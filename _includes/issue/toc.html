@@ -1,0 +1,29 @@
+<ul>
+
+  {% if general %}
+    <li>
+      {% assign prefix = "general" %}
+      <a href="#{{ prefix }}">General Information</a>
+      <ul>
+        {% if general.annexed_lists %}
+          <li><a href="#{{ prefix }}-annexed-lists"
+            >Lists annexed to the ITU Operational Bulletin</a>
+        {% endif %}
+      </ul>
+    </li>
+  {% endif %}
+
+  {% if amendments %}
+    <li>
+      {% assign prefix = "amendments" %}
+      <a href="#{{ prefix }}">Amendments</a>
+      <ul>
+        {% if amendments.ships_maritime %}
+          <li><a href="#{{ prefix }}-ships-maritime"
+            >List of Ship Stations and Maritime Mobile Service Identity Assignments</a>
+        {% endif %}
+      </ul>
+    </li>
+  {% endif %}
+
+</ul>

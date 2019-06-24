@@ -1,0 +1,22 @@
+<p>
+  The following signalling area/network codes have been <strong>assigned</strong>:
+</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Country/geographical area or signalling network
+      <th>SANC
+    </tr>
+  </thead>
+
+  <tbody>
+    {% for assignment in general.sanc.assigned %}
+      <tr>
+        <td>{{ assignment.country }}
+        <td>{{ assignment.code }}
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+

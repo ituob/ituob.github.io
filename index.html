@@ -1,0 +1,7 @@
+---
+layout: home
+---
+
+{% for issue in site.data.issues %}
+  <a href="/issues/{{ issue.meta.id }}">{{ issue.meta.id }}</a>
+{% endfor %}

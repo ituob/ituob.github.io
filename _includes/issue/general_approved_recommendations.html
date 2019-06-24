@@ -1,0 +1,11 @@
+<p>
+  By AAP-58, it was announced that the following ITU-T Recommendations were approved,
+  in accordance with the procedures outlined in
+  Recommendation ITU-T {{ general.recommendations.approval_procedures }}:
+</p>
+
+<ul>
+  {% for rec in general.recommendations.approved %}
+    <li>ITU-T {{ rec.code }} ({{ rec.date }}): {{ rec.name }}</li>
+  {% endfor %}
+</ul>

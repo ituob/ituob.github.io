@@ -1,0 +1,101 @@
+---
+layout: default
+---
+
+{% assign meta = page.issue.meta %}
+{% assign general = page.issue.general %}
+{% assign amendments = page.issue.amendments %}
+
+<header>
+  <h1>ITU Operational Bulletin</h1>
+  {% include issue/header.html %}
+</header>
+
+<nav class="table-of-contents">
+  <h2>Table of Contents</h2>
+  {% include issue/toc.html %}
+</nav>
+
+{% if meta.planned_issues %}
+  <section class="planned-issues">
+    <h2>Dates of publication of the next Operational Bulletins</h2>
+
+    <table>
+      <thead>
+        <tr>
+          <th class="seq-no">No.
+          <th class="publication-date">Publication date
+          <th class="cutoff-date">Including information received by
+        </tr>
+      </thead>
+      <tbody>
+        {% for issue in meta.planned_issues %}
+          <tr>
+            <td>{{ issue.id }}
+            <td>{{ issue.publication_date }}
+            <td>{{ issue.cutoff_date }}
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </section>
+{% endif %}
+
+<section class="general-information" id="general">
+  <h2>General information</h2>
+
+  {% if general.annexed_lists %}
+    <section class="annexed-lists" id="general-annexed-lists">
+      <h3>Lists annexed to the ITU Operational Bulletin</h3>
+
+      {% include issue/general_annexed_lists.html %}
+    </section>
+  {% endif %}
+
+  {% if general.recommendations.approved %}
+    <section class="approved-recommendations" id="general-approved-recommendations">
+      <h3>Approval of ITU-T Recommendations</h3>
+
+      {% include issue/general_approved_recommendations.html %}
+    </section>
+  {% endif %}
+
+  {% if general.iptn.assigned %}
+    <section class="iptn" id="general-iptn">
+      <h3>
+        The International Public Telecommunication Numbering Plan
+        (Recommendation ITU-T E.164 (11/2010))
+      </h3>
+      {% include issue/general_iptn.html %}
+    </section>
+  {% endif %}
+
+  {% if general.sanc.assigned %}
+    <section class="iptn" id="general-sanc">
+      <h3>
+        Assignment of Signalling Area/Network Codes (SANC)
+        (Recommendation ITU-T Q.708 (03/99))
+      </h3>
+      {% include issue/general_sanc.html %}
+    </section>
+  {% endif %}
+
+  {% if general.nnp.communications %}
+    <section class="nnp" id="general-nnp">
+      <header>
+        <h3>
+          Telephone Service
+          (Recommendation ITU-T E.164)
+        </h3>
+        <p class="url">
+          <a href="http://www.itu.int/itu-t/inr/nnp">Available online</a>
+        </p>
+      </header>
+      {% include issue/general_nnp_comms.html %}
+    </section>
+  {% endif %}
+</section>
+
+<section class="amendments" id="amendments">
+  <h2>Amendments to service publications</h2>
+</section>

@@ -1,0 +1,48 @@
+<section class="ob-lists">
+  <p>
+    A. The following Lists have been published by TSB or BR
+    as Annexes to the ITU Operational Bulletin:
+  </p>
+
+  <table>
+    <thead>
+      <tr>
+        <th class="seq-no">OB No.
+        <th class="list-name">
+    </thead>
+    <tbody>
+      {% for list in general.annexed_lists.published_in_ob %}
+        <tr>
+          <td>{{ list.source }}</td>
+
+          <td>
+            {{ list.name }}
+
+            {% if list.related_recommendation %}
+              (according to
+                {{ list.related_recommendation.body }}
+                {{ list.related_recommendation.code }}
+                ({{ list.related_recommendation.date }}))
+            {% endif %}
+
+            {% if list.position_on %}
+              (Position on {{ list.position_on }})
+            {% endif %}
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+
+<section class="online-lists">
+  <p>
+    B. The following Lists are available online from the ITU-T website:
+  </p>
+
+  <ul>
+    {% for list in general.annexed_lists.available_online %}
+      <li><a href="{{ list.source }}">{{ list.name }}</a></li>
+    {% endfor %}
+  </ul>
+</section>

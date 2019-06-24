@@ -1,0 +1,38 @@
+<section class="identifiers">
+  <h2 class="seq-no">
+    No. <span class="value">{{ meta.id }}</span>
+  </h2>
+
+  <div class="publication-date">
+    {{ meta.publication_date }}
+  </div>
+
+  <div class="other">
+    <span class="cutoff-date">
+      Information received by
+      {{ meta.cutoff_date }}
+    </span>
+
+    <span class="issn">
+      ISSN {{ meta.issn }}
+    </span>
+
+    (Online)
+  </div>
+</section>
+
+<section class="authors">
+  {% for entity in meta.authors %}
+    <article class="author">
+      {% if entity.name %}
+        <strong class="name">{{ entity.name }}</strong>
+      {% endif %}
+      {% if entity.address %}
+        <span class="address">{{ entity.address }}</span>
+      {% endif %}
+      {% for contact in entity.contacts %}
+        <span class="contact-{{ contact.type }}">{{ contact.data }}</span>
+      {% endfor %}
+    </article>
+  {% endfor %}
+</section>
