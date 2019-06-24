@@ -36,7 +36,7 @@ module Jekyll
       end
     end
 
-    # Returns a list ISSUES_ROOT subdirectories (expected one for each OB issue)
+    # Returns a list of ISSUES_ROOT subdirectories (expected one for each OB issue)
     def get_issues
       Pathname(ISSUES_ROOT).children.select(&:directory?)
     end
