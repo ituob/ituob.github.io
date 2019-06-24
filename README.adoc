@@ -27,11 +27,11 @@ in OB issues. Place NNP data in XML, obtained from NNP team, under `nnp/`.
 
 = Implementation details
 
-The following plugins enable site to function:
+The following plugins enable the site to function:
 
-* Issue data reader — consumes OB data in YAML, XML and AsciiDoc
-  and populates ``site.data``
-* Issue page generator — creates a page for each issue
-  using ``site.data``
-* Amendment search index generator — to facilitate client-side amendment search,
-  creates JSON indexes from OB issue data and from NNP data
+* Issue data reader — consumes changes, processing OB YAML, AsciiDoc and NNP XML as needed,
+  and populates ``site.data`` with structured information
+  about OB issues and changes in telecommunications landscape covered by ITU
+* Issue page generator — creates a page for each OB issue using ``site.data``
+* Amendment search index generator — to facilitate client-side search
+  of changes in ITU, creates JSON indexes from OB issue data and from NNP data
