@@ -1,3 +1,35 @@
-Uses link:https://github.com/riboseinc/itu-ob-data/[itu-ob-data] to generate
-a web-based representation of individual OB issues
+Generates a web-based representation of individual OB issues
 and amendment search across OB issues.
+
+= Authoring
+
+== OB issues
+
+Place each OB issue under `issues/{{ OB No. }}/` directory.
+
+Each OB issue should contain the following files:
+
+* `meta.yaml` — Information about OB issue: number, date, authors, etc.
+* `general.yaml` — General information from the OB issue.
+* `amendments.yaml` — The amendments part from the OB issue.
+* `nnp_communications/{{ filename }}` — Texts of communications mentioned
+  in the General Information part under E.164 section.
+
+See issue 1173 in link:https://github.com/riboseinc/itu-ob-data/[itu-ob-data]
+(work in progress).
+
+== NNP data
+
+NNP-related data, and changes to that data, is not described formally
+in OB issues. Place NNP data in XML, obtained from NNP team, under `nnp/`.
+
+= Implementation details
+
+The following plugins enable site to function:
+
+* Issue data reader — consumes OB data in YAML, XML and AsciiDoc
+  and populates ``site.data``
+* Issue page generator — creates a page for each issue
+  using ``site.data``
+* Amendment search index generator — to facilitate client-side amendment search,
+  creates JSON indexes from OB issue data and from NNP data
