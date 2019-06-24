@@ -1,16 +1,18 @@
 module Jekyll
 
   class Site
-    def write_amendment_search_indexes
-      indexes_root = File.join("data", "amendments")
-      FileUtils.mkdir_p(File.join(self.source, indexes_root))
+    AMENDMENT_TYPES = ['ships_maritime', 'iptn', 'mnc']
+    AMENDMENT_INDEXES_ROOT = File.join("data", "amendment_indexes")
 
-      ['ships_maritime', 'iptn', 'mnc'].each do |type|
-        self.write_amendment_index_for_type(type, indexes_root)
+    def write_amendment_search_indexes
+      FileUtils.mkdir_p(File.join(self.source, AMENDMENT_INDEXES_ROOT))
+
+      AMENDMENT_TYPES.each do |type|
+        self.write_amendment_index_for_type(type)
       end
     end
 
-    def write_amendment_index_for_type(amendment_type, indexes_root)
+    def write_amendment_index_for_type(amendment_type)
       amendments = []
 
       self.data['issues'].each do |issue|
@@ -23,15 +25,19 @@ module Jekyll
 
       index = { 'items' => amendments }
       index_filename = "#{amendment_type}.json"
+      index_file_path = File.join(
+        self.source,
+        AMENDMENT_INDEXES_ROOT,
+        index_filename)
 
-      File.open(File.join(self.source, indexes_root, index_filename), "w") do |f|
+      File.open(index_file_path, "w") do |f|
         f.write(JSON.pretty_generate(index))
       end
 
       self.static_files << Jekyll::StaticFile.new(
         self,
         self.source,
-        indexes_root,
+        AMENDMENT_INDEXES_ROOT,
         index_filename)
     end
   end
