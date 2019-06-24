@@ -14,6 +14,8 @@ Each OB issue should contain the following files:
 * `amendments.yaml` — The amendments part from the OB issue.
 * `nnp_communications/{{ filename }}` — Texts of communications mentioned
   in the General Information part under E.164 section.
+  The filename is referenced under `_contents` key for each communication
+  in `general.yaml`.
 
 See issue 1173 in link:https://github.com/riboseinc/itu-ob-data/[itu-ob-data]
 (work in progress).
