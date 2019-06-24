@@ -1,20 +1,24 @@
 module Jekyll
 
   class Site
-    AMENDMENT_TYPES = ['ships_maritime', 'iptn', 'mnc']
+
+    OB_AMENDMENT_TYPES = ['ships_maritime', 'iptn', 'mnc']
     AMENDMENT_INDEXES_ROOT = File.join("data", "amendment_indexes")
 
     def write_amendment_search_indexes
       FileUtils.mkdir_p(File.join(self.source, AMENDMENT_INDEXES_ROOT))
 
-      AMENDMENT_TYPES.each do |type|
-        self.write_amendment_index_for_type(type)
+      OB_AMENDMENT_TYPES.each do |amendment_type|
+        json_index = self.generate_amendment_index_from_ob_issues(amendment_type)
+        index_filename = "#{amendment_type}.json"
+        self.write_amendment_index(json_index, index_filename)
       end
     end
 
-    def write_amendment_index_for_type(amendment_type)
+    def generate_amendment_index_from_ob_issues(amendment_type)
       amendments = []
 
+      # Collect amendments of given type across OB issues
       self.data['issues'].each do |issue|
         if issue['amendments'][amendment_type]
           issue['amendments'][amendment_type].each do |change|
@@ -23,8 +27,10 @@ module Jekyll
         end
       end
 
-      index = { 'items' => amendments }
-      index_filename = "#{amendment_type}.json"
+      return { 'items' => amendments }
+    end
+
+    def write_amendment_index(index, index_filename)
       index_file_path = File.join(
         self.source,
         AMENDMENT_INDEXES_ROOT,
