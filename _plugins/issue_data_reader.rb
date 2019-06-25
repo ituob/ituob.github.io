@@ -8,7 +8,7 @@ module Jekyll
     ISSUES_ROOT = '_issues'
 
     def read_ob_issues
-      self.data['issues'] = []
+      self.data['issues'] = {}
 
       self.get_issues().each do |issue_path|
         meta = File.read(File.join(issue_path, 'meta.yaml'))
@@ -32,7 +32,7 @@ module Jekyll
           comm['contents_html'] = Asciidoctor.convert contents, safe: :server
         end
 
-        self.data['issues'].push(issue_data)
+        self.data['issues'][issue_data['meta']['id']] = issue_data
       end
     end
 

@@ -1,13 +1,11 @@
 module Jekyll
 
   class OBIssue < Page
-    def initialize(site, base_dir, issue_dir, issue_id)
+    def initialize(site, base_dir, issue_dir, issue_id, issue_data)
       @site = site
       @base = base_dir
       @dir = issue_dir
       @name = "index.html"
-
-      issue_data = site.data['issues'].detect { |i| i['meta']['id'] == issue_id }
 
       # Ignore OB issue unless it has a publication date.
       # TODO: Check that the date is in the future.
@@ -29,16 +27,16 @@ module Jekyll
     def write_ob_issues
       base_path = self.config['ob_issues_path'] || 'issues'
 
-      self.data['issues'].each do |issue_data|
-        issue_id = issue_data['meta']['id']
+      self.data['issues'].each do |issue_id, issue_data|
         self.write_ob_issue(
           File.join(base_path, issue_id.to_s),
-          issue_id)
+          issue_id,
+          issue_data)
       end
     end
 
-    def write_ob_issue(path, issue_id)
-      self.pages << OBIssue.new(self, self.source, path, issue_id)
+    def write_ob_issue(path, issue_id, issue_data)
+      self.pages << OBIssue.new(self, self.source, path, issue_id, issue_data)
     end
   end
 
