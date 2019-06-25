@@ -98,4 +98,27 @@ layout: default
 
 <section class="amendments" id="amendments">
   <h2>Amendments to service publications</h2>
+
+  {% for notice in amendments.notices %}
+    <section>
+      <header>
+        <h3>{{ notice.title }}</h3>
+        {% if notice.annex_to_ob %}
+          <p>
+            Annex to ITU Operational Bulletin No. {{ notice.annex_to_ob }}
+            —
+            {{ site.data.issues[notice.annex_to_ob]["meta"]["publication_date"] }}
+          </p>
+        {% endif %}
+        {% if notice.amendment_no %}
+          <p>
+            Amendment no. {{ notice.amendment_no }}
+          </p>
+        {% endif %}
+      </header>
+
+      {% for item in notice.items %}
+      {% endfor %}
+    </section>
+  {% endfor %}
 </section>
