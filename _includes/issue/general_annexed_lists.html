@@ -11,22 +11,26 @@
         <th class="list-name">
     </thead>
     <tbody>
-      {% for list in general.annexed_lists.published_in_ob %}
+      {% for item in include.lists_annexed %}
+        {% assign list_id = item[0] %}
+        {% assign list_issue_data = item[1] %}
+        {% assign list_data = site.data.publications[list_id].meta %}
+
         <tr>
-          <td>{{ list.source }}</td>
+          <td>{{ list_issue_data.annexed_to_ob }}</td>
 
           <td>
-            {{ list.name }}
+            {{ list_data.title }}
 
-            {% if list.related_recommendation %}
+            {% if list_data.recommendation %}
               (according to
-                {{ list.related_recommendation.body }}
-                {{ list.related_recommendation.code }}
-                ({{ list.related_recommendation.date }}))
+                {{ list_data.recommendation.body }}
+                {{ list_data.recommendation.code }}
+                ({{ list_data.recommendation.version }}))
             {% endif %}
 
-            {% if list.position_on %}
-              (Position on {{ list.position_on }})
+            {% if list_issue_data.position_on %}
+              (Position on {{ list_issue_data.position_on }})
             {% endif %}
           </td>
         </tr>
@@ -41,7 +45,7 @@
   </p>
 
   <ul>
-    {% for list in general.annexed_lists.available_online %}
+    {% for list in general.lists_available_online %}
       <li><a href="{{ list.source }}">{{ list.name }}</a></li>
     {% endfor %}
   </ul>

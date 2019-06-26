@@ -1,54 +1,189 @@
 require 'pathname'
 require 'asciidoctor'
 
+OB_DATE_FORMAT = '%Y-%m-%d'
 
 module Jekyll
 
   class Site
-    ISSUES_ROOT = '_issues'
+    OB_ROOT = '_issues'
+    PUB_ROOT = '_lists'
 
-    def read_ob_issues
-      self.data['issues'] = {}
-
-      self.get_issues().each do |issue_path|
-        meta = File.read(File.join(issue_path, 'meta.yaml'))
-        general = File.read(File.join(issue_path, 'general.yaml'))
-        amendments = File.read(File.join(issue_path, 'amendments.yaml'))
-
-        issue_data = {
-          'meta' => YAML.load(meta),
-          'general' => YAML.load(general),
-          'amendments' => YAML.load(amendments),
-        }
-
-        begin
-          communications = issue_data['general']['nnp']['communications']
-        rescue
-          p "No communications"
-          communications = []
-        end
-        communications.each do |comm|
-          contents = File.read(File.join(issue_path, 'nnp_communications', comm['_contents']))
-          comm['contents_html'] = Asciidoctor.convert contents, safe: :server
-        end
-
-        self.data['issues'][issue_data['meta']['id']] = issue_data
+    def load_data(fname, path, optional=false)
+      fpath = File.join(path, fname)
+      if not optional or File.file?(fpath)
+        return YAML.load(File.read(fpath))
       end
     end
 
-    # Returns a list of ISSUES_ROOT subdirectories (expected one for each OB issue)
+    def read_publications
+      self.data['publications'] = {}
+
+      self.get_publications().each do |pub_path|
+        pub_data = {
+          'meta' => self.load_data('meta.yaml', pub_path),
+        }
+        pub_id = pub_data['meta']['id']
+        self.data['publications'][pub_id] = pub_data
+      end
+    end
+
+    def read_ob_issues
+      self.data['issues'] = {}
+      self.data['current_annexes'] = {}
+
+      self.get_issues().each do |issue_path|
+        issue_data = {
+          'meta' => self.load_data('meta.yaml', issue_path),
+          'general' => self.load_data('general.yaml', issue_path, optional: true),
+          'amendments' => self.load_data('amendments.yaml', issue_path, optional: true),
+          'annexes' => self.load_data('annexes.yaml', issue_path, optional: true),
+        }
+        issue_id = issue_data['meta']['id']
+
+        if issue_data['amendments']
+          issue_data['amendments']['items'].each do |amendment|
+            self.process_amendment(amendment, issue_id)
+          end
+        end
+
+        if issue_data['annexes']
+          issue_data['annexes'].each do |publication_id, publication_issue_data|
+            current_position = publication_issue_data['position_on']
+
+            previously_annexed = self.data['current_annexes'][publication_id]
+            if previously_annexed
+              previous_position = previously_annexed['position_on']
+              if previous_position >= current_position
+                p "WARNING: Newly annexed position of #{publication_id} #{current_position} is not larger than previously annexed position #{previous_position}!"
+              end
+            end
+
+            if self.data['publications'][publication_id] == nil
+              p "WARNING: Publication metadata not found for List #{publication_id}, annexed to OB #{issue_id}"
+            end
+
+            self.data['current_annexes'][publication_id] = {
+              'annexed_to_ob' => issue_id,
+              'position_on' => current_position,
+            }
+          end
+        end
+
+        # Snapshot latest annexes up to this issue
+        issue_data['lists_annexed'] = Marshal.load(Marshal.dump(self.data['current_annexes']))
+
+        convert_nnp_communications_to_html(issue_data, issue_path)
+
+        self.data['issues'][issue_id] = issue_data
+      end
+    end
+
+    # Associates the amendment with the original publication.
+    # Infers & fills in useful amendment information
+    # (publication title, amendment counter, etc.)
+    def process_amendment(amendment, ob_issue_id)
+      if amendment['target']
+        original_pub, _ = self.resolve_amended_publication(amendment['target'])
+
+        if original_pub
+          original_pub['amendments'] ||= []
+          original_pub['amendments'] << {
+            'changeset': amendment['changeset'],
+            'amended_in_ob_issue': ob_issue_id,
+          }
+          amendment['target']['title'] = original_pub['meta']['title']
+          amendment['seq_no'] = original_pub['amendments'].size
+        else
+          p "WARNING: Original publication not found for amendment #{amendment['target']['publication']}"
+        end
+      else
+        p "No target specified for amendment “#{amendment['title'] || amendment}” in OB #{ob_issue_id}"
+      end
+    end
+
+    # Resolves the original publication from given amendment target.
+    def resolve_amended_publication(amn_target)
+      pub = self.data['publications'][amn_target['publication']]
+
+      # Let’s see if amendment target is a previously annexed list position
+      annexed_list = self.data['current_annexes'][amn_target['publication']]
+      if annexed_list
+        if annexed_list['position_on']
+          if amn_target['position_on']
+            if amn_target['position_on'] == annexed_list['position_on']
+              return pub, annexed_list
+            else
+              p "WARNING: Trying to amend list #{amn_target['publication']} at position #{amn_target['position_on']}, while latest annexed position is #{annexed_list['position_on']}!"
+            end
+          else
+            p "WARNING: Trying to amend list #{amn_target['publication']} annexed at position #{annexed_list['position_on']} without specifying position"
+          end
+        else
+          p "WARNING: Annexed list #{amn_target['publication']} does not have position specified"
+        end
+      end
+
+      return pub, nil
+
+      # if amn_target['type'] == 'ob_annex'
+      #   ref = amn_target['ref']
+      #   ob = self.data['issues'][ref['ob']]
+      #   if ob
+      #     pub = ob['annexes'][ref['annex']]
+      #   else
+      #     p "Missing data for referenced OB #{ref['ob']}"
+      #     pub = nil
+      #   end
+
+      # else
+      #   if self.data['external_publications']
+      #     pub = self.data['external_publications'][amn_target['type']]
+      #   else
+      #     p "Failed extenral publication lookup: No external publications specified"
+      #     pub = nil
+      #   end
+
+      # end
+      # pub
+    end
+
+    # Returns a list of OB_ROOT subdirectories (expected one for each OB issue)
     def get_issues
-      Pathname(ISSUES_ROOT).children.select(&:directory?)
+      Pathname(OB_ROOT).children.select(&:directory?).map(&:to_s).sort_by(&:to_i)
+    end
+
+    # Returns a list of PUB_ROOT subdirectories
+    def get_publications
+      Pathname(PUB_ROOT).children.select(&:directory?).map(&:to_s)
     end
   end
 
-  class IssueDataReader < Generator
+  class OBDataReader < Generator
     safe true
     priority :high
 
     def generate(site)
+      site.read_publications
       site.read_ob_issues
     end
   end
 
+end
+
+
+def convert_nnp_communications_to_html(ob_issue_data, ob_issue_path)
+  begin
+    communications = ob_issue_data['general']['nnp']['communications'] || []
+  rescue
+    communications = []
+  end
+
+  communications.each do |comm|
+    contents = File.read(File.join(
+      ob_issue_path,
+      'nnp_communications',
+      comm['_contents']))
+    comm['contents_html'] = Asciidoctor.convert contents, safe: :server
+  end
 end

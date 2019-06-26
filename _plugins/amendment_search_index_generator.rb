@@ -22,9 +22,11 @@ module Jekyll
 
       # Collect amendments of given type across OB issues
       self.data['issues'].each do |issue_id, issue_data|
-        issue_data['amendments']['notices'].each do |notice|
-          if checker.call(notice)
-            amendments.push notice
+        if issue_data['amendments']
+          issue_data['amendments']['items'].each do |notice|
+            if checker.call(notice)
+              amendments.push notice
+            end
           end
         end
       end

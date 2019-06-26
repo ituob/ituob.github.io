@@ -18,10 +18,11 @@
       {% assign prefix = "amendments" %}
       <a href="#{{ prefix }}">Amendments</a>
       <ul>
-        {% if amendments.ships_maritime %}
-          <li><a href="#{{ prefix }}-ships-maritime"
-            >List of Ship Stations and Maritime Mobile Service Identity Assignments</a>
-        {% endif %}
+        {% for amendment in amendments.items %}
+          <li>
+            <a href="#{{ prefix }}-notice-{{ forloop.index }}">{{ amendment.target.title }}</a>
+          </li>
+        {% endfor %}
       </ul>
     </li>
   {% endif %}

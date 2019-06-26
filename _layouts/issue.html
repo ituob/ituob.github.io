@@ -44,11 +44,11 @@ layout: default
 <section class="general-information" id="general">
   <h2>General information</h2>
 
-  {% if general.annexed_lists %}
+  {% if page.issue.lists_annexed %}
     <section class="annexed-lists" id="general-annexed-lists">
       <h3>Lists annexed to the ITU Operational Bulletin</h3>
 
-      {% include issue/general_annexed_lists.html %}
+      {% include issue/general_annexed_lists.html lists_annexed=page.issue.lists_annexed %}
     </section>
   {% endif %}
 
@@ -99,26 +99,42 @@ layout: default
 <section class="amendments" id="amendments">
   <h2>Amendments to service publications</h2>
 
-  {% for notice in amendments.notices %}
-    <section>
+  {% for amendment in amendments.items %}
+    <article id="amendments-amendment-{{ forloop.index }}">
       <header>
-        <h3>{{ notice.title }}</h3>
-        {% if notice.annex_to_ob %}
+        <h3>
+          {% if amendment.target.title %}
+            {{ amendment.target.title }}
+          {% elsif amendment.target.type == "ob_annex" %}
+            {{ site.data.issues[amendment.target.ref.ob]
+              .annexes[amendment.target.ref.annex] }}
+          {% endif %}
+        </h3>
+        {% if amendment.target.type == "ob_annex" %}
           <p>
-            Annex to ITU Operational Bulletin No. {{ notice.annex_to_ob }}
+            Annex to ITU Operational Bulletin No. {{ amendment.target.ref.ob }}
             —
-            {{ site.data.issues[notice.annex_to_ob]["meta"]["publication_date"] }}
+            {{ site.data.issues[amendment.target.ref.ob]["meta"]["publication_date"] }}
           </p>
         {% endif %}
-        {% if notice.amendment_no %}
+        {% if amendment.amendment_no %}
           <p>
-            Amendment no. {{ notice.amendment_no }}
+            Amendment no. {{ amendment.seq_no }}
           </p>
         {% endif %}
       </header>
 
-      {% for item in notice.items %}
-      {% endfor %}
-    </section>
+      {% if amendment.type %}
+        {% assign amendment_template = "issue/" | append: amendment.type | append: ".html" %}
+      {% else %}
+        {% assign amendment_template = false  %}
+      {% endif %}
+
+      {% if amendment_template %}
+        {% for item in amendment.items %}
+          {% include {{ amendment_template }} item=item %}
+        {% endfor %}
+      {% endif %}
+    </article>
   {% endfor %}
 </section>
