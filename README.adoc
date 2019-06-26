@@ -39,6 +39,7 @@ Each OB issue should contain the following files:
 * `meta.yaml` — Information about OB issue: number, date, authors, etc.
 * `general.yaml` — General information from the OB issue.
 * `amendments.yaml` — The amendments part from the OB issue.
+* `annexes.yaml` — Any annexes to this OB issue.
 * `nnp_communications/{{ filename }}` — Texts of communications mentioned
   in the General Information part under E.164 section.
   The filename is referenced under `_contents` key for each communication
