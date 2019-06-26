@@ -3,6 +3,9 @@ and amendment search across OB issues.
 
 = Authoring
 
+See link:https://github.com/riboseinc/itu-ob-data/[itu-ob-data]
+for an example (work in progress).
+
 == Referenced publications
 
 Many messages in OB issue amend previous publications.
@@ -44,9 +47,6 @@ Each OB issue should contain the following files:
   in the General Information part under E.164 section.
   The filename is referenced under `_contents` key for each communication
   in `general.yaml`.
-
-See issue 1173 in link:https://github.com/riboseinc/itu-ob-data/[itu-ob-data]
-(work in progress).
 
 == NNP data
 
