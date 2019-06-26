@@ -100,7 +100,7 @@ layout: default
   <h2>Amendments to service publications</h2>
 
   {% for amendment in amendments.items %}
-    <article id="amendments-amendment-{{ forloop.index }}">
+    <article id="amendments-item-{{ forloop.index }}">
       <header>
         <h3>
           {% if amendment.target.title %}

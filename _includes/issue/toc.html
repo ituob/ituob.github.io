@@ -20,7 +20,7 @@
       <ul>
         {% for amendment in amendments.items %}
           <li>
-            <a href="#{{ prefix }}-notice-{{ forloop.index }}">{{ amendment.target.title }}</a>
+            <a href="#{{ prefix }}-item-{{ forloop.index }}">{{ amendment.target.title }}</a>
           </li>
         {% endfor %}
       </ul>
