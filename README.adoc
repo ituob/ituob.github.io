@@ -42,16 +42,16 @@ The following plugins enable the site to function:
 
 * Message: a piece of information disseminated via ITU OB.
   Maps to a section within an OB issue.
-
-  Usually a message is connected to an ITU recommendation.
-
-  A message may be an amendment, or otherwise be a notice of general kind.
++
+Usually a message is connected to an ITU recommendation.
++
+A message may be an amendment, or otherwise be a notice of general kind.
 
   * Amendment: an update to a previous ITU publication
     (such as a List position annexed to a previous OB issue,
     or an “external publication” such as the List V).
-
-    Always specifies the target being amended and the _changeset_.
++
+Always specifies the target being amended and the _changeset_.
   
     * Amendment target: references the original publication being amended.
       Specifies _type_ (classifying original publication)
