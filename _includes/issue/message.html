@@ -1,0 +1,11 @@
+{% assign type = include.msg.type %}
+{% assign type_tmpl = "ob_messages/" | append: type | append: ".html" %}
+
+<article class="message message--{{ type }}" id="{{ include.anchor }}">
+  {% assign title = message.title
+    | default: site.message_types[type].title
+    | default: message.target.title %}
+
+  <h3>{% trans title %}</h3>
+  {% include {{ type_tmpl }} msg=include.msg issue=include.issue %}
+</article>

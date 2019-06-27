@@ -42,8 +42,10 @@ module Jekyll
         issue_id = issue_data['meta']['id']
 
         if issue_data['amendments']
-          issue_data['amendments']['items'].each do |amendment|
-            self.process_amendment(amendment, issue_id)
+          issue_data['amendments']['messages'].each do |msg|
+            if msg['type'] == 'amendment'
+              self.process_amendment(msg, issue_id)
+            end
           end
         end
 

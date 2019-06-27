@@ -9,6 +9,50 @@ url: "" # the base hostname & protocol for your site, e.g. http://example.com
 twitter_username: jekyllrb
 github_username:  jekyll
 
+
+# TODO: Move to itu-ob-data
+message_types:
+  custom:
+    contents: load_file
+
+  amendment: {}
+
+  running_annexes:
+    title:
+      en: Lists annexed to the ITU Operational Bulletin
+      ru: Списки, прилагаемые к Оперативному бюллетеню МСЭ
+
+  approved_recommendations:
+    title:
+      en: Approved Recommendations
+      ru: Утверждение Рекомендаций МСЭ-T
+
+  sanc:
+    title:
+      en: (TBD sanc)
+      ru: (TBD sanc-ru)
+
+  iptn:
+    title:
+      en: The International Public Telecommunication Numbering Plan
+      ru: Международный план нумерации электросвязи общего пользования
+
+  telephone_service:
+    title:
+      en: Telephone Service
+      ru: Услуга телефонной связи
+
+  service_restrictions:
+    title:
+      en: Service Restrictions
+      ru: Ограничения обслуживания
+
+  callback_procedures:
+    title:
+      en: "Call-back and alternative calling procedures (Res. 21 Rev. PP-2006)"
+      ru: "Обратный вызов и альтернативные процедуры вызова (Рез. 21 (Пересм. ПК-06))"
+
+
 languages:
   - id: en
     title: English

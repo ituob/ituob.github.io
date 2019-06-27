@@ -44,6 +44,11 @@ layout: default
 <section class="general-information" id="general">
   <h2>General information</h2>
 
+  {% for message in general.messages %}
+    {% assign anchor = "general-" | append: forloop.index %}
+    {% include issue/message.html msg=message anchor=anchor issue=page.issue %}
+  {% endfor %}
+
   {% if page.issue.running_annexes %}
     <section class="annexed-lists" id="general-annexed-lists">
       <h3>Lists annexed to the ITU Operational Bulletin</h3>

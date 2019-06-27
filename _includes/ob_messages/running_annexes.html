@@ -1,0 +1,64 @@
+<p>
+  A. The following Lists have been published by TSB or BR
+  as Annexes to the ITU Operational Bulletin:
+</p>
+
+<table>
+  <thead>
+    <tr>
+      <th class="seq-no">OB No.
+      <th class="list-name">
+  </thead>
+  <tbody>
+    {% for item in include.issue.running_annexes %}
+      {% assign pub_id = item[0] %}
+      {% assign publication = site.data.publications[pub_id].meta %}
+      {% assign annexed_issue = item[1] %}
+
+      <tr>
+        <td>{{ annexed_issue.annexed_to_ob }}</td>
+
+        <td>
+          {% trans publication.title %}
+
+          {% if publication.recommendation %}
+            (according to
+              {{ publication.recommendation.body }}
+              {{ publication.recommendation.code }}
+              ({{ publication.recommendation.version }}))
+          {% endif %}
+
+          {% if annexed_issue.position_on %}
+            (Position on {{ annexed_issue.position_on }})
+          {% endif %}
+        </td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+</section>
+
+<section class="online-lists">
+<p>
+  B. The following Lists are available online from the ITU-T website:
+</p>
+
+<ul>
+  {% for item in include.msg.extra_links %}
+    {% assign publication = site.data.publications[item].meta %}
+    {% if publication.url %}
+      <li>
+        <a href="{{ publication.url }}">
+          {% trans publication.title %}
+
+          {% if publication.recommendation %}
+            (according to
+              {{ publication.recommendation.body }}
+              {{ publication.recommendation.code }}
+              ({{ publication.recommendation.version }}))
+          {% endif %}
+        </a>
+      </li>
+    {% endif %}
+  {% endfor %}
+</ul>

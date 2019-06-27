@@ -5,10 +5,13 @@
       {% assign prefix = "general" %}
       <a href="#{{ prefix }}">General Information</a>
       <ul>
-        {% if general.annexed_lists %}
-          <li><a href="#{{ prefix }}-annexed-lists"
-            >Lists annexed to the ITU Operational Bulletin</a>
-        {% endif %}
+        {% for msg in general.messages %}
+          <li>
+            <a href="#{{ prefix }}-{{ forloop.index }}">
+              {% trans site.message_types[msg.type].title %}
+            </a>
+          </li>
+        {% endfor %}
       </ul>
     </li>
   {% endif %}
@@ -18,10 +21,14 @@
       {% assign prefix = "amendments" %}
       <a href="#{{ prefix }}">Amendments</a>
       <ul>
-        {% for amendment in amendments.items %}
+        {% for msg in amendments.messages %}
           <li>
-            <a href="#{{ prefix }}-item-{{ forloop.index }}">
-              {% trans amendment.target.title %}
+            <a href="#{{ prefix }}-{{ forloop.index }}">
+              {% if msg.type == "amendment" %}
+                {% trans amendment.target.title %}
+              {% else %}
+                {% trans site.message_types[msg.type].title %}
+              {% endif %}
             </a>
           </li>
         {% endfor %}
