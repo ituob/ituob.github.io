@@ -105,7 +105,7 @@ module Jekyll
     # (publication title, amendment counter, etc.)
     def process_amendment(amendment, ob_issue_id)
       if amendment['target']
-        original_pub, _ = self.resolve_amended_publication(amendment['target'])
+        original_pub, _ = self.resolve_amendment_target(amendment['target'])
 
         if original_pub
           original_pub['amendments'] ||= []
@@ -124,7 +124,7 @@ module Jekyll
     end
 
     # Resolves the original publication from given amendment target.
-    def resolve_amended_publication(amn_target)
+    def resolve_amendment_target(amn_target)
       pub = self.data['publications'][amn_target['publication']]
 
       # Let’s see if amendment target is a previously annexed list position
