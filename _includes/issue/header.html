@@ -25,7 +25,7 @@
   {% for entity in meta.authors %}
     <article class="author">
       {% if entity.name %}
-        <strong class="name">{{ entity.name }}</strong>
+        <strong class="name">{% trans entity.name %}</strong>
       {% endif %}
       {% if entity.address %}
         <span class="address">{{ entity.address }}</span>
