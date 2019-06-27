@@ -14,12 +14,12 @@ module Jekyll
   #   ```
   #   ---
   #   lang: en
-  #   title:
+  #   hello:
   #     en: hello
   #     ja: こんにちは
   #   ---
   #
-  #   {% trans title %}
+  #   {% trans page.hello %}
   #   ```
   #
   # (This example seems pretty useless, the mechanism is mostly intended to work with
