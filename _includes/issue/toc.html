@@ -21,7 +21,7 @@
         {% for amendment in amendments.items %}
           <li>
             <a href="#{{ prefix }}-item-{{ forloop.index }}">
-              {{ amendment.target.title[page.lang] | default: amendment.target.title['en'] }}
+              {% trans amendment.target.title %}
             </a>
           </li>
         {% endfor %}

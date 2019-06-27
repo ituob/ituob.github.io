@@ -20,7 +20,7 @@
           <td>{{ annexed_issue.annexed_to_ob }}</td>
 
           <td>
-            {{ publication.title[page.lang] | default: publication.title['en'] }}
+            {% trans publication.title %}
 
             {% if publication.recommendation %}
               (according to
@@ -50,7 +50,7 @@
       {% if publication.url %}
         <li>
           <a href="{{ publication.url }}">
-            {{ publication.title[page.lang] | default: publication.title['en'] }}
+            {% trans publication.title %}
 
             {% if publication.recommendation %}
               (according to
