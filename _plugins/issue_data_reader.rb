@@ -61,8 +61,6 @@ module Jekyll
         # Snapshot latest annexes up to this issue
         issue_data['running_annexes'] = Marshal.load(Marshal.dump(self.data['current_annexes']))
 
-        convert_nnp_communications_to_html(issue_data, issue_path)
-
         self.data['issues'][issue_id] = issue_data
       end
     end
@@ -171,21 +169,4 @@ module Jekyll
     end
   end
 
-end
-
-
-def convert_nnp_communications_to_html(ob_issue_data, ob_issue_path)
-  begin
-    communications = ob_issue_data['general']['nnp']['communications'] || []
-  rescue
-    communications = []
-  end
-
-  communications.each do |comm|
-    contents = File.read(File.join(
-      ob_issue_path,
-      'nnp_communications',
-      comm['_contents']))
-    comm['contents_html'] = Asciidoctor.convert contents, safe: :server
-  end
 end
