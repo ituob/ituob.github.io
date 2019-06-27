@@ -2,6 +2,18 @@
 layout: home
 ---
 
-{% for issue in site.data.issues %}
-  <a href="/issues/{{ issue.meta.id }}">{{ issue.meta.id }}</a>
-{% endfor %}
+<ul>
+  {% for issue in site.data.issues %}
+    {% assign issue_data = issue[1] %}
+    <li>
+      OB {{ issue_data.meta.id }}
+      &emsp;
+      {% for lang in site.languages %}
+        {% if issue_data.meta.languages[lang.id] %}
+          <a href="/issues/{{ issue_data.meta.id }}-{{ lang.id }}">{{ lang.title }}</a>
+          &ensp;
+        {% endif %}
+      {% endfor %}
+    </li>
+  {% endfor %}
+</ul>

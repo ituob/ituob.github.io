@@ -49,29 +49,15 @@ module Jekyll
 
         if issue_data['annexes']
           issue_data['annexes'].each do |publication_id, publication_issue_data|
-            current_position = publication_issue_data['position_on']
-
-            previously_annexed = self.data['current_annexes'][publication_id]
-            if previously_annexed
-              previous_position = previously_annexed['position_on']
-              if previous_position >= current_position
-                p "WARNING: Newly annexed position of #{publication_id} #{current_position} is not larger than previously annexed position #{previous_position}!"
-              end
-            end
-
-            if self.data['publications'][publication_id] == nil
-              p "WARNING: Publication metadata not found for List #{publication_id}, annexed to OB #{issue_id}"
-            end
-
-            self.data['current_annexes'][publication_id] = {
-              'annexed_to_ob' => issue_id,
-              'position_on' => current_position,
-            }
+            self.update_current_annexes_with(
+              publication_id,
+              publication_issue_data,
+              issue_id)
           end
         end
 
         # Snapshot latest annexes up to this issue
-        issue_data['lists_annexed'] = Marshal.load(Marshal.dump(self.data['current_annexes']))
+        issue_data['running_annexes'] = Marshal.load(Marshal.dump(self.data['current_annexes']))
 
         convert_nnp_communications_to_html(issue_data, issue_path)
 
@@ -79,7 +65,42 @@ module Jekyll
       end
     end
 
-    # Associates the amendment with the original publication.
+    # Adds an issue (specified by issue_data)
+    # of given publication/list/dataset (specified by publication_id)
+    # to the list of current annexes.
+    #
+    # If publication was previously annexed with another position,
+    # ensures that new position represents a later version/issue/snapshot
+    # of publication/list/dataset.
+    #
+    # TODO: If there is a use case for retiring annexes, retire=true argument
+    # can be added to drop given publication from current annexes.
+    def update_current_annexes_with(publication_id, publication_issue_data, ob_issue_id)
+      current_position = publication_issue_data['position_on']
+
+      previously_annexed = self.data['current_annexes'][publication_id]
+      if previously_annexed
+        previous_position = previously_annexed['position_on']
+        if current_position and previous_position
+          if previous_position >= current_position
+            p "WARNING: Newly annexed position of #{publication_id} #{current_position} must be later than previously annexed position #{previous_position}!"
+          end
+        else
+          p "WARNING: Annexed publication #{publication_id} must specify annexed position always or never"
+        end
+      end
+
+      if self.data['publications'][publication_id] == nil
+        p "WARNING: Publication metadata not found for List #{publication_id}, annexed to OB #{issue_id}"
+      end
+
+      self.data['current_annexes'][publication_id] = {
+        'annexed_to_ob' => ob_issue_id,
+        'position_on' => current_position,
+      }
+    end
+
+    # Associates an amendment with the original publication.
     # Infers & fills in useful amendment information
     # (publication title, amendment counter, etc.)
     def process_amendment(amendment, ob_issue_id)

@@ -1,10 +1,10 @@
 module Jekyll
 
   class OBIssue < Page
-    def initialize(site, base_dir, issue_dir, issue_id, issue_data)
+    def initialize(site, base_dir, issue_dir, issue_id, issue_data, language='en')
       @site = site
       @base = base_dir
-      @dir = issue_dir
+      @dir = "#{issue_dir}-#{language}"
       @name = "index.html"
 
       # Ignore OB issue unless it has a publication date.
@@ -17,6 +17,7 @@ module Jekyll
 
       self.data = {
         'layout' => 'issue',
+        'lang' => language,
         'issue' => issue_data,
       }
     end
@@ -36,7 +37,13 @@ module Jekyll
     end
 
     def write_ob_issue(path, issue_id, issue_data)
-      self.pages << OBIssue.new(self, self.source, path, issue_id, issue_data)
+      if issue_data['meta']['languages']
+        issue_data['meta']['languages'].each do |lang, _|
+          self.pages << OBIssue.new(self, self.source, path, issue_id, issue_data, lang)
+        end
+      else
+        self.pages << OBIssue.new(self, self.source, path, issue_id, issue_data)
+      end
     end
   end
 

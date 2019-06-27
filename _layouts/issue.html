@@ -44,11 +44,13 @@ layout: default
 <section class="general-information" id="general">
   <h2>General information</h2>
 
-  {% if page.issue.lists_annexed %}
+  {% if page.issue.running_annexes %}
     <section class="annexed-lists" id="general-annexed-lists">
       <h3>Lists annexed to the ITU Operational Bulletin</h3>
 
-      {% include issue/general_annexed_lists.html lists_annexed=page.issue.lists_annexed %}
+      {% include issue/general_annexed_lists.html
+          annexes=page.issue.running_annexes
+          online_annexes=page.issue.meta.annexes_available_online %}
     </section>
   {% endif %}
 

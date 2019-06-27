@@ -20,7 +20,9 @@
       <ul>
         {% for amendment in amendments.items %}
           <li>
-            <a href="#{{ prefix }}-item-{{ forloop.index }}">{{ amendment.target.title }}</a>
+            <a href="#{{ prefix }}-item-{{ forloop.index }}">
+              {{ amendment.target.title[page.lang] | default: amendment.target.title['en'] }}
+            </a>
           </li>
         {% endfor %}
       </ul>
