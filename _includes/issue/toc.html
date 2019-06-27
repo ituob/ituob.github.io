@@ -25,7 +25,7 @@
           <li>
             <a href="#{{ prefix }}-{{ forloop.index }}">
               {% if msg.type == "amendment" %}
-                {% trans amendment.target.title %}
+                {% trans site.data.publications[msg.target.publication].meta.title %}
               {% else %}
                 {% trans site.message_types[msg.type].title %}
               {% endif %}

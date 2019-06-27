@@ -1,0 +1,33 @@
+<table>
+  <thead>
+    <tr>
+      <th colspan=2>Country / Geographical area
+    <tr>
+      <th>MCC + MNC
+      <th>Operator / Network
+  </thead>
+
+  <tbody>
+    {% for item in include.changeset %}
+      {% assign area = item[0] %}
+      {% assign ops = item[1] %}
+      {% for op in ops %}
+        <tr>
+          <td colspan=3>
+            {% assign opcode = op[0] %}
+            {% assign changes = op[1] %}
+            <strong>{{ area }}&emsp;{{ opcode }}</strong>
+
+            {% for change in changes %}
+              {% assign code = change[0] %}
+              {% assign entity_name = change[1] %}
+              <tr>
+                <td>
+                  {{ code }}
+                <td>
+                  {{ entity_name }}
+            {% endfor %}
+      {% endfor %}
+    {% endfor %}
+  </tbody>
+</table>

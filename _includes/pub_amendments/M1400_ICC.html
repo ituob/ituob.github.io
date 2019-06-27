@@ -1,0 +1,38 @@
+<table>
+  <thead>
+    <tr>
+      <th colspan=3>Country or area / ISO code
+    <tr>
+      <th>Company Name / Address
+      <th>Company Code (carrier code)
+      <th>Contact
+  </thead>
+
+  <tbody>
+    {% for item in include.changeset %}
+      {% assign area = item[0] %}
+      {% assign ops = item[1] %}
+      {% for op in ops %}
+        <tr>
+          <td colspan=3>
+            {% assign opcode = op[0] %}
+            {% assign changes = op[1] %}
+            <strong>{{ area }}&emsp;{{ opcode }}</strong>
+
+            {% for change in changes %}
+              {% assign code = change[0] %}
+              {% assign entity_data = change[1] %}
+              <tr>
+                <td>
+                  {{ entity_data.name }}
+                  <br>
+                  {{ entity_data.address | newline_to_br }}
+                <td>
+                  {{ code }}
+                <td>
+                  {{ entity_data.contact | newline_to_br }}
+            {% endfor %}
+      {% endfor %}
+    {% endfor %}
+  </tbody>
+</table>
