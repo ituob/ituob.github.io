@@ -35,7 +35,14 @@ module Jekyll
       translatable = context[@key]
       active_lang = context['page']['lang']
       default_lang = context['site']['default_language']
-      translatable[active_lang] || translatable[default_lang]
+
+      if translatable
+        result = translatable[active_lang] || translatable[default_lang] || translatable
+      else
+        result = translatable
+      end
+
+      result
     end
 
   end
