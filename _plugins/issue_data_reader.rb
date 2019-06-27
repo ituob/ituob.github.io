@@ -146,27 +146,6 @@ module Jekyll
       end
 
       return pub, nil
-
-      # if amn_target['type'] == 'ob_annex'
-      #   ref = amn_target['ref']
-      #   ob = self.data['issues'][ref['ob']]
-      #   if ob
-      #     pub = ob['annexes'][ref['annex']]
-      #   else
-      #     p "Missing data for referenced OB #{ref['ob']}"
-      #     pub = nil
-      #   end
-
-      # else
-      #   if self.data['external_publications']
-      #     pub = self.data['external_publications'][amn_target['type']]
-      #   else
-      #     p "Failed extenral publication lookup: No external publications specified"
-      #     pub = nil
-      #   end
-
-      # end
-      # pub
     end
 
     # Returns a list of OB_ROOT subdirectories (expected one for each OB issue)
