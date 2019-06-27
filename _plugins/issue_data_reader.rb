@@ -113,7 +113,6 @@ module Jekyll
             'changeset': amendment['changeset'],
             'amended_in_ob_issue': ob_issue_id,
           }
-          amendment['target']['title'] = original_pub['meta']['title']
           amendment['seq_no'] = original_pub['amendments'].size
         else
           p "WARNING: Original publication not found for amendment #{amendment['target']['publication']}"
