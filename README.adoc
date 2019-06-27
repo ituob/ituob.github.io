@@ -63,3 +63,8 @@ The following plugins enable the site to function:
 * Issue page generator — creates a page for each OB issue using ``site.data``
 * Amendment search index generator — to facilitate client-side search
   of changes in ITU, creates JSON indexes from OB issue data and from NNP data
+* Localizer — a template tag that allows to translate string variables specified
+  in the form of { <lang1>: <string1>, <lang2>: <string2> }.
+  This is used for ITU data such as publication titles.
+  This allows to keep translations together,
+  rather than have multiple versions of the site data in language-scoped directories.
