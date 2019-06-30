@@ -36,10 +36,18 @@ module Jekyll
       active_lang = context['page']['lang']
       default_lang = context['site']['default_language']
 
+      result = nil
+
       if translatable
-        result = translatable[active_lang] || translatable[default_lang] || translatable
-      else
-        result = translatable
+        if translatable[active_lang]
+          result = translatable[active_lang]
+        elsif translatable[default_lang]
+          p "Translations: Missing for #{translatable}"
+          result = translatable[default_lang]
+        else
+          p "Translations: Non-translatable"
+          result = translatable
+        end
       end
 
       result
@@ -74,19 +82,32 @@ module Jekyll
     end
 
     def render(context)
-      filename = context[@key]
+      path = context[@key]
+
+      if not path
+        p "L10N: trans_file passed empty string"
+        return nil
+      end
+
+      path_components = path.split(File::SEPARATOR)
+      filename = path_components.pop
+      file_path = File.join(*path_components)
+
+      # Try borrowing issue from immediate context, falling back to page.issue
+      issue = context['issue'] || context['page']['issue']
+
       issue_path = File.join(
         context['site']['source'],
         context['site']['ob_root'],
-        context['page']['issue']['meta']['id'].to_s)
+        issue['meta']['id'].to_s)
 
       active_lang = context['page']['lang']
       default_lang = context['site']['default_language']
 
       fpath_candidates = [
-        File.join(issue_path, "#{active_lang}-#{filename}"),
-        File.join(issue_path, "#{default_lang}-#{filename}"),
-        File.join(issue_path, filename),
+        File.join(issue_path, file_path, "#{active_lang}-#{filename}"),
+        File.join(issue_path, file_path, "#{default_lang}-#{filename}"),
+        File.join(issue_path, file_path, filename),
       ]
 
       result = nil

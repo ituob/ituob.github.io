@@ -63,6 +63,11 @@ module Jekyll
 
         self.data['issues'][issue_id] = issue_data
       end
+
+      issues_seq_desc = self.data['issues'].keys.sort_by(&:to_i).reverse()
+      self.data['latest_issue_id'] = issues_seq_desc[0]
+      self.data['previous_issue_id'] = issues_seq_desc[1]
+      self.data['issue_ids_descending'] = issues_seq_desc
     end
 
     # Adds an issue (specified by issue_data)
@@ -105,15 +110,25 @@ module Jekyll
     # (publication title, amendment counter, etc.)
     def process_amendment(amendment, ob_issue_id)
       if amendment['target']
-        original_pub, _ = self.resolve_amendment_target(amendment['target'])
+        original_pub, current_annex = self.resolve_amendment_target(amendment['target'])
 
         if original_pub
           original_pub['amendments'] ||= []
           original_pub['amendments'] << {
-            'changeset': amendment['changeset'],
-            'amended_in_ob_issue': ob_issue_id,
+            'changeset' => amendment['changeset'],
+            'amended_in_ob_issue' => ob_issue_id,
           }
-          amendment['seq_no'] = original_pub['amendments'].size
+
+          if current_annex
+            annexed_position = current_annex['position_on']
+            if amendment['target']['position_on'] == annexed_position
+              current_annex['amendments'] ||= []
+              current_annex['amendments'] << {
+                'amended_in_ob_issue' => ob_issue_id,
+              }
+              amendment['seq_no'] = current_annex['amendments'].size
+            end
+          end
         else
           p "WARNING: Original publication not found for amendment #{amendment['target']['publication']}"
         end
