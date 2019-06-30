@@ -10,9 +10,20 @@ and amendment search across OB issues.
 = Authoring
 
 See link:https://github.com/ituob/itu-ob-data/[itu-ob-data]
-for an example (work in progress).
+for how the `data` directory should be structured.
 
-== Referenced publications
+== OB issues
+
+Place each OB issue under `data/issues/{{ OB No. }}/` directory.
+
+Each OB issue should contain the following files:
+
+* `meta.yaml` — Information about OB issue: number, date, authors, etc.
+* `general.yaml` — General information from the OB issue.
+* `amendments.yaml` — The amendments part from the OB issue.
+* `annexes.yaml` — Any annexes to this OB issue.
+
+== Referenced service publications (annexed Lists)
 
 Many messages in OB issue amend previous publications.
 
@@ -23,41 +34,23 @@ When a publication is annexed to an OB issue,
 and whenever it is amended in subsequent issues,
 its publication ID is referenced.
 
-Place all publications under `_lists/{{ List ID }}/`.
-(There is assumed to be one type of publication as of now, called List.)
+Place all publications under `data/lists/{{ List ID }}/`.
 
-All Lists must specify a “position” when annexed to an OB issue.
-Amendments to such lists should specify the position being amended as well.
+Each publication directory should contain one file:
+
+* `meta.yaml` — Publication metadata, such as title, URL,
+  associated recommendation.
+
+When annexed to an OB issue, all Lists must specify a “position”.
+Amendments to such Lists should specify the position being amended as well.
 (Technically this is redundant,
 as we can infer the position being amended by finding which
-position of the list was annexed to OB last,
+position of the List was annexed to OB last,
 but currently it is used for data consistenty check.)
 
-Publications that are not annexed (e.g., “external” List V),
-but are amended, should also be included under `_lists/`.
-For them amendments are not required to specify position, but should specify
-whatever issue/version of the list being amended, depending on the list
-(currently not normalized).
-
-== OB issues
-
-Place each OB issue under `_issues/{{ OB No. }}/` directory.
-
-Each OB issue should contain the following files:
-
-* `meta.yaml` — Information about OB issue: number, date, authors, etc.
-* `general.yaml` — General information from the OB issue.
-* `amendments.yaml` — The amendments part from the OB issue.
-* `annexes.yaml` — Any annexes to this OB issue.
-* `nnp_communications/{{ filename }}` — Texts of communications mentioned
-  in the General Information part under E.164 section.
-  The filename is referenced under `_contents` key for each communication
-  in `general.yaml`.
-
-== NNP data (WIP)
-
-NNP-related data, and changes to that data, is not described formally
-in OB issues. Place NNP data in XML, obtained from NNP team, under `nnp/`.
+Publications that are not annexed (“external” Lists V and VIII, NNP dataset),
+but are amended, should also be included under `data/lists/`.
+For them, amendments are not required to specify position.
 
 = Implementation details
 
@@ -67,9 +60,8 @@ The following plugins enable the site to function:
   with structured information
   about OB issues and changes in telecommunications landscape covered by ITU
 * Issue page generator — creates a page for each OB issue using ``site.data``
-* Amendment search index generator — to facilitate client-side search
-  of changes in ITU, creates JSON indexes from OB issue data and from NNP data
-* Localizer — implements two template tags.
+* Message index generator — generates message index/archive pages
+* Localizer — implements two template tags:
 ** Template tag `{% trans a_string %}` allows to translate string variables specified
    in the form of { <lang1>: <string1>, <lang2>: <string2> }.
 ** Template tag `{% trans_file a_filename %}` includes file, specified by name relative
