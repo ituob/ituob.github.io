@@ -1,0 +1,19 @@
+---
+layout: default
+---
+
+<ul>
+  {% for issue_id in page.issue_ids %}
+    {% assign issue = site.data.issues[issue_id] %}
+    <li>
+      OB {{ issue.meta.id }}
+      &emsp;
+      {% for lang in site.languages %}
+        {% if issue.meta.languages[lang.id] %}
+          <a href="/issues/{{ issue.meta.id }}-{{ lang.id }}">{{ lang.title }}</a>
+          &ensp;
+        {% endif %}
+      {% endfor %}
+    </li>
+  {% endfor %}
+</ul>

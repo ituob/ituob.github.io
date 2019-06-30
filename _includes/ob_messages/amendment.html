@@ -1,16 +1,3 @@
-{% if include.issue.running_annexes[include.msg.target.publication] %}
-  {% assign ob_id = include.issue.running_annexes[include.msg.target.publication].annexed_to_ob %}
-  <p>
-    Annex to ITU Operational Bulletin No. {{ ob_id }}
-    — {{ site.data.issues[ob_id].meta.publication_date }}
-  </p>
-{% endif %}
-
-{% if include.msg.seq_no %}
-  <p>
-    Amendment no. {{ include.msg.seq_no }}
-  </p>
-{% endif %}
-
-{% assign amendment_template = "pub_amendments/" | append: include.msg.target.publication | append: ".html" %}
-{% include {{ amendment_template }} changeset=include.msg.changeset %}
+<div class="included-contents">
+  {% trans_file include.msg.contents %}
+</div>

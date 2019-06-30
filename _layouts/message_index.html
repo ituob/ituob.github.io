@@ -1,0 +1,75 @@
+---
+layout: default
+---
+
+<header>
+  {% if page.index_id == 'by-rec' %}
+    <p class="index-type">
+      Messages related to ITU-T Recommendation
+    </p>
+    <h2 class="index-key">
+      {{ page.meta.code }}
+    </h2>
+
+    {% assign hide_recommendation = true %}
+  {% elsif page.index_id == 'by-pub-amended' %}
+    <p class="index-type">
+      Messages amending ITU-T Service Publication
+    </p>
+    <h2 class="index-key">
+      {{ site.data.publications[page.meta.publication].meta.title[site.default_language] }}
+    </h2>
+    <p class="meta">
+      position on {{ page.meta.position_on }}
+    </p>
+
+    {% assign hide_publication = true %}
+    {% assign hide_recommendation = true %}
+  {% endif %}
+</header>
+
+{% assign year_count = page.years | size %}
+{% if year_count > 0 %}
+  <nav class="yearly-archive">
+    <p>
+      Browse archives by year:
+      {% for year in page.years %}
+        {% if page.year == year %}
+          <strong>{{ year }}</strong>
+        {% else %}
+          <a href="{% if page.year %}../{% endif %}{{ year }}/">{{ year }}</a>
+        {% endif %}
+      {% endfor %}
+    </p>
+  </nav>
+{% endif %}
+
+<table>
+  <thead>
+    <tr>
+      <th class="ob-issue">OB Issue
+      <th class="message">Message
+  <tbody>
+    {% for item in page.messages %}
+      <tr>
+        {% if issue.meta.id != item.issue_id %}
+          {% assign issue = site.data.issues[item.issue_id] %}
+        {% endif %}
+        <td class="ob-issue">
+          <a class="issue-id" href="/issues/{{ issue.meta.id }}-{{ site.default_language }}">{{ issue.meta.id }}</a>
+          <span class="publication-date">
+            ({{ issue.meta.publication_date }})
+          </span>
+        </td>
+
+        {% assign type = item.msg.type %}
+        {% assign type_tmpl = "ob_messages/" | append: type | append: ".html" %}
+        <td class="message">
+          {% include issue/message.html msg=item.msg issue=issue hide_recommendation=hide_recommendation hide_publication=hide_publication %}
+        </td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<script src="{{ "/assets/expandable-message.js" | relative_url }}"></script>

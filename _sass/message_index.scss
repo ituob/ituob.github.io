@@ -1,0 +1,33 @@
+body.layout--message_index {
+  > main {
+    > header {
+      .index-type {
+        @extend .section-title;
+      }
+    }
+    > table {
+      > tbody, > thead {
+        &, & > tr {
+          > td, > th {
+            padding: .5em 0;
+          }
+        }
+      }
+      td.message {
+      }
+      td.ob-issue {
+        padding-right: 1em;
+
+        .issue-id {
+          font-weight: bold;
+          font-size: 120%;
+          line-height: 1.5;
+          margin-top: 1em;
+        }
+        .publication-date {
+          white-space: nowrap;
+        }
+      }
+    }
+  }
+}

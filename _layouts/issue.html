@@ -7,18 +7,17 @@ layout: default
 {% assign amendments = page.issue.amendments %}
 
 <header>
-  <h1>ITU Operational Bulletin</h1>
   {% include issue/header.html %}
 </header>
 
-<nav class="table-of-contents">
-  <h2>Table of Contents</h2>
+<nav class="toc">
+  <h3 class="section-title">Table of Contents</h3>
   {% include issue/toc.html %}
 </nav>
 
 {% if meta.planned_issues %}
   <section class="planned-issues">
-    <h2>Dates of publication of the next Operational Bulletins</h2>
+    <h3>Dates of publication of the next Operational Bulletins</h3>
 
     <table>
       <thead>
@@ -32,8 +31,8 @@ layout: default
         {% for issue in meta.planned_issues %}
           <tr>
             <td>{{ issue.id }}
-            <td>{{ issue.publication_date }}
-            <td>{{ issue.cutoff_date }}
+            <td>{{ issue.publication_date | date: "%d %b %Y" }}
+            <td>{{ issue.cutoff_date | date: "%d %b %Y" }}
           </tr>
         {% endfor %}
       </tbody>
@@ -42,7 +41,7 @@ layout: default
 {% endif %}
 
 <section class="general-information" id="general">
-  <h2>General information</h2>
+  <h3>General information</h3>
 
   {% for message in general.messages %}
     {% assign anchor = "general-" | append: forloop.index %}
@@ -51,10 +50,12 @@ layout: default
 </section>
 
 <section class="amendments" id="amendments">
-  <h2>Amendments to service publications</h2>
+  <h3>Amendments to service publications</h3>
 
   {% for message in amendments.messages %}
     {% assign anchor = "amendments-" | append: forloop.index %}
     {% include issue/message.html msg=message anchor=anchor issue=page.issue %}
   {% endfor %}
 </section>
+
+<script src="{{ "/assets/expandable-message.js" | relative_url }}"></script>

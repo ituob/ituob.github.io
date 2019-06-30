@@ -1,0 +1,99 @@
+body {
+  font-family: Helvetica, Arial, sans-serif;
+  padding: 10vh 5vw 5vh 5vw;
+  line-height: 1.5;
+}
+
+a {
+  &:link, &:visited, &:hover {
+    color: $linkColor;
+    text-decoration: none;
+  }
+}
+
+body > header {
+  a {
+    &:link, &:visited {
+    }
+  }
+  h1 {
+    font-size: 120%;
+    text-transform: uppercase;
+    letter-spacing: -.025em;
+  }
+  h1, .logo {
+    display: inline-block;
+    vertical-align: middle;
+  }
+  .logo {
+    width: $logoSide;
+    height: $logoSide;
+  }
+}
+
+body > main {
+  display: flex;
+  flex-flow: column nowrap;
+  align-items: flex-start;
+  padding-left: $logoTextOffset;
+
+  > header {
+    > h2 {
+    }
+  }
+
+  .actionable {
+    margin-left: $logoSide - $logoTextOffset;
+    font-size: 90%;
+    line-height: 1.2;
+  }
+}
+
+article.service-publication {
+  .title {
+    margin-bottom: .3em;
+    font-weight: normal;
+  }
+}
+
+.ob-issue {
+  > header {
+    .issue-title, .cutoff-date {
+      display: inline-block;
+      vertical-align: middle;
+      margin: 0;
+    }
+    .cutoff-date {
+      margin-left: 1em;
+    }
+  }
+  .lang-links {
+    .lang {
+      &:after {
+        content: ", ";
+      }
+      &:last-child:after {
+        content: "";
+      }
+    }
+  }
+}
+
+body.home {
+  > main {
+    > section {
+      &.browse-by-recommendation {
+        > .items {
+          > .recommendation {
+            display: inline-block;
+            margin-right: 1em;
+
+            .title {
+              margin-top: 0;
+            }
+          }
+        }
+      }
+    }
+  }
+}

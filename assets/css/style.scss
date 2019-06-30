@@ -1,0 +1,17 @@
+---
+---
+
+@import 'normalize';
+
+$primaryColor: #1aa1da;
+$accentColor: #DF314E;
+$accentColorInverse: white;
+$textColor: black;
+$linkColor: darken($primaryColor, 5);
+$logoSide: 60px;
+$logoTextOffset: $logoSide / 5;
+
+@import 'base';
+@import 'main';
+@import 'message_index';
+@import 'issue_page';

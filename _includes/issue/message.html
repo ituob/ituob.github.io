@@ -1,12 +1,77 @@
-{% assign type = include.msg.type %}
+{% assign message = include.msg %}
+{% assign type = message.type %}
 {% assign type_tmpl = "ob_messages/" | append: type | append: ".html" %}
 
-<article class="message message--{{ type }}" id="{{ include.anchor }}">
-  {% assign title = message.title
-    | default: site.message_types[type].title
-    | default: site.data.publications[message.target.publication].meta.title %}
+<article class="message message--{{ type }}"
+    {% if include.anchor %}id="{{ include.anchor }}"{% endif %}>
 
-  <h3>{% trans title %}</h3>
+  <header>
+    {% comment %}
+      TODO: Simplify logic of choosing the correct title and selectively hiding contents
+      for messages (amendments) depending on where they are included
+      (message index vs. OB issue page)
+    {% endcomment %}
 
-  {% include {{ type_tmpl }} msg=include.msg issue=include.issue %}
+    {% if type == "amendment" %}
+      {% assign title = message.title | default: site.data.publications[message.target.publication].meta.title %}
+      {% assign recommendation = site.data.publications[message.target.publication].meta.recommendation %}
+    {% else %}
+      {% assign title = message.title | default: site.message_types[type].title %}
+      {% assign recommendation = message.recommendation | default: site.message_types[type].recommendation %}
+    {% endif %}
+
+    <h3 class="title">
+      {% if type == "amendment" %}
+        {% if include.hide_publication and include.msg.seq_no %}
+          Amendment No. {{ include.msg.seq_no }}
+        {% elsif include.hide_publication %}
+          Amendment
+        {% else %}
+          {% trans title %}
+        {% endif %}
+      {% else %}
+        {% trans title %}
+      {% endif %}
+    </h3>
+
+    {% unless include.hide_recommendation %}
+      {% if recommendation %}
+        <p class="recommendation">
+          In accordance with
+          <span class="std-label">
+            <span class="std-body">{{ recommendation.body }}</span>
+            <span class="std-type">Recommendation</span>
+            <span class="std-id">
+              {{ recommendation.code }}
+              {% if recommendation.version %}({{ recommendation.version }}){% endif %}
+            </span>
+          </span>
+        </p>
+      {% endif %}
+    {% endunless %}
+
+    {% unless include.hide_publication %}
+      {% if type == "amendment" %}
+        {% if include.issue.running_annexes[message.target.publication] %}
+          {% assign ob_id = include.issue.running_annexes[message.target.publication].annexed_to_ob %}
+          <p class="annex-to-ob">
+            Annex to
+            <a href="/issues/{{ ob_id }}-{{ site.default_language }}/">ITU Operational Bulletin No. {{ ob_id }}</a>
+            — {{ site.data.issues[ob_id].meta.publication_date }}
+          </p>
+          {% if include.msg.seq_no %}
+            <p class="amendment-seq-no">
+              Amendment no. {{ include.msg.seq_no }}
+            </p>
+          {% endif %}
+        {% elsif site.publications[message.target.publication].url %}
+          <p>
+            <a href="{{ site.publications[message.target.publication].url }}">Available online</a>
+          </p>
+        {% endif %}
+      {% endif %}
+    {% endunless %}
+  </header>
+
+  {% include {{ type_tmpl }} msg=message issue=include.issue %}
 </article>

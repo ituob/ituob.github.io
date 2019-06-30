@@ -1,19 +1,96 @@
 ---
-layout: home
+layout: default
+html_class: home
 ---
 
-<ul>
-  {% for issue in site.data.issues %}
-    {% assign issue_data = issue[1] %}
-    <li>
-      OB {{ issue_data.meta.id }}
-      &emsp;
+<section class="latest-ob-issue">
+  <p class="section-title">Read latest issue</p>
+
+  <article class="ob-issue featured-issue">
+    {% assign issue = site.data.issues[site.data.latest_issue_id] %}
+
+    <header>
+      <h2 class="issue-title">No. <span class="ob-id">{{ site.data.latest_issue_id }}</span></h2>
+      <p class="cutoff-date">
+        includes updates up until {{ issue.meta.cutoff_date | date: '%d %b %Y' }}
+      </p>
+    </header>
+
+    {% if issue.annexes %}
+      <p class="annexes">
+        Annexes
+        {% for annex_item in issue.annexes %}
+          {% assign pub_id = annex_item[0] %}
+          {% assign position = annex_item[1] %}
+          {% if position %}
+            Position {{ position }} of
+          {% endif %}
+          {% trans site.data.publications[pub_id].title %}
+        {% endfor %}
+      </p>
+    {% endif %}
+
+    <p class="actionable lang-links">
+      read in
       {% for lang in site.languages %}
-        {% if issue_data.meta.languages[lang.id] %}
-          <a href="/issues/{{ issue_data.meta.id }}-{{ lang.id }}">{{ lang.title }}</a>
-          &ensp;
+        {% if issue.meta.languages[lang.id] %}
+          <a class="lang"
+            href="/issues/{{ issue.meta.id }}-{{ lang.id }}">{{ lang.title }}</a>
         {% endif %}
       {% endfor %}
-    </li>
+    </p>
+  </article>
+</section>
+
+<section class="browse-by-recommendation">
+  <h2 class="section-title">Filter messages by recommendation</h2>
+
+  <div class="items">
+    {% for idx_key in site.data.message_indices['by-rec'] %}
+      {% assign meta = idx_key[1].meta %}
+      <article class="recommendation">
+        <h3 class="title">
+          <a href="/messages/complement-to-itu-t-r {{ idx_key[0] }}">{{ meta.code }}</a>
+        </h3>
+      </article>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="service-publications">
+  <h2 class="section-title">View current lists</h2>
+
+  {% for item in site.data.current_annexes %}
+    {% assign pub_id = item[0] %}
+    {% assign annex_data = item[1] %}
+
+    <article class="service-publication">
+      <h3 class="title">{% trans site.data.publications[pub_id].meta.title %}</h3>
+
+      {% if annex_data.position_on or annex_data.annexed_to_ob %}
+        <p class="actionable position-annexed">
+          {% if annex_data.position_on %}
+            position on {{ annex_data.position_on | date: '%d %b %Y' }}
+          {% endif %}
+          {% if annex_data.annexed_to_ob %}
+            <a href="https://www.itu.int/pub/T-SP-OB.{{ annex_data.annexed_to_ob }}-{{ site.data.issues[annex_data.annexed_to_ob].meta.publication_date | date: "%Y" }}">
+              annexed to OB {{ annex_data.annexed_to_ob }}
+            </a>
+          {% endif %}
+        </p>
+      {% endif %}
+
+      {% if annex_data.amendments %}
+        {% assign latest_amendment = annex_data.amendments.last %}
+        <p class="actionable amendments">
+          + <a href="/messages/amending-sp {{ pub_id }} ({{ annex_data.position_on }})/">
+              amended {{ annex_data.amendments | size }} times
+            </a>
+            in subsequent issues{% if latest_amendment %}, latest
+              {{ site.data.issues[latest_amendment.amended_in_ob_issue].meta.publication_date | date: '%d %b %Y' }}
+            {% endif %}
+        </p>
+      {% endif %}
+    </article>
   {% endfor %}
-</ul>
+</section>
