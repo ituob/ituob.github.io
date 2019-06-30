@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>
+    {% assign title = page.title | default: layout.title %}
+    {% if title %}{{ title }} — {% endif %}{{ site.title }}
+  </title>
+
+  <link href="{{ "/assets/favicon-384x384.png" | relative_url }}"
+    rel="shortcut icon"
+    sizes="384x384"
+    type="image/x-icon">
+
+  <link href="{{ "/assets/favicon.png" | relative_url }}"
+    rel="shortcut icon"
+    sizes="32x32"
+    type="image/x-icon">
+
+  <link href="{{ "/assets/favicon-384x384.png" | relative_url }}"
+    rel="apple-touch-icon">
+
+  <meta name="description" value="{{ site.description }}">
+
+  <link rel="stylesheet" href="{{ "assets/css/style.css" | relative_url }}">
+
+  <script src="https://kit.fontawesome.com/3ebc4b9810.js"></script>
+</head>
+
+<body class="
+    {% if page.layout %}layout--{{ page.layout }}{% endif %}
+    lang--{{ page.lang }}
+    {{ page.html_class | default: layout.html_class }}
+  ">
+
+  <header>
+    <a href="/">
+      <img class="logo" src="{{ "/assets/logo.png" | relative_url }}" alt="ITU "><h1>Operational Bulletin</h1>
+    </a>
+  </header>
+
+  <main>
+    {{ content }}
+  </main>
+
+  <footer>
+  </footer>
+
+</body>
+</html>
