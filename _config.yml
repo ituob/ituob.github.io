@@ -3,7 +3,7 @@ baseurl: "" # the subpath of your site, e.g. /blog
 url: "" # the base hostname & protocol for your site, e.g. http://example.com
 
 
-ob_root: '_issues'
+ob_root: 'data/issues'
 
 # TODO: Move to itu-ob-data
 message_types:
