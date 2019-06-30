@@ -1,13 +1,22 @@
+= ITU Operational Bulletin Website www.ituob.org
+
 Generates a web-based representation of individual OB issues
 and message filtering across OB issues.
 
-= Building
+== Building
 
 * Ensure you have Ruby and Git.
 * Clone the repository & initialize submodules.
 * Run `bundle`; then `bundle exec jekyll build` (or `serve`).
 
-= Authoring
+== Approach
+
+Each ITU OB issue is modelled as a collection of messages.
+Each section in an OB issue is considered a message.
+
+//The same message type is
+
+== Authoring
 
 See link:https://github.com/ituob/itu-ob-data/[itu-ob-data]
 for how the `data` directory should be structured.
@@ -18,10 +27,17 @@ Place each OB issue under `data/issues/{{ OB No. }}/` directory.
 
 Each OB issue should contain the following files:
 
-* `meta.yaml` — Information about OB issue: number, date, authors, etc.
-* `general.yaml` — General information from the OB issue.
-* `amendments.yaml` — The amendments part from the OB issue.
-* `annexes.yaml` — Any annexes to this OB issue.
+`meta.yaml`::
+Information about OB issue: number, date, authors, etc.
+
+`general.yaml`::
+General information from the OB issue.
+
+`amendments.yaml`::
+The amendments part from the OB issue.
+
+`annexes.yaml`::
+Any annexes to this OB issue.
 
 == Referenced service publications (annexed Lists)
 
@@ -38,32 +54,46 @@ Place all publications under `data/lists/{{ List ID }}/`.
 
 Each publication directory should contain one file:
 
-* `meta.yaml` — Publication metadata, such as title, URL,
-  associated recommendation.
+`meta.yaml`::
+Publication metadata, such as title, URL, associated recommendation.
 
-When annexed to an OB issue, all Lists must specify a “position”.
+When annexed to an OB issue, all Lists must specify a "`position`".
 Amendments to such Lists should specify the position being amended as well.
+
 (Technically this is redundant,
 as we can infer the position being amended by finding which
 position of the List was annexed to OB last,
-but currently it is used for data consistenty check.)
+but currently it is used for data consistency check.)
 
-Publications that are not annexed (“external” Lists V and VIII, NNP dataset),
+Publications that are not annexed ("`external`" Lists V and VIII, NNP dataset),
 but are amended, should also be included under `data/lists/`.
 For them, amendments are not required to specify position.
 
-= Implementation details
 
-The following plugins enable the site to function:
+== Implementation details
 
-* Issue data reader — processes OB issue data and populates ``site.data``
-  with structured information
-  about OB issues and changes in telecommunications landscape covered by ITU
-* Issue page generator — creates a page for each OB issue using ``site.data``
-* Message index generator — generates message index/archive pages
-* Localizer — implements two template tags:
-** Template tag `{% trans a_string %}` allows to translate string variables specified
-   in the form of { <lang1>: <string1>, <lang2>: <string2> }.
-** Template tag `{% trans_file a_filename %}` includes file, specified by name relative
-   to current issue root, using language-specific version (<lang>-<a_filename>) if available.
-   It also parses AsciiDoc into HTML, so it does not belong under localizer umbrella per se.
+The following plugins enable the site to function.
+
+=== Issue data reader
+
+Processes OB issue data and populates ``site.data``
+with structured information
+about OB issues and changes in telecommunications landscape covered by ITU
+
+=== Issue page generator
+
+Creates a page for each OB issue using ``site.data``
+
+=== Message index generator
+
+Generates message index/archive pages
+
+=== Localizer
+implements two template tags:
+
+Template tag `{% trans a_string %}` allows to translate string variables specified
+in the form of { <lang1>: <string1>, <lang2>: <string2> }.
+
+Template tag `{% trans_file a_filename %}` includes file, specified by name relative
+to current issue root, using language-specific version (<lang>-<a_filename>) if available.
+It also parses AsciiDoc into HTML, so it does not belong under localizer umbrella per se.
