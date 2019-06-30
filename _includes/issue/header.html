@@ -4,13 +4,13 @@
   </h2>
 
   <div class="publication-date">
-    {{ meta.publication_date }}
+    {{ meta.publication_date | date: "%d %b %Y" }}
   </div>
 
   <div class="other">
     <span class="cutoff-date">
       Information received by
-      {{ meta.cutoff_date }}
+      {{ meta.cutoff_date | date: "%d %b %Y" }}
     </span>
 
     <span class="issn">
