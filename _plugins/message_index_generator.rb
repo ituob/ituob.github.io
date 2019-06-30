@@ -62,17 +62,7 @@ module Jekyll
 
   class Site
 
-    MESSAGE_INDICIES_ROOT = File.join('data', 'msg_index')
-
     def write_amendment_search_indexes
-      FileUtils.mkdir_p(File.join(self.source, MESSAGE_INDICIES_ROOT))
-
-      # self.data['publications'].each do |pub_id, _|
-      #   amendments = self.find_amendment_messages_for_publication(pub_id)
-      #   index_filename = "#{pub_id}.json"
-      #   self.write_amendment_index({ 'amendments' => amendments }, index_filename)
-      # end
-
       issue_messages = []
       self.data['issue_ids_descending'].each do |issue_id|
         issue_data = self.data['issues'][issue_id]
@@ -141,62 +131,6 @@ module Jekyll
         matches_per_year[latest_year],
         years_descending)
     end
-
-    # def find_amendment_messages_for_publication(pub_id)
-    #   amendments = []
-
-    #   site.data['message_indices'] = {}
-
-    #   # Collect amendments for given publication across OB issues
-    #   self.data['issues'].each do |issue_id, issue_data|
-    #     if issue_data['amendments']
-    #       issue_data['amendments']['messages'].each do |msg|
-    #         if msg['type'] == 'amendment'
-    #           target = msg['target']
-    #           if target
-    #             target_pub_id = target['publication']
-    #             if target_pub_id == pub_id
-    #               # Collect amendment
-    #               amendments.push msg
-
-    #               # File under
-
-    #               # Check if it’s amending an effective publication;
-    #               # if so, increase amendment count under current_annexes
-    #               current_annex = self.data['current_annexes'][pub_id]
-    #               if current_annex
-    #                 annexed_position = current_annex['position_on']
-    #                 if target['position_on'] == annexed_position
-    #                   current_annex['amendment_count'] ||= 0
-    #                   current_annex['amendment_count'] += amendments.size
-    #                 end
-    #               end
-    #             end
-    #           end
-    #         end
-    #       end
-    #     end
-    #   end
-
-    #   amendments
-    # end
-
-    # def write_amendment_index(index, index_filename)
-    #   index_file_path = File.join(
-    #     self.source,
-    #     AMENDMENT_INDEXES_ROOT,
-    #     index_filename)
-
-    #   File.open(index_file_path, "w") do |f|
-    #     f.write(JSON.pretty_generate(index))
-    #   end
-
-    #   self.static_files << Jekyll::StaticFile.new(
-    #     self,
-    #     self.source,
-    #     AMENDMENT_INDEXES_ROOT,
-    #     index_filename)
-    # end
   end
 
 
