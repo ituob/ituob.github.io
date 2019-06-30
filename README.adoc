@@ -1,6 +1,12 @@
 Generates a web-based representation of individual OB issues
 and amendment search across OB issues.
 
+= Building
+
+* Ensure you have Ruby and Git.
+* Clone the repository & initialize submodules.
+* Run `bundle exec jekyll build` (or `serve`).
+
 = Authoring
 
 See link:https://github.com/ituob/itu-ob-data/[itu-ob-data]
