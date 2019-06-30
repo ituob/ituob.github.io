@@ -28,16 +28,20 @@ message_types:
       ru: (TBD sanc-ru)
 
   iptn:
+    recommendation: { body: ITU-T, code: E.164, version: 2010-11 }
     title:
       en: The International Public Telecommunication Numbering Plan
       ru: Международный план нумерации электросвязи общего пользования
 
   telephone_service:
+    recommendation: { body: ITU-T, code: E.164 }
+    url: http://www.itu.int/itu-t/inr-nnp
     title:
       en: Telephone Service
       ru: Услуга телефонной связи
 
   service_restrictions:
+    url: http://www.itu.int/pub/T-SP-SR.1-2012
     title:
       en: Service Restrictions
       ru: Ограничения обслуживания
