@@ -6,8 +6,8 @@ OB_DATE_FORMAT = '%Y-%m-%d'
 module Jekyll
 
   class Site
-    OB_ROOT = '_issues'
-    PUB_ROOT = '_lists'
+    OB_ROOT = File.join('data', 'issues')
+    PUB_ROOT = File.join('data', 'lists')
 
     def load_data(fname, path, optional=false)
       fpath = File.join(path, fname)
