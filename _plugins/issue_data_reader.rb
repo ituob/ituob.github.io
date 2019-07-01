@@ -8,11 +8,24 @@ module Jekyll
   class Site
     OB_ROOT = File.join('data', 'issues')
     PUB_ROOT = File.join('data', 'lists')
+    REC_ROOT = File.join('data', 'recommendations')
 
     def load_data(fname, path, optional=false)
       fpath = File.join(path, fname)
       if not optional or File.file?(fpath)
         return YAML.load(File.read(fpath))
+      end
+    end
+
+    def read_recommendations
+      self.data['recommendations'] = {}
+
+      self.get_recommendations().each do |rec_path|
+        rec_data = {
+          'meta' => self.load_data('meta.yaml', rec_path),
+        }
+        rec_code = rec_data['meta']['code']
+        self.data['recommendations'][rec_code] = rec_data
       end
     end
 
@@ -171,6 +184,11 @@ module Jekyll
     def get_publications
       Pathname(PUB_ROOT).children.select(&:directory?).map(&:to_s)
     end
+
+    # Returns a list of REC_ROOT subdirectories
+    def get_recommendations
+      Pathname(REC_ROOT).children.select(&:directory?).map(&:to_s)
+    end
   end
 
   class OBDataReader < Generator
@@ -178,6 +196,7 @@ module Jekyll
     priority :high
 
     def generate(site)
+      site.read_recommendations
       site.read_publications
       site.read_ob_issues
     end

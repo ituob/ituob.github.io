@@ -1,0 +1,12 @@
+By AAP-02, it was announced that the following ITU-T Recommendations were approved,
+in accordance with the procedures outlined in Recommendation ITU-T A.8:
+
+<ul>
+  {% for rec in include.msg.items %}
+    {% assign rec_data = site.data.recommendations[rec.code] %}
+      <li>
+        ITU-T {{ rec.code }} ({{ rec.version }}):
+        {% trans rec_data.meta.title %}
+      </li>
+  {% endfor %}
+</ul>
