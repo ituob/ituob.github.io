@@ -8,9 +8,7 @@ ob_root: 'data/issues'
 
 # TODO: Move to itu-ob-data
 message_types:
-  custom:
-    contents: load_file
-
+  custom: {}
   amendment: {}
 
   running_annexes:
