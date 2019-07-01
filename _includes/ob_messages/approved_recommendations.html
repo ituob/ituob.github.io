@@ -3,9 +3,11 @@ in accordance with the procedures outlined in Recommendation ITU-T A.8:
 
 <ul>
   {% for rec in include.msg.items %}
-    {% assign rec_data = site.data.recommendations[rec.code] %}
+    {% assign rec_code = rec[0] %}
+    {% assign rec_data = site.data.recommendations[rec_code] %}
+    {% assign version = rec[1] %}
       <li>
-        ITU-T {{ rec.code }} ({{ rec.version }}):
+        ITU-T {{ rec_data.code }} ({{ version }}):
         {% trans rec_data.meta.title %}
       </li>
   {% endfor %}
