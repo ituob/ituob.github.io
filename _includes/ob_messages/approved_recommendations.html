@@ -9,7 +9,7 @@
     {% assign rec_data = site.data.recommendations[rec_code] %}
     {% assign version = rec[1] %}
       <li>
-        ITU-T {{ rec_data.code }} ({{ version }}):
+        ITU-T {{ rec_code }} ({{ version }}):
         {% trans rec_data.meta.title %}
       </li>
   {% endfor %}
