@@ -15,7 +15,8 @@ layout: default
   {% include issue/toc.html %}
 </nav>
 
-{% if meta.planned_issues %}
+{% assign planned_issue_count = page.issue.planned_issues | size %}
+{% if planned_issue_count > 0 %}
   <section class="planned-issues">
     <h3>Dates of publication of the next Operational Bulletins</h3>
 
@@ -28,7 +29,7 @@ layout: default
         </tr>
       </thead>
       <tbody>
-        {% for issue in meta.planned_issues %}
+        {% for issue in page.issue.planned_issues limit:25 %}
           <tr>
             <td>{{ issue.id }}
             <td>{{ issue.publication_date | date: "%d %b %Y" }}

@@ -44,6 +44,7 @@ module Jekyll
     def read_ob_issues
       self.data['issues'] = {}
       self.data['current_annexes'] = {}
+      self.data['planned_issues'] = []
 
       self.get_issues().each do |issue_path|
         issue_data = {
@@ -51,6 +52,7 @@ module Jekyll
           'general' => self.load_data('general.yaml', issue_path, optional: true),
           'amendments' => self.load_data('amendments.yaml', issue_path, optional: true),
           'annexes' => self.load_data('annexes.yaml', issue_path, optional: true),
+          'planned_issues' => [],
         }
         issue_id = issue_data['meta']['id']
 
@@ -78,9 +80,27 @@ module Jekyll
       end
 
       issues_seq_desc = self.data['issues'].keys.sort_by(&:to_i).reverse()
+
+      issues_seq_desc.each do |issue_id|
+        self.backfill_planned_issue(issue_id)
+      end
+
       self.data['latest_issue_id'] = issues_seq_desc[0]
       self.data['previous_issue_id'] = issues_seq_desc[1]
       self.data['issue_ids_descending'] = issues_seq_desc
+    end
+
+    def backfill_planned_issue(issue_id)
+      self.data['issues'].each do |_iid, _idata|
+        if issue_id > _iid
+          issue_data = self.data['issues'][issue_id]
+          _idata['planned_issues'] << {
+            'id' => issue_data['meta']['id'],
+            'publication_date' => issue_data['meta']['publication_date'],
+            'cutoff_date' => issue_data['meta']['cutoff_date'],
+          }
+        end
+      end
     end
 
     # Adds an issue (specified by issue_data)
