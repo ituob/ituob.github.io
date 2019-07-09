@@ -146,4 +146,10 @@ article.message {
       }
     }
   }
+
+  &.message--approved_recommendations {
+    ul {
+      font-size: 80%;
+    }
+  }
 }
