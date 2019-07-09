@@ -1,0 +1,15 @@
+<table>
+  <thead>
+    <tr>
+      <th>Country/geographical area
+      <th>OB
+  </thead>
+  <tbody>
+    {% for item in include.msg.items %}
+      <tr>
+        <td>{{ item.country }}
+        <td>{{ item.ob }} (page {{ item.page }})
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
