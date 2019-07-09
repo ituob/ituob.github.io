@@ -1,5 +1,6 @@
 {% assign message = include.msg %}
 {% assign type = message.type %}
+{% assign type_config = site.message_types[type] %}
 {% assign type_tmpl = "ob_messages/" | append: type | append: ".html" %}
 
 <article class="message message--{{ type }}"
@@ -16,8 +17,8 @@
       {% assign title = message.title | default: site.data.publications[message.target.publication].meta.title %}
       {% assign recommendation = site.data.publications[message.target.publication].meta.recommendation %}
     {% else %}
-      {% assign title = message.title | default: site.message_types[type].title %}
-      {% assign recommendation = message.recommendation | default: site.message_types[type].recommendation %}
+      {% assign title = message.title | default: type_config.title %}
+      {% assign recommendation = message.recommendation | default: type_config.recommendation %}
     {% endif %}
 
     <h3 class="title">
@@ -68,6 +69,10 @@
           <p>
             <a href="{{ site.publications[message.target.publication].url }}">Available online</a>
           </p>
+        {% endif %}
+      {% else %}
+        {% if type_config.url %}
+          <p><a href="{{ type_config.url }}">Available online</a></p>
         {% endif %}
       {% endif %}
     {% endunless %}
