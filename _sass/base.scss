@@ -128,10 +128,16 @@ article.message {
     }
   }
 
+  &.message--service_restrictions {
+    table {
+      @include compact-table(white);
+      font-size: 80%;
+    }
+  }
+
   &.message--running_annexes {
     table {
       @include compact-table(white);
-
       font-size: 80%;
 
       td:first-child, th:first-child {
