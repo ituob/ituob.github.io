@@ -72,8 +72,7 @@ dl {
     > .toggle {
       color: white;
       height: 1rem;
-      margin: 0 #{-$sidePadding} 0 #{-$sidePadding};
-      font-size: 90%;
+      margin: 1em #{-$sidePadding} 0 #{-$sidePadding};
 
       background: repeating-linear-gradient(
         135deg,
@@ -86,7 +85,7 @@ dl {
 
       .indicator {
         display: inline-block;
-        margin: 0 #{$sidePadding} 0 #{$sidePadding + .05rem};
+        margin: 0 #{$sidePadding} 0 #{$sidePadding};
         transition: transform .1s ease-in-out, text-shadow .1s ease-in-out;
         color: $primaryColor;
         cursor: pointer;
@@ -134,7 +133,16 @@ dl {
       }
     }
     .recommendation, .annex-to-ob, .online-link {
+      margin-bottom: .5em;
+      margin-top: .5em;
+    }
+    .recommendation, .annex-to-ob, .online-link, toggle {
       font-size: 90%;
+
+      .fas, .far {
+        width: 1rem;
+        text-align: center;
+      }
     }
   }
 
