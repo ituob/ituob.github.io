@@ -99,3 +99,15 @@ html_class: home
     </article>
   {% endfor %}
 </section>
+
+<section class="issue-archive">
+  <h2 class="section-title">View older issues</h2>
+
+  <div class="items">
+    {% for id in site.data.issue_ids_descending %}
+      {% if id != site.data.latest_issue_id %}
+        <a href="{{ "/issues/" | append: id | append: "-" | append: site.default_language | relative_url }}">{{ id }}</a>{% unless forloop.last %}, {% endunless %}
+      {% endif %}
+    {% endfor %}
+  </div>
+</section>
