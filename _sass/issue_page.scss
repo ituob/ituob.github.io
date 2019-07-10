@@ -16,6 +16,7 @@ body.layout--issue {
       &.planned-issues {
         table {
           @include compact-table(white);
+          font-size: 80%;
         }
       }
     }
