@@ -104,10 +104,19 @@ html_class: home
   <h2 class="section-title">View older issues</h2>
 
   <div class="items">
+    <ul>
     {% for id in site.data.issue_ids_descending %}
+      {% assign issue_data = site.data.issues[id] %}
+      {% ifchanged %}
+        <li>
+          <strong>{{ issue_data.meta.publication_date | date: '%Y' }}</strong>:
+          &emsp;
+      {% endifchanged %}
       {% if id != site.data.latest_issue_id %}
-        <a href="{{ "/issues/" | append: id | append: "-" | append: site.default_language | relative_url }}">{{ id }}</a>{% unless forloop.last %}, {% endunless %}
+        <a href="{{ "/issues/" | append: id | append: "-" | append: site.default_language | relative_url }}">{{ id }}</a>
+        &ensp;
       {% endif %}
     {% endfor %}
+    </ul>
   </div>
 </section>
