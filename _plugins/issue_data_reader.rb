@@ -88,7 +88,7 @@ module Jekyll
       end
 
       issues_seq_desc = issues_seq_asc.reverse()
-      issues_seq_desc.each do |issue_id|
+      issues_seq_asc.each do |issue_id|
         self.backfill_planned_issue(issue_id)
       end
 
