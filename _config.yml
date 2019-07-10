@@ -19,6 +19,11 @@ message_types:
     title:
       en: Maritime Identification Digits
 
+  ipns:
+    recommendation: { body: ITU-T, code: E.212, version: 2016-09 }
+    title:
+      en: International Identification Plan for Public Networks and Subscriptions
+
   org_changes:
     title:
       en: Changes in Administrations/ROAs and other entities or Organizations
