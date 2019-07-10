@@ -18,6 +18,8 @@ module Jekyll
       'title' => 'Complement to ITU-T Recommendation',
       'url_prefix' => 'complement-to-itu-t-r',
       'getter' => lambda { |msg, site|
+        # For amendments, their related recommendation
+        # is whatever recommendation the amended publication is complement to.
         if msg['type'] == 'amendment' and msg['target']['publication'] != nil
           pub = site.data['publications'][msg['target']['publication']]
           if pub
@@ -25,6 +27,9 @@ module Jekyll
             return pub_rec
           end
         end
+        # For other messages, their related recommendation
+        # is either specified directly in message properties (e.g., for custom messages)
+        # or in message type configuration.
         return msg['recommendation'] || site.config['message_types'][msg['type']]['recommendation']
       },
       'key_builder' => lambda { |val| "#{val['code']}" },
