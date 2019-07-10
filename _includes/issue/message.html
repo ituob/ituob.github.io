@@ -29,7 +29,7 @@
           &emsp;
           Amd.
           {% if include.msg.seq_no %}no. {{ include.msg.seq_no }}{% endif %}
-          {% unless include.hide_publication %}to{% endunless %}
+          {% unless include.hide_publication %}{% if title %}to{% endif %}{% endunless %}
         </span>
 
         {% unless include.hide_publication %}
