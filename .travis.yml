@@ -5,7 +5,7 @@ env:
   global:
     - JEKYLL_ENV=production
 rvm:
-  - 2.3.7
+  - 2.5
 cache: bundler
 addons:
   apt:
