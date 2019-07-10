@@ -54,24 +54,65 @@ dl {
 }
 
 .message-card {
+  $sidePadding: 1rem;
+
   box-shadow: 2px 2px 10px rgba(black, 0.2);
   border-radius: .5em;
-  padding: 0 1rem;
+  padding: 0 $sidePadding;
   overflow: hidden;
 
   &.with-js {
-    transition: height .2s ease-out;
+    $toggleBackground: whiteSmoke;
+    transition: width .2s linear;
 
     .included-contents {
       display: none;
     }
-    .title {
-      i.fas {
-        margin-right: 1em;
+
+    > .toggle {
+      color: white;
+      height: 1rem;
+      margin: 0 #{-$sidePadding} 0 #{-$sidePadding};
+      font-size: 90%;
+
+      background: repeating-linear-gradient(
+        135deg,
+        $toggleBackground,
+        $toggleBackground 10px,
+        lighten($toggleBackground, 10) 10px,
+        lighten($toggleBackground, 10) 20px
+      );
+      cursor: pointer;
+
+      .indicator {
+        display: inline-block;
+        margin: 0 #{$sidePadding} 0 #{$sidePadding + .05rem};
+        transition: transform .1s ease-in-out, text-shadow .1s ease-in-out;
+        color: $primaryColor;
         cursor: pointer;
+        transform: scale(1.2);
+      }
+
+      &:hover {
+        background: $toggleBackground;
+
+        .indicator {
+          transform: scale(1);
+          text-shadow: 0 0 5px rgba(white, 0.3);
+        }
       }
     }
     &.expanded {
+      > .toggle {
+        .indicator {
+          transform: scale(1, 0) rotate(180deg);
+        }
+        &:hover {
+          .indicator {
+            transform: scale(1) rotate(180deg);
+          }
+        }
+      }
       .included-contents {
         display: block;
       }
@@ -81,8 +122,18 @@ dl {
   > header {
     > .title {
       font-weight: normal;
+      display: flex;
+      flex-flow: row nowrap;
+      align-items: flex-start;
+
+      .label {
+        white-space: nowrap;
+        margin: .35rem 1rem 0 0;
+        font-size: 70%;
+        letter-spacing: -.02em;
+      }
     }
-    .recommendation, .annex-to-ob {
+    .recommendation, .annex-to-ob, .online-link {
       font-size: 90%;
     }
   }
@@ -90,7 +141,6 @@ dl {
   .included-contents {
     margin-left: -1rem;
     margin-right: -1rem;
-    margin-top: 1em;
 
     font-size: 80%;
     line-height: 1.2;

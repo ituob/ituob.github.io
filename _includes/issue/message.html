@@ -23,13 +23,18 @@
 
     <h3 class="title">
       {% if type == "amendment" %}
-        {% if include.hide_publication and include.msg.seq_no %}
-          Amendment No. {{ include.msg.seq_no }}
-        {% elsif include.hide_publication %}
-          Amendment
-        {% else %}
+        <span class="label"
+            title="Amendment {% if include.msg.seq_no %}no. {{ include.msg.seq_no }} since specified position was published{% endif %}">
+          <i class="fas fa-pencil"></i>
+          &emsp;
+          Amd.
+          {% if include.msg.seq_no %}no. {{ include.msg.seq_no }}{% endif %}
+          {% unless include.hide_publication %}to{% endunless %}
+        </span>
+
+        {% unless include.hide_publication %}
           {% trans title %}
-        {% endif %}
+        {% endunless %}
       {% else %}
         {% trans title %}
       {% endif %}
@@ -56,23 +61,20 @@
         {% if include.issue.running_annexes[message.target.publication] %}
           {% assign ob_id = include.issue.running_annexes[message.target.publication].annexed_to_ob %}
           <p class="annex-to-ob">
-            Annex to
+            Position amended originally published as annex to
             <a href="/issues/{{ ob_id }}-{{ site.default_language }}/">ITU Operational Bulletin No. {{ ob_id }}</a>
             — {{ site.data.issues[ob_id].meta.publication_date }}
           </p>
-          {% if include.msg.seq_no %}
-            <p class="amendment-seq-no">
-              Amendment no. {{ include.msg.seq_no }}
-            </p>
-          {% endif %}
-        {% elsif site.publications[message.target.publication].url %}
-          <p>
-            <a href="{{ site.publications[message.target.publication].url }}">Available online</a>
+        {% endif %}
+        {% if site.data.publications[message.target.publication].meta.url %}
+          <p class="online-link">
+            <a href="{{ site.data.publications[message.target.publication].meta.url }}"
+              ><i class="fas fa-home"></i> Authoritative resource</a>
           </p>
         {% endif %}
       {% else %}
         {% if type_config.url %}
-          <p><a href="{{ type_config.url }}">Available online</a></p>
+          <p class="online-link"><a href="{{ type_config.url }}"><i class="fas fa-home"></i> Authoritative resource</a></p>
         {% endif %}
       {% endif %}
     {% endunless %}
