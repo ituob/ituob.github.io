@@ -5,6 +5,8 @@ layout: default
 {% assign meta = page.issue.meta %}
 {% assign general = page.issue.general %}
 {% assign amendments = page.issue.amendments %}
+{% assign annexes = page.issue.annexes %}
+{% assign num_annexes = page.issue.annexes | size %}
 
 <header>
   {% include issue/header.html %}
@@ -58,5 +60,32 @@ layout: default
     {% include issue/message.html msg=message anchor=anchor issue=page.issue %}
   {% endfor %}
 </section>
+
+{% if num_annexes > 0 %}
+  <section class="annexes" id="annexes">
+    <h3>Annexes to this issue</h3>
+
+    {% for annex in annexes %}
+      {% assign publication_id = annex[0] %}
+      {% assign title = site.data.publications[publication_id].meta.title %}
+      {% assign url = site.data.publications[publication_id].meta.url %}
+      <article class="annex">
+        <header>
+          <h3 class="title">
+            {% if title %}
+              {% if url %}
+                <a href="{{ url }}">{% trans title %}</a>
+              {% else %}
+                {% trans title %}
+              {% endif %}
+            {% else %}
+              {{ publication_id }}
+            {% endif %}
+          </h3>
+        </header>
+      </article>
+    {% endfor %}
+  </section>
+{% endif %}
 
 <script src="{{ "/assets/expandable-message.js" | relative_url }}"></script>
