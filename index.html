@@ -21,7 +21,7 @@ html_class: home
       </p>
     </header>
 
-    {% if issue.annexes %}
+    {% if num_annexes > 0 %}
       <p class="annexes">
         Annexes
         {% for annex_item in issue.annexes %}
@@ -30,7 +30,7 @@ html_class: home
           {% if position %}
             Position {{ position }} of
           {% endif %}
-          {% trans site.data.publications[pub_id].title %}
+          {% trans site.data.publications[pub_id].meta.title %}
         {% endfor %}
       </p>
     {% endif %}
