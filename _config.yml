@@ -36,6 +36,7 @@ message_types:
       zh: 批准ITU-T建议书
 
   sanc:
+    recommendation: { body: ITU-T, code: Q.708, version: 1999-03 }
     title:
       en: Assignment of Signalling Area/Network Codes (SANC)
       ru: (TBD sanc-ru)
