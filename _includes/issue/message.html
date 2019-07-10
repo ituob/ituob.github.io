@@ -43,6 +43,7 @@
     {% unless include.hide_recommendation %}
       {% if recommendation %}
         <p class="recommendation">
+          <i class="fas fa-stamp"></i> 
           In accordance with
           <span class="std-label">
             <span class="std-body">{{ recommendation.body }}</span>
@@ -61,7 +62,7 @@
         {% if include.issue.running_annexes[message.target.publication] %}
           {% assign ob_id = include.issue.running_annexes[message.target.publication].annexed_to_ob %}
           <p class="annex-to-ob">
-            Position amended originally published as annex to
+            <i class="far fa-calendar-alt"></i> Position amended originally published as annex to
             <a href="/issues/{{ ob_id }}-{{ site.default_language }}/">ITU Operational Bulletin No. {{ ob_id }}</a>
             — {{ site.data.issues[ob_id].meta.publication_date }}
           </p>
