@@ -46,6 +46,8 @@ module Jekyll
       self.data['current_annexes'] = {}
       self.data['planned_issues'] = []
 
+      issues_seq_asc = []
+
       self.get_issues().each do |issue_path|
         issue_data = {
           'meta' => self.load_data('meta.yaml', issue_path),
@@ -55,6 +57,14 @@ module Jekyll
           'planned_issues' => [],
         }
         issue_id = issue_data['meta']['id']
+        self.data['issues'][issue_id] = issue_data
+        issues_seq_asc << issue_id
+      end
+
+      issues_seq_asc = issues_seq_asc.sort_by(&:to_i)
+
+      issues_seq_asc.each do |issue_id|
+        issue_data = self.data['issues'][issue_id]
 
         if issue_data['amendments']
           issue_data['amendments']['messages'].each do |msg|
@@ -75,12 +85,9 @@ module Jekyll
 
         # Snapshot latest annexes up to this issue
         issue_data['running_annexes'] = Marshal.load(Marshal.dump(self.data['current_annexes']))
-
-        self.data['issues'][issue_id] = issue_data
       end
 
-      issues_seq_desc = self.data['issues'].keys.sort_by(&:to_i).reverse()
-
+      issues_seq_desc = issues_seq_asc.reverse()
       issues_seq_desc.each do |issue_id|
         self.backfill_planned_issue(issue_id)
       end
