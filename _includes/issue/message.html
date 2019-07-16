@@ -22,6 +22,13 @@
     {% endif %}
 
     <h3 class="title">
+      {% if include.issue and include.anchor and page.lang %}
+        {% assign permalink = "/issues/" | append: include.issue.meta.id | append: "-" | append: page.lang | append: "/#" | append: include.anchor %}
+        <a href="{{ permalink | relative_url }}">
+      {% else %}
+        {% assign permalink = nil %}
+      {% endif %}
+
       {% if type == "amendment" %}
         <span class="label"
             title="Amendment {% if include.msg.seq_no %}no. {{ include.msg.seq_no }} since specified position was published{% endif %}">
@@ -37,6 +44,10 @@
         {% endunless %}
       {% else %}
         {% trans title %}
+      {% endif %}
+
+      {% if include.issue and include.anchor %}
+        </a>
       {% endif %}
     </h3>
 
@@ -82,4 +93,38 @@
   </header>
 
   {% include {{ type_tmpl }} msg=message issue=include.issue %}
+
+  <script>
+    {% comment %}
+    Including script this way would limit CSP protection,
+    however, it improves UX.
+    {% endcomment %}
+
+    (function () {
+      if (document.currentScript) {  // Not supported in IE.
+        var card = document.currentScript.parentElement;
+        var expandableContents = card.querySelector('.included-contents');
+
+        var activeAnchor;
+        if (window.location.hash) {
+          activeAnchor = window.location.hash;
+        }
+
+        var cardAnchor;
+        var messageTitleAnchorLink = card.querySelector('header > .title > a');
+        if (messageTitleAnchorLink) {
+          cardAnchor = messageTitleAnchorLink.hash;
+        }
+
+        if (expandableContents) {
+          if (!activeAnchor || activeAnchor !== cardAnchor) {
+            expandableContents.style.display = 'none';
+          }
+          if (activeAnchor && activeAnchor === cardAnchor) {
+            card.classList.add('expanded');
+          }
+        }
+      }
+    }());
+  </script>
 </article>

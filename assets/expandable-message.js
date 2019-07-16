@@ -29,6 +29,8 @@
       });
 
       card.insertBefore(toggle, expandableContents);
+
+      expandableContents.removeAttribute('style');
     }
   }
 }());
