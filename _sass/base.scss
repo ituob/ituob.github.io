@@ -66,6 +66,59 @@ dl {
   padding: 0 $sidePadding;
   overflow: hidden;
 
+  > header {
+    > .title {
+      font-weight: normal;
+      display: flex;
+      flex-flow: row nowrap;
+      align-items: flex-start;
+
+      .label {
+        white-space: nowrap;
+        margin: .35rem 1rem 0 0;
+        font-size: 70%;
+        letter-spacing: -.02em;
+      }
+    }
+    .recommendation, .annex-to-ob, .online-link {
+      margin-bottom: .5em;
+      margin-top: .5em;
+    }
+    .recommendation, .annex-to-ob, .online-link, toggle {
+      font-size: 90%;
+
+      .fas, .far {
+        width: 1rem;
+        text-align: center;
+      }
+    }
+  }
+
+  .included-contents {
+    margin-left: -1rem;
+    margin-right: -1rem;
+
+    font-size: 80%;
+    line-height: 1.2;
+    padding: 0 1rem;
+    overflow: hidden;
+    background: whiteSmoke;
+
+    table {
+      @include compact-table(whiteSmoke);
+    }
+
+    .sect2, .sect3, .sect4, .sect5 {
+      padding-left: .5rem;
+      margin-left: -.5rem;
+      border-left: .5rem solid darken(whiteSmoke, 3);
+    }
+    h3, h4, h5, h6 {
+      font-size: 110%;
+      margin: 1em 0;
+    }
+  }
+
   &.with-js {
     $toggleBackground: whiteSmoke;
     transition: width .2s linear;
@@ -120,59 +173,6 @@ dl {
       .included-contents {
         display: block;
       }
-    }
-  }
-
-  > header {
-    > .title {
-      font-weight: normal;
-      display: flex;
-      flex-flow: row nowrap;
-      align-items: flex-start;
-
-      .label {
-        white-space: nowrap;
-        margin: .35rem 1rem 0 0;
-        font-size: 70%;
-        letter-spacing: -.02em;
-      }
-    }
-    .recommendation, .annex-to-ob, .online-link {
-      margin-bottom: .5em;
-      margin-top: .5em;
-    }
-    .recommendation, .annex-to-ob, .online-link, toggle {
-      font-size: 90%;
-
-      .fas, .far {
-        width: 1rem;
-        text-align: center;
-      }
-    }
-  }
-
-  .included-contents {
-    margin-left: -1rem;
-    margin-right: -1rem;
-
-    font-size: 80%;
-    line-height: 1.2;
-    padding: 0 1rem;
-    overflow: hidden;
-    background: whiteSmoke;
-
-    table {
-      @include compact-table(whiteSmoke);
-    }
-
-    .sect2, .sect3, .sect4, .sect5 {
-      padding-left: .5rem;
-      margin-left: -.5rem;
-      border-left: .5rem solid darken(whiteSmoke, 3);
-    }
-    h3, h4, h5, h6 {
-      font-size: 110%;
-      margin: 1em 0;
     }
   }
 }
