@@ -22,31 +22,27 @@
     {% endif %}
 
     <h3 class="title">
-      {% if include.issue and include.anchor and page.lang %}
-        {% assign permalink = "/issues/" | append: include.issue.meta.id | append: "-" | append: page.lang | append: "/#" | append: include.anchor %}
-        <a href="{{ permalink | relative_url }}">
-      {% else %}
-        {% assign permalink = nil %}
-      {% endif %}
-
       {% if type == "amendment" %}
         <span class="label"
             title="Amendment {% if include.msg.seq_no %}no. {{ include.msg.seq_no }} since specified position was published{% endif %}">
           <i class="fas fa-pencil"></i>
-          &emsp;
           Amd.
           {% if include.msg.seq_no %}no. {{ include.msg.seq_no }}{% endif %}
           {% unless include.hide_publication %}{% if title %}to{% endif %}{% endunless %}
         </span>
-
         {% unless include.hide_publication %}
-          {% trans title %}
+          <span class="text">{% trans title %}</span>
         {% endunless %}
       {% else %}
-        {% trans title %}
+        <span class="text">{% trans title %}</span>
       {% endif %}
 
-      {% if include.issue and include.anchor %}
+      {% if include.issue and include.anchor and page.lang %}
+        <a
+            class="anchor"
+            title="Link to this message"
+            href="{{ "/issues/" | append: include.issue.meta.id | append: "-" | append: page.lang | append: "/#" | append: include.anchor | relative_url }}">
+          <i class="fas fa-link"></i>
         </a>
       {% endif %}
     </h3>
@@ -111,7 +107,7 @@
         }
 
         var cardAnchor;
-        var messageTitleAnchorLink = card.querySelector('header > .title > a');
+        var messageTitleAnchorLink = card.querySelector('header > .title > a.anchor');
         if (messageTitleAnchorLink) {
           cardAnchor = messageTitleAnchorLink.hash;
         }

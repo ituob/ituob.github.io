@@ -79,6 +79,12 @@ dl {
         font-size: 70%;
         letter-spacing: -.02em;
       }
+      .text {
+        flex: 1;
+      }
+      .anchor {
+        margin: .35rem 0 0 1rem;
+      }
     }
     .recommendation, .annex-to-ob, .online-link {
       margin-bottom: .5em;
