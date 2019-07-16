@@ -77,7 +77,6 @@ dl {
         white-space: nowrap;
         margin: .35rem 1rem 0 0;
         font-size: 70%;
-        letter-spacing: -.02em;
       }
       .text {
         flex: 1;
@@ -86,17 +85,22 @@ dl {
         margin: .35rem 0 0 1rem;
       }
     }
-    .recommendation, .annex-to-ob, .online-link {
+    .recommendation, .annex-to-ob, .online-link, .label {
       margin-bottom: .5em;
       margin-top: .5em;
-    }
-    .recommendation, .annex-to-ob, .online-link, toggle {
-      font-size: 90%;
 
-      .fas, .far {
-        width: 1rem;
-        text-align: center;
-      }
+      letter-spacing: -.02em;
+    }
+    .recommendation, .annex-to-ob, .online-link, .toggle {
+      font-size: 90%;
+    }
+  }
+
+  header, .toggle {
+    .fas, .far {
+      width: 1rem;
+      font-size: .8rem;
+      text-align: center;
     }
   }
 
@@ -149,7 +153,7 @@ dl {
 
       .indicator {
         display: inline-block;
-        margin: 0 #{$sidePadding} 0 #{$sidePadding};
+        margin: 0 #{$sidePadding} 0 #{$sidePadding + .05rem};
         transition: transform .1s ease-in-out, text-shadow .1s ease-in-out;
         color: $primaryColor;
         cursor: pointer;
