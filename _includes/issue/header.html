@@ -1,4 +1,10 @@
-<section class="identifiers">
+<h1 class="bulletin-title">
+  <a href="https://www.itu.int/itu-t/bulletin/">
+    ITU Operational Bulletin
+  </a>
+</h1>
+
+<section class="meta-row publication">
   <h2 class="seq-no">
     No. <span class="value">{{ meta.id }}</span>
   </h2>
@@ -9,8 +15,7 @@
 
   <div class="other">
     <span class="cutoff-date">
-      Information received by
-      {{ meta.cutoff_date | date: "%d %b %Y" }}
+      Information&nbsp;received&nbsp;by {{ meta.cutoff_date | date: "%d %b %Y" }}
     </span>
 
     <span class="issn">
@@ -21,7 +26,7 @@
   </div>
 </section>
 
-<section class="authors">
+<section class="meta-row authors">
   {% for entity in meta.authors %}
     <article class="author">
       {% if entity.name %}
@@ -31,8 +36,22 @@
         <span class="address">{{ entity.address }}</span>
       {% endif %}
       {% for contact in entity.contacts %}
-        <span class="contact-{{ contact.type }}">{{ contact.data }}</span>
+        {% ifchanged %}
+        {% unless forloop.first %}
+        </span><!-- start {{ contact.type }} -->
+        {% endunless %}
+        <span class="contact-entry contact-{{ contact.type }}">
+          <span class="contact-label">
+            {% if contact.type == "phone" %}Tel:
+            {% elsif contact.type == "fax" %}Fax:
+            {% elsif contact.type == "email" %}Email:
+            {% endif %}
+          </span>
+        {% endifchanged %}
+          <span class="contact-data">{{ contact.data }}</span>
       {% endfor %}
+        </span><!-- last contact -->
+
     </article>
   {% endfor %}
 </section>
