@@ -95,6 +95,60 @@ body.layout--issue {
     nav.toc {
       margin-top: 2em;
     }
+
+    nav.with-js.fixable-bar {
+      $barHeight: 40px;
+
+      position: fixed;
+      top: -$barHeight;
+      left: 5vw;
+      right: 5vw;
+      height: $barHeight;
+      background: white;
+      z-index: 2;
+
+      display: flex;
+      flex-flow: row nowrap;
+      align-items: center;
+
+      transition: top .2s linear;
+
+      &.fixed {
+        top: 0;
+      }
+
+      div.menu-wrapper {
+        overflow: visible;
+        position: relative;
+        font-size: 110%;
+
+        .trigger, ul li {
+          padding: .5em;
+          box-sizing: border-box;
+          cursor: pointer;
+        }
+
+        .trigger {
+          height: $barHeight;
+          background: silver;
+        }
+
+        ul {
+          display: none;
+        }
+
+        &.expanded {
+          ul {
+            display: block;
+            position: absolute;
+            background: whiteSmoke;
+            top: $barHeight;
+            left: 0;
+          }
+        }
+      }
+    }
+
     > section {
       margin-top: 2em;
 
