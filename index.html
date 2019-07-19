@@ -3,14 +3,7 @@ layout: default
 html_class: home
 ---
 
-<section class="">
-  <p class="section-title">Purpose</p>
-  <p>The ITU Operational Bulletin is a fortnightly publication containing administrative and operational information exchanged between administrations and recognized operating agencies (ROAs) and other service providers, entities and organizations, in respect to international telecommunication services.</p>
-</section>
-
 <section class="latest-ob-issue">
-  <p class="section-title">Read latest issue</p>
-
   <article class="ob-issue featured-issue">
     {% assign issue = site.data.issues[site.data.latest_issue_id] %}
 
@@ -36,13 +29,21 @@ html_class: home
     {% endif %}
 
     <p class="actionable lang-links">
-      read in
+      <i class="fas fa-book-open"></i>Read this issue in
       {% for lang in site.languages %}
         {% if issue.meta.languages[lang.id] %}
           <a class="lang"
             href="/issues/{{ issue.meta.id }}-{{ lang.id }}">{{ lang.title }}</a>
         {% endif %}
       {% endfor %}
+    </p>
+
+    <p class="actionable langpurpose">
+      <i class="fas fa-info-circle"></i>The ITU Operational Bulletin is a fortnightly publication
+      containing administrative and operational information
+      exchanged between administrations and recognized operating agencies (ROAs)
+      and other service providers, entities and organizations,
+      in respect to international telecommunication services.
     </p>
   </article>
 </section>
@@ -63,7 +64,7 @@ html_class: home
 </section>
 
 <section class="service-publications">
-  <h2 class="section-title">View current lists</h2>
+  <h2 class="section-title">View amendments to current lists</h2>
 
   {% for item in site.data.current_annexes %}
     {% assign pub_id = item[0] %}
@@ -75,12 +76,12 @@ html_class: home
       {% if annex_data.position_on or annex_data.annexed_to_ob %}
         <p class="actionable position-annexed">
           {% if annex_data.position_on %}
-            position on {{ annex_data.position_on | date: '%d %b %Y' }}
+            <i class="far fa-calendar-alt"></i>Position on {{ annex_data.position_on | date: '%d %b %Y' }}
           {% endif %}
           {% if annex_data.annexed_to_ob %}
+            published as annex to
             <a href="https://www.itu.int/pub/T-SP-OB.{{ annex_data.annexed_to_ob }}-{{ site.data.issues[annex_data.annexed_to_ob].meta.publication_date | date: "%Y" }}">
-              annexed to OB {{ annex_data.annexed_to_ob }}
-            </a>
+              ITU Operational Bulletin No. {{ annex_data.annexed_to_ob }}</a>
           {% endif %}
         </p>
       {% endif %}
@@ -88,12 +89,12 @@ html_class: home
       {% if annex_data.amendments %}
         {% assign latest_amendment = annex_data.amendments.last %}
         <p class="actionable amendments">
-          + <a href="/messages/amending-sp {{ pub_id }} ({{ annex_data.position_on }})/">
-              amended {{ annex_data.amendments | size }} times
-            </a>
-            in subsequent issues{% if latest_amendment %}, latest
-              {{ site.data.issues[latest_amendment.amended_in_ob_issue].meta.publication_date | date: '%d %b %Y' }}
-            {% endif %}
+          <i class="fas fa-pencil"></i><a href="/messages/amending-sp {{ pub_id }} ({{ annex_data.position_on }})/">
+            Amended {{ annex_data.amendments | size }} times
+          </a>
+          in subsequent issues{% if latest_amendment %}, latest
+            {{ site.data.issues[latest_amendment.amended_in_ob_issue].meta.publication_date | date: '%d %b %Y' }}
+          {% endif %}
         </p>
       {% endif %}
     </article>

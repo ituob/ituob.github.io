@@ -4,6 +4,7 @@
 @import 'normalize';
 
 $primaryColor: #1aa1da;
+$primaryColorInverse: white;
 $accentColor: #DF314E;
 $accentColorInverse: white;
 $textColor: black;
@@ -13,5 +14,6 @@ $logoTextOffset: $logoSide / 5;
 
 @import 'base';
 @import 'main';
+@import 'home';
 @import 'message_index';
 @import 'issue_page';

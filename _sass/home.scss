@@ -1,0 +1,91 @@
+body.home {
+  padding-top: 8vh;
+  font-size: 100%;
+
+  > header {
+    margin: 0;
+    margin-bottom: 1em;
+    background: transparent;
+    color: $textColor;
+
+    h1 {
+      font-size: 95%;
+
+      .publication-name {
+        color: $primaryColor;
+        font-weight: bold;
+        font-size: 140%;
+        margin-right: .5rem;
+      }
+    }
+
+    .logo {
+      width: $logoSide;
+      height: $logoSide;
+      margin: 0;
+      mix-blend-mode: unset;
+      filter: unset;
+    }
+  }
+
+  > main {
+    padding-left: 12px;
+
+    .actionable {
+      font-size: 90%;
+      line-height: 1.2;
+      padding-left: 2rem;
+
+      .far, .fas {
+        width: 1.5rem;
+        margin-right: .5rem;
+        margin-left: -2rem;
+        text-align: center;
+      }
+    }
+
+    .purpose {
+      .fas {
+        color: $accentColor;
+      }
+    }
+
+    .ob-issue {
+      > header {
+        .issue-title, .cutoff-date {
+          display: inline-block;
+          vertical-align: middle;
+          margin: 0;
+        }
+        .cutoff-date {
+          margin-left: 1em;
+        }
+      }
+      .lang-links {
+        .lang {
+          &:after {
+            content: ", ";
+          }
+          &:last-child:after {
+            content: "";
+          }
+        }
+      }
+    }
+
+    > section {
+      &.browse-by-recommendation {
+        > .items {
+          > .recommendation {
+            display: inline-block;
+            margin-right: 1em;
+
+            .title {
+              margin-top: 0;
+            }
+          }
+        }
+      }
+    }
+  }
+}

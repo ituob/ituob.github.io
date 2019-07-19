@@ -141,6 +141,17 @@ body.layout--issue {
           }
         }
       }
+
+      .languages {
+        .lang {
+          &:after {
+            content: ", ";
+          }
+          &:last-child:after {
+            content: "";
+          }
+        }
+      }
     }
 
     nav.with-js.fixable-bar {
@@ -199,27 +210,23 @@ body.layout--issue {
 
         &.section-menu {
           .trigger {
-            color: white;
             font-weight: bold;
           }
           .trigger, ul {
-            background: $primaryColor;
-          }
-          ul {
+            background: #a6a6a6;
             color: white;
           }
         }
 
         &.message-menu {
           .trigger {
+            max-width: 50vw;
             font-weight: normal;
             text-transform: unset;
           }
           .trigger, ul {
-            background: $textColor;
-          }
-          ul {
-            color: white;
+            background: $primaryColor;
+            color: $primaryColorInverse;
           }
         }
       }

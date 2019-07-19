@@ -13,14 +13,29 @@ layout: default
 </header>
 
 <nav class="toc">
-  <aside class="authoritative-resource">
-    <p>
-      <a href="itu.int">
-        <i class="fas fa-home"></i>
-        Authoritative resource for this ITU OB issue
+  <p class="authoritative-resource">
+    <a href="https://www.itu.int/pub/T-SP-OB.{{ page.issue.meta.id }}-{{ page.issue.meta.publication_date | date: "%Y" }}">
+      <i class="fas fa-home"></i>
+      Authoritative resource for this ITU OB issue
+    </a>
+  </p>
+
+  {% assign num_languages = page.issue.meta.languages | size %}
+  {% if num_languages > 1 %}
+    <p class="languages">
+      <i class="fas fa-globe"></i>
+      Read this issue in
+
+      <a href="https://www.itu.int/pub/T-SP-OB.{{ page.issue.meta.id }}-{{ page.issue.meta.publication_date | date: "%Y" }}">
+        {% for lang in site.languages %}
+          {% if page.issue.meta.languages[lang.id] %}
+            <a class="lang"
+              href="/issues/{{ page.issue.meta.id }}-{{ lang.id }}">{{ lang.title }}</a>
+          {% endif %}
+        {% endfor %}
       </a>
     </p>
-  </aside>
+  {% endif %}
 
   {% include issue/toc.html %}
 </nav>

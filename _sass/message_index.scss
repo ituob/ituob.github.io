@@ -1,6 +1,14 @@
 body.layout--message_index {
   > main {
     > header {
+      align-self: stretch;
+      margin-left: -5vw;
+      margin-right: -5vw;
+      margin-bottom: 1rem;
+      padding-left: 5vw;
+      padding-right: 5vw;
+      background: whiteSmoke;
+
       .index-type {
         @extend .section-title;
       }
