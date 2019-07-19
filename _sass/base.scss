@@ -60,11 +60,17 @@ dl {
 
 .message-card {
   $sidePadding: 1rem;
+  $baseBoxShadow: 2px 2px 20px -8px rgba(black, 0.4);
 
-  box-shadow: 2px 2px 20px -8px rgba(black, 0.4);
-  border-radius: 1rem;
+  box-shadow: $baseBoxShadow;
+  border-radius: 6px;
+  margin-left: -6px;
   padding: 0 $sidePadding;
   overflow: hidden;
+
+  &.active {
+    box-shadow: 0 0 1px 1px rgba($primaryColor, 0.8), $baseBoxShadow;
+  }
 
   > header {
     > .title {
@@ -82,7 +88,9 @@ dl {
         flex: 1;
       }
       .anchor {
-        margin: .35rem 0 0 1rem;
+        $offset: .35rem;
+        margin: -(3rem + $offset) 0 0 1rem;
+        padding-top: 3rem + $offset;
       }
     }
     .recommendation, .annex-to-ob, .online-link, .label {

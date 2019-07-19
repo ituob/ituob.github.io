@@ -10,9 +10,27 @@
   function initStickyIssueNavigation() {
     let sectionMenu = makeMenu();
     sectionMenu.setItems(buildSectionMenu());
+    sectionMenu.wrapper.classList.add('section-menu');
 
     let messageMenu = makeMenu();
     messageMenu.setItems([]);
+    messageMenu.wrapper.classList.add('message-menu');
+
+    var issueLabel = document.createElement('div');
+    issueLabel.classList.add('issue-id');
+    issueLabel.textContent = document.querySelector('main > header .seq-no').textContent;
+
+    var menuBar = document.createElement('nav');
+    menuBar.classList.add('with-js');
+    menuBar.classList.add('fixable-bar');
+    menuBar.appendChild(issueLabel);
+    menuBar.appendChild(sectionMenu.wrapper);
+    menuBar.appendChild(messageMenu.wrapper);
+
+    makeMessageAnchorMenuAware(sectionMenu, messageMenu);
+
+    document.querySelector('body > main').
+      insertBefore(menuBar, sectionMenu.getItems()[0].el);
 
     function handleMessageVisibilityChange(entries) {
       // Most of the time IntersectionObserver reports current entry correctly;
@@ -21,10 +39,7 @@
       const currentMessageEl = getTopIntersectingEntry(entries) || goFigureCurrentMessage(sectionMenu.getItems());
 
       if (currentMessageEl) {
-        const messageTitle = getMenuItemTitleForMessage(currentMessageEl);
-        sectionMenu.selectItemContainingSubitemWithTitle(messageTitle);
-        messageMenu.setItems(sectionMenu.getSelectedItem().items);
-        messageMenu.selectItemByTitle(messageTitle);
+        selectMessageAndSection(currentMessageEl, sectionMenu, messageMenu);
       } else {
         messageMenu.setItems([]);
       }
@@ -38,24 +53,33 @@
 
     observeMessages(messageObserver, sectionMenu.getItems());
 
-    var menuBar = document.createElement('nav');
-    menuBar.classList.add('with-js');
-    menuBar.classList.add('fixable-bar');
-    menuBar.appendChild(sectionMenu.wrapper);
-    menuBar.appendChild(messageMenu.wrapper);
-
-    document.querySelector('body > main').
-      insertBefore(menuBar, document.querySelector('body > main > .toc'));
-
     window.addEventListener('scroll', function () {
-      const tocRect = document.querySelector('nav.toc').getBoundingClientRect();
-      if (tocRect.bottom < 0) {
+      const tocRect = sectionMenu.getItems()[0].el.getBoundingClientRect();
+      if (tocRect.top < 0) {
         menuBar.classList.add('fixed');
       } else {
         menuBar.classList.remove('fixed');
       }
     });
 
+  }
+
+
+  // Makes it so that anchors don’t use default behavior
+  // but instead select message using menu’s mechanism.
+  function makeMessageAnchorMenuAware(sectionMenu, messageMenu) {
+    for (let section of sectionMenu.getItems()) {
+      for (let message of section.items) {
+        const anchor = message.el.querySelector('a.anchor');
+        if (anchor) {
+          anchor.addEventListener('click', function (evt) {
+            message.el.scrollIntoView({ behavior: 'smooth' });
+            selectMessageAndSection(message.el, sectionMenu, messageMenu);
+            evt.preventDefault();
+          });
+        }
+      }
+    }
   }
 
 
@@ -90,6 +114,7 @@
           li.setAttribute('data-item-id', item.id);
           li.addEventListener('click', function() {
             item.el.scrollIntoView({ behavior: 'smooth' });
+            _selectItem(item);
           });
           ul.appendChild(li);
         }
@@ -128,6 +153,10 @@
         Array.from(ul.children).
           filter(el => el.matches('[data-item-id=' + item.id + ']'))[0].classList.add('selected');
         trigger.textContent = item.title;
+
+        history.pushState(null, null, '#' + item.id);
+        items.map(i => { i.el.classList.remove('active'); });
+        item.el.classList.add('active');
       }
     }
 
@@ -148,6 +177,13 @@
       wrapper: wrapper,
 
     }
+  }
+
+  function selectMessageAndSection(currentMessageEl, sectionMenu, messageMenu) {
+    const messageTitle = getMenuItemTitleForMessage(currentMessageEl);
+    sectionMenu.selectItemContainingSubitemWithTitle(messageTitle);
+    messageMenu.setItems(sectionMenu.getSelectedItem().items);
+    messageMenu.selectItemByTitle(messageTitle);
   }
 
 
@@ -203,7 +239,7 @@
 
   function getMenuItemTitleForMessage(element) {
     return Array.from(element.children).
-      filter(e => e.matches('header'))[0].querySelector('.title').textContent;
+      filter(e => e.matches('header'))[0].querySelector('.title > .text').textContent;
   }
 
   function buildSectionMenu() {

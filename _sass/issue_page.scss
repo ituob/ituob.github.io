@@ -1,10 +1,26 @@
+$barHeight: 40px;
+$interMessageMargin: 1.5rem;
+
+@mixin header($bgColor: #a6a6a6, $color: white) {
+  padding: .5rem 1rem;
+  font-size: 100%;
+  text-transform: uppercase;
+  background: $bgColor;
+  color: $color;
+  margin: 0;
+  margin-bottom: $interMessageMargin;
+}
+
+
 body.layout--issue {
   > main {
     > header {
-      @extend .message-card;
+      margin: 0 -5vw;
       padding: 0;
 
       align-self: stretch;
+
+      * { box-sizing: border-box; }
 
       > .bulletin-title {
         margin: 0;
@@ -26,8 +42,6 @@ body.layout--issue {
         }
       }
 
-      * { box-sizing: border-box; }
-
       > .meta-row {
         display: flex;
         flex-flow: row nowrap;
@@ -44,7 +58,7 @@ body.layout--issue {
           .seq-no {
             width: 16.8%;
             margin: 0;
-            background: #4c4c4c;
+            background: $accentColor;
             text-align: right;
             white-space: nowrap;
             overflow: hidden;
@@ -76,9 +90,10 @@ body.layout--issue {
         &.authors {
           align-items: flex-start;
           font-size: 80%;
+          background: whiteSmoke;
 
           > .author {
-            padding: 1em;
+            padding: 1rem;
             flex: 1;
             display: flex;
             flex-flow: column nowrap;
@@ -93,73 +108,148 @@ body.layout--issue {
     }
 
     nav.toc {
-      margin-top: 2em;
-    }
+      background: whiteSmoke;
+      margin: .2rem -5vw;
+      padding: 0 1rem;
 
-    nav.with-js.fixable-bar {
-      $barHeight: 40px;
+      align-self: stretch;
 
-      position: fixed;
-      top: -$barHeight;
-      left: 5vw;
-      right: 5vw;
-      height: $barHeight;
-      background: white;
-      z-index: 2;
+      * { box-sizing: border-box; }
 
-      display: flex;
-      flex-flow: row nowrap;
-      align-items: center;
-
-      transition: top .2s linear;
-
-      &.fixed {
-        top: 0;
+      ul, li {
+        list-style: none;
+        margin: 0;
+        padding: 0;
       }
 
-      div.menu-wrapper {
-        overflow: visible;
-        position: relative;
-        font-size: 110%;
-
-        .trigger, ul li {
-          padding: .5em;
-          box-sizing: border-box;
-          cursor: pointer;
+      > ul {
+        a, a:visited {
+          color: inherit;
         }
 
-        .trigger {
-          height: $barHeight;
-          background: silver;
-        }
+        > li {
+          display: flex;
+          flex-flow: row nowrap;
+          margin-bottom: 1em;
 
-        ul {
-          display: none;
-        }
-
-        &.expanded {
-          ul {
-            display: block;
-            position: absolute;
-            background: whiteSmoke;
-            top: $barHeight;
-            left: 0;
+          > a {
+            width: 16.8%;
+            padding-right: 2rem;
+          }
+          > ul {
+            flex: 1;
           }
         }
       }
     }
 
+    nav.with-js.fixable-bar {
+      position: fixed;
+      top: -4em;
+      left: 0;
+      right: 0;
+      z-index: 2;
+
+      display: flex;
+      flex-flow: row nowrap;
+      align-items: flex-start;
+
+      transition: top .2s linear;
+
+      .issue-id, .menu-wrapper > .trigger {
+        @include header;
+        margin: 0 .2rem 0 0;
+      }
+
+      .issue-id {
+        background-color: $accentColor;
+        font-weight: bold;
+      }
+
+      div.menu-wrapper {
+        overflow: visible;
+        position: relative;
+
+        .trigger, ul li {
+          cursor: pointer;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+
+        ul {
+          display: none;
+          position: absolute;
+          top: 100%;
+          left: 0;
+
+          list-style: none;
+          padding: 0;
+          margin: 0;
+          padding: .5rem 1rem;
+
+          li {
+            @extend header;
+
+            &.selected {
+              font-weight: bold;
+            }
+          }
+        }
+
+        &.section-menu {
+          .trigger {
+            color: white;
+            font-weight: bold;
+          }
+          .trigger, ul {
+            background: $primaryColor;
+          }
+          ul {
+            color: white;
+          }
+        }
+
+        &.message-menu {
+          .trigger {
+            font-weight: normal;
+            text-transform: unset;
+          }
+          .trigger, ul {
+            background: $textColor;
+          }
+          ul {
+            color: white;
+          }
+        }
+      }
+
+      &.fixed {
+        top: 0;
+
+        div.menu-wrapper.expanded ul {
+          display: block;
+        }
+      }
+    }
+
     > section {
-      margin-top: 2em;
+      display: flex;
+      flex-flow: column nowrap;
+      align-items: stretch;
 
       > h3 {
-        @extend .section-title;
-        margin-bottom: 2em;
+        @include header;
+        align-self: flex-start;
+        margin-left: -5vw;
+        margin-right: -5vw;
       }
       article.message {
-        margin-bottom: 1em;
+        margin-bottom: $interMessageMargin;
       }
       &.planned-issues {
+        margin-bottom: $interMessageMargin;
+
         table {
           @include compact-table(white);
           font-size: 80%;

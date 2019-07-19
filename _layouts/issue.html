@@ -13,7 +13,15 @@ layout: default
 </header>
 
 <nav class="toc">
-  <h3 class="section-title">Table of Contents</h3>
+  <aside class="authoritative-resource">
+    <p>
+      <a href="itu.int">
+        <i class="fas fa-home"></i>
+        Authoritative resource for this ITU OB issue
+      </a>
+    </p>
+  </aside>
+
   {% include issue/toc.html %}
 </nav>
 
@@ -43,23 +51,27 @@ layout: default
   </section>
 {% endif %}
 
-<section class="general-information" id="general">
-  <h3>General information</h3>
+{% if general %}
+  <section class="general-information" id="general">
+    <h3>General information</h3>
 
-  {% for message in general.messages %}
-    {% assign anchor = "general-" | append: forloop.index %}
-    {% include issue/message.html msg=message anchor=anchor issue=page.issue %}
-  {% endfor %}
-</section>
+    {% for message in general.messages %}
+      {% assign anchor = "general-" | append: forloop.index %}
+      {% include issue/message.html msg=message anchor=anchor issue=page.issue %}
+    {% endfor %}
+  </section>
+{% endif %}
 
-<section class="amendments" id="amendments">
-  <h3>Amendments to service publications</h3>
+{% if amendments %}
+  <section class="amendments" id="amendments">
+    <h3>Amendments</h3>
 
-  {% for message in amendments.messages %}
-    {% assign anchor = "amendments-" | append: forloop.index %}
-    {% include issue/message.html msg=message anchor=anchor issue=page.issue %}
-  {% endfor %}
-</section>
+    {% for message in amendments.messages %}
+      {% assign anchor = "amendments-" | append: forloop.index %}
+      {% include issue/message.html msg=message anchor=anchor issue=page.issue %}
+    {% endfor %}
+  </section>
+{% endif %}
 
 {% if num_annexes > 0 %}
   <section class="annexes" id="annexes">

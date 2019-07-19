@@ -35,12 +35,6 @@ body > main {
   display: flex;
   flex-flow: column nowrap;
   align-items: flex-start;
-  padding-left: $logoTextOffset;
-
-  > header {
-    > h2 {
-    }
-  }
 
   .actionable {
     margin-left: $logoSide - $logoTextOffset;
