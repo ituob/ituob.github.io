@@ -173,9 +173,11 @@ body.layout--issue {
 
       transition: top .2s linear;
 
+      box-shadow: 0 2px 9px rgba(black, 0.2);
+
       .issue-id, .menu-wrapper > .trigger {
         @include header;
-        margin: 0 .2rem 0 0;
+        margin: 0;
       }
 
       .issue-id {
@@ -225,8 +227,9 @@ body.layout--issue {
         }
 
         &.message-menu {
+          flex: 1;
+
           .trigger {
-            max-width: 50vw;
             font-weight: normal;
             text-transform: unset;
           }
@@ -254,8 +257,6 @@ body.layout--issue {
       > h3 {
         @include header;
         align-self: flex-start;
-        margin-left: -5vw;
-        margin-right: -5vw;
       }
       article.message {
         margin-bottom: $interMessageMargin;
