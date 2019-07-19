@@ -66,7 +66,7 @@ dl {
   border-radius: 6px;
   margin-left: -6px;
   padding: 0 $sidePadding;
-  overflow: hidden;
+  padding-top: .01em;
 
   &.active {
     box-shadow: 0 0 1px 1px rgba($primaryColor, 0.8), $baseBoxShadow;
@@ -110,6 +110,10 @@ dl {
       font-size: .8rem;
       text-align: center;
     }
+  }
+
+  .toggle, .included-contents {
+    border-radius: 0 0 6px 6px;
   }
 
   .included-contents {

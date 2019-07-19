@@ -40,15 +40,13 @@
 
       if (currentMessageEl) {
         selectMessageAndSection(currentMessageEl, sectionMenu, messageMenu);
-      } else {
-        messageMenu.setItems([]);
       }
     }
 
     const messageObserver = new IntersectionObserver((entries, observer) => { 
       handleMessageVisibilityChange(entries);
     }, {
-      rootMargin: '10px 0px -90% 0px',
+      rootMargin: '-10% 0px -88% 0px',
     });
 
     observeMessages(messageObserver, sectionMenu.getItems());
@@ -64,6 +62,15 @@
 
   }
 
+  // Updates browser location bar (adds a history record)
+  // and highlights the card corresponding to the menu item
+  // (un-highlighting other items’ cards).
+  function registerActiveMessage(item, otherItems) {
+    history.pushState(null, null, '#' + item.id);
+    otherItems.map(i => { i.el.classList.remove('active'); });
+    item.el.classList.add('active');
+  }
+
 
   // Makes it so that anchors don’t use default behavior
   // but instead select message using menu’s mechanism.
@@ -73,8 +80,9 @@
         const anchor = message.el.querySelector('a.anchor');
         if (anchor) {
           anchor.addEventListener('click', function (evt) {
-            message.el.scrollIntoView({ behavior: 'smooth' });
+            message.anchor.scrollIntoView({ behavior: 'smooth' });
             selectMessageAndSection(message.el, sectionMenu, messageMenu);
+            registerActiveMessage(message, messageMenu.getItems());
             evt.preventDefault();
           });
         }
@@ -113,8 +121,25 @@
           li.textContent = item.title;
           li.setAttribute('data-item-id', item.id);
           li.addEventListener('click', function() {
-            item.el.scrollIntoView({ behavior: 'smooth' });
-            _selectItem(item);
+            (item.anchor || item.el).scrollIntoView({ behavior: 'smooth' });
+
+            // Patiently wait until scrolling is completed, then select the item.
+            // Otherwise behavior is incorrect if selected item is at the bottom
+            // of the viewport (end of message list): scrolling will select
+            // a higher-positioned item by design.
+            var scrollTimeout = setTimeout(function () {
+              _selectItem(item);
+              registerActiveMessage(item, items);
+            }, 50);
+            function selectAfterScrollEnds() {
+              clearTimeout(scrollTimeout);
+              scrollTimeout = setTimeout(function () {
+                _selectItem(item);
+                registerActiveMessage(item, items);
+                window.removeEventListener('scroll', selectAfterScrollEnds);
+              }, 50);
+            }
+            window.addEventListener('scroll', selectAfterScrollEnds);
           });
           ul.appendChild(li);
         }
@@ -150,13 +175,14 @@
       if (item) {
         Array.from(ul.children).
           forEach(el => el.classList.remove('selected'));
-        Array.from(ul.children).
-          filter(el => el.matches('[data-item-id=' + item.id + ']'))[0].classList.add('selected');
+
         trigger.textContent = item.title;
 
-        history.pushState(null, null, '#' + item.id);
-        items.map(i => { i.el.classList.remove('active'); });
-        item.el.classList.add('active');
+        const selectedItemMenuListItemEl = Array.from(ul.children).
+          filter(el => el.matches('[data-item-id=' + item.id + ']'))[0];
+        if (selectedItemMenuListItemEl) {
+          selectedItemMenuListItemEl.classList.add('selected');
+        }
       }
     }
 
@@ -205,6 +231,7 @@
   // Iterating over sections & messages, determines
   // which message is currently current (the user is scrolling through it).
   function goFigureCurrentMessage(sections) {
+    console.debug('figuring out current message');
     for (let section of sections) {
       for (let message of section.items) {
         const rect = message.el.getBoundingClientRect();
@@ -262,10 +289,12 @@
     Array.from(element.children).
         filter(e => e.matches('article')).
         forEach(messageEl => {
-      if (messageEl.hasAttribute('id')) {  // Exclude items without anchor
+      const anchor = messageEl.querySelector('a.anchor');
+      if (anchor && anchor.hasAttribute('id')) {  // Exclude items without anchor
         items.push({
           title: getMenuItemTitleForMessage(messageEl),
-          id: messageEl.getAttribute('id'),
+          id: anchor.getAttribute('id'),
+          anchor: anchor,
           el: messageEl,
         });
       }

@@ -3,8 +3,7 @@
 {% assign type_config = site.message_types[type] %}
 {% assign type_tmpl = "ob_messages/" | append: type | append: ".html" %}
 
-<article class="message message--{{ type }}"
-    {% if include.anchor %}id="{{ include.anchor }}"{% endif %}>
+<article class="message message--{{ type }}">
 
   <header>
     {% comment %}
@@ -39,6 +38,7 @@
 
       {% if include.issue and include.anchor and page.lang %}
         <a
+            id="{{ include.anchor }}"
             class="anchor"
             title="Link to this message"
             href="{{ "/issues/" | append: include.issue.meta.id | append: "-" | append: page.lang | append: "/#" | append: include.anchor | relative_url }}">
