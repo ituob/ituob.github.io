@@ -19,12 +19,14 @@ body.home {
       }
     }
 
+    .logo-inverse {
+      display: none;
+    }
     .logo {
+      display: inline-block;
       width: $logoSide;
       height: $logoSide;
       margin: 0;
-      mix-blend-mode: unset;
-      filter: unset;
     }
   }
 

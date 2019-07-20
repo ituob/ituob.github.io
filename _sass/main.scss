@@ -52,7 +52,7 @@ body > header {
     color: inherit;
   }
 
-  h1, .logo {
+  h1, .logo-inverse {
     display: inline-block;
   }
   h1 {
@@ -61,13 +61,15 @@ body > header {
     text-transform: uppercase;
     letter-spacing: -.025em;
   }
-  .logo {
+  .logo, .logo-inverse {
     vertical-align: middle;
     width: $logoSide / 1.5;
     height: $logoSide / 1.5;
     margin: .5rem;
-    mix-blend-mode: color-dodge;
-    filter: invert(1);
+    margin-right: 0;
+  }
+  .logo {
+    display: none;
   }
 }
 
