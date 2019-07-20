@@ -78,6 +78,7 @@ dl {
       display: flex;
       flex-flow: row nowrap;
       align-items: flex-start;
+      justify-content: space-between;
 
       .label {
         white-space: nowrap;
@@ -89,8 +90,8 @@ dl {
       }
       .anchor {
         $offset: .35rem;
-        margin: -(3rem + $offset) 0 0 1rem;
-        padding-top: 3rem + $offset;
+        margin: -(2rem + $offset) 0 0 1rem;
+        padding-top: 2rem + $offset;
       }
     }
     .recommendation, .annex-to-ob, .online-link, .label {
