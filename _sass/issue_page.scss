@@ -184,6 +184,7 @@ body.layout--issue {
       .issue-id {
         background-color: $accentColor;
         font-weight: bold;
+        text-transform: unset;
       }
 
       div.menu-wrapper {
