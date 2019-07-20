@@ -73,8 +73,12 @@ module Jekyll
         issue_data = self.data['issues'][issue_id]
         ['general', 'amendments'].each do |section|
           if issue_data[section]
-            issue_data[section]['messages'].each do |msg|
-              issue_messages << { 'issue_id' => issue_id, 'msg' => msg }
+            issue_data[section]['messages'].each.with_index(1) do |msg, idx|
+              issue_messages << {
+                'issue_id' => issue_id,
+                'msg' => msg,
+                'anchor' => "#{section}-#{idx}",
+              }
             end
           end
         end

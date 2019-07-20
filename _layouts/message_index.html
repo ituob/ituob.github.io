@@ -65,7 +65,12 @@ layout: default
         {% assign type = item.msg.type %}
         {% assign type_tmpl = "ob_messages/" | append: type | append: ".html" %}
         <td class="message">
-          {% include issue/message.html msg=item.msg issue=issue hide_recommendation=hide_recommendation hide_publication=hide_publication %}
+          {% include issue/message.html
+              msg=item.msg
+              issue=issue
+              anchor=item.anchor
+              hide_recommendation=hide_recommendation
+              hide_publication=hide_publication %}
         </td>
       </tr>
     {% endfor %}
