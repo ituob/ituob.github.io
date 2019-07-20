@@ -33,7 +33,7 @@
         <strong class="name">{% trans entity.name %}</strong>
       {% endif %}
       {% if entity.address %}
-        <span class="address">{{ entity.address }}</span>
+        <span class="address">{{ entity.address | newline_to_br }}</span>
       {% endif %}
       {% for contact in entity.contacts %}
         {% ifchanged %}
