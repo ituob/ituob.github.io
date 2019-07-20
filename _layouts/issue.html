@@ -59,8 +59,8 @@ layout: default
         {% for issue in page.issue.planned_issues limit:25 %}
           <tr>
             <td>{{ issue.id }}
-            <td>{{ issue.publication_date | date: "%d %b %Y" }}
-            <td>{{ issue.cutoff_date | date: "%d %b %Y" }}
+            <td>{{ issue.publication_date | as_swiss_date }}
+            <td>{{ issue.cutoff_date | as_swiss_date }}
           </tr>
         {% endfor %}
       </tbody>

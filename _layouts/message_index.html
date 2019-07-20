@@ -20,7 +20,7 @@ layout: default
       {{ site.data.publications[page.meta.publication].meta.title[site.default_language] }}
     </h2>
     <p class="meta">
-      position on {{ page.meta.position_on }}
+      position on {{ page.meta.position_on | as_swiss_date }}
     </p>
 
     {% assign hide_publication = true %}
@@ -62,7 +62,7 @@ layout: default
               >{{ issue.meta.id }}
             </a>
             <span class="publication-date">
-              ({{ issue.meta.publication_date }})
+              ({{ issue.meta.publication_date | as_swiss_date }})
             </span>
           {% endifchanged %}
         </td>

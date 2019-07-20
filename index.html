@@ -10,7 +10,7 @@ html_class: home
     <header>
       <h2 class="issue-title">No. <span class="ob-id">{{ site.data.latest_issue_id }}</span></h2>
       <p class="cutoff-date">
-        includes updates up until {{ issue.meta.cutoff_date | date: '%d %b %Y' }}
+        includes updates up until {{ issue.meta.cutoff_date | as_swiss_date }}
       </p>
     </header>
 
@@ -76,7 +76,7 @@ html_class: home
       {% if annex_data.position_on or annex_data.annexed_to_ob %}
         <p class="actionable position-annexed">
           {% if annex_data.position_on %}
-            <i class="far fa-calendar-alt"></i>Position on {{ annex_data.position_on | date: '%d %b %Y' }}
+            <i class="far fa-calendar-alt"></i>Position on {{ annex_data.position_on | as_swiss_date }}
           {% endif %}
           {% if annex_data.annexed_to_ob %}
             published as annex to
@@ -93,7 +93,7 @@ html_class: home
             Amended {{ annex_data.amendments | size }} times
           </a>
           in subsequent issues{% if latest_amendment %}, latest
-            {{ site.data.issues[latest_amendment.amended_in_ob_issue].meta.publication_date | date: '%d %b %Y' }}
+            {{ site.data.issues[latest_amendment.amended_in_ob_issue].meta.publication_date | as_swiss_date }}
           {% endif %}
         </p>
       {% endif %}

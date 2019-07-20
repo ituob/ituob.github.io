@@ -71,7 +71,7 @@
           <p class="annex-to-ob">
             <i class="far fa-calendar-alt"></i> Position amended originally published as annex to
             <a href="/issues/{{ ob_id }}-{{ site.default_language }}/">ITU Operational Bulletin No. {{ ob_id }}</a>
-            — {{ site.data.issues[ob_id].meta.publication_date }}
+            — {{ site.data.issues[ob_id].meta.publication_date | as_swiss_date }}
           </p>
         {% endif %}
         {% if site.data.publications[message.target.publication].meta.url %}

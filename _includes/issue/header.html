@@ -10,12 +10,12 @@
   </h2>
 
   <div class="publication-date">
-    {{ meta.publication_date | date: "%d %b %Y" }}
+    {{ meta.publication_date | as_swiss_date }}
   </div>
 
   <div class="other">
     <span class="cutoff-date">
-      Information&nbsp;received&nbsp;by {{ meta.cutoff_date | date: "%d %b %Y" }}
+      Information&nbsp;received&nbsp;by {{ meta.cutoff_date | as_swiss_date }}
     </span>
 
     <span class="issn">
