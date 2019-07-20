@@ -56,10 +56,15 @@ layout: default
           {% assign issue = site.data.issues[item.issue_id] %}
         {% endif %}
         <td class="ob-issue">
-          <a class="issue-id" href="/issues/{{ issue.meta.id }}-{{ site.default_language }}">{{ issue.meta.id }}</a>
-          <span class="publication-date">
-            ({{ issue.meta.publication_date }})
-          </span>
+          {% ifchanged %}
+            <a class="issue-id"
+                href="/issues/{{ issue.meta.id }}-{{ site.default_language }}"
+              >{{ issue.meta.id }}
+            </a>
+            <span class="publication-date">
+              ({{ issue.meta.publication_date }})
+            </span>
+          {% endifchanged %}
         </td>
 
         {% assign type = item.msg.type %}
