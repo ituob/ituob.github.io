@@ -178,6 +178,7 @@ body.layout--issue {
       .issue-id, .menu-wrapper > .trigger {
         @include header;
         margin: 0;
+        white-space: nowrap;
       }
 
       .issue-id {
