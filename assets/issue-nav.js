@@ -104,6 +104,15 @@
     trigger.classList.add('trigger');
     wrapper.appendChild(trigger);
 
+    var icon = document.createElement('i');
+    icon.classList.add('fas');
+    icon.classList.add('fa-list-ul');
+    trigger.appendChild(icon);
+
+    var triggerText = document.createElement('span');
+    triggerText.classList.add('text');
+    trigger.appendChild(triggerText);
+
     var ul = document.createElement('ul');
     wrapper.appendChild(ul);
 
@@ -176,7 +185,7 @@
         Array.from(ul.children).
           forEach(el => el.classList.remove('selected'));
 
-        trigger.textContent = item.title;
+        triggerText.textContent = item.title;
 
         const selectedItemMenuListItemEl = Array.from(ul.children).
           filter(el => el.matches('[data-item-id=' + item.id + ']'))[0];

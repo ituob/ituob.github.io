@@ -189,6 +189,12 @@ body.layout--issue {
         overflow: visible;
         position: relative;
 
+        .trigger {
+          .fas {
+            margin-right: .5rem;
+          }
+        }
+
         .trigger, ul li {
           cursor: pointer;
           white-space: nowrap;
@@ -200,12 +206,13 @@ body.layout--issue {
           display: none;
           position: absolute;
           top: 100%;
-          left: 0;
+          left: 1rem;
+          padding: .5rem 1rem;
+          margin: .2rem 0 0 0;
 
           list-style: none;
-          padding: 0;
-          margin: 0;
-          padding: .5rem 1rem;
+
+          box-shadow: 0 10px 15px -10px rgba(black, 0.3);
 
           li {
             @extend header;
@@ -216,9 +223,27 @@ body.layout--issue {
           }
         }
 
+        @mixin withArrowFrom($previousBg) {
+          position: relative;
+          padding-left: 2rem;
+
+          &:before {
+            display: block;
+            position: absolute;
+            content: " ";
+            left: 0;
+            top: 50%;
+            background-color: $previousBg;
+            width: 20px;
+            height: 20px;
+            transform: translateX(-50%) translateY(-50%) scaleY(4) rotate(45deg);
+          }
+        }
+
         &.section-menu {
           .trigger {
             font-weight: bold;
+            @include withArrowFrom($accentColor);
           }
           .trigger, ul {
             background: #a6a6a6;
@@ -232,6 +257,7 @@ body.layout--issue {
           .trigger {
             font-weight: normal;
             text-transform: unset;
+            @include withArrowFrom(#a6a6a6);
           }
           .trigger, ul {
             background: $primaryColor;
