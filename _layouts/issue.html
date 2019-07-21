@@ -13,6 +13,13 @@ layout: default
 </header>
 
 <nav class="toc">
+  {% if page.issue.incomplete %}
+  <p class="authoritative-resource">
+    <i class="fas fa-exclamation-circle"></i>
+    This edition’s data below may not be complete yet.
+  </p>
+  {% endif %}
+
   <p class="authoritative-resource">
     <i class="fas fa-home"></i>
     See

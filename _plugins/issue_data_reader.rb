@@ -56,7 +56,17 @@ module Jekyll
           'annexes' => self.load_data('annexes.yaml', issue_path, optional: true),
           'planned_issues' => [],
         }
+
         issue_id = issue_data['meta']['id']
+
+        ['general', 'amendments'].each do |important_section|
+          if (issue_data[important_section] || {}).key?('messages') == false
+            p "Warning: Incomplete issue: #{issue_id}"
+            issue_data['incomplete'] = true
+            break
+          end
+        end
+
         self.data['issues'][issue_id] = issue_data
         issues_seq_asc << issue_id
       end
