@@ -9,8 +9,10 @@ $accentColor: #DF314E;
 $accentColorInverse: white;
 $textColor: black;
 $linkColor: darken($primaryColor, 5);
+
 $logoSide: 60px;
 $logoTextOffset: $logoSide / 5;
+$borderRadius: $logoTextOffset / 2;
 
 @import 'base';
 @import 'main';

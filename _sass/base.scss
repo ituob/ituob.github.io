@@ -121,8 +121,8 @@ dl {
   $baseBoxShadow: 2px 2px 20px -8px rgba(black, 0.4);
 
   box-shadow: $baseBoxShadow;
-  border-radius: 6px;
-  margin-left: -6px;
+  border-radius: $borderRadius;
+  margin-left: -$borderRadius;
   padding: 0 $sidePadding;
   padding-top: .01em;
 
@@ -169,10 +169,6 @@ dl {
       font-size: .8rem;
       text-align: center;
     }
-  }
-
-  .toggle, .included-contents {
-    border-radius: 0 0 6px 6px;
   }
 
   .included-contents {
