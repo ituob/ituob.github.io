@@ -3,6 +3,34 @@ layout: default
 html_class: home
 ---
 
+<section class="about">
+  <p>
+    <i class="fas fa-info-circle"></i>
+    During the data entry period, information on this resource may be missing or incomplete.
+  </p>
+
+  <input id="expandable" class="expand" type="checkbox">
+  <label for="expandable" class="expand-trigger">About ITU OB Online…</label>
+
+  <div class="expandable">
+    <p>
+      ITU Operational Bulletin is the medium for the exchange of information
+      on changes in international telecommunication networks and services.
+      Each edition includes informational notices and amendments to ITU Service Publications.
+      (Read more <a href="https://www.itu.int/pub/T-SP">about ITU OB</a>.)
+    <p>
+      <em>ITU OB Online</em> is an effort to make the ITU Operational Bulletin messages
+      and associated Service Publications easier to view & navigate
+      via fully-featured Web interface and machine-readable APIs.
+    <p>
+      While the information is being filled in,
+      some editions of ITU OB and ITU Service Publications may be missing here.
+      In such cases please refer
+      to <a href="https://www.itu.int/pub/T-SP">authoritative ITU OB resource</a>
+      on ITU website.
+  </div>
+</section>
+
 <section class="latest-ob-issue">
   <article class="ob-issue featured-issue">
     {% assign issue = site.data.issues[site.data.latest_issue_id] %}
@@ -36,14 +64,6 @@ html_class: home
             href="/issues/{{ issue.meta.id }}-{{ lang.id }}">{{ lang.title }}</a>
         {% endif %}
       {% endfor %}
-    </p>
-
-    <p class="actionable langpurpose">
-      <i class="fas fa-info-circle"></i>The ITU Operational Bulletin is a fortnightly publication
-      containing administrative and operational information
-      exchanged between administrations and recognized operating agencies (ROAs)
-      and other service providers, entities and organizations,
-      in respect to international telecommunication services.
     </p>
   </article>
 </section>
