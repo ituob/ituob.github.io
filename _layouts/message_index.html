@@ -8,7 +8,8 @@ layout: default
       Messages related to ITU-T Recommendation
     </p>
     <h2 class="index-key">
-      {{ page.meta.code }}
+      {% assign rec_details = site.data.recommendations[page.meta.code] %}
+      {{ page.meta.code }}{% if rec_details %}: {% trans rec_details.meta.title %}{% endif %}
     </h2>
 
     {% assign hide_recommendation = true %}
