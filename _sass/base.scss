@@ -51,8 +51,12 @@ dl {
   }
 }
 
-@mixin with-expandable-toggle($sidePadding) {
+@mixin with-expandable-toggle($sidePadding, $borderRadius) {
   $toggleBackground: whiteSmoke;
+
+  .toggle, .included-contents {
+    border-radius: 0 0 $borderRadius $borderRadius;
+  }
 
   .included-contents {
     display: none;
@@ -97,6 +101,8 @@ dl {
     }
 
     > .toggle {
+      border-radius: 0;
+
       .indicator {
         transform: scale(1, 0) rotate(180deg);
       }
@@ -197,7 +203,7 @@ dl {
   }
 
   &.with-js {
-    @include with-expandable-toggle($sidePadding);
+    @include with-expandable-toggle($sidePadding, $borderRadius);
   }
 }
 
