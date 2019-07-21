@@ -51,6 +51,64 @@ dl {
   }
 }
 
+@mixin with-expandable-toggle($sidePadding) {
+  $toggleBackground: whiteSmoke;
+
+  .included-contents {
+    display: none;
+  }
+
+  > .toggle {
+    color: white;
+    height: 1rem;
+    margin: 1em #{-$sidePadding} 0 #{-$sidePadding};
+
+    background: repeating-linear-gradient(
+      135deg,
+      $toggleBackground,
+      $toggleBackground 10px,
+      lighten($toggleBackground, 10) 10px,
+      lighten($toggleBackground, 10) 20px
+    );
+    cursor: pointer;
+
+    .indicator {
+      display: inline-block;
+      margin: 0 #{$sidePadding} 0 #{$sidePadding + .05rem};
+      transition: transform .1s ease-in-out, text-shadow .1s ease-in-out;
+      color: $primaryColor;
+      cursor: pointer;
+      transform: scale(1.2);
+    }
+
+    &:hover {
+      background: $toggleBackground;
+
+      .indicator {
+        transform: scale(1);
+        text-shadow: 0 0 5px rgba(white, 0.3);
+      }
+    }
+  }
+
+  &.expanded {
+    .included-contents {
+      display: block;
+    }
+
+    > .toggle {
+      .indicator {
+        transform: scale(1, 0) rotate(180deg);
+      }
+      &:hover {
+        .indicator {
+          transform: scale(1) rotate(180deg);
+        }
+      }
+    }
+  }
+}
+
 .section-title {
   color: $accentColor;
   font-weight: bold;
@@ -143,60 +201,7 @@ dl {
   }
 
   &.with-js {
-    $toggleBackground: whiteSmoke;
-    transition: width .2s linear;
-
-    .included-contents {
-      display: none;
-    }
-
-    > .toggle {
-      color: white;
-      height: 1rem;
-      margin: 1em #{-$sidePadding} 0 #{-$sidePadding};
-
-      background: repeating-linear-gradient(
-        135deg,
-        $toggleBackground,
-        $toggleBackground 10px,
-        lighten($toggleBackground, 10) 10px,
-        lighten($toggleBackground, 10) 20px
-      );
-      cursor: pointer;
-
-      .indicator {
-        display: inline-block;
-        margin: 0 #{$sidePadding} 0 #{$sidePadding + .05rem};
-        transition: transform .1s ease-in-out, text-shadow .1s ease-in-out;
-        color: $primaryColor;
-        cursor: pointer;
-        transform: scale(1.2);
-      }
-
-      &:hover {
-        background: $toggleBackground;
-
-        .indicator {
-          transform: scale(1);
-          text-shadow: 0 0 5px rgba(white, 0.3);
-        }
-      }
-    }
-    &.expanded {
-      > .toggle {
-        .indicator {
-          transform: scale(1, 0) rotate(180deg);
-        }
-        &:hover {
-          .indicator {
-            transform: scale(1) rotate(180deg);
-          }
-        }
-      }
-      .included-contents {
-        display: block;
-      }
-    }
+    @include with-expandable-toggle($sidePadding);
   }
 }
 

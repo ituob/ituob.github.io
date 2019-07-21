@@ -5,14 +5,10 @@ html_class: home
 
 <section class="about">
   <p>
-    <i class="fas fa-info-circle"></i>
     During the data entry period, information on this resource may be missing or incomplete.
   </p>
 
-  <input id="expandable" class="expand" type="checkbox">
-  <label for="expandable" class="expand-trigger">About ITU OB Online…</label>
-
-  <div class="expandable">
+  <div class="included-contents">
     <p>
       ITU Operational Bulletin is the medium for the exchange of information
       on changes in international telecommunication networks and services.
@@ -141,3 +137,12 @@ html_class: home
     </ul>
   </div>
 </section>
+
+<script src="{{ "/assets/expandable-message.js" | relative_url }}"></script>
+
+<script>
+  (function () {
+    var about = document.querySelector('section.about');
+    window.initExpandable(about, about.querySelector('.included-contents'), 'fa-info-circle');
+  }());
+</script>

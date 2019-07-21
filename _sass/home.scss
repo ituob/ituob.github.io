@@ -72,34 +72,18 @@ body.home {
     > section {
       &.about {
         background: whiteSmoke;
-        padding: 1rem;
+        padding: 1rem 1rem 0 1rem;
         margin: 1rem 0 1.5rem -6px;
         border-radius: 6px;
 
-        .expand {
-          display: none;
-        }
-        .expand-trigger {
-          display: block;
-          cursor: pointer;
-          color: $linkColor;
-        }
-        .expandable {
-          overflow: hidden;
-          max-height: 0;
-          columns: 300px 2;
-          column-gap: 1em;
-        }
-        .expand:checked + .expand-trigger + .expandable {
-          margin-top: 1rem;
-          max-height: 200px;
-        }
-        .expand:checked + .expand-trigger {
-          font-weight: bold;
+        @include with-expandable-toggle(1rem);
+
+        .included-contents {
+          padding-top: 1rem;
         }
 
-        .fas {
-          margin-right: .5rem;
+        &.expanded > .toggle:hover .indicator {
+          transform: scale(1, 0) rotate(0deg);
         }
 
         p {
