@@ -90,6 +90,22 @@ layout: default
   <section class="amendments" id="amendments">
     <h3>Amendments</h3>
 
+    <section class="legend">
+      <h4>
+        <i class="fas fa-info-circle"></i> Abbreviations used in this section
+      </h4>
+
+      <dl class="inline-dl">
+        <dt>ADD</dt> <dd>Insert</dd>
+        <dt>PAR</dt> <dd>Paragraph</dd>
+        <dt>COL</dt> <dd>Column</dd>
+        <dt>REP</dt> <dd>Replace</dd>
+        <dt>LIR</dt> <dd>Read</dd>
+        <dt>SUP</dt> <dd>Delete</dd>
+        <dt>P</dt> <dd>Page(s)</dd>
+      </dl>
+    </section>
+
     {% for message in amendments.messages %}
       {% assign anchor = "amendments-" | append: forloop.index %}
       {% include issue/message.html msg=message anchor=anchor issue=page.issue %}

@@ -107,6 +107,14 @@ body.layout--issue {
       }
     }
 
+    > nav.toc, > section .legend {
+      .fas, .far {
+        width: 1.2rem;
+        font-size: 1rem;
+        text-align: center;
+      }
+    }
+
     nav.toc {
       background: whiteSmoke;
       margin: .2rem -5vw;
@@ -115,12 +123,6 @@ body.layout--issue {
       align-self: stretch;
 
       * { box-sizing: border-box; }
-
-      .fas, .far {
-        width: 1.2rem;
-        font-size: 1rem;
-        text-align: center;
-      }
 
       ul, li {
         list-style: none;
@@ -281,6 +283,23 @@ body.layout--issue {
       display: flex;
       flex-flow: column nowrap;
       align-items: stretch;
+
+      .legend {
+        font-size: 90%;
+        margin-bottom: 1.5rem;
+
+        h4 {
+          display: inline-block;
+          font-size: 100%;
+          font-weight: normal;
+          margin-top: 0;
+          margin-right: 1.2rem;
+        }
+
+        dl {
+          margin: 0;
+        }
+      }
 
       > h3 {
         @include header;
