@@ -149,7 +149,7 @@ module Jekyll
       end
 
       if self.data['publications'][publication_id] == nil
-        p "WARNING: Publication metadata not found for List #{publication_id}, annexed to OB #{issue_id}"
+        p "WARNING: Publication metadata not found for List #{publication_id}, annexed to OB #{ob_issue_id}"
       end
 
       self.data['current_annexes'][publication_id] = {
