@@ -76,11 +76,14 @@ module Jekyll
       issues_seq_asc.each do |issue_id|
         issue_data = self.data['issues'][issue_id]
 
-        if issue_data['amendments']
-          issue_data['amendments']['messages'].each do |msg|
-            if msg['type'] == 'amendment'
-              self.process_amendment(msg, issue_id)
-            end
+        messages =
+          ((issue_data['amendments'] || {})['messages'] || []) +
+          ((issue_data['general'] || {})['messages'] || [])
+
+        messages.each do |msg|
+          loader_method = "load_#{msg['type']}_message"
+          if self.respond_to? loader_method
+            self.send(loader_method, msg, issue_id)
           end
         end
 
@@ -158,7 +161,7 @@ module Jekyll
     # Associates an amendment with the original publication.
     # Infers & fills in useful amendment information
     # (publication title, amendment counter, etc.)
-    def process_amendment(amendment, ob_issue_id)
+    def load_amendment_message(amendment, ob_issue_id)
       if amendment['target']
         original_pub, current_annex = self.resolve_amendment_target(amendment['target'])
 
