@@ -53,7 +53,8 @@ html_class: home
     {% endif %}
 
     <p class="actionable lang-links">
-      <i class="fas fa-book-open"></i>Read this issue in
+      <i class="fas fa-book-open"></i>
+      Read this issue in
       {% for lang in site.languages %}
         {% if issue.meta.languages[lang.id] %}
           <a class="lang"
@@ -92,7 +93,8 @@ html_class: home
       {% if annex_data.position_on or annex_data.annexed_to_ob %}
         <p class="actionable position-annexed">
           {% if annex_data.position_on %}
-            <i class="far fa-calendar-alt"></i>Position on {{ annex_data.position_on | as_swiss_date }}
+            <i class="far fa-calendar-alt"></i>
+            Position on {{ annex_data.position_on | as_swiss_date }}
           {% endif %}
           {% if annex_data.annexed_to_ob %}
             published as annex to
