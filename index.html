@@ -90,6 +90,13 @@ html_class: home
     <article class="service-publication">
       <h3 class="title">{% trans site.data.publications[pub_id].meta.title %}</h3>
 
+      {% if site.data.publications[pub_id].meta.url %}
+        <p class="actionable online-link">
+          <a href="{{ site.data.publications[pub_id].meta.url }}"
+            ><i class="fas fa-home"></i> Authoritative resource</a>
+        </p>
+      {% endif %}
+
       {% if annex_data.position_on or annex_data.annexed_to_ob %}
         <p class="actionable position-annexed">
           {% if annex_data.position_on %}
