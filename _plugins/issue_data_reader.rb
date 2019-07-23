@@ -97,7 +97,9 @@ module Jekyll
         end
 
         # Snapshot latest annexes up to this issue
-        issue_data['running_annexes'] = Marshal.load(Marshal.dump(self.data['current_annexes']))
+        issue_data['running_annexes'] = Marshal.load(Marshal.dump(self.data['current_annexes'].sort_by { |id, data|
+          data['annexed_to_ob']
+        }.reverse))
       end
 
       issues_seq_desc = issues_seq_asc.reverse()
