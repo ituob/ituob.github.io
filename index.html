@@ -81,7 +81,7 @@ html_class: home
 </section>
 
 <section class="service-publications">
-  <h2 class="section-title">View amendments to current lists</h2>
+  <h2 class="section-title">Annexed lists</h2>
 
   {% for item in site.data.current_annexes_ordered %}
     {% assign pub_id = item[0] %}
@@ -90,34 +90,31 @@ html_class: home
     <article class="service-publication">
       <h3 class="title">{% trans site.data.publications[pub_id].meta.title %}</h3>
 
-      {% if site.data.publications[pub_id].meta.url %}
-        <p class="actionable online-link">
-          <a href="{{ site.data.publications[pub_id].meta.url }}"
-            ><i class="fas fa-home"></i> Authoritative resource</a>
-        </p>
-      {% endif %}
+      <div class="actionable-row meta">
+        {% if annex_data.position_on %}
+          <p class="actionable position">
+            <i class="far fa-calendar-alt"></i>Position on {{ annex_data.position_on | as_swiss_date }}
+          </p>
+        {% endif %}
 
-      {% if annex_data.position_on or annex_data.annexed_to_ob %}
-        <p class="actionable position-annexed">
-          {% if annex_data.position_on %}
-            <i class="far fa-calendar-alt"></i>
-            Position on {{ annex_data.position_on | as_swiss_date }}
-          {% endif %}
-          {% if annex_data.annexed_to_ob %}
-            published as annex to
-            <a href="https://www.itu.int/pub/T-SP-OB.{{ annex_data.annexed_to_ob }}-{{ site.data.issues[annex_data.annexed_to_ob].meta.publication_date | date: "%Y" }}">
-              ITU Operational Bulletin No. {{ annex_data.annexed_to_ob }}</a>
-          {% endif %}
-        </p>
-      {% endif %}
+        {% if annex_data.annexed_to_ob %}
+          <p class="actionable annex-info">
+            <i class="far fa-paperclip"></i>Annexed to
+              <a
+                href="https://www.itu.int/pub/T-SP-OB.{{ annex_data.annexed_to_ob }}-{{ site.data.issues[annex_data.annexed_to_ob].meta.publication_date | date: "%Y" }}"
+              >ITU OB No. {{ annex_data.annexed_to_ob }}</a>
+          </p>
+        {% endif %}
+      </div>
 
       {% if annex_data.amendments %}
         {% assign latest_amendment = annex_data.amendments.last %}
         <p class="actionable amendments">
-          <i class="fas fa-pencil"></i><a href="/messages/amending-sp {{ pub_id }} ({{ annex_data.position_on }})/">
-            Amended {{ annex_data.amendments | size }} times
+          <a
+            href="/messages/amending-sp {{ pub_id }} ({{ annex_data.position_on }})/"
+            ><i class="fas fa-pencil"></i><strong>View {{ annex_data.amendments | size }} amendment(s)</strong>
           </a>
-          in subsequent issues{% if latest_amendment %}, latest
+          in subsequent OB editions{% if latest_amendment %}, latest
             {{ site.data.issues[latest_amendment.amended_in_ob_issue].meta.publication_date | as_swiss_date }}
           {% endif %}
         </p>
