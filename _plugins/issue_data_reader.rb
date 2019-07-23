@@ -138,28 +138,34 @@ module Jekyll
     # TODO: If there is a use case for retiring annexes, retire=true argument
     # can be added to drop given publication from current annexes.
     def update_current_annexes_with(publication_id, publication_issue_data, ob_issue_id)
-      current_position = publication_issue_data['position_on']
+      if publication_issue_data
+        current_position = publication_issue_data['position_on']
 
-      previously_annexed = self.data['current_annexes'][publication_id]
-      if previously_annexed
-        previous_position = previously_annexed['position_on']
-        if current_position and previous_position
-          if previous_position >= current_position
-            p "WARNING: Newly annexed position of #{publication_id} #{current_position} must be later than previously annexed position #{previous_position}!"
+        previously_annexed = self.data['current_annexes'][publication_id]
+        if previously_annexed
+          previous_position = previously_annexed['position_on']
+          if current_position and previous_position
+            if previous_position >= current_position
+              p "WARNING: Newly annexed position of #{publication_id} #{current_position} must be later than previously annexed position #{previous_position}!"
+            end
+          else
+            p "WARNING: Annexed publication #{publication_id} must specify annexed position always or never"
           end
-        else
-          p "WARNING: Annexed publication #{publication_id} must specify annexed position always or never"
         end
-      end
 
-      if self.data['publications'][publication_id] == nil
-        p "WARNING: Publication metadata not found for List #{publication_id}, annexed to OB #{ob_issue_id}"
-      end
+        if self.data['publications'][publication_id] == nil
+          p "WARNING: Publication metadata not found for List #{publication_id}, annexed to OB #{ob_issue_id}"
+        end
 
-      self.data['current_annexes'][publication_id] = {
-        'annexed_to_ob' => ob_issue_id,
-        'position_on' => current_position,
-      }
+        self.data['current_annexes'][publication_id] = {
+          'annexed_to_ob' => ob_issue_id,
+          'position_on' => current_position,
+        }
+      else
+        self.data['current_annexes'][publication_id] = {
+          'annexed_to_ob' => ob_issue_id,
+        }
+      end
     end
 
     # Associates an amendment with the original publication.
