@@ -6,7 +6,7 @@ module Jekyll
     # for each index.
 
     'by-pub-amended' => {
-      'title' => 'Amending ITU-T Service Publication',
+      'title' => 'Amendments to ITU-T Service Publication',
       'url_prefix' => 'amending-sp',
       'getter' => lambda { |msg, _|
         if msg['type'] == 'amendment'
@@ -19,7 +19,7 @@ module Jekyll
       },
     },
     'by-rec' => {
-      'title' => 'Complement to ITU-T Recommendation',
+      'title' => 'Messages complement to ITU-T Recommendation',
       'url_prefix' => 'complement-to-itu-t-r',
       'getter' => lambda { |msg, site|
         # For amendments, their related recommendation

@@ -52,7 +52,7 @@ body > header {
     color: inherit;
   }
 
-  h1, .logo-inverse {
+  h1, h2, .logo-inverse {
     display: inline-block;
   }
   h1 {
@@ -60,6 +60,27 @@ body > header {
     font-size: 110%;
     text-transform: uppercase;
     letter-spacing: -.025em;
+  }
+  h2 {
+    vertical-align: sub;  // Black magic? :(
+    font-size: 110%;
+    font-weight: normal;
+    padding-left: 2em;
+    position: relative;
+    overflow: hidden;
+
+    // Arrow
+    &:before {
+      display: block;
+      position: absolute;
+      content: " ";
+      border: 1px solid white;
+      left: 0;
+      top: 50%;
+      width: 20px;
+      height: 20px;
+      transform: translateX(-50%) translateY(-50%) scaleY(2) rotate(45deg);
+    }
   }
   .logo, .logo-inverse {
     vertical-align: middle;
