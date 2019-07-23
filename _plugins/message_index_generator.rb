@@ -1,6 +1,10 @@
 module Jekyll
 
   MESSAGE_INDICES = {
+    # In addition to configuration hash specified here,
+    # a layout named "message_index-<index ID>" is expected to exist
+    # for each index.
+
     'by-pub-amended' => {
       'title' => 'Amending ITU-T Service Publication',
       'url_prefix' => 'amending-sp',
@@ -53,7 +57,7 @@ module Jekyll
       self.process(@name)
 
       self.data = {
-        'layout' => 'message_index',
+        'layout' => "message_index-#{idx}",
         'years' => years,
         'year' => year,
         'meta' => meta,

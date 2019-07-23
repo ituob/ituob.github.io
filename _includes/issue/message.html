@@ -42,7 +42,7 @@
             class="anchor"
             title="Link to this message"
             href="{{ "/issues/" | append: include.issue.meta.id | append: "-" | append: site.default_language | append: "/#" | append: include.anchor | relative_url }}">
-          <i class="fas fa-link"></i>
+          <i class="fas fa-link"></i>{% if include.outside_ob %}<span class="ob-id">OB no. {{ include.issue.meta.id }}</span>{% endif %}
         </a>
       {% endif %}
     </h3>

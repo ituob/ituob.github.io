@@ -81,45 +81,47 @@ html_class: home
 </section>
 
 <section class="service-publications">
-  <h2 class="section-title">Annexed service publications</h2>
+  <h2 class="section-title">View publication amendments</h2>
 
   {% for item in site.data.current_annexes_ordered %}
     {% assign pub_id = item[0] %}
     {% assign annex_data = item[1] %}
 
-    <article class="service-publication">
-      <h3 class="title">{% trans site.data.publications[pub_id].meta.title %}</h3>
-
-      <div class="actionable-row meta">
-        {% if annex_data.position_on %}
-          <p class="actionable position">
-            <i class="far fa-calendar-alt"></i>Position on {{ annex_data.position_on | as_swiss_date }}
-          </p>
-        {% endif %}
-
-        {% if annex_data.annexed_to_ob %}
-          <p class="actionable annex-info">
-            <i class="far fa-paperclip"></i>Annexed to
-              <a
-                href="https://www.itu.int/pub/T-SP-OB.{{ annex_data.annexed_to_ob }}-{{ site.data.issues[annex_data.annexed_to_ob].meta.publication_date | date: "%Y" }}"
-              >ITU OB No. {{ annex_data.annexed_to_ob }}</a>
-          </p>
-        {% endif %}
-      </div>
-
-      {% if annex_data.amendments %}
-        {% assign latest_amendment = annex_data.amendments.last %}
-        <p class="actionable amendments">
-          <a
-            href="/messages/amending-sp {{ pub_id }} ({{ annex_data.position_on }})/"
-            ><i class="fas fa-pencil"></i><strong>View {{ annex_data.amendments | size }} amendment(s)</strong>
-          </a>
-          in subsequent OB editions{% if latest_amendment %}, latest
-            {{ site.data.issues[latest_amendment.amended_in_ob_issue].meta.publication_date | as_swiss_date }}
+    {% if annex_data.amendments %}
+      <article class="service-publication">
+        <h3 class="title">
+          {% if annex_data.amendments %}
+            <a
+              href="/messages/amending-sp {{ pub_id }} ({{ annex_data.position_on }})/">
           {% endif %}
-        </p>
-      {% endif %}
-    </article>
+          {% trans site.data.publications[pub_id].meta.title %}
+          {% if annex_data.amendments %}
+            </a>
+          {% endif %}
+        </h3>
+
+        <div class="actionable-row meta">
+          {% if annex_data.position_on %}
+            <p class="actionable position">
+              <i class="far fa-calendar-alt"></i>Position on {{ annex_data.position_on | as_swiss_date }}
+            </p>
+          {% elsif annex_data.annexed_to_ob %}
+            <p class="actionable position">
+              <i class="far fa-paperclip"></i>Annexed to ITU OB No. {{ annex_data.annexed_to_ob }}
+            </p>
+          {% endif %}
+
+          {% if annex_data.amendments %}
+            {% assign latest_amendment = annex_data.amendments.last %}
+            <p class="actionable amendments">
+              <i class="fas fa-pencil"></i>Amended {{ annex_data.amendments | size }} time(s){% if latest_amendment %}, latest
+                {{ site.data.issues[latest_amendment.amended_in_ob_issue].meta.publication_date | as_swiss_date }}
+              {% endif %}
+            </p>
+          {% endif %}
+        </div>
+      </article>
+    {% endif %}
   {% endfor %}
 </section>
 
@@ -130,15 +132,17 @@ html_class: home
     <ul>
     {% for id in site.data.issue_ids_descending %}
       {% assign issue_data = site.data.issues[id] %}
-      {% ifchanged %}
-        <li>
-          <strong>{{ issue_data.meta.publication_date | date: '%Y' }}</strong>:
-          &emsp;
-      {% endifchanged %}
-      {% if id != site.data.latest_issue_id %}
-        <a href="{{ "/issues/" | append: id | append: "-" | append: site.default_language | relative_url }}">{{ id }}</a>
-        &ensp;
-      {% endif %}
+      {% unless issue_data.incomplete %}
+        {% ifchanged %}
+          <li>
+            <strong>{{ issue_data.meta.publication_date | date: '%Y' }}</strong>:
+            &emsp;
+        {% endifchanged %}
+        {% if id != site.data.latest_issue_id %}
+          <a href="{{ "/issues/" | append: id | append: "-" | append: site.default_language | relative_url }}">{{ id }}</a>
+          &ensp;
+        {% endif %}
+      {% endunless %}
     {% endfor %}
     </ul>
   </div>

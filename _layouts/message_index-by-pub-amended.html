@@ -1,0 +1,52 @@
+---
+layout: message_index
+---
+
+{% assign annex_data = site.data.current_annexes[page.meta.publication] %}
+
+<p class="index-type">
+  Messages amending ITU-T Service Publication
+</p>
+
+<h2 class="index-key">
+  {{ site.data.publications[page.meta.publication].meta.title[site.default_language] }}
+</h2>
+
+
+<div class="meta">
+  <div class="meta-row">
+
+    {% if annex_data.position_on %}
+      <p class="position">
+        <i class="far fa-calendar-alt"></i>Position on {{ annex_data.position_on | as_swiss_date }}
+      </p>
+    {% endif %}
+
+    {% if site.data.publications[page.meta.publication].meta.url %}
+      <p class="online-link">
+        <a href="{{ site.data.publications[pub_id].meta.url }}"
+          ><i class="fas fa-home"></i>Authoritative resource</a>
+      </p>
+    {% endif %}
+
+    {% if annex_data.annexed_to_ob %}
+      <p class="annex-info">
+        <i class="far fa-paperclip"></i>Annexed to
+          <a
+            href="https://www.itu.int/pub/T-SP-OB.{{ annex_data.annexed_to_ob }}-{{ site.data.issues[annex_data.annexed_to_ob].meta.publication_date | date: "%Y" }}"
+          >ITU OB No. {{ annex_data.annexed_to_ob }}</a>
+      </p>
+    {% endif %}
+
+  </div>
+
+  {% if annex_data.amendments %}
+    {% assign latest_amendment = annex_data.amendments.last %}
+    <p class="amendments">
+      <i class="fas fa-pencil"></i>Amended {{ annex_data.amendments | size }} time(s)</strong>
+      </a>
+      in subsequent editions
+    </p>
+  {% endif %}
+
+</div>

@@ -1,38 +1,21 @@
 ---
 layout: default
+html_class: message_index
 ---
+{% if page.index_id == 'by-rec' %}
+  {% assign hide_recommendation = true %}
+{% elsif page.index_id == 'by-pub-amended' %}
+  {% assign hide_publication = true %}
+  {% assign hide_recommendation = true %}
+{% endif %}
 
 <header>
-  {% if page.index_id == 'by-rec' %}
-    <p class="index-type">
-      Messages related to ITU-T Recommendation
-    </p>
-    <h2 class="index-key">
-      {% assign rec_details = site.data.recommendations[page.meta.code] %}
-      {{ page.meta.code }}{% if rec_details %}: {% trans rec_details.meta.title %}{% endif %}
-    </h2>
-
-    {% assign hide_recommendation = true %}
-  {% elsif page.index_id == 'by-pub-amended' %}
-    <p class="index-type">
-      Messages amending ITU-T Service Publication
-    </p>
-    <h2 class="index-key">
-      {{ site.data.publications[page.meta.publication].meta.title[site.default_language] }}
-    </h2>
-    <p class="meta">
-      position on {{ page.meta.position_on | as_swiss_date }}
-    </p>
-
-    {% assign hide_publication = true %}
-    {% assign hide_recommendation = true %}
-  {% endif %}
+  {{ content }}
 
   {% assign year_count = page.years | size %}
   {% if year_count > 0 %}
     <nav class="yearly-archive">
-      <p>
-        Browse archives by year:
+      <p><i class="fas fa-history"></i>{% unless page.year %}Showing current year. {% endunless %}Browse previous years:
         {% for year in page.years %}
           {% if page.year == year %}
             <strong>{{ year }}</strong>
@@ -48,22 +31,19 @@ layout: default
 <table>
   <thead>
     <tr>
-      <th class="ob-issue">OB Issue
+      <th class="date">Date
       <th class="message">Message
   <tbody>
     {% for item in page.messages %}
+      {% if issue.meta.id != item.issue_id %}
+        {% assign issue = site.data.issues[item.issue_id] %}
+      {% endif %}
+
       <tr>
-        {% if issue.meta.id != item.issue_id %}
-          {% assign issue = site.data.issues[item.issue_id] %}
-        {% endif %}
-        <td class="ob-issue">
+        <td class="date">
           {% ifchanged %}
-            <a class="issue-id"
-                href="/issues/{{ issue.meta.id }}-{{ site.default_language }}"
-              >{{ issue.meta.id }}
-            </a>
             <span class="publication-date">
-              ({{ issue.meta.publication_date | as_swiss_date }})
+              {{ issue.meta.publication_date | date: "%b %d" }}
             </span>
           {% endifchanged %}
         </td>
@@ -75,6 +55,7 @@ layout: default
               msg=item.msg
               issue=issue
               anchor=item.anchor
+              outside_ob=true
               hide_recommendation=hide_recommendation
               hide_publication=hide_publication %}
         </td>

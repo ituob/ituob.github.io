@@ -1,4 +1,23 @@
-body.layout--message_index {
+body.layout--message_index-by-pub-amended {
+  article.message > header > .title {
+    .label {
+      font-size: 90%;
+      margin-top: 0;
+
+      .fas {
+        font-size: 100%;
+        margin-right: .5rem;
+      }
+    }
+    .anchor {
+      font-size: 90%;
+      margin-top: 0;
+      padding-top: 0;
+    }
+  }
+}
+
+body.message_index {
   > main {
     > header {
       align-self: stretch;
@@ -12,7 +31,27 @@ body.layout--message_index {
       .index-type {
         @extend .section-title;
       }
+
+      .meta, .yearly-archive {
+        .far, .fas {
+          width: 2rem;
+          margin-left: -2rem;
+          text-align: center;
+        }
+      }
+
+      .meta-row {
+        display: flex;
+        flex-flow: row nowrap;
+        margin: 1em 0;
+
+        > * {
+          margin: 0;
+          margin-right: 3rem; // Compensate for negative margin from the icon
+        }
+      }
     }
+
     > table {
       > tbody, > thead {
         &, & > tr {
@@ -24,15 +63,10 @@ body.layout--message_index {
       td.message {
         width: 100%;
       }
-      td.ob-issue {
+      td.date {
         padding-right: 2rem;
+        padding-top: 1.8em;
 
-        .issue-id {
-          font-weight: bold;
-          font-size: 120%;
-          line-height: 1.5;
-          margin-top: 1em;
-        }
         .publication-date {
           white-space: nowrap;
         }

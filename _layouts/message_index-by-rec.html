@@ -1,0 +1,11 @@
+---
+layout: message_index
+---
+
+<p class="index-type">
+  Messages related to ITU-T Recommendation
+</p>
+<h2 class="index-key">
+  {% assign rec_details = site.data.recommendations[page.meta.code] %}
+  {{ page.meta.code }}{% if rec_details %}: {% trans rec_details.meta.title %}{% endif %}
+</h2>
