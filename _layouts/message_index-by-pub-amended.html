@@ -4,11 +4,27 @@ title: Messages related to ITU-T Service Publication
 ---
 
 {% assign annex_data = site.data.current_annexes[page.meta.publication] %}
+{% assign pub_data = site.data.publications[page.meta.publication] %}
+
+<div class="meta">
+  {% if pub_data.meta.recommendation %}
+    <p class="recommendation">
+      <i class="fas fa-stamp"></i>In accordance with
+      <span class="std-label">
+        <span class="std-body">{{ pub_data.meta.recommendation.body }}</span>
+        <span class="std-type">Recommendation</span>
+        <span class="std-id">
+          {{ pub_data.meta.recommendation.code }}
+          {% if pub_data.meta.recommendation.version %}({{ pub_data.meta.recommendation.version }}){% endif %}
+        </span>
+      </span>
+    </p>
+  {% endif %}
+</div>
 
 <h2 class="index-key">
-  {{ site.data.publications[page.meta.publication].meta.title[site.default_language] }}
+  {{ pub_data.meta.title[site.default_language] }}
 </h2>
-
 
 <div class="meta">
   <div class="meta-row">
@@ -19,19 +35,19 @@ title: Messages related to ITU-T Service Publication
       </p>
     {% endif %}
 
-    {% if site.data.publications[page.meta.publication].meta.url %}
-      <p class="online-link">
-        <a href="{{ site.data.publications[pub_id].meta.url }}"
-          ><i class="fas fa-home"></i>Authoritative resource</a>
-      </p>
-    {% endif %}
-
     {% if annex_data.annexed_to_ob %}
       <p class="annex-info">
         <i class="far fa-paperclip"></i>Annexed to
           <a
             href="https://www.itu.int/pub/T-SP-OB.{{ annex_data.annexed_to_ob }}-{{ site.data.issues[annex_data.annexed_to_ob].meta.publication_date | date: "%Y" }}"
           >ITU OB No. {{ annex_data.annexed_to_ob }}</a>
+      </p>
+    {% endif %}
+
+    {% if pub_data.meta.url %}
+      <p class="online-link">
+        <a href="{{ pub_data.meta.url }}"
+          ><i class="fas fa-home"></i>Authoritative resource</a>
       </p>
     {% endif %}
 
