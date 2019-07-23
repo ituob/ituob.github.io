@@ -42,7 +42,7 @@ body.message_index {
 
       .meta-row {
         display: flex;
-        flex-flow: row nowrap;
+        flex-flow: row wrap;
         margin: 1em 0;
 
         > * {
