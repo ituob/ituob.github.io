@@ -83,7 +83,7 @@ html_class: home
 <section class="service-publications">
   <h2 class="section-title">View amendments to current lists</h2>
 
-  {% for item in site.data.current_annexes %}
+  {% for item in site.data.current_annexes_ordered %}
     {% assign pub_id = item[0] %}
     {% assign annex_data = item[1] %}
 

@@ -108,6 +108,10 @@ module Jekyll
       self.data['latest_issue_id'] = issues_seq_desc[0]
       self.data['previous_issue_id'] = issues_seq_desc[1]
       self.data['issue_ids_descending'] = issues_seq_desc
+
+      self.data['current_annexes_ordered'] = self.data['current_annexes'].sort_by { |id, data|
+        data['annexed_to_ob']
+      }.reverse
     end
 
     def backfill_planned_issue(issue_id)
