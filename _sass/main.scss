@@ -46,23 +46,26 @@ body > header {
 
   margin-left: -5vw;
   margin-right: -5vw;
-  margin-bottom: .2rem;
+
+  padding-left: 5vw;
+
+  a {
+    margin-left: -#{$logoSide / 1.5};
+    display: flex;
+    flex-flow: row nowrap;
+    align-items: center;
+  }
 
   a:link, a:hover, a:visited {
     color: inherit;
   }
 
-  h1, h2, .logo-inverse {
-    display: inline-block;
-  }
   h1 {
-    vertical-align: sub;  // Black magic? :(
     font-size: 110%;
     text-transform: uppercase;
     letter-spacing: -.025em;
   }
   h2 {
-    vertical-align: sub;  // Black magic? :(
     font-size: 110%;
     font-weight: normal;
     padding-left: 2em;
@@ -83,10 +86,9 @@ body > header {
     }
   }
   .logo, .logo-inverse {
-    vertical-align: middle;
+    display: block;
     width: $logoSide / 1.5;
     height: $logoSide / 1.5;
-    margin: .5rem;
     margin-right: 0;
   }
   .logo {
