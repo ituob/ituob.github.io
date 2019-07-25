@@ -65,21 +65,6 @@ html_class: home
   </article>
 </section>
 
-<section class="browse-by-recommendation">
-  <h2 class="section-title">Filter messages by recommendation</h2>
-
-  <div class="items">
-    {% for idx_key in site.data.message_indices['by-rec'] %}
-      {% assign meta = idx_key[1].meta %}
-      <article class="recommendation">
-        <h3 class="title">
-          <a href="/messages/complement-to-itu-t-r {{ idx_key[0] }}">{{ meta.code }}</a>
-        </h3>
-      </article>
-    {% endfor %}
-  </div>
-</section>
-
 <section class="service-publications">
   <h2 class="section-title">View publication amendments</h2>
 
@@ -123,6 +108,21 @@ html_class: home
       </article>
     {% endif %}
   {% endfor %}
+</section>
+
+<section class="browse-by-recommendation">
+  <h2 class="section-title">Filter messages by recommendation</h2>
+
+  <div class="items">
+    {% for idx_key in site.data.message_indices['by-rec'] %}
+      {% assign meta = idx_key[1].meta %}
+      <article class="recommendation">
+        <h3 class="title">
+          <a href="/messages/complement-to-itu-t-r {{ idx_key[0] }}">{{ meta.code }}</a>
+        </h3>
+      </article>
+    {% endfor %}
+  </div>
 </section>
 
 <section class="issue-archive">
