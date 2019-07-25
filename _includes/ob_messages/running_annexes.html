@@ -24,12 +24,11 @@
           {% if publication.recommendation %}
             (according to
               {{ publication.recommendation.body }}
-              {{ publication.recommendation.code }}
-              ({{ publication.recommendation.version }}))
+              {{ publication.recommendation.code }}{% if publication.recommendation.version %} ({{ publication.recommendation.version }}){% endif %})
           {% endif %}
 
           {% if annexed_issue.position_on %}
-            (Position on {{ annexed_issue.position_on }})
+            (position on {{ annexed_issue.position_on }})
           {% endif %}
         </td>
       </tr>
@@ -52,8 +51,7 @@
           {% if publication.recommendation %}
             (according to
               {{ publication.recommendation.body }}
-              {{ publication.recommendation.code }}
-              ({{ publication.recommendation.version }}))
+              {{ publication.recommendation.code }}{% if publication.recommendation.version %} ({{ publication.recommendation.version }}){% endif %})
           {% endif %}
         </a>
       </li>
