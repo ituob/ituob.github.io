@@ -41,15 +41,18 @@ module Jekyll
   }
 
   class MessageIndex < Page
-    def initialize(site, base_dir, idx, key, meta, messages, years, year=nil)
+    def initialize(site, base_dir, idx, key, meta, messages, past_years, year)
       @site = site
       @base = base_dir
 
       url_prefix = MESSAGE_INDICES[idx]['url_prefix']
-      if year
-        @dir = File.join('messages', "#{url_prefix} #{key}", year.to_s)
-      else
+
+      latest_year = !past_years.include?(year)
+      if latest_year
+        # Do not append year to archive page URL for latest year
         @dir = File.join('messages', "#{url_prefix} #{key}")
+      else
+        @dir = File.join('messages', "#{url_prefix} #{key}", year.to_s)
       end
 
       @name = "index.html"
@@ -58,8 +61,9 @@ module Jekyll
 
       self.data = {
         'layout' => "message_index-#{idx}",
-        'years' => years,
+        'years' => past_years,
         'year' => year,
+        'latest_year' => latest_year,
         'meta' => meta,
         'title' => MESSAGE_INDICES[idx]['title'],
         'index_id' => idx,
@@ -142,7 +146,8 @@ module Jekyll
         key,
         meta,
         matches_per_year[latest_year],
-        years_descending)
+        years_descending,
+        latest_year)
     end
   end
 

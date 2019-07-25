@@ -15,16 +15,19 @@ html_class: message_index
   {% assign year_count = page.years | size %}
   {% if year_count > 0 %}
     <nav class="yearly-archive">
-      <p><i class="fas fa-history"></i>{% unless page.year %}Showing current year. {% endunless %}Browse previous years:
+      <p><i class="fas fa-history"></i>{% if page.latest_year %}<strong>{{ page.year }}</strong>—{% endif %}Browse previous years:
         {% for year in page.years %}
           {% if page.year == year %}
             <strong>{{ year }}</strong>
           {% else %}
-            <a href="{% if page.year %}../{% endif %}{{ year }}/">{{ year }}</a>
+            <a href="{% unless page.latest_year %}../{% endunless %}{{ year }}/">{{ year }}</a>
           {% endif %}
         {% endfor %}
       </p>
     </nav>
+  {% else %}
+    <nav class="yearly-archive">
+      <p><i class="fas fa-history"></i>Showing last year {{ page.year }}</p>
   {% endif %}
 </header>
 
@@ -32,7 +35,12 @@ html_class: message_index
   <thead>
     <tr>
       <th class="date">Date
-      <th class="message">Message
+      <th class="message">
+        {% if page.index_id == 'by-rec' %}
+          Message
+        {% elsif page.index_id == 'by-pub-amended' %}
+          Amendment
+        {% endif %}
   <tbody>
     {% for item in page.messages %}
       {% if issue.meta.id != item.issue_id %}
