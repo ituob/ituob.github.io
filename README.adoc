@@ -50,7 +50,7 @@ When a publication is annexed to an OB issue,
 and whenever it is amended in subsequent issues,
 its publication ID is referenced.
 
-Place all publications under `data/lists/{{ List ID }}/`.
+Place all publications under `data/lists/{{ list (publication) ID }}/`.
 
 Each publication directory should contain one file:
 
@@ -65,9 +65,18 @@ as we can infer the position being amended by finding which
 position of the List was annexed to OB last,
 but currently it is used for data consistency check.)
 
-Publications that are not annexed ("`external`" Lists V and VIII, NNP dataset),
-but are amended, should also be included under `data/lists/`.
+=== Special cases
+
+Publications that are never annexed, but *are* amended
+("`external`" Lists V and VIII, NNP dataset),
+should also be included under `data/lists/`.
 For them, amendments are not required to specify position.
+
+Publications that are never amended, but *are* annexed
+under section B of Annexed Lists in each OB edition
+via `extra_links` array of `running_annexes` message
+(e.g., BUREAUFAX, ROA),
+should also be included under `data/lists/`.
 
 
 == Implementation details
