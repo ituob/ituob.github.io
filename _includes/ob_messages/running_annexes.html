@@ -1,76 +1,78 @@
-<p>
-  A. The following Lists have been published by TSB or BR
-  as Annexes to the ITU Operational Bulletin:
-</p>
+<div class="included-contents">
+  <p>
+    A. The following Lists have been published by TSB or BR
+    as Annexes to the ITU Operational Bulletin:
+  </p>
 
-<table>
-  <thead>
-    <tr>
-      <th class="seq-no">OB No.
-      <th class="list-name">
-  </thead>
-  <tbody>
-    {% for item in include.issue.running_annexes %}
-      {% assign pub_id = item[0] %}
-      {% assign publication = site.data.publications[pub_id].meta %}
-      {% assign annexed_issue = item[1] %}
-
+  <table>
+    <thead>
       <tr>
-        <td>
-          {% if site.data.issues[annexed_issue.annexed_to_ob] %}
-            <a href="
-                {% if site.data.issues[annexed_issue.annexed_to_ob].incomplete != true %}
-                  {{ "/issues/" | append: annexed_issue.annexed_to_ob | append: "-" | append: site.default_language | relative_url }}
-                {% else %}
-                  https://www.itu.int/pub/T-SP-OB.{{ annexed_issue.annexed_to_ob }}-{{ site.data.issues[annexed_issue.annexed_to_ob].meta.publication_date | date: "%Y" }}
-                {% endif %}
-              ">
-          {% endif %}
+        <th class="seq-no">OB No.
+        <th class="list-name">
+    </thead>
+    <tbody>
+      {% for item in include.issue.running_annexes %}
+        {% assign pub_id = item[0] %}
+        {% assign publication = site.data.publications[pub_id].meta %}
+        {% assign annexed_issue = item[1] %}
 
-          {{ annexed_issue.annexed_to_ob }}
+        <tr>
+          <td>
+            {% if site.data.issues[annexed_issue.annexed_to_ob] %}
+              <a href="
+                  {% if site.data.issues[annexed_issue.annexed_to_ob].incomplete != true %}
+                    {{ "/issues/" | append: annexed_issue.annexed_to_ob | append: "-" | append: site.default_language | relative_url }}
+                  {% else %}
+                    https://www.itu.int/pub/T-SP-OB.{{ annexed_issue.annexed_to_ob }}-{{ site.data.issues[annexed_issue.annexed_to_ob].meta.publication_date | date: "%Y" }}
+                  {% endif %}
+                ">
+            {% endif %}
 
-          {% if site.data.issues[annexed_issue.annexed_to_ob] %}
-            </a>
-          {% endif %}
-        </td>
+            {{ annexed_issue.annexed_to_ob }}
 
-        <td>
-          {% trans publication.title %}
+            {% if site.data.issues[annexed_issue.annexed_to_ob] %}
+              </a>
+            {% endif %}
+          </td>
 
-          {% if publication.recommendation %}
-            (according to
-              {{ publication.recommendation.body }}
-              {{ publication.recommendation.code }}{% if publication.recommendation.version %} ({{ publication.recommendation.version }}){% endif %})
-          {% endif %}
+          <td>
+            {% trans publication.title %}
 
-          {% if annexed_issue.position_on %}
-            (position on {{ annexed_issue.position_on }})
-          {% endif %}
-        </td>
-      </tr>
+            {% if publication.recommendation %}
+              (according to
+                {{ publication.recommendation.body }}
+                {{ publication.recommendation.code }}{% if publication.recommendation.version %} ({{ publication.recommendation.version }}){% endif %})
+            {% endif %}
+
+            {% if annexed_issue.position_on %}
+              (position on {{ annexed_issue.position_on }})
+            {% endif %}
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <p>
+    B. The following Lists are available online from the ITU-T website:
+  </p>
+
+  <ul>
+    {% for item in include.msg.extra_links %}
+      {% assign publication = site.data.publications[item].meta %}
+      {% if publication.url %}
+        <li>
+          <a href="{{ publication.url }}">
+            {% trans publication.title %}
+
+            {% if publication.recommendation %}
+              (according to
+                {{ publication.recommendation.body }}
+                {{ publication.recommendation.code }}{% if publication.recommendation.version %} ({{ publication.recommendation.version }}){% endif %})
+            {% endif %}
+          </a>
+        </li>
+      {% endif %}
     {% endfor %}
-  </tbody>
-</table>
-
-<p>
-  B. The following Lists are available online from the ITU-T website:
-</p>
-
-<ul>
-  {% for item in include.msg.extra_links %}
-    {% assign publication = site.data.publications[item].meta %}
-    {% if publication.url %}
-      <li>
-        <a href="{{ publication.url }}">
-          {% trans publication.title %}
-
-          {% if publication.recommendation %}
-            (according to
-              {{ publication.recommendation.body }}
-              {{ publication.recommendation.code }}{% if publication.recommendation.version %} ({{ publication.recommendation.version }}){% endif %})
-          {% endif %}
-        </a>
-      </li>
-    {% endif %}
-  {% endfor %}
-</ul>
+  </ul>
+</div>

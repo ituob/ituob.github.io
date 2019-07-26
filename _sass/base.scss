@@ -255,9 +255,6 @@ article.message {
 
   &.message--running_annexes {
     table {
-      @include compact-table(white);
-      font-size: 80%;
-
       td:first-child, th:first-child {
         white-space: nowrap;
         font-weight: bold;
