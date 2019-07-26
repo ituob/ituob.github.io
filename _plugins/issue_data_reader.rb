@@ -102,10 +102,13 @@ module Jekyll
         }.reverse))
       end
 
-      issues_seq_desc = issues_seq_asc.reverse()
       issues_seq_asc.each do |issue_id|
         self.backfill_planned_issue(issue_id)
       end
+
+      issues_seq_desc = issues_seq_asc.select {
+        |i_id| !self.data['issues'][i_id]['incomplete']
+      }.reverse()
 
       self.data['latest_issue_id'] = issues_seq_desc[0]
       self.data['previous_issue_id'] = issues_seq_desc[1]
