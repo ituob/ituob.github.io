@@ -6,6 +6,11 @@ module Jekyll
   class Site
 
     def load_approved_recommendations_message(msg, issue_id)
+      msg['items'] = msg['items'].map { |code, version|
+        year, month = version.split('-')
+        [code, Date.new(year.to_i, month.to_i, 1)]
+      }.to_h
+
       msg['items'].each do |rec, version|
         # Check if recommendation already has a title in YAML database
         existing_rec = self.data['recommendations'][rec]
@@ -20,8 +25,7 @@ module Jekyll
         end
 
         # Fetch English title for the recommendation
-        year, month = version.split('-')
-        version = "#{month}/#{year[-2..-1]}"
+        version = "#{version.month.to_s}/#{version.year.to_s[-2..-1]}"
 
         begin
           title = self.fetch_recommendation_title(rec, version)
