@@ -13,8 +13,9 @@
     {% endcomment %}
 
     {% if type == "amendment" %}
-      {% assign title = message.title | default: site.data.publications[message.target.publication].meta.title %}
-      {% assign recommendation = site.data.publications[message.target.publication].meta.recommendation %}
+      {% assign pub = site.data.publications[message.target.publication].meta %}
+      {% assign title = message.title | default: pub.title %}
+      {% assign recommendation = pub.recommendation %}
     {% else %}
       {% assign title = message.title | default: type_config.title %}
       {% assign recommendation = message.recommendation | default: type_config.recommendation %}
@@ -30,7 +31,14 @@
           {% unless include.hide_publication %}{% if title %}to{% endif %}{% endunless %}
         </span>
         {% unless include.hide_publication %}
-          <span class="text">{% trans title %}</span>
+          {% assign annex = site.data.current_annexes[pub.id] %}
+          {% if annex.amendments %}
+            <a class="text" href="/messages/amending-sp {{ pub.id }} ({{ annex.position_on }})/">
+              {% trans title %}
+            </a>
+          {% else %}
+            <span class="text">{% trans title %}</span>
+          {% endif %}
         {% endunless %}
       {% else %}
         <span class="text">{% trans title %}</span>
