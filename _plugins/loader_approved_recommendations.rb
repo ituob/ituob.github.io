@@ -35,7 +35,7 @@ module Jekyll
         end
 
         # If successful, add title to recommendation data dynamically
-        if title
+        if title != ""
           self.data['recommendations'][rec]['meta']['title'] = {
             'en' => title,
           }
