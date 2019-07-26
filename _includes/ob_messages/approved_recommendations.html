@@ -8,11 +8,11 @@
 <ul>
   {% for rec in include.msg.items %}
     {% assign rec_code = rec[0] %}
-    {% assign rec_data = site.data.recommendations[rec_code] %}
+    {% assign rec_data = site.data.recommendations[rec_code].meta %}
     {% assign version = rec[1] %}
       <li>
-        ITU-T {{ rec_code }} ({{ version }}){% if rec_data.meta.title %}:
-        {% trans rec_data.meta.title %}
+        ITU-T {{ rec_code }}{% if version %} ({{ version | date: "%m/%Y" }}){% endif %}{% if rec_data.title %}:
+        {% trans rec_data.title %}
         {% endif %}
       </li>
   {% endfor %}
