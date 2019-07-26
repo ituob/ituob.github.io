@@ -75,14 +75,10 @@ html_class: home
     {% if annex_data.amendments %}
       <article class="service-publication">
         <h3 class="title">
-          {% if annex_data.amendments %}
-            <a
-              href="/messages/amending-sp {{ pub_id }} ({{ annex_data.position_on }})/">
-          {% endif %}
-          {% trans site.data.publications[pub_id].meta.title %}
-          {% if annex_data.amendments %}
-            </a>
-          {% endif %}
+          <a
+            href="/messages/amending-sp {{ pub_id }} ({{ annex_data.position_on }})/">
+            {% trans site.data.publications[pub_id].meta.title %}
+          </a>
         </h3>
 
         <div class="actionable-row meta">
