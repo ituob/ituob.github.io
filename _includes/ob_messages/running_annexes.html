@@ -16,7 +16,23 @@
       {% assign annexed_issue = item[1] %}
 
       <tr>
-        <td>{{ annexed_issue.annexed_to_ob }}</td>
+        <td>
+          {% if site.data.issues[annexed_issue.annexed_to_ob] %}
+            <a href="
+                {% if site.data.issues[annexed_issue.annexed_to_ob].incomplete != true %}
+                  {{ "/issues/" | append: annexed_issue.annexed_to_ob | append: "-" | append: site.default_language | relative_url }}
+                {% else %}
+                  https://www.itu.int/pub/T-SP-OB.{{ annexed_issue.annexed_to_ob }}-{{ site.data.issues[annexed_issue.annexed_to_ob].meta.publication_date | date: "%Y" }}
+                {% endif %}
+              ">
+          {% endif %}
+
+          {{ annexed_issue.annexed_to_ob }}
+
+          {% if site.data.issues[annexed_issue.annexed_to_ob] %}
+            </a>
+          {% endif %}
+        </td>
 
         <td>
           {% trans publication.title %}
