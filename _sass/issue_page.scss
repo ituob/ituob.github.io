@@ -160,6 +160,20 @@ body.layout--issue {
           }
         }
       }
+
+      .global-expand-toggle {
+        cursor: pointer;
+        color: $linkColor;
+
+        .indicator {
+          transition: transform .1s ease-in-out;
+        }
+        &.expanded {
+          .indicator {
+            transform: scale(1, 1) rotate(90deg);
+          }
+        }
+      }
     }
 
     nav.with-js.fixable-bar {

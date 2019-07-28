@@ -5,7 +5,7 @@
 
 (function () {
 
-  initStickyIssueNavigation();
+  window.stickyNav = initStickyIssueNavigation();
 
   function initStickyIssueNavigation() {
     let sectionMenu = makeMenu();
@@ -59,6 +59,10 @@
         menuBar.classList.remove('fixed');
       }
     });
+
+    return {
+      menuBar: menuBar,
+    };
 
   }
 
