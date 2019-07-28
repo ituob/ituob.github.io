@@ -4,6 +4,8 @@
   // supported by FontAwesome and some CSS (see .with-js class)
   window.initExpandable = function (card, expandableContents, iconNormal, onChangeState) {
 
+    var expanded = false;
+
     function expand() {
       expanded = true;
       card.classList.add('expanded');
@@ -101,7 +103,7 @@
     };
   }
 
-  makeAllMessagesExpandable = function () {
+  function makeAllMessagesExpandable () {
     function handleStateChange(expandable) {
       if (expandables.every(exp => exp.isExpanded() === true)) {
         globalToggle.updateState(true);
