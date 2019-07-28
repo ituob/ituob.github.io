@@ -69,7 +69,24 @@ dl {
   }
 }
 
-@mixin with-expandable-toggle($sidePadding, $borderRadius) {
+@mixin toggleIndicatorContainer() {
+  .indicator {
+    transition: transform .1s ease-in-out, text-shadow .1s ease-in-out;
+    color: $primaryColor;
+    cursor: pointer;
+    transform: scale(1.2);
+  }
+
+  &:hover {
+    .indicator {
+      transform: scale(1);
+      text-shadow: 0 0 5px rgba(white, 0.3);
+    }
+  }
+}
+
+// Message modifier
+@mixin withExpandableToggle($sidePadding, $borderRadius) {
   $toggleBackground: whiteSmoke;
 
   .toggle, .included-contents {
@@ -97,20 +114,13 @@ dl {
     .indicator {
       display: inline-block;
       margin: 0 #{$sidePadding} 0 #{$sidePadding + .05rem};
-      transition: transform .1s ease-in-out, text-shadow .1s ease-in-out;
-      color: $primaryColor;
-      cursor: pointer;
-      transform: scale(1.2);
     }
 
     &:hover {
       background: $toggleBackground;
-
-      .indicator {
-        transform: scale(1);
-        text-shadow: 0 0 5px rgba(white, 0.3);
-      }
     }
+
+    @include toggleIndicatorContainer();
   }
 
   &.expanded {
@@ -228,7 +238,7 @@ dl {
   }
 
   &.with-js {
-    @include with-expandable-toggle($sidePadding, $borderRadius);
+    @include withExpandableToggle($sidePadding, $borderRadius);
   }
 }
 

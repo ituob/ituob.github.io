@@ -97,7 +97,7 @@ body.home {
         margin: 1rem 0 1.5rem -#{$borderRadius};
         border-radius: $borderRadius;
 
-        @include with-expandable-toggle(1rem, $borderRadius);
+        @include withExpandableToggle(1rem, $borderRadius);
 
         .included-contents {
           padding-top: 1rem;
