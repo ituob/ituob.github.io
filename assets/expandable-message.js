@@ -101,7 +101,7 @@
     };
   }
 
-  window.makeAllMessagesExpandable = function () {
+  makeAllMessagesExpandable = function () {
     function handleStateChange(expandable) {
       if (expandables.every(exp => exp.isExpanded() === true)) {
         globalToggle.updateState(true);
@@ -130,7 +130,7 @@
   };
 
   var tocEl = document.querySelector('nav.toc');
-  var expandableMessageController = window.makeAllMessagesExpandable();
+  var expandableMessageController = makeAllMessagesExpandable();
   if (tocEl) {
     tocEl.appendChild(expandableMessageController.globalToggle.el);
   }
