@@ -7,18 +7,18 @@
     function expand() {
       expanded = true;
       card.classList.add('expanded');
-      onChangeState(expanded);
+      if (onChangeState) { onChangeState(expanded) };
     }
 
     function collapse() {
       expanded = false;
       card.classList.remove('expanded');
-      onChangeState(expanded);
+      if (onChangeState) { onChangeState(expanded) };
     }
 
     function toggleState() {
       expanded = card.classList.toggle('expanded');
-      onChangeState(expanded);
+      if (onChangeState) { onChangeState(expanded) };
     }
 
     var toggle = document.createElement('div');
