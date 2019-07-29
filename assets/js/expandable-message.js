@@ -114,25 +114,25 @@
       }
     }
 
-    var messageCards = document.querySelectorAll('article.message');
+    const messageCards = document.querySelectorAll('article.message');
     var expandables = [];
     for (let card of messageCards) {
-      var expandableContents = card.querySelector('.included-contents');
+      const expandableContents = card.querySelector('.included-contents');
       if (expandableContents) {
         expandables.push(window.initExpandable(
           card, expandableContents, 'fa-chevron-circle-down', handleStateChange));
       }
     }
 
-    var globalToggle = makeGlobalToggle(expandables, 'fa-chevron-circle-right');
+    const globalToggle = makeGlobalToggle(expandables, 'fa-chevron-circle-right');
 
     return {
       globalToggle: globalToggle,
     };
   };
 
-  var tocEl = document.querySelector('nav.toc');
-  var expandableMessageController = makeAllMessagesExpandable();
+  const tocEl = document.querySelector('nav.toc');
+  const expandableMessageController = makeAllMessagesExpandable();
   if (tocEl) {
     tocEl.appendChild(expandableMessageController.globalToggle.el);
   }
