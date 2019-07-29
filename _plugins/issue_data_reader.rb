@@ -59,9 +59,9 @@ module Jekyll
 
         issue_id = issue_data['meta']['id']
 
+        # Consider OB edition “incomplete” if it lacks either amendments or general section
         ['general', 'amendments'].each do |important_section|
           if (issue_data[important_section] || {}).key?('messages') == false
-            p "Warning: Incomplete issue: #{issue_id}"
             issue_data['incomplete'] = true
             break
           end
