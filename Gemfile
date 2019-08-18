@@ -5,7 +5,7 @@ gem "jekyll", "~> 3.8.5"
 gem "nokogiri"
 
 group :jekyll_plugins do
-  gem "jekyll-plugin-frontend-build", "~> 0.0.1"
+  gem "jekyll-plugin-frontend-build", "~> 0.0.2"
   gem "jekyll-feed", "~> 0.6"
 end
 
