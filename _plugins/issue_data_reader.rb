@@ -42,12 +42,20 @@ module Jekyll
     end
 
     def read_ob_issues
+
+      # Placeholder for OB edition (issue) data
       self.data['issues'] = {}
+
+      # Placeholder for running annexes
       self.data['current_annexes'] = {}
+
+      # Placeholder for planned issues schedule
       self.data['planned_issues'] = []
 
+      # Collect issue IDs to sort later
       issues_seq_asc = []
 
+      # Read issues from filesystem, in unspecified order
       self.get_issues().each do |issue_path|
         issue_data = {
           'meta' => self.load_data('meta.yaml', issue_path),
@@ -71,15 +79,22 @@ module Jekyll
         issues_seq_asc << issue_id
       end
 
+      # Sort editions by numeric ID ascending (oldest first)
       issues_seq_asc = issues_seq_asc.sort_by(&:to_i)
 
+      # Process edition data
       issues_seq_asc.each do |issue_id|
+        # Get unprocessed data hash for the current edition
         issue_data = self.data['issues'][issue_id]
 
+        # Obtain combined array of all messages
         messages =
           ((issue_data['amendments'] || {})['messages'] || []) +
           ((issue_data['general'] || {})['messages'] || [])
 
+        # Process message data for message types
+        # which have custom processing method provided
+        # in corresponding loader plugin
         messages.each do |msg|
           loader_method = "load_#{msg['type']}_message"
           if self.respond_to? loader_method
@@ -87,6 +102,7 @@ module Jekyll
           end
         end
 
+        # Process annexes added in this edition
         if issue_data['annexes']
           issue_data['annexes'].each do |publication_id, publication_issue_data|
             self.update_current_annexes_with(
@@ -96,16 +112,16 @@ module Jekyll
           end
         end
 
-        # Snapshot latest annexes up to this issue
+        # Snapshot latest annexes up to this edition
         issue_data['running_annexes'] = Marshal.load(Marshal.dump(self.data['current_annexes'].sort_by { |id, data|
           data['annexed_to_ob']
         }.reverse))
-      end
 
-      issues_seq_asc.each do |issue_id|
+        # Back-fill scheduled issues for preceding editions
         self.backfill_planned_issue(issue_id)
       end
 
+      # Obtain an array of complete (non-draft) issues, latest first
       issues_seq_desc = issues_seq_asc.select {
         |i_id| !self.data['issues'][i_id]['incomplete']
       }.reverse()
@@ -119,6 +135,7 @@ module Jekyll
       }.reverse
     end
 
+    # Add given OB edition to previous editions’ “planned issues” section
     def backfill_planned_issue(issue_id)
       self.data['issues'].each do |_iid, _idata|
         if issue_id > _iid
