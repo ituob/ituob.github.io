@@ -18,12 +18,14 @@ and message filtering across OB issues.
 Each ITU OB issue is modelled as a collection of messages.
 Each section in an OB issue is considered a message.
 
-//The same message type is
-
 == Authoring
 
-See link:https://github.com/ituob/itu-ob-data/[itu-ob-data]
-for how the `data` directory should be structured.
+* The link:https://github.com/ituob/itu-ob-editor/[ITU OB editor],
+  currently in early alpha testing mode, will be the authoring tool
+  for ITU Operational Bulletin data.
+
+* See link:https://github.com/ituob/itu-ob-data/[itu-ob-data]
+  for how the `data` directory should be structured.
 
 == OB issues
 
@@ -104,6 +106,7 @@ Creates a page for each OB issue using ``site.data``
 Generates message index/archive pages
 
 === Localizer
+
 implements two template tags:
 
 Template tag `{% trans a_string %}` allows to translate string variables specified
