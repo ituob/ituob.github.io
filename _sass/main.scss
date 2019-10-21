@@ -1,41 +1,29 @@
 body {
   font-family: Helvetica, Arial, sans-serif;
-  padding: 0 5vw 0 5vw;
   line-height: 1.5;
-  min-width: 900px;
 
-  > footer {
-    margin-top: 1rem;
-    padding-top: 1rem;
-    padding-bottom: 2rem;
-    text-align: right;
-    font-size: 80%;
-    color: #333;
-    opacity: .7;
+  min-height: 100vh;
+  overflow-y: auto;
+  display: flex;
+  flex-flow: column nowrap;
 
-    .powered-by {
-      text-transform: uppercase;
-      letter-spacing: .04em;
+  @media screen and (min-width: $wideScreenBreakpoint) {
+    min-width: 900px;
+    padding: 0 5vw;
 
-      a:link, a:visited {
-        color: inherit;
-        text-decoration: underline;
-      }
-      .logo {
-        filter: grayscale(100%);
-        width: 3rem;
-        height: 3rem;
-        margin-right: .2rem;
-        vertical-align: middle;
-      }
+    > header, > footer {
+      margin: 0 -5vw;
     }
   }
-}
-
-a {
-  &:link, &:visited, &:hover {
-    color: $linkColor;
-    text-decoration: none;
+  > header {
+    flex-shrink: 0;
+    flex-grow: 0;
+  }
+  > main {
+    flex: 1;
+  }
+  > footer {
+    flex-shrink: 0;
   }
 }
 
@@ -44,10 +32,11 @@ body > header {
   color: $primaryColorInverse;
   font-size: 80%;
 
-  margin-left: -5vw;
-  margin-right: -5vw;
+  padding-left: 3rem;
 
-  padding-left: 5vw;
+  @media screen and (min-width: $wideScreenBreakpoint) {
+    padding-left: 5vw;
+  }
 
   a {
     margin-left: -#{$logoSide / 1.5};
@@ -97,9 +86,62 @@ body > header {
 }
 
 body > main {
+  padding: 0 2rem;
+
   display: flex;
   flex-flow: column nowrap;
   align-items: flex-start;
+
+  @media screen and (min-width: $wideScreenBreakpoint) {
+    padding-left: 0;
+    padding-right: 0;
+  }
+}
+
+body > footer {
+  margin-top: 1rem;
+
+  padding: 2rem 2rem;
+
+  text-align: right;
+  color: #333;
+  opacity: .7;
+  background: whiteSmoke;
+
+  display: flex;
+  flex-flow: row nowrap;
+  align-items: center;
+  justify-content: space-between;
+
+  @media screen and (min-width: $wideScreenBreakpoint) {
+    padding-left: 5vw;
+    padding-right: 5vw;
+  }
+
+  .powered-by {
+    text-transform: uppercase;
+    font-size: 80%;
+    letter-spacing: .04em;
+
+    a:link, a:visited {
+      color: inherit;
+      text-decoration: underline;
+    }
+    .logo {
+      filter: grayscale(100%);
+      width: 3rem;
+      height: 3rem;
+      margin-right: .2rem;
+      vertical-align: middle;
+    }
+  }
+}
+
+a {
+  &:link, &:visited, &:hover {
+    color: $linkColor;
+    text-decoration: none;
+  }
 }
 
 article.service-publication {

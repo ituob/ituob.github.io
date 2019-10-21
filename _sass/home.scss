@@ -1,12 +1,18 @@
 body.home {
-  padding-top: 8vh;
   font-size: 100%;
 
   > header {
+    padding-top: 6vh;
+    padding-left: 3.5rem;
     margin: 0;
     margin-bottom: 1em;
+
     background: transparent;
     color: $textColor;
+
+    @media screen and (min-width: $wideScreenBreakpoint) {
+      padding-left: 2rem;
+    }
 
     h1 {
       font-size: 95%;
@@ -31,7 +37,9 @@ body.home {
   }
 
   > main {
-    padding-left: 12px;
+    @media screen and (min-width: $wideScreenBreakpoint) {
+      padding-left: 12px;
+    }
 
     .actionable-row {
       max-width: 70vw;
@@ -126,5 +134,9 @@ body.home {
         }
       }
     }
+  }
+
+  > footer {
+    background: transparent;
   }
 }

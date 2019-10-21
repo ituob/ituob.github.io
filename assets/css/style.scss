@@ -14,6 +14,8 @@ $logoSide: 60px;
 $logoTextOffset: $logoSide / 5;
 $borderRadius: $logoTextOffset / 2;
 
+$wideScreenBreakpoint: 800px;
+
 @import 'base';
 @import 'main';
 @import 'home';

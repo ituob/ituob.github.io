@@ -20,13 +20,19 @@ body.layout--message_index-by-pub-amended {
 body.message_index {
   > main {
     > header {
+      margin: 0 -2rem;
+      padding: 0 2rem;
+
       align-self: stretch;
-      margin-left: -5vw;
-      margin-right: -5vw;
       margin-bottom: 1rem;
-      padding-left: 5vw;
-      padding-right: 5vw;
       background: whiteSmoke;
+
+      @media screen and (min-width: $wideScreenBreakpoint) {
+        padding-left: 5vw;
+        padding-right: 5vw;
+        margin-left: -5vw;
+        margin-right: -5vw;
+      }
 
       .index-type {
         @extend .section-title;

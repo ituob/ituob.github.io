@@ -14,10 +14,19 @@ $interMessageMargin: 1.5rem;
 
 body.layout--issue {
   > main {
-    > header {
-      margin: 0 -5vw;
-      padding: 0;
+    > header, nav.toc {
+      margin: 0 -2rem;
+    }
 
+    @media screen and (min-width: $wideScreenBreakpoint) {
+      > header, nav.toc {
+        margin-left: -5vw;
+        margin-right: -5vw;
+      }
+    }
+
+    > header {
+      padding: 0;
       align-self: stretch;
 
       * { box-sizing: border-box; }
@@ -117,7 +126,8 @@ body.layout--issue {
 
     nav.toc {
       background: whiteSmoke;
-      margin: .2rem -5vw;
+      margin-top: .2rem;
+      margin-bottom: .2rem;
       padding: 0 1rem;
 
       align-self: stretch;
