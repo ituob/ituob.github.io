@@ -44,8 +44,13 @@ body.home {
     .actionable-row {
       max-width: 70vw;
       display: flex;
-      flex-flow: row nowrap;
-      margin: 1em 0;
+      flex-flow: row wrap;
+      margin: .5rem 0 1rem 0;
+
+      @media screen and (min-width: $wideScreenBreakpoint) {
+        margin: 1em 0;
+        flex-flow: row nowrap;
+      }
 
       > * {
         margin: 0;
