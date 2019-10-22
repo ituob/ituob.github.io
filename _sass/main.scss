@@ -110,7 +110,7 @@ body > footer {
   display: flex;
   flex-flow: row wrap;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: space-between;
 
   @media screen and (min-width: $wideScreenBreakpoint) {
     padding-left: 5vw;

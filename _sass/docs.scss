@@ -24,6 +24,10 @@ body.layout--docs {
 }
 
 body.layout--docs.docs-home {
+  > footer {
+    justify-content: flex-end;
+  }
+
   > main {
     align-items: stretch;
 
