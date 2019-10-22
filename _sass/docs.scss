@@ -1,0 +1,114 @@
+body.layout--docs {
+  padding: 0;
+
+  @media screen and (min-width: $wideScreenBreakpoint) {
+    > header, > main, > footer {
+      margin-left: 0;
+      margin-right: 0;
+      padding-left: 8vw;
+      padding-right: 8vw;
+    }
+    > header > a {
+      margin-left: -10px;
+    }
+  }
+
+  > header {
+    background: linear-gradient(160deg, darken(#a6a6a6, 20), #a6a6a6);
+
+    @media screen and (min-width: $wideScreenBreakpoint) {
+      padding-top: 1rem;
+      padding-bottom: 1rem;
+    }
+  }
+}
+
+body.layout--docs.docs-home {
+  > main {
+    align-items: stretch;
+
+    > section {
+      display: flex;
+      flex-flow: column nowrap;
+
+      > h2 {
+        font-size: 180%;
+        font-weight: normal;
+      }
+
+      &.app {
+        .body {
+          display: flex;
+          flex-flow: row nowrap;
+          align-items: flex-start;
+
+          > * {
+            flex: 1;
+          }
+        }
+
+        @media screen and (min-width: $wideScreenBreakpoint) {
+          .summary, .distribution {
+            width: 70%;
+          }
+
+          .distribution {
+          }
+        }
+
+        .summary {
+          margin-bottom: 2rem;
+
+          p:first-of-type {
+            margin-top: 0;
+          }
+          p:last-of-type {
+            margin-bottom: 0;
+          }
+        }
+
+        .distribution {
+          .download-notes {
+            font-size: 90%;
+            color: #a6a6a6;
+          }
+
+          .download-links {
+            //align-self: flex-end;
+            display: flex;
+            flex-flow: row nowrap;
+            align-items: center;
+
+            > :not(:last-child) {
+              margin-right: 1rem;
+            }
+
+            .secondary {
+              font-size: 90%;
+              color: #a6a6a6;
+            }
+
+            .release {
+              color: $textColor;
+            }
+
+            > a.download-link {
+              padding: .8rem 2rem;
+              flex: 1;
+              text-align: center;
+              border-radius: 2rem;
+              background: linear-gradient(160deg, $linkColor, lighten($linkColor, 10));
+              color: white;
+              white-space: nowrap;
+              max-width: 10rem;
+
+              .icon {
+                margin-right: .5rem;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

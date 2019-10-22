@@ -105,7 +105,6 @@ body > footer {
 
   text-align: right;
   color: #333;
-  opacity: .7;
   background: whiteSmoke;
 
   display: flex;
@@ -118,10 +117,32 @@ body > footer {
     padding-right: 5vw;
   }
 
+  a.editor-portal {
+    display: block;
+
+    padding: 1rem 2rem;
+    margin: 0 1rem 0 0;
+    background: whiteSmoke;
+    border-radius: 2rem;
+    color: #a6a6a6;
+
+    transition: color .2s linear, background .2s linear;
+
+    &:hover {
+      background: #a6a6a6;
+      color: white;
+    }
+
+    .icon {
+      margin-right: .5rem;
+    }
+  }
+
   .powered-by {
     text-transform: uppercase;
     font-size: 80%;
     letter-spacing: .04em;
+    color: #a6a6a6;
 
     a:link, a:visited {
       color: inherit;
@@ -129,6 +150,7 @@ body > footer {
     }
     .logo {
       filter: grayscale(100%);
+      opacity: .35;
       width: 3rem;
       height: 3rem;
       margin-right: .2rem;
