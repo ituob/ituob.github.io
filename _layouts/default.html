@@ -53,10 +53,13 @@
   </main>
 
   <footer>
-    <a href="/docs/" class="footer-pill interactive">
-      <i class="icon fas fa-pencil-alt"></i>
-      Editors
-    </a>
+    {% unless page.layout == "docs" %}
+      <a href="/docs/" class="footer-pill interactive">
+        <i class="icon fas fa-pencil-alt"></i>
+        Editors
+      </a>
+    {% endunless %}
+
     <a href="https://open.ribose.com/" class="footer-pill interactive powered-by">
       <span class="icon">
         <img class="logo" src="{{ "/assets/ribose-logo.png" | relative_url }}" alt="Ribose logo">
