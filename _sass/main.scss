@@ -108,17 +108,23 @@ body > footer {
   background: whiteSmoke;
 
   display: flex;
-  flex-flow: row nowrap;
+  flex-flow: row wrap;
   align-items: center;
   justify-content: space-between;
 
   @media screen and (min-width: $wideScreenBreakpoint) {
     padding-left: 5vw;
     padding-right: 5vw;
+    flex-flow: row nowrap;
   }
 
-  a.editor-portal {
-    display: block;
+  .footer-pill {
+    white-space: nowrap;
+    height: 24px;
+
+    display: flex;
+    flex-flow: row nowrap;
+    align-items: center;
 
     padding: 1rem 2rem;
     margin: 0 1rem 0 0;
@@ -126,35 +132,47 @@ body > footer {
     border-radius: 2rem;
     color: #a6a6a6;
 
-    transition: color .2s linear, background .2s linear;
-
-    &:hover {
-      background: #a6a6a6;
-      color: white;
+    .icon {
+      margin: -1rem .5rem -1rem -2rem;
+      padding-left: 2rem;
+      width: 1rem;
     }
 
-    .icon {
-      margin-right: .5rem;
+    &.interactive {
+      transition: color .2s linear, background .2s linear;
+
+      &:hover {
+        background: #a6a6a6;
+        color: white;
+      }
     }
   }
 
   .powered-by {
-    text-transform: uppercase;
-    font-size: 80%;
-    letter-spacing: .04em;
-    color: #a6a6a6;
+    padding-right: 1rem;
+    background: transparent;
 
-    a:link, a:visited {
-      color: inherit;
-      text-decoration: underline;
+    .icon {
+      padding-left: .5rem;
+      margin-right: 2rem;
+
+      img.logo {
+        filter: grayscale(100%);
+        opacity: .35;
+        transition: opacity .2s linear;
+        width: 2.5rem;
+        height: 2.5rem;
+        display: block;
+      }
     }
-    .logo {
-      filter: grayscale(100%);
-      opacity: .35;
-      width: 3rem;
-      height: 3rem;
-      margin-right: .2rem;
-      vertical-align: middle;
+
+    &.interactive:hover {
+      color: unset;
+      background: transparent;
+
+      .logo {
+        opacity: 1;
+      }
     }
   }
 }
