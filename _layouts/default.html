@@ -60,6 +60,14 @@
       </a>
     {% endunless %}
 
+    {% assign footer_pills = page.footer_pills | default: layout.footer_pills %}
+    {% for item in footer_pills %}
+      <a href="{{ item.url }}" class="footer-pill interactive">
+        <i class="icon {{ item.icon }}"></i>
+        {{ item.title }}
+      </a>
+    {% endfor %}
+
     <a href="https://open.ribose.com/" class="footer-pill interactive powered-by">
       <span class="icon">
         <img class="logo" src="{{ "/assets/ribose-logo.png" | relative_url }}" alt="Ribose logo">
