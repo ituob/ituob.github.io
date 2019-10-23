@@ -36,10 +36,10 @@
   ">
 
   <header>
-    <a href="/">
+    <a href="{{ layout.site_home_link | default: "/" }}">
       <img class="logo" src="{{ "/assets/logo.png" | relative_url }}" alt="ITU ">
       <img class="logo-inverse" src="{{ "/assets/logo-inverse.png" | relative_url }}" alt="ITU ">
-      <h1><span class="publication-name">Operational Bulletin</span> online</h1>
+      <h1>{{ layout.site_header | default: "<span class='publication-name'>Operational Bulletin</span> online" | safe }}</h1>
       {% if title %}
         <h2>
           {{ title }}
