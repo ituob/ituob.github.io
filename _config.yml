@@ -89,7 +89,6 @@ default_language: en
 collections:
   docs:
     output: true
-    permalink: /:collection/:path
 
 # Build settings
 markdown: kramdown
