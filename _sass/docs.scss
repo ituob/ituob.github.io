@@ -5,8 +5,8 @@ body.layout--docs {
     > header, > main, > footer {
       margin-left: 0;
       margin-right: 0;
-      padding-left: 8vw;
-      padding-right: 8vw;
+      padding-left: 5vw;
+      padding-right: 5vw;
     }
     > header > a {
       margin-left: -10px;
@@ -23,23 +23,103 @@ body.layout--docs {
   }
 }
 
-body.layout--docs.docs-home {
-  > footer {
-    justify-content: flex-end;
+@mixin reasonableHeaders() {
+  > h2 {
+    font-size: 180%;
+    font-weight: normal;
   }
+  > h3 {
+    font-size: 100%;
+    letter-spacing: .03em;
+    font-weight: normal;
+    text-transform: uppercase;
+  }
+  > h2 + h3 {
+    margin-top: 0;
+  }
+}
 
+.docs-index-section {
+  display: flex;
+  flex-flow: column nowrap;
+
+  @include reasonableHeaders();
+}
+
+.label {
+  vertical-align: text-top;
+  display: inline-block;
+  padding: .1rem .5rem;
+  background: #a6a6a6;
+  color: white;
+  text-transform: uppercase;
+  font-weight: bold;
+  font-size: 50%;
+  margin-right: 1rem;
+}
+
+
+body.layout--docs.docs-page {
+  > main > header {
+    @include reasonableHeaders();
+  }
+}
+
+
+body.layout--docs.docs-home {
   > main {
-    align-items: stretch;
+    > section, > aside > section {
+      @extend .docs-index-section;
+    }
 
-    > section {
-      display: flex;
-      flex-flow: column nowrap;
+    > :first-child {
+      padding-right: 2rem;
+    }
 
-      > h2 {
-        font-size: 180%;
-        font-weight: normal;
+    > aside, > section.app-docs {
+      flex: 1;
+    }
+
+    > aside {
+      margin: 2rem -2rem 0 -2rem;
+      background: whiteSmoke;
+      padding: 0 2rem 1rem 2rem;
+
+      ol {
+        margin-top: 0;
+      }
+    }
+
+    > section.app-docs {
+      ul {
+        margin-top: 0;
+        padding-left: 0;
+        list-style: none;
       }
 
+      a {
+        &::before {
+          @extend .label;
+          background-color: $linkColor;
+          content: " ";
+          width: 1rem;
+          padding-left: 0;
+          padding-right: 0;
+        }
+      }
+      a[href=""] {
+        color: #a6a6a6;
+        cursor: default;
+
+        &::before {
+          @extend .label;
+          width: unset;
+          content: "soon";
+        }
+      }
+    }
+
+    > aside > section {
       &.app {
         .body {
           display: flex;
@@ -48,15 +128,6 @@ body.layout--docs.docs-home {
 
           > * {
             flex: 1;
-          }
-        }
-
-        @media screen and (min-width: $wideScreenBreakpoint) {
-          .summary, .distribution {
-            width: 70%;
-          }
-
-          .distribution {
           }
         }
 
@@ -71,24 +142,28 @@ body.layout--docs.docs-home {
           }
         }
 
-        .distribution {
-          .download-notes {
-            font-size: 90%;
-            color: #a6a6a6;
+        .download-notes {
+          .label {
+            background-color: $accentColor;
           }
+        }
+
+        .distribution {
+          display: flex;
+          flex-flow: column nowrap;
+          align-items: center;
 
           .download-links {
-            //align-self: flex-end;
             display: flex;
             flex-flow: row nowrap;
             align-items: center;
+            margin-bottom: 1rem;
 
             > :not(:last-child) {
               margin-right: 1rem;
             }
 
             .secondary {
-              font-size: 90%;
               color: #a6a6a6;
             }
 
@@ -98,13 +173,32 @@ body.layout--docs.docs-home {
 
             > a.download-link {
               padding: .8rem 2rem;
-              flex: 1;
-              text-align: center;
               border-radius: 2rem;
-              background: linear-gradient(160deg, $linkColor, lighten($linkColor, 10));
+              flex-shrink: 0;
               color: white;
               white-space: nowrap;
               max-width: 10rem;
+              position: relative;
+              overflow: hidden;
+              z-index: 1;
+
+              &::after {
+                transition: transform .2s linear;
+                z-index: -1;
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                height: 200%;
+                content: " ";
+                background: linear-gradient(160deg, $primaryColor, lighten($primaryColor, 20));
+              }
+
+              &:hover {
+                &::after {
+                  transform: translateY(-50%);
+                }
+              }
 
               .icon {
                 margin-right: .5rem;
@@ -112,6 +206,15 @@ body.layout--docs.docs-home {
             }
           }
         }
+      }
+    }
+
+    @media screen and (min-width: $wideScreenBreakpoint) {
+      flex-flow: row nowrap;
+
+      > aside {
+        margin: -1rem 0 0 0;
+        border-radius: 1rem;
       }
     }
   }

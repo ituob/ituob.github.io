@@ -3,38 +3,106 @@ layout: docs
 html_class: docs-home
 ---
 
-<section class="app">
-  <h2>Download the Software</h2>
+<section class="app-docs">
+  <h2>Documentation</h2>
 
-  <div class="summary">
-    <p>
-      ITU&nbsp;OB&nbsp;editor&nbsp;app
-      is&nbsp;an&nbsp;integral part of&nbsp;collaborative authoring workflow.
-      <br>
-      Use it to enter structured data and submit your changes.
-    </p>
-  </div>
+  <h3>Tutorials</h3>
 
-  <div class="distribution">
-    <div class="download-links">
-      <span class="secondary">Pre-release <span class="release">v0.0.22</span> available&nbsp;for</span>
+  <p>For all ITU OB editors:</p>
 
-      <a class="download-link" href="https://github.com/ituob/itu-ob-editor/releases/download/v0.0.22/itu-ob-editor-0.0.22.dmg">
-        <i class="icon fab fa-apple"></i>
-        macOS
-      </a>
+  <ul>
+    <li><a href="">Get started with ITU OB editor app</a></li>
+    <li><a href="">Connect (or reconnect) data repository</a></li>
+    <li><a href="./schedule/">Schedule an edition</a></li>
+    <li><a href="">Annex a publication</a></li>
+    <li><a href="">Find issues using Preflight</a></li>
+    <li><a href="">Add translations</a></li>
+    <li><a href="">Submit your changes</a></li>
+  </ul>
 
-      <span class="secondary">and</span>
+  <p>For data entry contributors:</p>
 
-      <a class="download-link" href="https://github.com/ituob/itu-ob-editor/releases/download/v0.0.22/itu-ob-editor.Setup.0.0.22.exe">
-        <i class="icon fab fa-microsoft"></i>
-        Windows
-      </a>
-    </div>
+  <ul>
+    <li><a href="">Prepare data repository</a></li>
+    <li><a href="">Filling in past edition messages</a></li>
+  </ul>
 
-    <p class="download-notes">
-      Note: the binaries distributed are currently unsigned, and your OS will give a warning about that.
-      Please wait until stable release to obtain signed binaries, unless instructed otherwise.
-    </p>
-  </div>
+  <p>For ITU OB data repository maintainers:</p>
+
+  <ul>
+    <li><a href="">Review & integrate changes</a></li>
+    <li><a href="">Resolve merge conflicts</a></li>
+  </ul>
+
+  <h3>Topics</h3>
+
+  <ul>
+    <li><a href="">Update flow of ITUOB.org website and resources</a></li>
+    <li><a href="">Supported message types</a></li>
+  </ul>
 </section>
+
+<aside>
+
+  <section class="authoring-workflow-summary">
+    <h2>Authoring at a glance</h2>
+
+    <ol>
+      <li>
+        Site authors
+        use the <strong>ITU OB editor app</strong>
+        to view the latest snapshot of <em>ITU OB data</em>
+        and make changes to it.
+
+      <li>
+        Changes to the data get integrated
+        into ITU OB’s <strong>upstream data repository</strong>.
+
+      <li>
+        When upstream data repository is updated,
+        it builds and publishes a new version of <strong>ITU OB online</strong>.
+
+      <li>
+        ITU OB online includes human-readable website, PDF deliverables,
+        and datasets for programmatic access.
+    </ol>
+
+  </section>
+  {% unless site.in_app_help %}
+    <section class="app">
+      <h3>Get ITU OB editor utility</h3>
+
+      <div class="summary">
+        <p>
+          This application allows to enter structured data, sync changes,
+          and is integral part of&nbsp;ITU&nbsp;OB collaborative authoring workflow.
+        </p>
+
+        <p>
+          Download release <strong>v0.0.22</strong> below.
+        </p>
+
+        <p class="download-notes">
+          <span class="label">Note</span>
+          This is a pre-release.
+          The binaries distributed are currently unsigned, and your OS will give a warning about that.
+          Unless instructed otherwise, please wait until stable release to obtain signed binaries.
+        </p>
+      </div>
+
+      <div class="distribution">
+        <div class="download-links">
+          <a class="download-link" href="https://github.com/ituob/itu-ob-editor/releases/download/v0.0.22/itu-ob-editor-0.0.22.dmg">
+            <i class="icon fab fa-apple"></i>
+            macOS
+          </a>
+
+          <a class="download-link" href="https://github.com/ituob/itu-ob-editor/releases/download/v0.0.22/itu-ob-editor.Setup.0.0.22.exe">
+            <i class="icon fab fa-microsoft"></i>
+            Windows
+          </a>
+        </div>
+      </div>
+    </section>
+  {% endunless %}
+</aside>
