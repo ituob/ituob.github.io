@@ -1,3 +1,10 @@
+---
+footer_pills:
+  - title: Editors
+    url: "/docs/"
+    icon: fas fa-pencil-alt
+---
+
 <!doctype html>
 <html lang="en">
 <head>
@@ -53,13 +60,6 @@
   </main>
 
   <footer>
-    {% unless page.layout == "docs" %}
-      <a href="/docs/" class="footer-pill interactive">
-        <i class="icon fas fa-pencil-alt"></i>
-        Editors
-      </a>
-    {% endunless %}
-
     {% assign footer_pills = page.footer_pills | default: layout.footer_pills %}
     {% for item in footer_pills %}
       <a href="{{ item.url }}" class="footer-pill interactive">

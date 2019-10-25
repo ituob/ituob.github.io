@@ -1,6 +1,6 @@
 ---
 layout: docs
-html_class: docs-home
+html_class: docs-page docs-page--home
 ---
 
 <section class="app-docs">
@@ -42,33 +42,33 @@ html_class: docs-home
   </ul>
 </section>
 
-<aside>
 
-  <section class="authoring-workflow-summary">
-    <h2>Authoring at a glance</h2>
+{% unless site.in_app_help %}
+  <aside>
+    <section class="authoring-workflow-summary">
+      <h2>Authoring at a glance</h2>
 
-    <ol>
-      <li>
-        Site authors
-        use the <strong>ITU OB editor app</strong>
-        to view the latest snapshot of <em>ITU OB data</em>
-        and make changes to it.
+      <ol>
+        <li>
+          Site authors
+          use the <strong>ITU OB editor app</strong>
+          to view the latest snapshot of <em>ITU OB data</em>
+          and make changes to it.
 
-      <li>
-        Changes to the data get integrated
-        into ITU OB’s <strong>upstream data repository</strong>.
+        <li>
+          Changes to the data get integrated
+          into ITU OB’s <strong>upstream data repository</strong>.
 
-      <li>
-        When upstream data repository is updated,
-        it builds and publishes a new version of <strong>ITU OB online</strong>.
+        <li>
+          When upstream data repository is updated,
+          it builds and publishes a new version of <strong>ITU OB online</strong>.
 
-      <li>
-        ITU OB online includes human-readable website, PDF deliverables,
-        and datasets for programmatic access.
-    </ol>
+        <li>
+          ITU OB online includes human-readable website, PDF deliverables,
+          and datasets for programmatic access.
+      </ol>
+    </section>
 
-  </section>
-  {% unless site.in_app_help %}
     <section class="app">
       <h3>Get ITU OB editor utility</h3>
 
@@ -104,5 +104,5 @@ html_class: docs-home
         </div>
       </div>
     </section>
-  {% endunless %}
-</aside>
+  </aside>
+{% endunless %}

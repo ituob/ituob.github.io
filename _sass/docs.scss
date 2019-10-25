@@ -1,4 +1,4 @@
-body.layout--docs {
+body.docs-page {
   padding: 0;
 
   @media screen and (min-width: $wideScreenBreakpoint) {
@@ -59,14 +59,14 @@ body.layout--docs {
 }
 
 
-body.layout--docs.docs-page {
+body.docs-page {
   > main > header {
     @include reasonableHeaders();
   }
 }
 
 
-body.layout--docs.docs-home {
+body.docs-page--home {
   > main {
     > section, > aside > section {
       @extend .docs-index-section;
