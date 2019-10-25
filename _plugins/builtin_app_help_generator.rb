@@ -25,7 +25,7 @@ module Jekyll
 
       self.process(@name)
 
-      self.data = data
+      self.data = data.clone
       self.data['in_app_help'] = true
       self.data['permalink'] = nil
     end
