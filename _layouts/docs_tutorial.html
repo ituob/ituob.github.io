@@ -1,6 +1,32 @@
 ---
 layout: docs
 title: Tutorials
+
+extra_scripts:
+  - src: https://vjs.zencdn.net/7.6.5/video.js
+
+extra_stylesheets:
+  - href: https://vjs.zencdn.net/7.6.5/video-js.css
 ---
 
 {{ content }}
+
+{% for tut in page.tutorials %}
+  <div class="tutorial">
+    <ol class="steps">
+      {% for d in tut.directions %}
+        <li>
+          {{ d.step }}
+        </li>
+      {% endfor %}
+    </ol>
+
+    {% if tut.video %}
+      <div class="video">
+        <video-js data-setup='{"controls": true}'>
+          <source src="{{ tut.video.src }}" type="video/mp4">
+        </video-js>
+      </div>
+    {% endif %}
+  </div>
+{% endfor %}
