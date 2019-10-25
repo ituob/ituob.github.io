@@ -34,6 +34,16 @@ footer_pills:
   <link rel="stylesheet" href="{{ "assets/css/style.css" | relative_url }}">
 
   <script src="https://kit.fontawesome.com/3ebc4b9810.js"></script>
+
+  {% assign extra_stylesheets = page.extra_stylesheets | default: layout.extra_stylesheets %}
+  {% if extra_stylesheets %}
+    {% for ss in extra_stylesheets %}
+      <link rel="stylesheet"
+        href="{{ ss.href }}"
+        {% if ss.integrity %}integrity="{{ ss.integrity }}"{% endif %}
+        {% if ss.crossorigin %}crossorigin="{{ ss.crossorigin }}"{% endif %}>
+    {% endfor %}
+  {% endif %}
 </head>
 
 <body class="
@@ -75,6 +85,16 @@ footer_pills:
       Powered by Ribose
     </a>
   </footer>
+
+  {% assign extra_scripts = page.extra_scripts | default: layout.extra_scripts %}
+  {% if extra_scripts %}
+    {% for sc in extra_scripts %}
+      <script
+        src="{{ sc.src }}"
+        {% if sc.integrity %}integrity="{{ sc.integrity }}"{% endif %}
+        {% if sc.crossorigin %}crossorigin="{{ sc.crossorigin }}"{% endif %}></script>
+    {% endfor %}
+  {% endif %}
 
 </body>
 </html>
