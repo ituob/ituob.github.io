@@ -4,6 +4,7 @@ title: Tutorials
 
 extra_scripts:
   - src: https://vjs.zencdn.net/7.6.5/video.js
+  - src: /assets/js/youtube-video.js
 
 extra_stylesheets:
   - href: https://vjs.zencdn.net/7.6.5/video-js.css
@@ -23,8 +24,13 @@ extra_stylesheets:
 
     {% if tut.video %}
       <div class="video">
-        <video-js data-setup='{"controls": true}'>
-          <source src="{{ tut.video.src }}" type="video/mp4">
+        {% if tut.video.src contains "youtu" %}
+          {% assign tech = "youtube" %}
+        {% else %}
+          {% assign tech = nil %}
+        {% endif %}
+        <video-js data-setup='{ "controls": true{% if tech %}, "techOrder": ["{{ tech }}"]{% endif %} }'>
+          <source src="{{ tut.video.src }}" type="video/youtube">
         </video-js>
       </div>
     {% endif %}
