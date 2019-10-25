@@ -50,41 +50,46 @@ footer_pills:
     {% if page.layout %}layout--{{ page.layout }}{% endif %}
     lang--{{ page.lang }}
     {{ page.html_class | default: layout.html_class }}
+    {% if page.in_app_help %}in-app-help{% endif %}
   ">
 
-  <header>
-    <a href="{{ layout.site_home_link | default: "/" }}">
-      <img class="logo" src="{{ "/assets/logo.png" | relative_url }}" alt="ITU ">
-      <img class="logo-inverse" src="{{ "/assets/logo-inverse.png" | relative_url }}" alt="ITU ">
-      <h1>{{ layout.site_header | default: "<span class='publication-name'>Operational Bulletin</span> online" | safe }}</h1>
-      {% if title %}
-        <h2>
-          {{ title }}
-        </h2>
-      {% endif %}
-    </a>
-  </header>
+  {% unless page.in_app_help %}
+    <header>
+      <a href="{{ layout.site_home_link | default: "/" }}">
+        <img class="logo" src="{{ "/assets/logo.png" | relative_url }}" alt="ITU ">
+        <img class="logo-inverse" src="{{ "/assets/logo-inverse.png" | relative_url }}" alt="ITU ">
+        <h1>{{ layout.site_header | default: "<span class='publication-name'>Operational Bulletin</span> online" | safe }}</h1>
+        {% if title %}
+          <h2>
+            {{ title }}
+          </h2>
+        {% endif %}
+      </a>
+    </header>
+  {% endunless %}
 
   <main>
     {{ content }}
   </main>
 
-  <footer>
-    {% assign footer_pills = page.footer_pills | default: layout.footer_pills %}
-    {% for item in footer_pills %}
-      <a href="{{ item.url }}" class="footer-pill interactive">
-        <i class="icon {{ item.icon }}"></i>
-        {{ item.title }}
-      </a>
-    {% endfor %}
+  {% unless page.in_app_help %}
+    <footer>
+      {% assign footer_pills = page.footer_pills | default: layout.footer_pills %}
+      {% for item in footer_pills %}
+        <a href="{{ item.url }}" class="footer-pill interactive">
+          <i class="icon {{ item.icon }}"></i>
+          {{ item.title }}
+        </a>
+      {% endfor %}
 
-    <a href="https://open.ribose.com/" class="footer-pill interactive powered-by">
-      <span class="icon">
-        <img class="logo" src="{{ "/assets/ribose-logo.png" | relative_url }}" alt="Ribose logo">
-      </span>
-      Powered by Ribose
-    </a>
-  </footer>
+      <a href="https://open.ribose.com/" class="footer-pill interactive powered-by">
+        <span class="icon">
+          <img class="logo" src="{{ "/assets/ribose-logo.png" | relative_url }}" alt="Ribose logo">
+        </span>
+        Powered by Ribose
+      </a>
+    </footer>
+  {% endunless %}
 
   {% assign extra_scripts = page.extra_scripts | default: layout.extra_scripts %}
   {% if extra_scripts %}
