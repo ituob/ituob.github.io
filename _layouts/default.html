@@ -13,7 +13,7 @@ footer_pills:
 
   <title>
     {% assign title = page.title | default: layout.title %}
-    {% if title %}{{ title }} — {% endif %}{{ site.title }}
+    {% if title %}{{ title }} — {% endif %}{{ page.site_title | default: site.title }}
   </title>
 
   <link href="{{ "/assets/favicon-384x384.png" | relative_url }}"

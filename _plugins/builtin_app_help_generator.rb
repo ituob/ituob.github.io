@@ -28,6 +28,7 @@ module Jekyll
       self.data = data.clone
       self.data['in_app_help'] = true
       self.data['permalink'] = nil
+      self.data['site_title'] = "#{site.config['in_app_help']['app_name']} Help"
     end
   end
 
