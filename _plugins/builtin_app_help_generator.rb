@@ -37,7 +37,6 @@ module Jekyll
       originals = @collections[in_collection]
       originals.docs.each do |doc|
         page = InAppHelpPage.new(self, self.source, url_prefix, doc.cleaned_relative_path, doc.content, doc.data)
-        p doc.cleaned_relative_path
         @pages << page
       end
     end
