@@ -63,6 +63,12 @@ body.docs-page {
   }
 
   &.in-app-help {
+    min-width: unset;
+
+    > header, > main, > footer {
+      padding-left: 2rem;
+      padding-right: 2rem;
+    }
     > main > header {
       display: flex;
       flex-flow: row nowrap;
