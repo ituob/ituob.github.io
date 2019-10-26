@@ -14,7 +14,7 @@
   }
 }
 
-.label {
+.docs-label {
   vertical-align: text-top;
   display: inline-block;
   padding: .1rem .5rem;
@@ -218,7 +218,7 @@ body.docs-page--home {
 
       a {
         &::before {
-          @extend .label;
+          @extend .docs-label;
           background-color: $linkColor;
           content: " ";
           width: 1rem;
@@ -231,7 +231,7 @@ body.docs-page--home {
         cursor: default;
 
         &::before {
-          @extend .label;
+          @extend .docs-label;
           width: unset;
           content: "soon";
         }
@@ -263,6 +263,7 @@ body.docs-page--home {
 
         .download-notes {
           .label {
+            @extend .docs-label;
             background-color: $accentColor;
           }
         }
