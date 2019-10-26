@@ -1,5 +1,45 @@
+@mixin reasonableHeaders() {
+  > h2 {
+    font-size: 180%;
+    font-weight: normal;
+  }
+  > h3 {
+    font-size: 100%;
+    letter-spacing: .03em;
+    font-weight: normal;
+    text-transform: uppercase;
+  }
+  > h2 + h3 {
+    margin-top: 0;
+  }
+}
+
+.label {
+  vertical-align: text-top;
+  display: inline-block;
+  padding: .1rem .5rem;
+  background: #a6a6a6;
+  color: white;
+  text-transform: uppercase;
+  font-weight: bold;
+  font-size: 50%;
+  margin-right: 1rem;
+}
+
+.docs-index-section {
+  display: flex;
+  flex-flow: column nowrap;
+
+  @include reasonableHeaders();
+}
+
+
 body.docs-page {
   padding: 0;
+
+  > main > header {
+    @include reasonableHeaders();
+  }
 
   @media screen and (min-width: $wideScreenBreakpoint) {
     > header, > main, > footer {
@@ -21,48 +61,7 @@ body.docs-page {
       padding-bottom: 1rem;
     }
   }
-}
 
-@mixin reasonableHeaders() {
-  > h2 {
-    font-size: 180%;
-    font-weight: normal;
-  }
-  > h3 {
-    font-size: 100%;
-    letter-spacing: .03em;
-    font-weight: normal;
-    text-transform: uppercase;
-  }
-  > h2 + h3 {
-    margin-top: 0;
-  }
-}
-
-.docs-index-section {
-  display: flex;
-  flex-flow: column nowrap;
-
-  @include reasonableHeaders();
-}
-
-.label {
-  vertical-align: text-top;
-  display: inline-block;
-  padding: .1rem .5rem;
-  background: #a6a6a6;
-  color: white;
-  text-transform: uppercase;
-  font-weight: bold;
-  font-size: 50%;
-  margin-right: 1rem;
-}
-
-
-body.docs-page {
-  > main > header {
-    @include reasonableHeaders();
-  }
   &.in-app-help {
     > main > header {
       display: flex;
