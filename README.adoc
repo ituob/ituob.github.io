@@ -87,6 +87,34 @@ via `extra_links` array of `running_annexes` message
 should also be included under `data/lists/`.
 
 
+== Documentation for site editors
+
+Documentation for ITU OB authors, and also technically the same as editor app help,
+is built from the `docs` Jekyll collection.
+
+NOTE: This may be moved to a dedicated website in future.
+
+These pages use docs[_*] layouts, and are styled by docs.scss.
+
+Pages are generated twice, firstly (with default Jekyll behavior) as part of main website,
+and secondly (with `builtin_app_help_generator.rb` plugin) to be used as application’s built-in help.
+
+=== Built-in app help page generation
+
+The generator plugin is configured through `in_app_help` site-wide config key.
+It re-uses the documents from specified collection under specified URL prefix,
+specifying or overriding certain page frontmatter.
+
+Most importantly, it sets the `{{ page.in_app_help }}` variable.
+
+Site layouts make use of that variable to add a HTML class on `<body>`,
+and to turn on/off (mostly off) certain UI elements that do not make sense
+in context of built-in app help.
+
+The https://github.com/ituob/itu-ob-editor[ITU OB editor] app loads these pages
+when user uses the Help menu.
+
+
 == Implementation details
 
 The following plugins enable the site to function.
