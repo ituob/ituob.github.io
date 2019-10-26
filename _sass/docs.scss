@@ -67,27 +67,107 @@ body.docs-page {
 
 
 body.docs-page--tutorial {
+  .intro {
+    font-size: 120%;
+    margin-bottom: 1rem;
+  }
+
   .tutorial {
-    display: flex;
-    flex-flow: row nowrap;
+    // Must match aspect ratio of all videos
+    $videoAspectRatio: 0.5625;
 
-    .video, .steps {
-      flex: 1;
-    }
-    .steps {
-      min-width: 30%;
-      flex-shrink: 0;
-    }
     .video {
-      margin-left: 2rem;
+      margin-left: -2rem;
+      margin-bottom: 2rem;
 
-      video-js {
-        width: 100%;
-        height: 100%;
-        background-color: unset;
+      &, video-js {
+        width: 100vw;
+        height: 100vw * $videoAspectRatio;
+      }
+    }
 
-        video {
-          width: 100%;
+    .steps {
+      margin-right: 1rem;
+
+      .step, .notes {
+        p:first-of-type {
+          margin-top: 0;
+        }
+        p:last-of-type {
+          margin-bottom: 0;
+        }
+      }
+
+      .step {
+        margin-bottom: 1rem;
+
+        &:last-child {
+          margin-bottom: 0;
+        }
+      }
+
+      .notes {
+        margin-top: 1rem;
+        padding-left: 2em;
+      }
+
+      .note {
+        font-size: 90%;
+
+        .icon {
+          width: 1.5em;
+          margin-right: .5em;
+          margin-left: -2em;
+        }
+
+        &.intent-primary {
+          .icon {
+            color: $primaryColor;
+          }
+        }
+
+        &.intent-accent {
+          .icon {
+            color: $accentColor;
+          }
+        }
+      }
+    }
+
+    @media screen and (min-width: $wideScreenBreakpoint) {
+      display: flex;
+      flex-flow: row wrap;
+
+      ol.steps {
+        margin-top: 0;
+        margin-right: 0;
+        flex: 1;
+        flex-shrink: 0;
+        min-width: 30%;
+      }
+      .video {
+        margin-left: 0;
+        margin-right: 2rem;
+        $factor: 2.2;
+
+        flex: 0;
+        flex-basis: 100vw / $factor;
+        flex-shrink: 0;
+        flex-grow: 0;
+        width: unset;
+        height: unset;
+        min-width: 550px;
+
+        video-js {
+          width: 100vw / $factor;
+          height: 100vw / $factor * $videoAspectRatio;
+          min-width: 550px;
+          min-height: 550px * $videoAspectRatio;
+          background-color: unset;
+
+          video {
+            //width: 100%;
+          }
         }
       }
     }

@@ -13,14 +13,7 @@ extra_stylesheets:
 {{ content }}
 
 {% for tut in page.tutorials %}
-  <div class="tutorial">
-    <ol class="steps">
-      {% for d in tut.directions %}
-        <li>
-          {{ d.step }}
-        </li>
-      {% endfor %}
-    </ol>
+  <section class="tutorial">
 
     {% if tut.video %}
       <div class="video">
@@ -34,5 +27,28 @@ extra_stylesheets:
         </video-js>
       </div>
     {% endif %}
-  </div>
+
+    <ol class="steps">
+      {% for d in tut.directions %}
+        <li class="step">
+          <p>
+            {{ d.step }}
+          </p>
+
+          {% if d.notes %}
+            <div class="notes">
+              {% for note in d.notes %}
+                <p class="note {% if note.intent %}intent-{{ note.intent }}{% endif %}">
+                  {%- if note.icon -%}
+                    <i class="icon fa {{ note.icon }}"></i>
+                  {%- endif -%}{{ note.text }}
+                </p>
+              {% endfor %}
+            </div>
+          {% endif %}
+        </li>
+      {% endfor %}
+    </ol>
+
+  </section>
 {% endfor %}
