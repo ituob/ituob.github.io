@@ -63,6 +63,17 @@ body.docs-page {
   > main > header {
     @include reasonableHeaders();
   }
+  &.in-app-help {
+    > main > header {
+      display: flex;
+      flex-flow: row nowrap;
+      align-items: center;
+
+      .breadcrumbs {
+        margin-right: 2rem;
+      }
+    }
+  }
 }
 
 

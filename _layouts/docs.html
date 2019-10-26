@@ -8,4 +8,14 @@ footer_pills:
     icon: fas fa-home
 ---
 
+<header>
+  {% unless page.hide_breadcrumbs %}
+    {% if page.in_app_help %}
+      <nav class="breadcrumbs"><a href="{{ site.in_app_help.url_prefix }}">Docs&nbsp;&nbsp;&larr;</a></nav>
+    {% endif %}
+  {% endunless %}
+
+  <h2>{{ page.page_title }}</h2>
+</header>
+
 {{ content }}
