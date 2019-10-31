@@ -33,7 +33,7 @@ module Jekyll
   end
 
   class Site
-    def write_in_app_help_pages(in_collection, out_collection, url_prefix)
+    def write_in_app_help_pages(in_collection, url_prefix)
       originals = @collections[in_collection]
       originals.docs.each do |doc|
         page = InAppHelpPage.new(self, self.source, url_prefix, doc.cleaned_relative_path, doc.content, doc.data)
@@ -49,7 +49,6 @@ Jekyll::Hooks.register :site, :post_read do |site|
     cfg = site.config['in_app_help']
     site.write_in_app_help_pages(
       cfg['in_collection'],
-      cfg['out_collection'],
       cfg['url_prefix'])
   end
 end
