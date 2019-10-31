@@ -102,10 +102,10 @@ body.docs-page--tutorial {
       }
     }
 
-    .steps {
+    .items {
       margin-right: 1rem;
 
-      .step, .notes {
+      .item, .notes {
         p:first-of-type {
           margin-top: 0;
         }
@@ -114,7 +114,7 @@ body.docs-page--tutorial {
         }
       }
 
-      .step {
+      .item {
         margin-bottom: 1rem;
 
         &:last-child {
@@ -124,26 +124,49 @@ body.docs-page--tutorial {
 
       .notes {
         margin-top: 1rem;
-        padding-left: 2em;
+        padding-left: 2rem;
       }
 
       .note {
         font-size: 90%;
+        display: flex;
+        flex-flow: row nowrap;
+        align-items: flex-start;
+
+        .note-body {
+          h4, h5, h6 {
+            font-size: 100%;
+          }
+          > h4, > h5, > h6, > ul, > p, > ol {
+            &:first-child {
+              margin-top: 0;
+            }
+            &:last-child {
+              margin-bottom: 0;
+            }
+          }
+          ul, ol {
+            padding-left: 1rem;
+          }
+        }
 
         .icon {
-          width: 1.5em;
-          margin-right: .5em;
-          margin-left: -2em;
+          width: 1.5rem;
+          height: 1.5rem;
+          font-size: 1.4rem;
+          margin-right: .5rem;
+          margin-left: -2rem;
+          color: grey;
         }
 
         &.intent-primary {
-          .icon {
+          .icon, .title {
             color: $primaryColor;
           }
         }
 
         &.intent-accent {
-          .icon {
+          .icon, .title {
             color: $accentColor;
           }
         }

@@ -1,0 +1,45 @@
+{% if include.options %}
+  {% assign list_type = "ul" %}
+  {% assign items = include.options %}
+{% elsif include.directions %}
+  {% assign list_type ="ol" %}
+  {% assign items = include.directions %}
+{% endif %}
+
+<{{ list_type }} class="items">
+  {% for d in items %}
+    <li class="item">
+      <p>
+        {{ d.step }}
+      </p>
+
+      {% if d.notes %}
+        <div class="notes">
+          {% for note in d.notes %}
+            <div class="note {% if note.intent %}intent-{{ note.intent }}{% endif %}">
+              {%- if note.icon -%}
+                <i class="icon fa {{ note.icon }}"></i>
+              {%- endif -%}
+
+              <div class="note-body">
+                {% if note.title %}
+                  <h5 class="note-title">
+                    {{ note.title }}
+                  </h5>
+                {% endif %}
+
+                {{ note.text | safe }}
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+
+      {% assign num_options = d.options | size %}
+      {% assign num_directions = d.directions | size %}
+      {% if num_options > 0 or num_directions > 0 %}
+        {% include directions.html options=d.options directions=d.directions %}
+      {% endif %}
+    </li>
+  {% endfor %}
+</{{ list_type }}>
