@@ -24,7 +24,7 @@ jobs:
           ruby-version: '2.6'
           architecture: 'x64'
       - uses: actions/checkout@master
-      - name: Setup git submodules (authenticated)
+      - name: Setup git submodules
         run: |
           make update-init update-modules
       - name: Update gems
