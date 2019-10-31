@@ -36,7 +36,12 @@ module Jekyll
     def write_in_app_help_pages(in_collection, url_prefix)
       originals = @collections[in_collection]
       originals.docs.each do |doc|
-        page = InAppHelpPage.new(self, self.source, url_prefix, doc.cleaned_relative_path, doc.content, doc.data)
+        if doc.data['permalink']
+          permalink = doc.data['permalink'].sub("/#{in_collection}/", '')
+        else
+          permalink = doc.cleaned_relative_path
+        end
+        page = InAppHelpPage.new(self, self.source, url_prefix, permalink, doc.content, doc.data)
         @pages << page
       end
     end
