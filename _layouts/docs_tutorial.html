@@ -41,7 +41,7 @@ extra_stylesheets:
                 <p class="note {% if note.intent %}intent-{{ note.intent }}{% endif %}">
                   {%- if note.icon -%}
                     <i class="icon fa {{ note.icon }}"></i>
-                  {%- endif -%}{{ note.text }}
+                  {%- endif -%}{{ note.text | safe }}
                 </p>
               {% endfor %}
             </div>
