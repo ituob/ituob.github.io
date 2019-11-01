@@ -23,7 +23,7 @@ footer_pills:
     {% if page.in_app_help %}
       <nav class="breadcrumbs">
         <a href="{{ site.in_app_help.url_prefix }}">
-          All Documentation</a>{%- for crumb in breadcrumbs -%}&nbsp;&nbsp;<i class="icon fas fa-caret-left"></i>&nbsp;&nbsp;{%- if crumb.url -%}<a href="{{ crumb.url }}">{%- endif -%}{{ crumb.title }}{%- if crumb.url -%}</a>{%- endif -%}{%- endfor -%}&nbsp;&nbsp;<i class="icon fas fa-caret-left"></i>
+          All documentation</a>{%- for crumb in breadcrumbs -%}&nbsp;&nbsp;<i class="icon fas fa-caret-left"></i>&nbsp;&nbsp;{%- if crumb.url -%}<a href="{{ crumb.url }}">{%- endif -%}{{ crumb.title }}{%- if crumb.url -%}</a>{%- endif -%}{%- endfor -%}&nbsp;&nbsp;<i class="icon fas fa-caret-left"></i>
       </nav>
     {% endif %}
   {% endunless %}
