@@ -71,11 +71,15 @@ body.docs-page {
     }
     > main > header {
       display: flex;
-      flex-flow: row nowrap;
-      align-items: center;
+      flex-flow: column nowrap;
+      align-items: flex-start;
 
       .breadcrumbs {
-        margin-right: 2rem;
+        display: flex;
+        flex-flow: row nowrap;
+        align-items: center;
+        margin: 2rem 2rem 0 0;
+        white-space: nowrap;
       }
     }
   }
@@ -243,16 +247,41 @@ body.docs-page--home {
         margin-top: 0;
         padding-left: 0;
         list-style: none;
+
+        > li > ul, > li > p {
+          padding-left: 2rem;
+        }
+        > li > p {
+          margin: .25rem 0;
+          font-size: 90%;
+        }
       }
 
-      a {
+      li {
+        margin: .25rem 0;
+      }
+
+      li, li > a {
         &::before {
           @extend .docs-label;
-          background-color: $linkColor;
           content: " ";
           width: 1rem;
           padding-left: 0;
           padding-right: 0;
+        }
+      }
+      li {
+        position: relative;
+        &::before {
+          background-color: $textColor;
+          height: .025rem;
+          margin-top: .45rem;
+        }
+      }
+      li > a {
+        margin-left: -2rem;
+        &::before {
+          background-color: $linkColor;
         }
       }
       a[href=""] {
