@@ -12,13 +12,42 @@ page_title: Migrating historical ITU OB data
   </p>
 </section>
 
-<section class="faq">
-  <h3>Background information</h3>
+<section class="overview">
+  <h3>Migration process overview</h3>
+  <p>
+  The process involves locating a historical OB edition—available in the old format
+  (MS Word and/or PDF) on ITU’s website—and using ITU OB Editor app to enter the data
+  from that edition into the new data repository.
 
+  <h3>Submitting your changes</h3>
+  <p>
+  You will configure your copy of ITU OB Editor app to operate on your individual copy
+  of ITU OB data. Changes you make will go into that copy. After you make a few changes,
+  you will request from the maintainers of ITU OB data repository to pull and review your changes.
+
+  <h3>Migration tutorials</h3>
+  <p>
+  Following help pages describe each migration step in more detail:
+
+  <ul>
+    <li><a href="./prepare-repo/">Start and configure the ITU OB Editor app</a></li>
+    <!--
+    <li><a href="./find-legacy-edition/">Choose an OB edition to migrate</a></li>
+    <li><a href="./schedule/">Migrate OB edition data</a></li>
+    <li><a href="./merge/">Submit your changes</a></li>
+    <li><a href="./troubleshooting/">What to do if you’re stuck</a></li>
+    -->
+  </ul>
+</section>
+
+<section class="background">
+  <h3>More about ITU Operational Bulletin</h3>
+
+  <p>
   ITU Operational Bulletin (OB) is a publication used for exchange of information about changes
   in international telecommunication networks and services.
 
-  <h4>Why does ITU OB exist?</h4>
+  <h4>Q: Why does ITU OB exist?</h4>
 
   <p>
   ITU maintains a number of Recommendations, which are followed by telecommunications equipment
@@ -46,7 +75,7 @@ page_title: Migrating historical ITU OB data
   helping telecommunications operators and other participants to keep up-to-date with
   the latest state of affairs and avoid the breakdown of communications.
 
-  <h4>Why is it being migrated?</h4>
+  <h4>Q: Why is it being migrated?</h4>
 
   <p>
   Historically, ITU Operation Bulletin has been a periodic publication,
@@ -61,14 +90,15 @@ page_title: Migrating historical ITU OB data
   This allows ITU OB issues in HTML, MS Word and PDF formats to be generated automatically,
   allows ITU to offer a machine-readable feed of OB messages.
 
-  <h4>How is ITU OB structured?</h4>
+  <h4>Q: How is ITU OB structured?</h4>
 
   <p>
   Each edition of Operational Bulletin contains the following.
 
   <ol>
     <li>
-      A table of Service Publications annexed to that edition (also called <em>Annexed Lists</em>).
+      A table of still-relevant Service Publication positions (also called <em>Annexed Lists</em>)
+      that were previously annexed.
       This table doesn’t change very often.
     <li>
       A number of <em>messages</em>, split into two sections:
@@ -86,14 +116,8 @@ page_title: Migrating historical ITU OB data
           since the previous ITU OB edition came out.
       </ol>
     </li>
+
+    <li>
+      Fresh Service Publication positions annexed to this issue, if any.
   </ol>
-</section>
-
-<section class="overview">
-  <h3>Migration process overview</h3>
-
-  <p>
-  The process involves locating a historical OB edition—available in the old format
-  (MS Word and/or PDF) on ITU’s website—and using ITU OB Editor app to enter the data
-  from that edition into the new data repository.
 </section>
