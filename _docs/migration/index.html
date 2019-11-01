@@ -1,0 +1,99 @@
+---
+layout: docs_tutorial_migration
+permalink: /docs/migration/
+breadcrumbs: []
+title: Data entry volunteers
+page_title: Migrating historical ITU OB data
+---
+
+<section class="intro">
+  <p>
+    Thank you for volunteering to help with the migration of ITU Operational Bulletin archives!
+  </p>
+</section>
+
+<section class="faq">
+  <h3>Background information</h3>
+
+  ITU Operational Bulletin (OB) is a publication used for exchange of information about changes
+  in international telecommunication networks and services.
+
+  <h4>Why does ITU OB exist?</h4>
+
+  <p>
+  ITU maintains a number of Recommendations, which are followed by telecommunications equipment
+  used by providers across the planet.
+
+  (To draw a simplified analogy, a Recommendation is like an <em>addressing system</em>:
+  each address has properties like a country name, city, street and building.)
+
+  <p>
+  Alongside each of those standards, ITU maintains various datasets that describe the specific details about
+  each telecommunications provider who participates in the system.
+  These datasets are distributed in the form of Service Publications.
+
+  (To continue the above analogy, a Service Publication may be like an <em>address book</em>,
+  describing how pieces of equipments can find one another.)
+
+  <p>
+  By following those Recommendations and Service Publications,
+  telecommunication operators across the whole planet can interoperate with each other.
+  This is how, for example, we can call any mobile phone number on the planet,
+  even if that number is operated by a different company in another country.
+
+  <p>
+  Operational Bulletin aggregates changes to Recommendations and Service Publications,
+  helping telecommunications operators and other participants to keep up-to-date with
+  the latest state of affairs and avoid the breakdown of communications.
+
+  <h4>Why is it being migrated?</h4>
+
+  <p>
+  Historically, ITU Operation Bulletin has been a periodic publication,
+  with a new issue coming out every couple of weeks.
+  ITU staff would gather notices from various telecommunications providers,
+  compile those changes together into a Microsoft Word document,
+  and upload it to ITU website.
+
+  <p>
+  This solution is far from being efficient, and as part of a new program
+  ITU OB is being migrated to a new structured format.
+  This allows ITU OB issues in HTML, MS Word and PDF formats to be generated automatically,
+  allows ITU to offer a machine-readable feed of OB messages.
+
+  <h4>How is ITU OB structured?</h4>
+
+  <p>
+  Each edition of Operational Bulletin contains the following.
+
+  <ol>
+    <li>
+      A table of Service Publications annexed to that edition (also called <em>Annexed Lists</em>).
+      This table doesn’t change very often.
+    <li>
+      A number of <em>messages</em>, split into two sections:
+
+      <ol>
+        <li>
+          In “General Messages”,
+          each message contains information related to some ITU recommendation.
+          <br>
+          Example messages: “Telephone Service”, “Service Restrictions”, etc.
+
+        <li>
+          In “Amendments”,
+          each message contains changes made to a specific annexed service publication
+          since the previous ITU OB edition came out.
+      </ol>
+    </li>
+  </ol>
+</section>
+
+<section class="overview">
+  <h3>Migration process overview</h3>
+
+  <p>
+  The process involves locating a historical OB edition—available in the old format
+  (MS Word and/or PDF) on ITU’s website—and using ITU OB Editor app to enter the data
+  from that edition into the new data repository.
+</section>
