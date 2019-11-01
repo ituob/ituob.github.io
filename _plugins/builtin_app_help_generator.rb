@@ -13,7 +13,7 @@ module Jekyll
 
       url_prefix = site.config['in_app_help']['url_prefix']
 
-      if path == '/index'
+      if path.end_with?('/index')
         @dir = url_prefix
       else
         @dir = File.join(url_prefix, path)
