@@ -29,6 +29,7 @@
 .docs-index-section {
   display: flex;
   flex-flow: column nowrap;
+  align-items: flex-start;
 
   @include reasonableHeaders();
 }
@@ -248,51 +249,75 @@ body.docs-page--home {
         margin-top: 0;
         padding-left: 0;
         list-style: none;
+        padding-bottom: .5rem;
 
-        > li > ul, > li > p {
-          padding-left: 2rem;
-        }
+        box-shadow: -14px 0 14px -14px rgba(black, 0.2);
+
         > li > p {
-          margin: .25rem 0;
           font-size: 90%;
+          margin-top: .5rem;
+          margin-bottom: .5rem;
+        }
+        > li > ul {
+          margin-top: .5rem;
         }
       }
 
-      li {
-        margin: .25rem 0;
-      }
-
-      li, li > a {
-        &::before {
-          @extend .docs-label;
-          content: " ";
-          width: 1rem;
-          padding-left: 0;
-          padding-right: 0;
-        }
-      }
       li {
         position: relative;
+        padding-left: 2rem;
+        border-left: .1rem solid silver;
+
+        &:last-child {
+          border-bottom: 1px dashed silver;
+          padding-bottom: .5rem;
+        }
+
         &::before {
           background-color: $textColor;
           height: .025rem;
           margin-top: .45rem;
         }
       }
-      li > a {
-        margin-left: -2rem;
+      a {
+        position: relative;
+        padding: 0 .2rem;
+        margin-top: .4rem;
+        margin-left: -.2rem;
+        display: inline-block;
+        transition: color .2s linear;
+
         &::before {
-          background-color: $linkColor;
+          display: block;
+          content: " ";
+          position: absolute;
+          top: 0; left: 0; right: 0; bottom: 0;
+          transition: background-color .2s linear;
+        }
+
+        &:hover {
+          color: white;
+
+          &::before {
+            background-color: rgba($linkColor, 0.7);
+            z-index: -1;
+          }
         }
       }
       a[href=""] {
-        color: #a6a6a6;
+        color: #bbb;
         cursor: default;
 
         &::before {
-          @extend .docs-label;
-          width: unset;
-          content: "soon";
+          background-color: transparent;
+        }
+
+        &::after {
+          display: inline-block;
+          content: "coming soon";
+          margin-left: .5rem;
+          font-size: 60%;
+          color: rgba($accentColor, 0.5);
         }
       }
     }
