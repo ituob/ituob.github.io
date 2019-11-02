@@ -111,6 +111,10 @@ body.docs-page--tutorial {
     .items {
       margin-right: 1rem;
 
+      .items {
+        margin-top: 1rem;
+      }
+
       .item, .notes {
         p:first-of-type {
           margin-top: 0;
@@ -163,6 +167,7 @@ body.docs-page--tutorial {
           margin-right: .5rem;
           margin-left: -2rem;
           color: grey;
+          transform: scale(0.8);
         }
 
         &.intent-primary {
