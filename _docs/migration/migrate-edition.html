@@ -7,10 +7,10 @@ page_title: Enter legacy OB edition into ITU OB Editor app
 tutorials:
 - directions:
 
-  - step: Add the edition to OB calendar & open the issue editor window.
+  - step: Add the edition to OB calendar & open its Issue Editor window.
     directions:
     - step: |
-        In the OB Edition file you downloaded, locate the publication & cutoff dates
+        In the OB edition file you downloaded, locate the publication & cutoff dates
         for that edition.
     - step: |
         Using the ITU OB Editor app, add the edition to ITU OB calendar
@@ -19,22 +19,76 @@ tutorials:
         After the edition is added, open it by clicking on the edition
         in the list on the right of OB calendar window.
 
-  - step: Enter amendments.
-    directions:
-    - step: |
-        In the OB Edition file you downloaded, locate the amendments section.
-    - step: |
-        Using the ITU OB Editor app, add each amendment message.
-      notes:
-      - text: |
-          See the <a href="../../amend-publication/">Adding publication amendments guide</a>.
-        icon: fas fa-info-circle
-        intent: primary
+  - step: Enter messages from the legacy edition in its Issue Editor window.
+    options:
+    - step: Add Lists Annexed message.
+      directions:
+      - step: |
+          In the beginning of the OB edition file you downloaded, find the “Lists annexed…” section header.
+      - step: |
+          On the left side of the Issue Editor window in ITU OB Editor app,
+          click the plus button below the “General Messages” header
+          and select the “Lists Annexed” menu item.
+        notes:
+        - text: |
+            <strong>Message editor screen</strong> will appear on the right side of the window.
+          icon: fas fa-info-circle
+          intent: primary
+      - step: |
+          Check that the items under Running Annexes tab in the message editor,
+          and items under <em>A.</em> list in the legacy edition,
+          are the same.
+        notes:
+        - text: |
+            If they are not the same, <a href="../troubleshooting/">contact ITU OB Editor maintenance team</a>.
+          icon: fas fa-info-circle
+          intent: accent
+      - step: |
+          In the message editor screen under <em>Extra publications</em> tab,
+          add all items from the <em>B.</em> list in the legacy edition document
+          using the circular plus <i class="fas fa-plus-circle"></i> button.
+        notes:
+        - text: |
+            <p>
+              You need to enter only a short Publication code for each item.
+            <p>
+              Here are the publication codes to use:
+            <table>
+              <tr>
+                <th>
+                  Publication name
+                <th>
+                  Publication code
+              <tr>
+                <td>List of ITU Carrier Codes (ITU-T Rec. M.1400 (03/2013))
+                <td>M1400_ICC
+              <tr>
+                <td>Bureaufax Table (ITU-T Rec. F.170)
+                <td>BUREAUFAX
+              <tr>
+                <td>List of recognized operating agencies (ROAs)
+                <td>ROA
+            </table>
+          icon: fas fa-info-circle
+          intent: primary
+
+    - step: Add amendment messages.
+      directions:
+      - step: |
+          In the OB Edition file you downloaded, locate the amendments section.
+      - step: |
+          Using the ITU OB Editor app, add each amendment message.
+        notes:
+        - text: |
+            See the <a href="../../amend-publication/">Adding publication amendments guide</a>.
+          icon: fas fa-info-circle
+          intent: primary
 ---
 
 <section class="intro">
   <p>
-    This assumes you have located a legacy edition to migrate,
-    and have it downloaded & opened.
+    This assumes you have <a href="../find-legacy-edition/">found, downloaded and opened a legacy edition</a>
+    in MS Word or PDF format, and that you have the ITU OB Editor app
+    <a href="../prepare-repo/">opened & configured</a>.
   </p>
 </section>
