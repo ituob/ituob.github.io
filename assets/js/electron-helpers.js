@@ -46,3 +46,16 @@
   });
 }());
 
+
+// This module sets header color to matching system chrome color.
+
+(function () {
+  let remote = window.getElectronModule('remote');
+  if (!remote) { return; }
+
+  let header = document.querySelector('body > header');
+  let color = remote.systemPreferences.getColor('under-page-background');
+  if (color) {
+    header.style.background = color;
+  }
+}());
