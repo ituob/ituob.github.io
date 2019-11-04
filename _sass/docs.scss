@@ -140,6 +140,10 @@ body.docs-page--tutorial {
         padding-left: 2rem;
       }
 
+      .note + .note {
+        margin-top: 1rem;
+      }
+
       .note {
         font-size: 90%;
         display: flex;
