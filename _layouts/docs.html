@@ -12,22 +12,7 @@ footer_pills:
     icon: fas fa-home
 ---
 
-{% if page.breadcrumbs == nil %}
-  {% assign breadcrumbs = layout.breadcrumbs %}
-{% else %}
-  {% assign breadcrumbs = page.breadcrumbs %}
-{% endif %}
-
 <header>
-  {% unless page.hide_breadcrumbs %}
-    {% if page.in_app_help %}
-      <nav class="breadcrumbs">
-        <a href="{{ site.in_app_help.url_prefix }}">
-          All documentation</a>{%- for crumb in breadcrumbs -%}&nbsp;&nbsp;<i class="icon fas fa-caret-left"></i>&nbsp;&nbsp;{%- if crumb.url -%}<a href="{{ crumb.url }}">{%- endif -%}{{ crumb.title }}{%- if crumb.url -%}</a>{%- endif -%}{%- endfor -%}&nbsp;&nbsp;<i class="icon fas fa-caret-left"></i>
-      </nav>
-    {% endif %}
-  {% endunless %}
-
   <h2>{{ page.page_title }}</h2>
 </header>
 

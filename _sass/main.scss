@@ -38,7 +38,7 @@ body > header {
     padding-left: 5vw;
   }
 
-  a {
+  > :first-child {
     margin-left: -#{$logoSide / 1.5};
     display: flex;
     flex-flow: row nowrap;

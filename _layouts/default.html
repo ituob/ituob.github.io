@@ -53,20 +53,28 @@ footer_pills:
     {% if page.in_app_help %}in-app-help{% endif %}
   ">
 
-  {% unless page.in_app_help %}
-    <header>
-      <a href="{{ layout.site_home_link | default: "/" }}">
-        <img class="logo" src="{{ "/assets/logo.png" | relative_url }}" alt="ITU ">
-        <img class="logo-inverse" src="{{ "/assets/logo-inverse.png" | relative_url }}" alt="ITU ">
-        <h1>{{ layout.site_header | default: "<span class='publication-name'>Operational Bulletin</span> online" | safe }}</h1>
-        {% if title %}
-          <h2>
-            {{ title }}
-          </h2>
-        {% endif %}
-      </a>
-    </header>
-  {% endunless %}
+  <header>
+    <span>
+      <img class="logo" src="{{ "/assets/logo.png" | relative_url }}" alt="ITU ">
+      <img class="logo-inverse" src="{{ "/assets/logo-inverse.png" | relative_url }}" alt="ITU ">
+      <h1><a href="{{ layout.site_home_link | default: "/" }}">{{ layout.site_header | default: "<span class='publication-name'>Operational Bulletin</span> online" | safe }}</a></h1>
+
+      {% if page.breadcrumbs == nil %}
+        {% assign breadcrumbs = layout.breadcrumbs %}
+      {% else %}
+        {% assign breadcrumbs = page.breadcrumbs %}
+      {% endif %}
+      {% assign num_breadcrumbs = breadcrumbs | size %}
+
+      {% unless page.hide_breadcrumbs == "all" %}
+      <h2>
+        <nav class="breadcrumbs">
+          {%- for crumb in breadcrumbs -%}{%- if crumb.url -%}<a href="{{ crumb.url }}">{%- endif -%}{{ crumb.title }}{%- if crumb.url -%}</a>{% unless forloop.last %}&nbsp;&nbsp;<i class="icon fas fa-caret-right"></i>&nbsp;&nbsp;{% endunless %}{%- endif -%}{%- endfor -%}{% if title and page.hide_breadcrumbs != "title" %}{% if num_breadcrumbs > 0 %}&nbsp;&nbsp;<i class="icon fas fa-caret-right"></i>&nbsp;&nbsp;{% endif %}<span class="title">{{ title }}</span>{% endif %}
+        </nav>
+      </h2>
+      {% endunless %}
+    </span>
+  </header>
 
   <main>
     {{ content }}
