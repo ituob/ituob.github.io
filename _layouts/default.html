@@ -57,7 +57,7 @@ footer_pills:
     <span>
       <img class="logo" src="{{ "/assets/logo.png" | relative_url }}" alt="ITU ">
       <img class="logo-inverse" src="{{ "/assets/logo-inverse.png" | relative_url }}" alt="ITU ">
-      <h1><a href="{{ layout.site_home_link | default: "/" }}">{{ layout.site_header | default: "<span class='publication-name'>Operational Bulletin</span> online" | safe }}</a></h1>
+      <h1><a href="{{ page.in_app_help.url_prefix | default: layout.site_home_link | default: "/" }}">{{ layout.site_header | default: "<span class='publication-name'>Operational Bulletin</span> online" | safe }}</a></h1>
 
       {% if page.breadcrumbs == nil %}
         {% assign breadcrumbs = layout.breadcrumbs %}
