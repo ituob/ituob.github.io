@@ -23,57 +23,45 @@ tutorials:
   - step: |
       Enter messages, one by one, from the legacy edition
       into the Issue Editor window of the ITU OB Editor app.
-    notes:
-    - text: |
-        In the MS Word or PDF version of each legacy ITU OB issue
-        a single message is represented by a section of the document,
-        often starting with grey header at the top of the page.
-      icon: fas fa-info-circle
-      intent: primary
-    options:
-    - step: Add Lists Annexed message.
-      directions:
-      - step: |
-          In the beginning of the OB edition file you downloaded, find the “Lists annexed…” section header.
-      - step: |
-          On the left side of the Issue Editor window in ITU OB Editor app,
-          click the plus button below the “General Messages” header
-          and select the “Lists Annexed” menu item.
-        notes:
-        - text: |
-            <strong>Message editor screen</strong> will appear on the right side of the window.
-          icon: fas fa-info-circle
-          intent: primary
-      - step: |
-          Check that the items under Running Annexes tab in the message editor,
-          and items under <em>A.</em> list in the legacy edition,
-          are the same (disregarding the order they appear in).
-        notes:
-        - text: |
-            If they are not the same, <a href="../troubleshooting/">contact ITU OB Editor maintenance team</a>.
-          icon: fas fa-info-circle
-          intent: accent
-      - step: |
-          See <a href="../../messages/running_annexes/">how to add Lists Annexed message</a> next.
-        notes:
-        - text: |
-            Use that guide to fill in the <em>Extra publications</em> tab
-            using items from the <em>B.</em> part of the Lists Annexed section
-            of the legacy edition document.
-          icon: fas fa-info-circle
-          intent: primary
+    directions:
+    - step: |
+        <em>Identify</em> a single message inside the legacy OB edition file you downloaded.
+      notes:
+      - text: |
+          <p>
+            Messages are divided into “General information” and “Amendments”.
+          <p>
+            A single message is represented as a section of the document,
+            often starting with grey header at the top of the page.
+        icon: fas fa-info-circle
+        intent: primary
+    - step: |
+        <em>Create</em> a corresponding message entry in the Issue Editor editor,
+        and edit the message so that its contents in the app match
+        its contents in the legacy OB edition file you downloaded.
+      notes:
+      - text: |
+          See <a href="../../messages/">how to work with messages</a>
+          and <a href="../../amend-publication/">how to add amendmnets</a>
+          in ITU OB Editor.
+        icon: fas fa-arrow-circle-right
+        intent: primary
 
-    - step: Add amendment messages.
-      directions:
-      - step: |
-          In the OB Edition file you downloaded, locate the amendments section.
-      - step: |
-          Using the ITU OB Editor app, add each amendment message.
-        notes:
-        - text: |
-            See the <a href="../../amend-publication/">Adding publication amendments guide</a>.
-          icon: fas fa-info-circle
-          intent: primary
+      options:
+      - step: "Notes about Lists Annexed message:"
+        directions:
+        - step: |
+            Check that the items under “Running Annexes” tab in the message editor,
+            and items under <em>A.</em> list in the legacy edition,
+            are the same (disregarding the order they appear in).
+          notes:
+          - text: |
+              If they are not the same, <a href="../troubleshooting/">contact ITU OB Editor maintenance team</a>.
+            icon: fas fa-info-circle
+            intent: accent
+        - step: |
+            Populate Extra Publications tab using the <em>B.</em> part of the list
+            <a href="../../messages/running_annexes/">as described here</a>.
 ---
 
 <section class="intro">
