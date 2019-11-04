@@ -26,7 +26,7 @@ module Jekyll
       self.process(@name)
 
       self.data = data.clone
-      self.data['in_app_help'] = true
+      self.data['in_app_help'] = site.config['in_app_help']
       self.data['permalink'] = nil
       self.data['site_title'] = "#{site.config['in_app_help']['app_name']} Help"
     end
