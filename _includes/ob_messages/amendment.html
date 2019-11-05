@@ -1,3 +1,19 @@
 <div class="included-contents">
-  {% trans_file include.msg.contents %}
+
+  {% comment %}
+    Use this to guess whether the message is using new format (ProseMirror)
+    or old (.adoc attachment)
+  {% endcomment %}
+  {% assign contents_default_lang = include.msg.contents[site.default_language] %}
+
+  {% if contents_default_lang.type == "doc" %}
+    {% assign contents_active_lang = include.msg.contents[page.lang] %}
+    {% if contents_active_lang.type == "doc" %}
+      {% include prosemirror_contents.html doc=contents_active_lang %}
+    {% else %}
+      <p>(Translation is missing.)</p>
+    {% endif %}
+  {% else %}
+    {% trans_file include.msg.contents %}
+  {% endif %}
 </div>

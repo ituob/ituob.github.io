@@ -1,0 +1,46 @@
+{% for node in include.doc.content %}
+
+  {% if node.type == "text" %}
+    {{ node.text }}
+
+  {% elsif node.type == "paragraph" %}
+    <p>
+      {% include prosemirror_contents.html doc=node %}
+    </p>
+
+  {% elsif node.type == "heading" %}
+    {% assign _headingLevel = node.attrs.level | plus: 2 %}
+    <h{{ _headingLevel }}>
+      {% include prosemirror_contents.html doc=node %}
+    </h{{ _headingLevel }}>
+
+  {% elsif node.type == "bullet_list" %}
+    <ul>
+      {% include prosemirror_contents.html doc=node %}
+    </ul>
+  {% elsif node.type == "ordered_list" %}
+    <ol>
+      {% include prosemirror_contents.html doc=node %}
+    </ol>
+  {% elsif node.type == "list_item" %}
+    <li>
+      {% include prosemirror_contents.html doc=node %}
+    </li>
+
+  {% elsif node.type == "table_row" %}
+    <tr>
+      {% include prosemirror_contents.html doc=node %}
+    </tr>
+  {% elsif node.type == "table_cell" %}
+    <td
+        {% if node.attrs.rowspan %}rowspan="{{ node.attrs.rowspan }}"{% endif %}
+        {% if node.attrs.colspan %}colspan="{{ node.attrs.colspan }}"{% endif %}>
+      {% include prosemirror_contents.html doc=node %}
+    </td>
+  {% elsif node.type == "table" %}
+    <table>
+      {% include prosemirror_contents.html doc=node %}
+    </table>
+
+  {% endif %}
+{% endfor %}
