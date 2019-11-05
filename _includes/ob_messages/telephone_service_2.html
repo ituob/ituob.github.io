@@ -1,0 +1,15 @@
+<div class="included-contents">
+  {% for cc_set in include.msg.contents %}
+    <div class="country">
+      <h4>{% trans cc_set.country_name %} +{{ cc_set.phone_code }}</h4>
+
+      {% for comm in cc_set.communications %}
+        <div class="communication">
+          <h5>Communication of {{ comm.date | as_swiss_date }}</h5>
+          {% assign doc = comm.contents[page.lang] | default: comm.contents[site.default_language] %}
+          {% include prosemirror_contents.html doc=doc %}
+        </div>
+      {% endfor %}
+    </div>
+  {% endfor %}
+</div>
