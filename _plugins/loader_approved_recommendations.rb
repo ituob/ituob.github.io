@@ -7,8 +7,14 @@ module Jekyll
 
     def load_approved_recommendations_message(msg, issue_id)
       msg['items'] = msg['items'].map { |code, version|
-        year, month = version.split('-')
-        [code, Date.new(year.to_i, month.to_i, 1)]
+        version_as_date = nil
+        if version.is_a?(Date)
+          version_as_date = version
+        else
+          year, month = version.split('-')
+          version_as_date = Date.new(year.to_i, month.to_i, 1)
+        end
+        [code, version_as_date]
       }.to_h
 
       msg['items'].each do |rec, version|
