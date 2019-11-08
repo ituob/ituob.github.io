@@ -7,7 +7,7 @@
   <tbody>
     {% for item in include.msg.items %}
       <tr>
-        <td>{{ item.country }}
+        <td>{% trans item.country %}
         <td>
           {% if site.data.issues[item.ob] %}
             <a href="
