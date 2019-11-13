@@ -7,11 +7,6 @@ module Jekyll
       @dir = "#{issue_dir}-#{language}"
       @name = "index.html"
 
-      # Ignore OB issue unless it has a publication date.
-      # TODO: Check that the date is in the future.
-      unless issue_data['meta']['publication_date']
-        return false
-      end
       # Tack another convenience property onto issue_data
       issue_data['running_annexes_ordered'] = issue_data['running_annexes'].sort_by { |id, data|
         data['annexed_to_ob']
@@ -41,6 +36,13 @@ module Jekyll
     end
 
     def write_ob_issue(path, issue_id, issue_data)
+      pub_date = issue_data['meta']['publication_date']
+
+      # Ignore OB issue unless it has a publication date which is in the past
+      unless pub_date and pub_date < Date.today
+        return
+      end
+
       if issue_data['meta']['languages']
         issue_data['meta']['languages'].each do |lang, _|
           self.pages << OBIssue.new(self, self.source, path, issue_id, issue_data, lang)
