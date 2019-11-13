@@ -123,7 +123,7 @@ module Jekyll
 
       # Obtain an array of complete (non-draft) issues, latest first
       issues_seq_desc = issues_seq_asc.select {
-        |i_id| !self.data['issues'][i_id]['incomplete']
+        |i_id| self.data['issues'][i_id]['meta']['publication_date'] < Date.today
       }.reverse()
 
       self.data['latest_issue_id'] = issues_seq_desc[0]
