@@ -221,7 +221,7 @@ module Jekyll
       end
     end
 
-    # Resolves the original publication from given amendment target.
+    # Resolves the original publication and current annex, if any, given an amendment target.
     def resolve_amendment_target(amn_target)
       pub = self.data['publications'][amn_target['publication']]
 
