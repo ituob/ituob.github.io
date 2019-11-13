@@ -75,7 +75,7 @@ module Jekyll
 
   class Site
 
-    def write_amendment_search_indexes
+    def write_message_search_indices
       # Build a list of all messages across all issues
       issue_messages = []
       self.data['issue_ids_descending'].each do |issue_id|
@@ -158,7 +158,7 @@ module Jekyll
     priority :low
 
     def generate(site)
-      site.write_amendment_search_indexes
+      site.write_message_search_indices
     end
   end
 
