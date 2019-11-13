@@ -150,7 +150,7 @@ module Jekyll
       end
     end
 
-    # Adds an issue (specified by issue_data)
+    # Adds an issue/position (specified by issue_data)
     # of given publication/list/dataset (specified by publication_id)
     # to the list of current annexes.
     #
