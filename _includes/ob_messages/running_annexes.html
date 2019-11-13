@@ -11,7 +11,7 @@
         <th class="list-name">
     </thead>
     <tbody>
-      {% for item in include.issue.running_annexes %}
+      {% for item in include.issue.running_annexes_ordered %}
         {% assign pub_id = item[0] %}
         {% assign publication = site.data.publications[pub_id].meta %}
         {% assign annexed_issue = item[1] %}

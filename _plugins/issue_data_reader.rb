@@ -114,9 +114,7 @@ module Jekyll
         end
 
         # Snapshot latest annexes up to this edition
-        issue_data['running_annexes'] = Marshal.load(Marshal.dump(self.data['current_annexes'].sort_by { |id, data|
-          data['annexed_to_ob']
-        }.reverse))
+        issue_data['running_annexes'] = Marshal.load(Marshal.dump(self.data['current_annexes']))
 
         # Back-fill scheduled issues for preceding editions
         self.backfill_planned_issue(issue_id)

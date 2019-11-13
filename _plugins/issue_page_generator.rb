@@ -12,6 +12,10 @@ module Jekyll
       unless issue_data['meta']['publication_date']
         return false
       end
+      # Tack another convenience property onto issue_data
+      issue_data['running_annexes_ordered'] = issue_data['running_annexes'].sort_by { |id, data|
+        data['annexed_to_ob']
+      }.reverse()
 
       self.process(@name)
 
