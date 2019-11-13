@@ -76,6 +76,7 @@ module Jekyll
   class Site
 
     def write_amendment_search_indexes
+      # Build a list of all messages across all issues
       issue_messages = []
       self.data['issue_ids_descending'].each do |issue_id|
         issue_data = self.data['issues'][issue_id]
