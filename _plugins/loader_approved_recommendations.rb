@@ -18,12 +18,10 @@ module Jekyll
       }.to_h
 
       msg['items'].each do |rec, version|
-        # Check if recommendation already has a title in YAML database
+        # Check if recommendation already has metadata in YAML database
         existing_rec = self.data['recommendations'][rec]
         if existing_rec
-          if existing_rec['meta']['title']['en']
-            next
-          end
+          next
         else
           self.data['recommendations'][rec] = {
             'meta' => { 'code' => rec, }
