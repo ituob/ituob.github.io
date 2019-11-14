@@ -99,7 +99,7 @@ module Jekyll
         messages.each do |msg|
           loader_method = "load_#{msg['type']}_message"
           if self.respond_to? loader_method
-            self.send(loader_method, msg, issue_id)
+            self.send(loader_method, msg, issue_id, issue_data['meta'])
           end
         end
 
@@ -192,7 +192,7 @@ module Jekyll
     # Associates an amendment with the original publication.
     # Infers & fills in useful amendment information
     # (publication title, amendment counter, etc.)
-    def load_amendment_message(amendment, ob_issue_id)
+    def load_amendment_message(amendment, ob_issue_id, ob_issue_meta)
       if amendment['target']
         original_pub, current_annex = self.resolve_amendment_target(amendment['target'])
 
@@ -204,8 +204,7 @@ module Jekyll
           }
 
           if current_annex
-            annexed_position = current_annex['position_on']
-            if amendment['target']['position_on'] == annexed_position
+            if current_annex['position_on'] and ob_issue_meta['publication_date'] >= current_annex['position_on']
               current_annex['amendments'] ||= []
               current_annex['amendments'] << {
                 'amended_in_ob_issue' => ob_issue_id,
@@ -236,7 +235,8 @@ module Jekyll
               p "WARNING: Trying to amend list #{amn_target['publication']} at position #{amn_target['position_on']}, while latest annexed position is #{annexed_list['position_on']}!"
             end
           else
-            p "WARNING: Trying to amend list #{amn_target['publication']} annexed at position #{annexed_list['position_on']} without specifying position"
+            # Position not specified, the latest annexed will be assumed
+            return pub, annexed_list
           end
         else
           p "WARNING: Annexed list #{amn_target['publication']} does not have position specified"

@@ -5,7 +5,7 @@ require 'nokogiri'
 module Jekyll
   class Site
 
-    def load_approved_recommendations_message(msg, issue_id)
+    def load_approved_recommendations_message(msg, issue_id, issue_meta)
       msg['items'] = msg['items'].map { |code, version|
         version_as_date = nil
         if version.is_a?(Date)

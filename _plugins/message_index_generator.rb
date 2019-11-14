@@ -14,8 +14,8 @@ module Jekyll
         end
         return nil
       },
-      'key_builder' => lambda { |val|
-        "#{val['publication']} (#{val['position_on']})"
+      'key_builder' => lambda { |val, issue_data|
+        "#{val['publication']} (#{val['position_on'] or (issue_data['running_annexes'][val['publication']] or {})['position_on'] or '-'})"
       },
     },
     'by-rec' => {
@@ -36,7 +36,7 @@ module Jekyll
         # or in message type configuration.
         return msg['recommendation'] || site.config['message_types'][msg['type']]['recommendation']
       },
-      'key_builder' => lambda { |val| "#{val['code']}" },
+      'key_builder' => lambda { |val, issue_data| "#{val['code']}" },
     },
   }
 
@@ -101,7 +101,7 @@ module Jekyll
           val = config['getter'].call(item['msg'], self)
           next if val == nil
 
-          key = config['key_builder'].call(val)
+          key = config['key_builder'].call(val, item['issue_data'])
           keys[key] ||= {
             'meta' => val,
             'items' => [],
@@ -121,7 +121,7 @@ module Jekyll
       matches_per_year = {}
 
       matches.each do |match|
-        year = self.data['issues'][match['issue_id']]['meta']['publication_date'].year
+        year = match['issue_data']['meta']['publication_date'].year
         matches_per_year[year] ||= []
         matches_per_year[year] << match
       end
