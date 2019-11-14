@@ -80,11 +80,13 @@ module Jekyll
       issue_messages = []
       self.data['issue_ids_descending'].each do |issue_id|
         issue_data = self.data['issues'][issue_id]
+
         ['general', 'amendments'].each do |section|
           if issue_data[section]
             issue_data[section]['messages'].each.with_index(1) do |msg, idx|
               issue_messages << {
                 'issue_id' => issue_id,
+                'issue_data' => issue_data,
                 'msg' => msg,
                 'anchor' => "#{section}-#{idx}",
               }

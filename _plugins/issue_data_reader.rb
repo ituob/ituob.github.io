@@ -226,6 +226,7 @@ module Jekyll
 
       # Let’s see if amendment target is a previously annexed list position
       annexed_list = self.data['current_annexes'][amn_target['publication']]
+
       if annexed_list
         if annexed_list['position_on']
           if amn_target['position_on']
