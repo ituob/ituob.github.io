@@ -1,15 +1,3 @@
 <div class="included-contents">
-
-  {% comment %}
-    Use this to guess whether the message is using new format (ProseMirror)
-    or old (.adoc attachment)
-  {% endcomment %}
-  {% assign contents_default_lang = include.msg.contents[site.default_language] %}
-
-  {% if contents_default_lang.type == "doc" %}
-    {% comment %}Currently, per-page language selection only works for OB edition pages.{% endcomment %}
-    {% include prosemirror_contents.html doc=contents_default_lang %}
-  {% else %}
-    {% trans_file include.msg.contents %}
-  {% endif %}
+  {% include prosemirror_or_adoc_contents.html contents=include.msg.contents %}
 </div>
