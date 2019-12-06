@@ -6,10 +6,10 @@ clean:
 	rm -rf _site
 
 _site:
-	bundle exec jekyll build
+	bundle exec jekyll build --trace
 
 serve:
-	bundle exec jekyll serve
+	bundle exec jekyll serve --trace
 
 update-init:
 	git submodule update --init
