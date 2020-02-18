@@ -69,8 +69,8 @@ module Jekyll
 
         # Consider OB edition “incomplete” if it lacks either amendments or general section
         ['general', 'amendments'].each do |important_section|
-          message_count = (issue_data[important_section] || {})['messages'].size
-          if message_count < 1
+          messages = (issue_data[important_section] || {})['messages']
+          if messages == nil or messages.size < 1
             issue_data['incomplete'] = true
             break
           end
