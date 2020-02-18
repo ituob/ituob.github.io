@@ -55,12 +55,20 @@ html_class: home
     <p class="actionable lang-links">
       <i class="fas fa-book-open"></i>
       Read this issue in
-      {% for lang in site.languages %}
-        {% if issue.meta.languages[lang.id] %}
-          <a class="lang"
-            href="/issues/{{ issue.meta.id }}-{{ lang.id }}">{{ lang.title }}</a>
-        {% endif %}
-      {% endfor %}
+      {% if issue.meta.languages %}
+        {% for lang in site.languages %}
+          {% if issue.meta.languages[lang.id] %}
+            <a class="lang"
+              href="/issues/{{ issue.meta.id }}-{{ lang.id }}">{{ lang.title }}</a>
+          {% endif %}
+        {% endfor %}
+      {% else %}
+        {% comment %}
+          TODO: ITU OB editor does not support translation and omits languages in meta at this time.
+        {% endcomment %}
+        <a class="lang"
+          href="/issues/{{ issue.meta.id }}-en">English</a>
+      {% endif %}
     </p>
   </article>
 </section>
