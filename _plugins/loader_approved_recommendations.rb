@@ -12,7 +12,7 @@ module Jekyll
           version_as_date = version
         else
           year, month = version.split('-')
-          version_as_date = Date.new(year.to_i, month.to_i, 1)
+          version_as_date = Date.new(year.to_i, (month or '1').to_i, 1)
         end
         [code, version_as_date]
       }.to_h
