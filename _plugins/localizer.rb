@@ -33,6 +33,13 @@ module Jekyll
 
     def render(context)
       translatable = context[@key]
+      report = context.registers[:site].config['report_missing_translations'] == true
+
+      # Try borrowing issue from immediate context, falling back to page.issue
+      issue = context['issue'] || context['page']['issue']
+
+      page = if issue then issue['meta']['id'].to_s else context['page']['meta'] end
+
       active_lang = context['page']['lang']
       default_lang = context['site']['default_language']
 
@@ -42,10 +49,14 @@ module Jekyll
         if translatable[active_lang]
           result = translatable[active_lang]
         elsif translatable[default_lang]
-          p "Translations: Missing for #{translatable}"
+          if report
+            p "Translations: #{issue_id}: Missing for #{@key}: #{translatable}"
+          end
           result = translatable[default_lang]
         else
-          p "Translations: Non-translatable"
+          if report
+            p "Translations: #{issue_id}: Non-translatable: #{@key}: #{translatable}"
+          end
           result = translatable
         end
       end
