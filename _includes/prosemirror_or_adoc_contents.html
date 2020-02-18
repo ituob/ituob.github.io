@@ -16,6 +16,6 @@
     {% assign contents_translated = nil %}
     {% include prosemirror_contents.html doc=contents_default_lang %}
   {% endif %}
-{% else %}
+{% elsif include.contents %}
   {% trans_file include.contents %}
 {% endif %}
