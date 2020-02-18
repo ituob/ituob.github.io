@@ -95,8 +95,12 @@ module Jekyll
     def render(context)
       path = context[@key]
 
-      if not path
-        p "L10N: trans_file passed empty string"
+      # Try borrowing issue from immediate context, falling back to page.issue
+      issue = context['issue'] || context['page']['issue']
+      issue_id = issue['meta']['id'].to_s
+
+      if not path or path == {}
+        p "ERROR: L10N: trans_file passed empty string or object in issue #{issue_id}, #{@key}"
         return nil
       end
 
@@ -104,13 +108,10 @@ module Jekyll
       filename = path_components.pop
       file_path = File.join(*path_components)
 
-      # Try borrowing issue from immediate context, falling back to page.issue
-      issue = context['issue'] || context['page']['issue']
-
       issue_path = File.join(
         context['site']['source'],
         context['site']['ob_root'],
-        issue['meta']['id'].to_s)
+        issue_id)
 
       active_lang = context['page']['lang']
       default_lang = context['site']['default_language']
@@ -132,7 +133,7 @@ module Jekyll
       end
 
       if result == nil
-        p "Couldn’t translate referenced file: #{filename}"
+        p "Error: L10N: #{issue_id} Couldn’t parse referenced file: #{@key}: #{filename}"
       end
 
       result
