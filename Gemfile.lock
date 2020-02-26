@@ -28,8 +28,6 @@ GEM
       pathutil (~> 0.9)
       rouge (>= 1.7, < 4)
       safe_yaml (~> 1.0)
-    jekyll-feed (0.13.0)
-      jekyll (>= 3.7, < 5.0)
     jekyll-plugin-frontend-build (0.0.2)
       jekyll (~> 3.8)
     jekyll-sass-converter (1.5.2)
@@ -43,7 +41,7 @@ GEM
       rb-inotify (~> 0.9, >= 0.9.10)
     mercenary (0.3.6)
     mini_portile2 (2.4.0)
-    nokogiri (1.10.7)
+    nokogiri (1.10.8)
       mini_portile2 (~> 2.4.0)
     pathutil (0.16.2)
       forwardable-extended (~> 2.6)
@@ -65,7 +63,6 @@ PLATFORMS
 DEPENDENCIES
   asciidoctor
   jekyll (~> 3.8.5)
-  jekyll-feed (~> 0.6)
   jekyll-plugin-frontend-build (~> 0.0.2)
   nokogiri
   tzinfo-data
