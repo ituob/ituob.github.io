@@ -20,7 +20,7 @@ module Jekyll
     def read_recommendations
       self.data['recommendations'] = {}
 
-      self.get_recommendations().each do |rec_path|
+      self.get_recommendations.each do |rec_path|
         rec_data = {
           'meta' => self.load_data('meta.yaml', rec_path),
         }
@@ -32,7 +32,7 @@ module Jekyll
     def read_publications
       self.data['publications'] = {}
 
-      self.get_publications().each do |pub_path|
+      self.get_publications.each do |pub_path|
         pub_data = {
           'meta' => self.load_data('meta.yaml', pub_path),
         }
@@ -56,7 +56,7 @@ module Jekyll
       issues_seq_asc = []
 
       # Read issues from filesystem, in unspecified order
-      self.get_issues().each do |issue_path|
+      self.get_issues.each do |issue_path|
         issue_data = {
           'meta' => self.load_data('meta.yaml', issue_path),
           'general' => self.load_data('general.yaml', issue_path, optional: true),
@@ -121,9 +121,9 @@ module Jekyll
       end
 
       # Obtain an array of complete (non-draft) issues, latest first
-      issues_seq_desc = issues_seq_asc.select {
-        |i_id| self.data['issues'][i_id]['meta']['publication_date'] < Date.today
-      }.reverse()
+      issues_seq_desc = issues_seq_asc.select do |i_id|
+        self.data['issues'][i_id]['meta']['publication_date'] < Date.today
+      end.reverse
 
       self.data['latest_issue_id'] = issues_seq_desc[0]
       self.data['previous_issue_id'] = issues_seq_desc[1]
