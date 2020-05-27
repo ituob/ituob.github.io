@@ -122,7 +122,7 @@ module Jekyll
 
       # Obtain an array of complete (non-draft) issues, latest first
       issues_seq_desc = issues_seq_asc.select do |i_id|
-        self.data['issues'][i_id]['meta']['publication_date'] < Date.today
+        self.data['issues'][i_id]['meta']['publication_date'].to_date < Date.today
       end.reverse
 
       self.data['latest_issue_id'] = issues_seq_desc[0]
@@ -166,7 +166,7 @@ module Jekyll
         if previously_annexed
           previous_position = previously_annexed['position_on']
           if current_position and previous_position
-            if previous_position >= current_position
+            if previous_position.to_date >= current_position.to_date
               p "WARNING: Newly annexed position of #{publication_id} #{current_position} must be later than previously annexed position #{previous_position}!"
             end
           else
@@ -204,7 +204,7 @@ module Jekyll
           }
 
           if current_annex
-            if current_annex['position_on'] and ob_issue_meta['publication_date'] >= current_annex['position_on']
+            if current_annex['position_on'] and ob_issue_meta['publication_date'].to_date >= current_annex['position_on'].to_date
               current_annex['amendments'] ||= []
               current_annex['amendments'] << {
                 'amended_in_ob_issue' => ob_issue_id,

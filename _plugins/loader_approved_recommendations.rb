@@ -10,9 +10,17 @@ module Jekyll
         version_as_date = nil
         if version.is_a?(Date)
           version_as_date = version
+        elsif version.is_a?(Time)
+          # NOTE: It really shouldn’t be a time.
+          version_as_date = version.to_date
         else
-          year, month = version.split('-')
-          version_as_date = Date.new(year.to_i, (month or '1').to_i, 1)
+          begin
+            year, month = version.split('-')
+            version_as_date = Date.new(year.to_i, (month or '1').to_i, 1)
+          rescue
+            year, month, day = version.split('-')
+            version_as_date = Date.new(year.to_i, (month or '1').to_i, (day or '1').to_i)
+          end
         end
         [code, version_as_date]
       }.to_h

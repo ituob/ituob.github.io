@@ -39,7 +39,7 @@ module Jekyll
       pub_date = issue_data['meta']['publication_date']
 
       # Ignore OB issue unless it has a publication date which is in the past
-      unless pub_date and pub_date < Date.today
+      unless pub_date and pub_date.to_date < Date.today
         return
       end
 
