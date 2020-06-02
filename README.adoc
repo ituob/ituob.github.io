@@ -1,8 +1,12 @@
 = ITU Operational Bulletin Website
 
-image::https://travis-ci.com/ituob/ituob.org.svg?branch=master[]
+image:https://github.com/ituob/ituob.org/workflows/build/badge.svg["Build Status", link="https://github.com/ituob/ituob.org/actions?workflow=build"]
+image:https://github.com/ituob/ituob.org/workflows/deploy-master/badge.svg["Build Status", link="https://github.com/ituob/ituob.org/actions?workflow=deploy-master"]
+image:https://github.com/ituob/ituob.org/workflows/deploy-staging/badge.svg["Build Status", link="https://github.com/ituob/ituob.org/actions?workflow=deploy-staging"]
 
-The website built from this source is available at www.ituob.org.
+The website built from this source is available at:
+* Production: https://www.ituob.org
+* Staging: https://staging-www.ituob.org
 
 Generates a web-based representation of individual OB issues
 and message filtering across OB issues.
