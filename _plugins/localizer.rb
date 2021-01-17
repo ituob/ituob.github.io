@@ -99,8 +99,13 @@ module Jekyll
       issue = context['issue'] || context['page']['issue']
       issue_id = issue['meta']['id'].to_s
 
-      if not path or path == {}
-        p "ERROR: L10N: trans_file passed empty string or object in issue #{issue_id}, #{@key}"
+      if path.class == Hash
+        p "ERROR: L10N: trans_file was passed a hash (object) instead of a string in issue #{issue_id}, #{@key}"
+        return nil
+      end
+
+      if not path
+        p "WARNING: L10N: trans_file passed empty string or object in issue #{issue_id}, #{@key}"
         return nil
       end
 
