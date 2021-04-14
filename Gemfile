@@ -20,3 +20,5 @@ gem "wdm", "~> 0.1.0" if Gem.win_platform?
 
 # Converts AsciiDoc-formatted contents of NNP communications
 gem "asciidoctor"
+
+gem "relaton"
