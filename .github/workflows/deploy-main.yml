@@ -1,17 +1,17 @@
-name: deploy-staging
+name: deploy-main
 
 on:
   push:
-    branches: staging
+    branches: main
   repository_dispatch:
-    types: [ deploy_staging ]
+    types: [ deploy_main ]
 
 jobs:
   build:
     name: Build site
     runs-on: ubuntu-latest
     environment:
-      name: staging
+      name: production
     steps:
       - name: Setup prerequisites
         run: |
@@ -62,10 +62,10 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
-      - name: Deploy to ${{ secrets.S3_BUCKET_NAME_STAGING }}
+      - name: Deploy to ${{ secrets.S3_BUCKET_NAME }}
         env:
-          CLOUDFRONT_DISTRIBUTION_ID: ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID_STAGING }}
-          S3_BUCKET_NAME: ${{ secrets.S3_BUCKET_NAME_STAGING }}
+          CLOUDFRONT_DISTRIBUTION_ID: ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}
+          S3_BUCKET_NAME: ${{ secrets.S3_BUCKET_NAME }}
         run: |
           aws configure set default.s3.max_concurrent_requests 100
           aws configure set default.s3.max_queue_size 10000
