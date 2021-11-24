@@ -23,7 +23,7 @@ jobs:
       - name: Use Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: 2.7
+          ruby-version: 3.0
           bundler-cache: true
 
       - name: Checkout data
@@ -44,7 +44,7 @@ jobs:
       - name: Use Node
         uses: actions/setup-node@v2
         with:
-          node-version: '10'
+          node-version: '16'
           cache: 'npm'
 
       - run: npm install
