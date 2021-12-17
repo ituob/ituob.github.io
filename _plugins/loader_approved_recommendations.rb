@@ -25,7 +25,7 @@ module Jekyll
       }.to_h
 
       # results = Queue.new
-      @db ||= Relaton::DbCache.init_bib_caches global_cache: true
+      @db ||= Relaton::DbCache.init_bib_caches(local_cache: 'relaton')
       msg['items'].each do |rec, version|
         # Check if recommendation already has metadata in YAML database
         existing_rec = data['recommendations'][rec]
@@ -50,12 +50,17 @@ module Jekyll
       # msg['items'].size.times do
       #   t = results.pop
         begin
-          title = fetch_recommendation_title rec, version
-        rescue
-          p "ERROR: Failed to fetch recommendation title for #{rec} #{version}"
-          title = ""
+          title = fetch_recommendation_title(rec, version)
+        rescue StandardError => e
+          puts "ERROR: Error thrown when fetching recommendation title for #{rec} #{version}"
+          p e.inspect
+          title = nil
         end
-        next if title == ""
+
+        if title.nil?
+          puts "WARNING: No title retrieved for recommendation #{rec} #{version}"
+          next
+        end
 
         # If successful, add title to recommendation data dynamically
         data['recommendations'][rec]['meta']['title'] = { 'en' => title }
@@ -64,8 +69,10 @@ module Jekyll
 
     def fetch_recommendation_title(rec, version)
       ref = "ITU-T #{rec.strip}"
-      ref += " #{version}" if version && !version.empty?
+      ref += " #{version.strip}" if version && !version.empty?
       bib = @db.fetch ref
+      return nil unless bib
+
       bib.title.detect { |t| t.type == 'main' }&.title&.content.to_s
     end
   end
