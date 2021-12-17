@@ -3,6 +3,7 @@ SHELL := /bin/bash
 all: _site
 
 clean:
+	bundle exec jekyll clean
 	rm -rf _site
 
 _site:
