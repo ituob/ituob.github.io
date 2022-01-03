@@ -24,7 +24,7 @@ jobs:
       - name: Use Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: 3.0
+          ruby-version: '3.0' # https://github.com/actions/runner/issues/849
           bundler-cache: true
 
       - name: Checkout data
