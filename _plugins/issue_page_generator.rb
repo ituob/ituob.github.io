@@ -8,9 +8,9 @@ module Jekyll
       @name = "index.html"
 
       # Tack another convenience property onto issue_data
-      issue_data['running_annexes_ordered'] = issue_data['running_annexes'].sort_by { |id, data|
+      issue_data['running_annexes_ordered'] = issue_data['running_annexes'].sort_by do |id, data|
         data['annexed_to_ob']
-      }.reverse()
+      end.reverse
 
       self.process(@name)
 
