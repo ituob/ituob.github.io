@@ -12,9 +12,9 @@ module Jekyll
 
     def load_data(fname, path, optional=false)
       fpath = File.join(path, fname)
-      if not optional or File.file?(fpath)
-        return YAML.load(File.read(fpath))
-      end
+      return unless not optional or File.file?(fpath)
+
+      return YAML.load_file(fpath, permitted_classes: [Time, Date])
     end
 
     def read_recommendations
