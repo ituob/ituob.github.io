@@ -1,12 +1,16 @@
+.PHONY: _site
 SHELL := /bin/bash
 
 all: _site
+
+Gemfile.lock:
+	bundle install
 
 clean:
 	bundle exec jekyll clean
 	rm -rf _site
 
-_site:
+_site: Gemfile.lock
 	bundle exec jekyll build --trace
 
 serve:
