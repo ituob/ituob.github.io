@@ -19,7 +19,7 @@ jobs:
           sudo apt-get install -y curl make libxml2-dev libxslt-dev openssl
 
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Use Ruby
         uses: ruby/setup-ruby@v1
@@ -28,7 +28,7 @@ jobs:
           bundler-cache: true
 
       - name: Checkout data
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           token: ${{ secrets.ITUOB_CI_PAT_TOKEN }}
           repository: ituob/itu-ob-data
