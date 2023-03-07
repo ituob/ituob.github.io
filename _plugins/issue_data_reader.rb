@@ -193,30 +193,36 @@ module Jekyll
     # Infers & fills in useful amendment information
     # (publication title, amendment counter, etc.)
     def load_amendment_message(amendment, ob_issue_id, ob_issue_meta)
-      if amendment['target']
-        original_pub, current_annex = self.resolve_amendment_target(amendment['target'])
 
-        if original_pub
-          original_pub['amendments'] ||= []
-          original_pub['amendments'] << {
-            'changeset' => amendment['changeset'],
-            'amended_in_ob_issue' => ob_issue_id,
-          }
-
-          if current_annex
-            if current_annex['position_on'] and ob_issue_meta['publication_date'].to_date >= current_annex['position_on'].to_date
-              current_annex['amendments'] ||= []
-              current_annex['amendments'] << {
-                'amended_in_ob_issue' => ob_issue_id,
-              }
-              amendment['seq_no'] = current_annex['amendments'].size
-            end
-          end
-        else
-          p "WARNING: Original publication not found for amendment #{amendment['target']['publication']}"
-        end
-      else
+      unless amendment['target']
         p "No target specified for amendment “#{amendment['title'] || amendment}” in OB #{ob_issue_id}"
+        return
+      end
+
+      original_pub, current_annex = self.resolve_amendment_target(amendment['target'])
+
+      unless original_pub
+        p "WARNING: Original publication not found for amendment #{amendment['target']['publication']}"
+        return
+      end
+
+      original_pub['amendments'] ||= []
+      original_pub['amendments'] << {
+        'changeset' => amendment['changeset'],
+        'amended_in_ob_issue' => ob_issue_id,
+      }
+
+      unless current_annex
+        p "WARNING: Annex not found for amendment #{amendment['target']['publication']}"
+        return
+      end
+
+      if current_annex['position_on'] and ob_issue_meta['publication_date'].to_date >= current_annex['position_on'].to_date
+        current_annex['amendments'] ||= []
+        current_annex['amendments'] << {
+          'amended_in_ob_issue' => ob_issue_id,
+        }
+        amendment['seq_no'] = current_annex['amendments'].size
       end
     end
 
@@ -227,24 +233,24 @@ module Jekyll
       # Let’s see if amendment target is a previously annexed list position
       annexed_list = self.data['current_annexes'][amn_target['publication']]
 
-      if annexed_list
-        if annexed_list['position_on']
-          if amn_target['position_on']
-            if amn_target['position_on'] == annexed_list['position_on']
-              return pub, annexed_list
-            else
-              p "WARNING: Trying to amend list #{amn_target['publication']} at position #{amn_target['position_on']}, while latest annexed position is #{annexed_list['position_on']}!"
-            end
-          else
-            # Position not specified, the latest annexed will be assumed
-            return pub, annexed_list
-          end
-        else
-          p "WARNING: Annexed list #{amn_target['publication']} does not have position specified"
-        end
+      return [pub, nil] unless annexed_list
+
+      unless annexed_list['position_on']
+        p "WARNING: Annexed list #{amn_target['publication']} does not have position specified"
+        return [pub, nil]
       end
 
-      return pub, nil
+      unless amn_target['position_on']
+        # Position not specified, the latest annexed will be assumed
+        return [pub, annexed_list]
+      end
+
+      unless amn_target['position_on'] == annexed_list['position_on']
+        p "WARNING: Trying to amend list #{amn_target['publication']} at position #{amn_target['position_on']}, while latest annexed position is #{annexed_list['position_on']}!"
+        return [pub, nil]
+      end
+
+      [pub, annexed_list]
     end
 
     # Returns a list of OB_ROOT subdirectories (expected one for each OB issue)
