@@ -22,12 +22,13 @@ jobs:
         then
           echo "::set-output name=my_env::production"
           echo "::set-output name=my_url::https://www.ituob.org"
+          echo "::set-output name=data_branch::main"
         elif [ "$GITHUB_REF" = "refs/heads/staging" ]
         then
           echo "::set-output name=my_env::staging"
           echo "::set-output name=my_url::https://staging-www.ituob.org"
+          echo "::set-output name=data_branch::staging"
         fi
-
 
   build:
     name: Build site
@@ -62,7 +63,7 @@ jobs:
         token: ${{ secrets.ITUOB_CI_PAT_TOKEN }}
         repository: ituob/itu-ob-data
         path: data
-        ref: master
+        ref: ${{ needs.set_environment.outputs.data_branch }}
         fetch-depth: 1
 
     - name: Cache relaton
