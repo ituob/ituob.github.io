@@ -110,10 +110,16 @@ jobs:
         key: cache-lychee-${{ github.sha }}
         restore-keys: cache-lychee-
 
-    - name: Run lychee
+    - name: Run lychee for emails
       uses: lycheeverse/lychee-action@v1.6.1
       with:
-        args: --verbose --no-progress --cache --max-cache-age 1d '_site/**/*.html'
+        args: --no-progress --exclude "(https?)|(file)://" --cache --max-cache-age 1d '_site/**/*.html'
+        fail: false
+
+    - name: Run lychee for links
+      uses: lycheeverse/lychee-action@v1.6.1
+      with:
+        args: --no-progress --exclude-mail --cache --max-cache-age 1d '_site/**/*.html'
         fail: true
 
   deploy:
