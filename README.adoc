@@ -17,6 +17,11 @@ and message filtering across OB issues.
 * Clone the repository & initialize submodules.
 * Run `bundle`; then `bundle exec jekyll build` (or `serve`).
 
+The source data branches are:
+
+* Production deploys from the https://github.com/ituob/itu-ob-data/tree/main[itu-ob-data@main branch]
+* Staging deploys from the https://github.com/ituob/itu-ob-data/tree/staging[itu-ob-data@staging branch]
+
 == Approach
 
 Each ITU OB issue is modelled as a collection of messages.
