@@ -10,13 +10,11 @@
         <td>{% trans item.country %}
         <td>
           {% if site.data.issues[item.ob] %}
-            <a href="
-              {% if site.data.issues[item.ob].incomplete != true %}
-                {{ "/issues/" | append: item.ob | append: "-" | append: site.default_language | relative_url }}
-              {% else %}
-                https://www.itu.int/pub/T-SP-OB.{{ item.ob }}-{{ site.data.issues[item.ob].meta.publication_date | date: "%Y" }}
-              {% endif %}
-            ">
+            {% if site.data.issues[item.ob].incomplete != true %}
+              <a href="{{ "/issues/" | append: item.ob | append: "-" | append: site.default_language | relative_url }}
+            {% else %}">
+              <a href="https://www.itu.int/pub/T-SP-OB.{{ item.ob }}-{{ site.data.issues[item.ob].meta.publication_date | date: "%Y" }}">
+            {% endif %}
           {% endif %}
             {{ item.ob }}
           {% if site.data.issues[item.ob] %}

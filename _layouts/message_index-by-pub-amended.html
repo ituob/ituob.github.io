@@ -39,19 +39,17 @@ title: Messages related to ITU-T Service Publication
       <p class="annex-info">
         <i class="far fa-paperclip"></i>Annexed to
           {% if site.data.issues[annex_data.annexed_to_ob] %}
-            <a href="
-                {% if site.data.issues[annex_data.annexed_to_ob].incomplete != true %}
-                  {{ "/issues/" | append: annex_data.annexed_to_ob | append: "-" | append: site.default_language | relative_url }}
-                {% else %}
-                  https://www.itu.int/pub/T-SP-OB.{{ annex_data.annexed_to_ob }}-{{ site.data.issues[annex_data.annexed_to_ob].meta.publication_date | date: "%Y" }}
-                {% endif %}
-              ">
+            {% if site.data.issues[annex_data.annexed_to_ob].incomplete != true %}
+              <a href="{{ "/issues/" | append: annex_data.annexed_to_ob | append: "-" | append: site.default_language | relative_url }}">
+            {% else %}
+              <a href="https://www.itu.int/pub/T-SP-OB.{{ annex_data.annexed_to_ob }}-{{ site.data.issues[annex_data.annexed_to_ob].meta.publication_date | date: "%Y" }}">
+            {% endif %}
           {% endif %}
 
           ITU OB No. {{ annex_data.annexed_to_ob }}
 
           {% if site.data.issues[annex_data.annexed_to_ob] %}
-            </a>
+              </a>
           {% endif %}
       </p>
     {% endif %}
