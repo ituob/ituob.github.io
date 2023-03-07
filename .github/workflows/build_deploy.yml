@@ -12,22 +12,23 @@ on:
 jobs:
   set_environment:
     outputs:
-      my_env: ${{ steps.setenv.outputs.my_env }}
-      my_url: ${{ steps.setenv.outputs.my_url }}
+      env_name: ${{ steps.setenv.outputs.env_name }}
+      env_url: ${{ steps.setenv.outputs.env_url }}
     runs-on: ubuntu-latest
     steps:
     - id: setenv
+      name: Set output
       run: |
-        if [ "$GITHUB_REF" = "refs/heads/main" ]
+        if [ "$GITHUB_REF" = "refs/heads/main" ];
         then
-          echo "::set-output name=my_env::production"
-          echo "::set-output name=my_url::https://www.ituob.org"
-          echo "::set-output name=data_branch::main"
+          echo "env_name=production" >> $GITHUB_OUTPUT
+          echo "env_url=https://www.ituob.org" >> $GITHUB_OUTPUT
+          echo "data_branch=main" >> $GITHUB_OUTPUT
         elif [ "$GITHUB_REF" = "refs/heads/staging" ]
         then
-          echo "::set-output name=my_env::staging"
-          echo "::set-output name=my_url::https://staging-www.ituob.org"
-          echo "::set-output name=data_branch::staging"
+          echo "env_name=staging" >> $GITHUB_OUTPUT
+          echo "env_url=https://staging-www.ituob.org" >> $GITHUB_OUTPUT
+          echo "data_branch=staging" >> $GITHUB_OUTPUT
         fi
 
   build:
@@ -35,8 +36,8 @@ jobs:
     runs-on: ubuntu-latest
     needs: set_environment
     environment:
-      name: ${{ needs.set_environment.outputs.my_env }}
-      url: ${{ needs.set_environment.outputs.my_url }}
+      name: ${{ needs.set_environment.outputs.env_name }}
+      url: ${{ needs.set_environment.outputs.env_url }}
     steps:
 
     - name: Checkout repository
@@ -116,15 +117,15 @@ jobs:
         fail: true
 
   deploy:
-    name: Deploy to ${{ needs.set_environment.outputs.my_env }}
+    name: Deploy to ${{ needs.set_environment.outputs.env_name }}
     needs:
       - set_environment
       - build
     runs-on: ubuntu-latest
-    if: ${{ needs.set_environment.outputs.my_env != '' }}
+    if: ${{ needs.set_environment.outputs.env_name != '' }}
     environment:
-      name: ${{ needs.set_environment.outputs.my_env }}
-      url: ${{ needs.set_environment.outputs.my_url }}
+      name: ${{ needs.set_environment.outputs.env_name }}
+      url: ${{ needs.set_environment.outputs.env_url }}
     steps:
 
     - name: Download site
