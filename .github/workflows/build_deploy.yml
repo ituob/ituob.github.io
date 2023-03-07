@@ -117,10 +117,7 @@ jobs:
         fail: false
 
     - name: Run lychee for links
-      uses: lycheeverse/lychee-action@v1.6.1
-      with:
-        args: --no-progress --exclude-mail --cache --max-cache-age 1d '_site/**/*.html'
-        fail: true
+      run: lychee --no-progress --exclude-mail --cache --max-cache-age 1d '_site/**/*.html'
 
   deploy:
     name: Deploy to ${{ needs.set_environment.outputs.env_name }}
