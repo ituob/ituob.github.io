@@ -1,8 +1,7 @@
 = ITU Operational Bulletin Website
 
-image:https://github.com/ituob/ituob.org/workflows/build/badge.svg["Build Status", link="https://github.com/ituob/ituob.org/actions?workflow=build"]
-image:https://github.com/ituob/ituob.org/workflows/deploy-master/badge.svg["Build Status", link="https://github.com/ituob/ituob.org/actions?workflow=deploy-master"]
-image:https://github.com/ituob/ituob.org/workflows/deploy-staging/badge.svg["Build Status", link="https://github.com/ituob/ituob.org/actions?workflow=deploy-staging"]
+image:https://github.com/ituob/ituob.org/actions/workflows/build_deploy.yml/badge.svg?branch=main["build_deploy (main)", link="https://github.com/ituob/ituob.org/actions/workflows/build_deploy.yml"]
+image:https://github.com/ituob/ituob.org/actions/workflows/build_deploy.yml/badge.svg?branch=staging["build_deploy (staging)", link="https://github.com/ituob/ituob.org/actions/workflows/build_deploy.yml"]
 
 The website built from this source is available at:
 
