@@ -1,0 +1,128 @@
+name: build_deploy
+
+on:
+  push:
+    branches:
+    - main
+    - staging
+  pull_request:
+  repository_dispatch:
+  workflow_dispatch:
+
+jobs:
+  set_environment:
+    outputs:
+      my_env: ${{ steps.setenv.outputs.my_env }}
+      my_url: ${{ steps.setenv.outputs.my_url }}
+    runs-on: ubuntu-latest
+    steps:
+    - id: setenv
+      run: |
+        if [ "$GITHUB_REF" = "refs/heads/main" ]
+        then
+          echo "::set-output name=my_env::production"
+          echo "::set-output name=my_url::https://www.ituob.org"
+        elif [ "$GITHUB_REF" = "refs/heads/staging" ]
+        then
+          echo "::set-output name=my_env::staging"
+          echo "::set-output name=my_url::https://staging-www.ituob.org"
+        fi
+
+
+  build:
+    name: Build site
+    runs-on: ubuntu-latest
+    needs: set_environment
+    environment:
+      name: ${{ needs.set_environment.outputs.my_env }}
+      url: ${{ needs.set_environment.outputs.my_url }}
+    steps:
+
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Install AWS CLI
+      uses: unfor19/install-aws-cli-action@v1
+
+    - name: Use Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: '3.1'
+        bundler-cache: true
+
+    - name: Use Node
+      uses: actions/setup-node@v2
+      with:
+        node-version: '16'
+        cache: 'npm'
+
+    - name: Checkout data
+      uses: actions/checkout@v3
+      with:
+        token: ${{ secrets.ITUOB_CI_PAT_TOKEN }}
+        repository: ituob/itu-ob-data
+        path: data
+        ref: master
+        fetch-depth: 1
+
+    - name: Cache relaton
+      uses: actions/cache@v2
+      with:
+        path: relaton
+        key: ${{ runner.os }}-${{ hashFiles('data/**/*.yaml') }}
+
+    - name: Build site
+      env:
+        JEKYLL_ENV: production
+      run: |
+        make _site
+        zip -r site.zip _site
+
+    - name: Upload site
+      uses: actions/upload-artifact@v3
+      with:
+        name: site.zip
+        path: site.zip
+        retention-days: 1
+
+  deploy:
+    name: Deploy to ${{ needs.set_environment.outputs.my_env }}
+    needs:
+      - set_environment
+      - build
+    runs-on: ubuntu-latest
+    if: ${{ needs.set_environment.outputs.my_env != '' }}
+    environment:
+      name: ${{ needs.set_environment.outputs.my_env }}
+      url: ${{ needs.set_environment.outputs.my_url }}
+    steps:
+
+    - name: Download site
+      uses: actions/download-artifact@v3
+      with:
+        name: site.zip
+        path: .
+
+    - name: Unzip
+      run: unzip site.zip
+
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ secrets.AWS_REGION }}
+
+    - name: Deploy to AWS
+      env:
+        CLOUDFRONT_DISTRIBUTION_ID: ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}
+        S3_BUCKET_NAME: ${{ secrets.S3_BUCKET_NAME }}
+      run: |
+        aws configure set default.s3.max_concurrent_requests 100
+        aws configure set default.s3.max_queue_size 10000
+        aws configure set default.s3.use_accelerate_endpoint true
+        aws configure set default.s3.payload_signing_enabled false
+        aws s3 sync _site s3://$S3_BUCKET_NAME --region=$AWS_REGION --delete --no-progress --exclude "*" --include "*.html" --content-type "text/html; charset=utf-8"
+        aws s3 sync _site s3://$S3_BUCKET_NAME --region=$AWS_REGION --delete --no-progress --exclude "*" --include "*.json" --content-type "text/json; charset=utf-8"
+        aws s3 sync _site s3://$S3_BUCKET_NAME --region=$AWS_REGION --delete --no-progress --exclude "*.html,*.json" --include "*"
+        aws cloudfront create-invalidation --distribution-id $CLOUDFRONT_DISTRIBUTION_ID --paths "/*"

@@ -1,0 +1,56 @@
+name: links
+
+on:
+  push:
+    branches:
+    - main
+    - staging
+  pull_request:
+
+jobs:
+  link_checker:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Use Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: '3.1'
+        bundler-cache: true
+
+    - name: Use Node
+      uses: actions/setup-node@v2
+      with:
+        node-version: '16'
+        cache: 'npm'
+
+    - name: Checkout data
+      uses: actions/checkout@v3
+      with:
+        token: ${{ secrets.ITUOB_CI_PAT_TOKEN }}
+        repository: ituob/itu-ob-data
+        path: data
+        ref: master
+        fetch-depth: 1
+
+    - name: Cache relaton
+      uses: actions/cache@v2
+      with:
+        path: relaton
+        key: ${{ runner.os }}-${{ hashFiles('data/**/*.yaml') }}
+
+    - name: Link Checker
+      uses: lycheeverse/lychee-action@v1.2.0
+      with:
+        args: --verbose --no-progress --exclude-file .lycheeignore -- _site/**/*.html
+        fail: true
+      env:
+        GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+
+      # - name: Create Issue From File
+      #   uses: peter-evans/create-issue-from-file@v2
+      #   with:
+      #     title: Link Checker Report
+      #     content-filepath: ./lychee/out.md
+      #     labels: report, automated issue
