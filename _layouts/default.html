@@ -111,7 +111,7 @@ footer_pills:
     {% endfor %}
   {% endif %}
 
-  {% if site.google_analytics %}
+  {% if jekyll.environment != "development" and site.google_analytics %}
   {% include google-analytics.html gaid='{{ site.google_analytics.id }}' %}
   {% endif %}
 </body>
