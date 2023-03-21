@@ -14,7 +14,7 @@ _site: Gemfile.lock
 	bundle exec jekyll build --trace
 
 serve:
-	bundle exec jekyll serve --trace
+	JEKYLL_ENV=development bundle exec jekyll serve --trace
 
 update-init:
 	git submodule update --init
