@@ -1,10 +1,9 @@
-{% assigns gaid = site.google_analytics.id %}
 <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id={{ gaid }}"></script>
+<script async src="https://www.googletagmanager.com/gtag/js?id={{ site.google_analytics.id }}"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
 
-  gtag('config', '{{ gaid }}');
+  gtag('config', '{{ site.google_analytics.id }}');
 </script>
