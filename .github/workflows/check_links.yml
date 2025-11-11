@@ -13,8 +13,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     environment:
-      name: production
-      url: https://www.ituob.org
+      name: ${{ github.ref == 'refs/heads/staging' && 'staging' || 'production' }}
+      url: ${{ github.ref == 'refs/heads/staging' && 'https://staging-www.ituob.org' || 'https://www.ituob.org' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -44,7 +44,7 @@ jobs:
           token: ${{ secrets.ITUOB_CI_PAT_TOKEN }}
           repository: ituob/itu-ob-data
           path: data
-          ref: ${{ needs.set_environment.outputs.data_branch }}
+          ref: ${{ github.ref == 'refs/heads/staging' && 'staging' || 'main' }}
           fetch-depth: 1
 
       - name: Cache relaton
