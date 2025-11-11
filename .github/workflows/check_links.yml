@@ -44,7 +44,7 @@ jobs:
           token: ${{ secrets.ITUOB_CI_PAT_TOKEN }}
           repository: ituob/itu-ob-data
           path: data
-          ref: ${{ needs.set_environment.outputs.data_branch }}
+          ref: ${{ github.ref == 'refs/heads/staging' && 'staging' || 'main' }}
           fetch-depth: 1
 
       - name: Cache relaton
