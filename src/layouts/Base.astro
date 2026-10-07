@@ -1,0 +1,278 @@
+---
+/**
+ * Base layout — Cobalt Glass shell.
+ *
+ * - Sticky glassmorphic header with brand, search trigger (Cmd+K), nav.
+ * - Optional breadcrumbs.
+ * - Three container widths: content / wide / full.
+ * - Command palette overlay (Cmd+K / Ctrl+K).
+ * - Footer with sitemap.
+ */
+import "~/styles/global.css";
+import DisclaimerBanner from "~/components/DisclaimerBanner.astro";
+import CommandPalette from "~/components/CommandPalette.astro";
+import { OB_ISSN } from "~/lib/catalogs";
+
+export interface Breadcrumb {
+  label: string;
+  href?: string;
+}
+
+export interface Props {
+  title: string;
+  description?: string;
+  masthead?: boolean;
+  canonical?: string;
+  ogImage?: string;
+  jsonLd?: Record<string, unknown> | Record<string, unknown>[];
+  progress?: boolean;
+  lang?: string;
+  wide?: boolean;
+  full?: boolean;
+  breadcrumbs?: Breadcrumb[];
+}
+
+const {
+  title,
+  description = "ITU Operational Bulletin — the premier cross-bureau biweekly publication of the International Telecommunication Union.",
+  masthead: _showMasthead = false,
+  canonical,
+  ogImage,
+  jsonLd,
+  progress = false,
+  lang = "en",
+  wide = false,
+  full = false,
+  breadcrumbs = [],
+} = Astro.props;
+
+const siteName = "ITU Operational Bulletin";
+const fullTitle = title === siteName ? title : `${title} — ${siteName}`;
+const canon = canonical ?? new URL(Astro.url.pathname, Astro.site ?? "https://www.ituob.org").toString();
+
+const isRtl = lang === "ar" || lang === "he" || lang === "fa";
+const dir = isRtl ? "rtl" : "ltr";
+
+const containerClass = full ? "container-full" : wide ? "container-wide" : "container-content";
+
+const navItems = [
+  { href: "/issues/", label: "Issues", minScreen: "" },
+  { href: "/datasets/", label: "Datasets", minScreen: "sm" },
+  { href: "/registers/", label: "Registers", minScreen: "md" },
+  { href: "/recommendations/", label: "Recommendations", minScreen: "lg" },
+  { href: "/types/", label: "Types", minScreen: "xl" },
+];
+
+const hideClasses: Record<string, string> = {
+  "": "",
+  sm: "hidden sm:inline-flex",
+  md: "hidden md:inline-flex",
+  lg: "hidden lg:inline-flex",
+  xl: "hidden xl:inline-flex",
+};
+---
+<!doctype html>
+<html lang={lang} dir={dir}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canon} />
+    <meta name="generator" content={Astro.generator} />
+
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canon} />
+    <meta property="og:site_name" content={siteName} />
+    <meta property="og:type" content="website" />
+    {ogImage && <meta property="og:image" content={ogImage} />}
+
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content={fullTitle} />
+    <meta name="twitter:description" content={description} />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
+    />
+
+    {jsonLd && (
+      <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+    )}
+
+    <script is:inline>
+      (function () {
+        try {
+          var stored = localStorage.getItem("ob-theme");
+          if (stored === "dark") document.documentElement.classList.add("dark");
+          else if (stored === "light") document.documentElement.classList.add("light");
+        } catch (e) {}
+      })();
+    </script>
+
+    {progress && (
+      <script>
+        const bar = document.createElement("div");
+        bar.className = "reading-progress no-print";
+        document.body.appendChild(bar);
+        function update() {
+          const h = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+          const p = h > 0 ? window.scrollY / h : 0;
+          bar.style.setProperty("--progress", String(p));
+        }
+        window.addEventListener("scroll", update, { passive: true });
+        window.addEventListener("resize", update);
+        document.addEventListener("DOMContentLoaded", update);
+      </script>
+    )}
+  </head>
+  <body>
+    <a
+      href="#main"
+      class="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-[100] focus:bg-[var(--accent)] focus:text-[var(--accent-contrast)] focus:px-3 focus:py-1.5 focus:rounded-[var(--radius-sm)]"
+    >
+      Skip to content
+    </a>
+
+    <DisclaimerBanner />
+
+    <header class="header-sticky no-print">
+      <div class={containerClass} style="display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 0 var(--page-pad); min-height: 3.75rem;">
+        <div style="display: flex; align-items: center; gap: 0.8rem; min-width: 0;">
+          <a
+            href="/"
+            class="no-underline"
+            style="display: flex; align-items: center; gap: 0.7rem; color: var(--fg); white-space: nowrap;"
+          >
+            <span aria-hidden="true" style="display: inline-flex; align-items: center; justify-content: center; width: 2.25rem; height: 2.25rem; border-radius: var(--radius-md); background: var(--gradient-accent); color: var(--accent-contrast, var(--accent-on)); font-family: var(--font-mono); font-size: var(--step--2); font-weight: 700; letter-spacing: 0.02em; box-shadow: 0 4px 12px rgba(59,130,246,0.35), inset 0 1px 0 rgba(255,255,255,0.2); position: relative; overflow: hidden;">
+              OB
+            </span>
+            <span style="font-family: var(--font-sans); font-weight: 700; font-size: var(--step-0); letter-spacing: -0.025em; color: var(--fg);" class="hidden sm:inline">
+              ITU Operational Bulletin
+            </span>
+            <span style="font-family: var(--font-sans); font-weight: 700; font-size: var(--step-0); letter-spacing: -0.025em; color: var(--fg);" class="sm:hidden">
+              OB
+            </span>
+          </a>
+          <span style="width: 1px; height: 1.4rem; background: var(--border-1);" class="hidden lg:inline-block"></span>
+          <span
+            class="hidden lg:inline"
+            style="font-family: var(--font-mono); font-size: var(--step--3); color: var(--fg-3); letter-spacing: 0.04em;"
+          >
+            ISSN {OB_ISSN}
+          </span>
+        </div>
+
+        <nav style="display: flex; align-items: center; gap: 0.3rem;" aria-label="Primary">
+          <button type="button" class="search-trigger" id="cmdk-trigger" aria-label="Open command palette">
+            <span style="font-size: var(--step--1); line-height: 1;">⌕</span>
+            <span class="hidden md:inline">Search</span>
+            <span class="hidden lg:inline-flex" style="align-items: center; gap: 0.2rem;">
+              <span class="kbd">⌘</span><span class="kbd">K</span>
+            </span>
+          </button>
+          <span style="width: 1px; height: 1.5rem; background: var(--border-1); margin: 0 0.25rem;" class="hidden sm:inline-block"></span>
+          {navItems.map((item) => (
+            <a href={item.href} class={`nav-link ${hideClasses[item.minScreen]}`}>
+              {item.label}
+            </a>
+          ))}
+          <button
+            type="button"
+            id="theme-toggle"
+            class="icon-btn"
+            aria-label="Toggle colour theme"
+            title="Toggle theme"
+          >
+            ◐
+          </button>
+        </nav>
+      </div>
+
+      {breadcrumbs.length > 0 && (
+        <div class={containerClass} style="padding: 0 var(--page-pad) 0.6rem;">
+          <nav class="crumbs" aria-label="Breadcrumb">
+            {breadcrumbs.map((crumb, i) => (
+              <>
+                {i > 0 && <span class="crumbs-sep" aria-hidden="true">/</span>}
+                {crumb.href ? (
+                  <a href={crumb.href}>{crumb.label}</a>
+                ) : (
+                  <span class="crumbs-current">{crumb.label}</span>
+                )}
+              </>
+            ))}
+          </nav>
+        </div>
+      )}
+    </header>
+
+    <main id="main" class={containerClass} style="padding: clamp(1.5rem, 4vw, 3rem) var(--page-pad) 4rem;">
+      <h1 class="sr-only">ITU Operational Bulletin</h1>
+      <slot />
+    </main>
+
+    <footer class="no-print" style="border-top: 1px solid var(--glass-border); margin-top: 4rem; background: var(--glass-bg); backdrop-filter: blur(var(--glass-blur)) saturate(150%); -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(150%);">
+      <div
+        class={containerClass}
+        style="display: grid; grid-template-columns: 1fr; gap: 2rem; padding: 3rem var(--page-pad); font-family: var(--font-sans); font-size: var(--step--1); color: var(--fg-2);"
+      >
+        <div style="display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 2.5rem;">
+          <div style="max-width: 32rem;">
+            <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.5rem;">
+              <span aria-hidden="true" style="display: inline-flex; align-items: center; justify-content: center; width: 1.75rem; height: 1.75rem; border-radius: var(--radius-sm); background: var(--gradient-accent); color: var(--accent-on); font-family: var(--font-mono); font-size: var(--step--3); font-weight: 700; box-shadow: 0 2px 8px rgba(59,130,246,0.3);">
+                OB
+              </span>
+              <p style="font-family: var(--font-sans); font-weight: 700; font-size: var(--step-1); color: var(--fg); margin: 0; letter-spacing: -0.025em;">
+                ITU Operational Bulletin
+              </p>
+            </div>
+            <p style="margin: 0; line-height: 1.6; font-size: var(--step--1); color: var(--fg-2);">
+              ISSN {OB_ISSN} · Published biweekly by ITU-TSB and ITU-BR.
+              A community resource — not affiliated with the ITU.
+            </p>
+            <p style="margin: 0.75rem 0 0; font-size: var(--step--2); color: var(--fg-3);">
+              Press <span class="kbd">⌘</span> <span class="kbd">K</span> to jump anywhere.
+            </p>
+          </div>
+          <nav aria-label="Footer" style="display: grid; grid-template-columns: repeat(2, auto); gap: 0.5rem 2.5rem;">
+            <a href="/issues/" class="nav-link" style="text-transform: none;">Issue archive</a>
+            <a href="/datasets/" class="nav-link" style="text-transform: none;">Datasets</a>
+            <a href="/registers/" class="nav-link" style="text-transform: none;">Registers</a>
+            <a href="/recommendations/" class="nav-link" style="text-transform: none;">Recommendations</a>
+            <a href="/types/" class="nav-link" style="text-transform: none;">Message types</a>
+            <a href="/about/" class="nav-link" style="text-transform: none;">About</a>
+            <a href="https://www.itu.int/" rel="external" class="nav-link" style="text-transform: none;">ITU.int ↗</a>
+            <a href="https://www.itu.int/itu-t/bulletin/" rel="external" class="nav-link" style="text-transform: none;">Official OB ↗</a>
+          </nav>
+        </div>
+      </div>
+    </footer>
+
+    <CommandPalette />
+
+    <script is:inline>
+      (function () {
+        var btn = document.getElementById("theme-toggle");
+        if (btn) {
+          btn.addEventListener("click", function () {
+            var isDark = document.documentElement.classList.toggle("dark");
+            document.documentElement.classList.toggle("light", !isDark);
+            try {
+              localStorage.setItem("ob-theme", isDark ? "dark" : "light");
+            } catch (e) {}
+          });
+        }
+        var trig = document.getElementById("cmdk-trigger");
+        if (trig) {
+          trig.addEventListener("click", function () {
+            document.dispatchEvent(new KeyboardEvent("keydown", { key: "k", metaKey: true }));
+          });
+        }
+      })();
+    </script>
+  </body>
+</html>

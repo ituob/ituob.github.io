@@ -1,0 +1,204 @@
+---
+import Base from "~/layouts/Base.astro";
+import {
+  listDatasetSlugs,
+  loadDatasetMetadata,
+  loadDatasetSchema,
+  loadDatasetData,
+  issuesWithDataset,
+  loadIssue,
+} from "~/lib/loaders";
+import { PUBLICATION_BY_SLUG, type Language } from "~/lib/catalogs";
+import { formatSwissDate } from "~/lib/format";
+import { loadManifest, loadCurrentState } from "~/lib/snapshots";
+
+export function getStaticPaths() {
+  return listDatasetSlugs().map((slug) => ({ params: { slug } }));
+}
+
+const { slug } = Astro.params;
+const meta = loadDatasetMetadata(slug!);
+const schema = loadDatasetSchema(slug!);
+const data = loadDatasetData(slug!);
+const known = PUBLICATION_BY_SLUG.get(slug!);
+
+// Resolve alias.
+const resolvedMeta = meta?.alias_of ? loadDatasetMetadata(meta.alias_of) : meta;
+const resolvedData = meta?.alias_of ? loadDatasetData(meta.alias_of) : data;
+const resolvedSchema = meta?.alias_of ? loadDatasetSchema(meta.alias_of) : schema;
+
+const title = resolvedMeta?.title?.en ?? known?.label ?? slug;
+const issueIds = issuesWithDataset(slug!).sort((a, b) => b - a);
+const lang: Language = "en";
+
+// Check if a register snapshot exists for this slug.
+const registerManifest = loadManifest(slug!);
+const registerState = registerManifest ? loadCurrentState(slug!) : null;
+const hasRegister = !!(registerManifest && registerState);
+
+// Determine columns from schema or first row.
+const cols: string[] = (() => {
+  if (resolvedSchema?.items?.properties) {
+    return Object.keys(resolvedSchema.items.properties);
+  }
+  if (resolvedData && resolvedData.length > 0) {
+    return Object.keys(resolvedData[0]!);
+  }
+  return [];
+})();
+
+function formatValue(v: unknown): string {
+  if (v == null) return "";
+  if (typeof v === "string") return v;
+  if (typeof v === "number" || typeof v === "boolean") return String(v);
+  if (Array.isArray(v)) return v.map((x) => formatValue(x)).join(", ");
+  if (typeof v === "object") {
+    const obj = v as Record<string, unknown>;
+    if (lang in obj) return String(obj[lang] ?? "");
+    if ("en" in obj) return String(obj.en ?? "");
+    return Object.values(obj).map(String).join(", ");
+  }
+  return String(v);
+}
+---
+<Base
+  title={title}
+  description={`Current snapshot and full history of ${title} — ITU Operational Bulletin.`}
+  jsonLd={{
+    "@context": "https://schema.org",
+    "@type": "Dataset",
+    name: title,
+    inLanguage: "en",
+    publisher: { "@type": "Organization", name: "International Telecommunication Union" },
+  }}
+>
+  <header class="mb-8">
+    <p class="uppercase font-semibold" style="font-family: var(--font-sans); font-size: var(--step--1); letter-spacing: 0.1em; color: var(--accent);">
+      {known?.classification === "structured" ? "Structured dataset" : "Textual publication"}
+    </p>
+    <h1 class="mt-1" style="font-family: var(--font-display); font-size: var(--step-5); font-weight: 700; line-height: 1.05;">
+      {title}
+    </h1>
+    {hasRegister && (
+      <div class="mt-4 p-4 rounded border-2" style="border-color: var(--accent);">
+        <p class="font-semibold" style="color: var(--accent);">
+          → This register has a live replay view with {registerState!.entry_count} active entries.
+        </p>
+        <div class="mt-2 flex gap-3 text-[var(--step--1)]" style="font-family: var(--font-sans);">
+          <a href={`/registers/${slug}/`} class="no-underline hover:underline font-semibold" style="color: var(--accent);">
+            View current register state →
+          </a>
+          <a href={`/registers/${slug}/history/`} class="no-underline hover:underline" style="color: var(--accent);">
+            View change history →
+          </a>
+        </div>
+      </div>
+    )}
+    {resolvedMeta?.title?.fr && (
+      <p class="mt-1 italic text-[var(--step-1)]" style="color: var(--fg-muted);">
+        {resolvedMeta.title.fr}
+      </p>
+    )}
+    {known?.recommendation && (
+      <p class="mt-2 text-[var(--step--1)]" style="font-family: var(--font-sans); color: var(--fg-muted);">
+        Per ITU-T {known.recommendation}
+      </p>
+    )}
+    {meta?.alias_of && (
+      <p class="mt-3 panel p-3 text-[var(--step--1)]" style="font-family: var(--font-sans);">
+        This publication is an alias of <a href={`/datasets/${meta.alias_of}/`} class="font-semibold">{meta.alias_of}</a>.
+        All data and history are maintained there.
+      </p>
+    )}
+  </header>
+
+  {resolvedMeta?.url && (
+    <p class="mb-6">
+      <a href={resolvedMeta.url} rel="external" class="font-semibold">
+        View on ITU.int →
+      </a>
+    </p>
+  )}
+
+  <nav class="no-print mb-8" aria-label="Dataset sections" style="font-family: var(--font-sans);">
+    <a href="#snapshot" class="chip mr-1.5 no-underline">Current snapshot</a>
+    <a href="/datasets/{slug}/history/" class="chip mr-1.5 no-underline">Change history</a>
+  </nav>
+
+  <section id="snapshot" class="scroll-mt-24">
+    <header class="rule-thin pt-4 mb-5">
+      <h2 class="text-[var(--step-3)]" style="font-family: var(--font-display);">Current snapshot</h2>
+      <p class="mt-1 text-[var(--step--1)]" style="font-family: var(--font-sans); color: var(--fg-muted);">
+        {resolvedData ? <><span class="num">{resolvedData.length}</span> entries</> : "No structured data — textual publication."}
+      </p>
+    </header>
+
+    {resolvedMeta?.note?.en && (
+      <aside class="panel p-4 mb-6 text-[var(--step--1)]" style="font-family: var(--font-sans); color: var(--fg-muted);">
+        {resolvedMeta.note.en}
+      </aside>
+    )}
+
+    {resolvedData && resolvedData.length > 0 && cols.length > 0 && (
+      <div class="overflow-x-auto">
+        <table class="table-bulletin">
+          <thead>
+            <tr>
+              {cols.map((c) => <th>{c.replace(/_/g, " ")}</th>)}
+            </tr>
+          </thead>
+          <tbody>
+            {resolvedData.slice(0, 500).map((row) => (
+              <tr>
+                {cols.map((c) => (
+                  <td>{formatValue(row[c])}</td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        {resolvedData.length > 500 && (
+          <p class="mt-3 text-[var(--step--1)] italic" style="font-family: var(--font-sans); color: var(--fg-muted);">
+            Showing first 500 of <span class="num">{resolvedData.length}</span> entries.
+          </p>
+        )}
+      </div>
+    )}
+
+    {(!resolvedData || resolvedData.length === 0) && (
+      <p class="italic" style="color: var(--fg-muted);">
+        This is a textual publication — content is published per-issue as freeform text rather than as a structured dataset.
+      </p>
+    )}
+  </section>
+
+  {issueIds.length > 0 && (
+    <section class="mt-12">
+      <header class="rule-thin pt-4 mb-5">
+        <h2 class="text-[var(--step-3)]" style="font-family: var(--font-display);">Recently amended in</h2>
+      </header>
+      <ul class="grid sm:grid-cols-2 lg:grid-cols-3 gap-2" style="font-family: var(--font-sans);">
+        {issueIds.slice(0, 9).map((id) => {
+          const issue = loadIssue(id);
+          return (
+            <li>
+              <a href={`/datasets/${slug}/issue/${id}/`} class="flex items-baseline justify-between panel px-3 py-2 no-underline hover:border-[var(--accent)]">
+                <span class="font-semibold">No. <span class="num">{id}</span></span>
+                <span class="text-[var(--step--1)]" style="color: var(--fg-muted);">
+                  {issue ? formatSwissDate(issue.meta.publication_date) : ""}
+                </span>
+              </a>
+            </li>
+          );
+        })}
+      </ul>
+      {issueIds.length > 9 && (
+        <p class="mt-4">
+          <a href={`/datasets/${slug}/history/`} class="font-semibold uppercase tracking-wider text-[var(--step--1)] hover:text-[var(--accent)]" style="font-family: var(--font-sans); letter-spacing: 0.08em;">
+            Full history ({issueIds.length} issues) →
+          </a>
+        </p>
+      )}
+    </section>
+  )}
+</Base>

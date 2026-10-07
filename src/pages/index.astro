@@ -1,0 +1,324 @@
+---
+import Base from "~/layouts/Base.astro";
+import DisclaimerBanner from "~/components/DisclaimerBanner.astro";
+import PlannedIssues from "~/components/PlannedIssues.astro";
+import { listIssueIds, loadIssue, loadDatasetMetadata, listDatasetSlugs, buildRecommendationIndex, loadRegisterCatalog, loadRecommendationCatalog, loadListMetadata } from "~/lib/loaders";
+import { formatSwissDate, formatShortDate, slugifyRecCode } from "~/lib/format";
+import { PUBLICATION_BY_SLUG } from "~/lib/catalogs";
+import { obIssuesRoot, readYamlOrNull, join } from "~/lib/fs";
+
+const ids = listIssueIds();
+const latestId = ids[ids.length - 1]!;
+const latest = loadIssue(latestId);
+const recent = [...ids].reverse().slice(0, 10);
+const datasets = listDatasetSlugs();
+const plannedIssues = (latest?.general as any)?.planned_issues ??
+  (latest?.meta as any)?.planned_issues ?? [];
+
+const recIndex = buildRecommendationIndex();
+const registers = loadRegisterCatalog();
+const spRecommendations = loadRecommendationCatalog();
+
+const latestIssue = latest;
+const latestAmdCount = latestIssue ? Object.keys(latestIssue.amendments.structured).length + Object.keys(latestIssue.amendments.textual).length + Object.keys(latestIssue.amendments.placeholder).length : 0;
+const latestMsgCount = latestIssue ? latestIssue.general.textual.length : 0;
+
+const latestHref = "/issues/" + latestId + "/";
+
+// Year heatmap data
+const byYear = new Map<number, number[]>();
+for (const id of ids) {
+  const issue = loadIssue(id);
+  const iso = issue?.meta?.publication_date;
+  if (!iso) continue;
+  const year = Number.parseInt(iso.slice(0, 4), 10);
+  const arr = byYear.get(year) ?? [];
+  arr.push(id);
+  byYear.set(year, arr);
+}
+const years = [...byYear.keys()].sort((a, b) => b - a);
+const maxYearCount = Math.max(...[...byYear.values()].map((a) => a.length));
+const firstYear = Math.min(...years);
+---
+<Base
+  title="ITU Operational Bulletin"
+  full
+  description="The ITU Operational Bulletin — biweekly cross-bureau publication of the International Telecommunication Union."
+  jsonLd={{
+    "@context": "https://schema.org",
+    "@type": "PublicationEvent",
+    name: "ITU Operational Bulletin",
+    issn: "1564-5223",
+    inLanguage: "en",
+    publisher: { "@type": "Organization", name: "International Telecommunication Union" },
+  }}
+>
+  {/* ========== CURRENT EDITION BAR — compact, no hero ========== */}
+  <section style="border-bottom: 1px solid var(--border); padding: 1.25rem 0; margin-bottom: 2rem;">
+    <div style="display: flex; align-items: center; justify-content: space-between; gap: 1.5rem; flex-wrap: wrap;">
+      <div style="display: flex; align-items: baseline; gap: 1rem; flex-wrap: wrap;">
+        <div style="display: flex; align-items: baseline; gap: 0.5rem;">
+          <span style="font-size: var(--step--4); font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--fg-4);">Current</span>
+          <h1 style="font-family: var(--font-mono); font-size: var(--step-3); font-weight: 700; color: var(--fg); text-decoration: none; letter-spacing: -0.03em; margin: 0; line-height: 1;"><a href={latestHref} style="color: inherit; text-decoration: none;">No. {latestId}</a></h1>
+        </div>
+        <div class="meta-inline" style="font-size: var(--step--1);">
+          <span><span class="meta-inline-label">Published</span><span class="num">{formatSwissDate(latest?.meta.publication_date)}</span></span>
+          <span><span class="meta-inline-label">Cutoff</span><span class="num">{formatSwissDate(latest?.meta.cutoff_date)}</span></span>
+          <span class="hidden md:inline-flex"><span class="meta-inline-label">ISSN</span><span class="num">{latest?.meta.issn}</span></span>
+          <span class="hidden lg:inline-flex"><span class="meta-inline-label">This issue</span><span class="num">{latestAmdCount}</span> amendments</span>
+        </div>
+      </div>
+      <div style="display: flex; gap: 0.4rem;">
+        <a href={latestHref} class="btn-primary">Read No. {latestId} →</a>
+        <a href="/issues/" class="btn-ghost">Archive</a>
+        <a href="/registers/" class="btn-ghost hidden md:inline-flex">Registers</a>
+      </div>
+    </div>
+  </section>
+
+  {/* ========== SUMMARY STATS — single dense row ========== */}
+  <section style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0; margin-bottom: 2rem; border: 1px solid var(--border); border-radius: var(--radius-sm); overflow: hidden;" class="md:grid-cols-4">
+    <a href="/issues/" style="display: flex; flex-direction: column; gap: 0.15rem; padding: 0.85rem 1rem; text-decoration: none; border-right: 1px solid var(--border); transition: background var(--dur-fast);">
+      <span style="font-size: var(--step--4); font-weight: 500; text-transform: uppercase; letter-spacing: 0.08em; color: var(--fg-4);">Issues</span>
+      <span class="num" style="font-family: var(--font-mono); font-size: var(--step-2); font-weight: 700; color: var(--fg);">{ids.length}</span>
+      <span style="font-size: var(--step--3); color: var(--fg-3);">since {firstYear}</span>
+    </a>
+    <a href="/datasets/" style="display: flex; flex-direction: column; gap: 0.15rem; padding: 0.85rem 1rem; text-decoration: none; border-right: 1px solid var(--border); transition: background var(--dur-fast);" class="md:border-r">
+      <span style="font-size: var(--step--4); font-weight: 500; text-transform: uppercase; letter-spacing: 0.08em; color: var(--fg-4);">Datasets</span>
+      <span class="num" style="font-family: var(--font-mono); font-size: var(--step-2); font-weight: 700; color: var(--fg);">{datasets.length}</span>
+      <span style="font-size: var(--step--3); color: var(--fg-3);">publications</span>
+    </a>
+    <a href="/registers/" style="display: flex; flex-direction: column; gap: 0.15rem; padding: 0.85rem 1rem; text-decoration: none; border-right: 1px solid var(--border); transition: background var(--dur-fast);" class="md:border-r">
+      <span style="font-size: var(--step--4); font-weight: 500; text-transform: uppercase; letter-spacing: 0.08em; color: var(--fg-4);">Registers</span>
+      <span class="num" style="font-family: var(--font-mono); font-size: var(--step-2); font-weight: 700; color: var(--fg);">{registers.length}</span>
+      <span style="font-size: var(--step--3); color: var(--fg-3);">maintained</span>
+    </a>
+    <a href="/recommendations/" style="display: flex; flex-direction: column; gap: 0.15rem; padding: 0.85rem 1rem; text-decoration: none; transition: background var(--dur-fast);">
+      <span style="font-size: var(--step--4); font-weight: 500; text-transform: uppercase; letter-spacing: 0.08em; color: var(--fg-4);">Recommendations</span>
+      <span class="num" style="font-family: var(--font-mono); font-size: var(--step-2); font-weight: 700; color: var(--fg);">{recIndex.size}</span>
+      <span style="font-size: var(--step--3); color: var(--fg-3);">indexed</span>
+    </a>
+  </section>
+
+  {/* ========== MAIN GRID — content + sidebar ========== */}
+  <div class="split-layout">
+    <div style="display: flex; flex-direction: column; gap: 2.5rem;">
+      {/* REGISTERS — dense full-width bento */}
+      <section>
+        <header class="section-header">
+          <h2 style="font-size: var(--step-2);">View publication amendments</h2>
+          <a href="/registers/" class="nav-link" style="color: var(--accent);">All {registers.length} →</a>
+        </header>
+        <ul class="bento" style="list-style: none; padding: 0; margin: 0;">
+          {registers.map((reg) => {
+            const title = reg.title?.en ?? reg.register_id;
+            const rec = reg.recommendation;
+            const regHref = "/registers/" + reg.slug + "/";
+            const meta = (() => {
+              const pubId = reg.register_id;
+              let lastPosition: string | null = null;
+              let lastAnnexIssue = 0;
+              let amdCount = 0;
+              for (const id of ids) {
+                const ax = readYamlOrNull<Record<string, any>>(join(obIssuesRoot(), String(id), "annexes.yaml"));
+                if (ax && ax[pubId] && ax[pubId].position_on) {
+                  lastPosition = ax[pubId].position_on;
+                  lastAnnexIssue = id;
+                }
+                const issue = loadIssue(id);
+                if (issue && (issue.amendments.structured[reg.slug] || issue.amendments.textual[reg.slug] || issue.amendments.placeholder[reg.slug])) {
+                  if (id > lastAnnexIssue) amdCount++;
+                }
+              }
+              return { lastPosition, amdCount };
+            })();
+            const listMeta = loadListMetadata(reg.register_id);
+            const url = (reg as any).url ?? (listMeta as any)?.url;
+            return (
+              <li class="bento-sm">
+                <a
+                  href={regHref}
+                  class="surface surface-hover"
+                  style="display: block; padding: 0.75rem; text-decoration: none; height: 100%;"
+                >
+                  <div style="display: flex; flex-direction: column; gap: 0.3rem; height: 100%;">
+                    <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 0.4rem;">
+                      <h3 style="font-weight: 600; font-size: var(--step--1); color: var(--fg); margin: 0; line-height: 1.3;">{title}</h3>
+                      {rec && <span class="chip" style="flex-shrink: 0; font-size: 0.5625rem;">{rec}</span>}
+                    </div>
+                    <div style="display: flex; gap: 0.6rem; margin-top: auto; font-size: var(--step--3); color: var(--fg-3); font-family: var(--font-sans);">
+                      {meta.amdCount > 0 && (
+                        <span><span class="num" style="color: var(--fg-1); font-weight: 600;">{meta.amdCount}</span> amd</span>
+                      )}
+                      {url && <span style="color: var(--accent);">↗</span>}
+                    </div>
+                  </div>
+                </a>
+              </li>
+            );
+          })}
+        </ul>
+      </section>
+
+      {/* DATASETS — dense full-width bento */}
+      <section>
+        <header class="section-header">
+          <h2 style="font-size: var(--step-2);">Lists annexed to the Operational Bulletin</h2>
+          <a href="/datasets/" class="nav-link" style="color: var(--accent);">All {datasets.length} →</a>
+        </header>
+        <ul class="bento" style="list-style: none; padding: 0; margin: 0;">
+          {datasets.slice(0, 18).map((slug) => {
+            const meta = loadDatasetMetadata(slug);
+            const known = PUBLICATION_BY_SLUG.get(slug);
+            const title = meta?.title?.en ?? known?.label ?? slug;
+            const rec = meta?.recommendation?.code ?? known?.recommendation;
+            const dsHref = "/datasets/" + slug + "/";
+            return (
+              <li class="bento-xs">
+                <a href={dsHref} class="surface surface-hover" style="display: block; padding: 0.6rem; text-decoration: none; height: 100%;">
+                  <h3 style="font-weight: 600; font-size: var(--step--2); color: var(--fg); margin: 0; line-height: 1.3;">{title}</h3>
+                  <p style="margin: 0.2rem 0 0; font-family: var(--font-mono); font-size: var(--step--4); color: var(--fg-4);">
+                    {slug}{rec && <span style="color: var(--accent);"> · {rec}</span>}
+                  </p>
+                </a>
+              </li>
+            );
+          })}
+        </ul>
+      </section>
+
+      {/* YEAR ARCHIVE — compact dense rows */}
+      <section>
+        <header class="section-header">
+          <h2 style="font-size: var(--step-2);">View older issues</h2>
+          <span style="font-size: var(--step--2); color: var(--fg-3);">No. {ids[0]}–{ids[ids.length-1]}</span>
+        </header>
+        <div style="border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 0.75rem;">
+          <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.4rem;">
+            {years.map((year) => {
+              const issueIds = byYear.get(year)!;
+              return (
+                <li style="display: grid; grid-template-columns: 3rem 1fr; gap: 0.75rem; align-items: baseline;">
+                  <strong class="num" style="font-family: var(--font-mono); font-size: var(--step--1); color: var(--accent); font-weight: 700;">{year}</strong>
+                  <div style="display: flex; flex-wrap: wrap; gap: 0.1rem; align-content: flex-start;">
+                    {issueIds.map((id) => {
+                      const issueHref = "/issues/" + id + "/";
+                      return (
+                        <a href={issueHref} class="num" style="text-decoration: none; color: var(--fg-3); padding: 0.1rem 0.3rem; border-radius: var(--radius-xs); font-size: var(--step--3); transition: all var(--dur-fast);">{id}</a>
+                      );
+                    })}
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      </section>
+
+      {/* ABOUT — collapsed prose */}
+      <section>
+        <header class="section-header">
+          <h2 style="font-size: var(--step-2);">About this resource</h2>
+        </header>
+        <div class="prose-bulletin" style="font-size: var(--step--1); line-height: 1.6;">
+          <p style="color: var(--color-red-400); font-weight: 500;">
+            <strong>WARNING:</strong> This website is not an official ITU resource.
+            The data on this website has not been validated. Users of the ITU
+            Operational Bulletin are encouraged to refer to the official ITU
+            Operational Bulletin issues.
+          </p>
+          <p>
+            ITU Operational Bulletin is the medium for the exchange of information
+            on changes in international telecommunication networks and services.
+            Each edition includes informational notices and amendments to ITU Service Publications.
+            {" "}(<a href="https://www.itu.int/pub/T-SP" rel="external">Read more about ITU OB</a>.)
+          </p>
+          <p>
+            The ITU Operational Bulletin is published every two weeks by the
+            Telecommunication Standardization Bureau (TSB) and the Radiocommunication
+            Bureau (BR) of the International Telecommunication Union. It disseminates
+            operational information of importance to administrations, recognized
+            operating agencies and the broader international telecommunication
+            community — including updates to the Lists annexed to the Bulletin,
+            signalling code assignments, numbering-plan information and approved
+            ITU-T Recommendations.
+          </p>
+          <p>
+            <em>ITU OB Online</em> is an effort to make the ITU Operational Bulletin
+            messages and associated Service Publications easier to view and navigate
+            via a fully-featured Web interface and machine-readable APIs.
+          </p>
+          <p>
+            While the information is being filled in, some editions of ITU OB and
+            ITU Service Publications may be missing here. In such cases please refer
+            to the <a href="https://www.itu.int/pub/T-SP" rel="external">authoritative ITU OB resource</a>
+            on the ITU website.
+          </p>
+          <p style="margin-bottom: 0;">
+            The current edition, <a href={latestHref}>No. {latestId}</a>,
+            was published on {formatSwissDate(latest?.meta.publication_date)}.
+          </p>
+        </div>
+      </section>
+    </div>
+
+    {/* ===== SIDEBAR ===== */}
+    <aside style="display: flex; flex-direction: column; gap: 1rem;">
+      {/* RECENT ISSUES */}
+      <section class="surface" style="padding: 0.85rem;">
+        <p style="font-size: var(--step--4); font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--fg-4); margin: 0 0 0.6rem;">Recent issues</p>
+        <ol style="list-style: none; padding: 0; margin: 0; font-family: var(--font-sans); font-size: var(--step--2);">
+          {recent.map((id) => {
+            const issue = loadIssue(id);
+            if (!issue) return null;
+            const issueHref = "/issues/" + id + "/";
+            return (
+              <li style="border-bottom: 1px solid var(--border);">
+                <a href={issueHref} style="display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; text-decoration: none; padding: 0.35rem 0;">
+                  <span class="num" style="font-family: var(--font-mono); color: var(--fg-1); font-weight: 500;">No. {id}</span>
+                  <span class="num" style="color: var(--fg-4); font-size: var(--step--3);">{formatShortDate(issue.meta.publication_date)}</span>
+                </a>
+              </li>
+            );
+          })}
+        </ol>
+        <a href="/issues/" style="display: inline-flex; align-items: center; gap: 0.3rem; margin-top: 0.5rem; font-size: var(--step--3); font-weight: 500; color: var(--accent); text-decoration: none;">All {ids.length} →</a>
+      </section>
+
+      {/* TIP */}
+      <section class="surface-active" style="padding: 0.75rem;">
+        <p style="font-size: var(--step--4); font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent); margin: 0 0 0.4rem;">Tip</p>
+        <p style="font-size: var(--step--2); color: var(--fg-1); margin: 0; line-height: 1.5;">
+          Press <span class="kbd">⌘</span> <span class="kbd">K</span> to jump anywhere.
+        </p>
+      </section>
+
+      {/* RECOMMENDATIONS */}
+      <section class="surface" style="padding: 0.85rem;">
+        <h3 style="font-size: var(--step--4); font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--fg-4); margin: 0 0 0.6rem;">Filter messages by recommendation</h3>
+        <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.15rem;">
+          {spRecommendations.map((rec) => {
+            const recHref = "/recommendations/" + slugifyRecCode(rec.code) + "/";
+            return (
+              <li>
+                <a href={recHref} style="display: flex; align-items: baseline; gap: 0.4rem; padding: 0.25rem 0; text-decoration: none; border-bottom: 1px solid var(--border);">
+                  <h3 style="font-weight: 600; color: var(--accent); font-family: var(--font-mono); font-size: var(--step--2); flex-shrink: 0; margin: 0;">{rec.code}</h3>
+                  {rec.title?.en && (
+                    <span style="font-size: var(--step--3); color: var(--fg-3); line-height: 1.3; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                      {rec.title.en.length > 40 ? rec.title.en.slice(0, 37) + "…" : rec.title.en}
+                    </span>
+                  )}
+                </a>
+              </li>
+            );
+          })}
+        </ul>
+        <a href="/recommendations/" style="display: inline-flex; align-items: center; gap: 0.3rem; margin-top: 0.5rem; font-size: var(--step--3); font-weight: 500; color: var(--accent); text-decoration: none;">All →</a>
+      </section>
+
+      {Array.isArray(plannedIssues) && plannedIssues.length > 0 && (
+        <PlannedIssues issues={plannedIssues} />
+      )}
+    </aside>
+  </div>
+</Base>

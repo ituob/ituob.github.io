@@ -1,0 +1,64 @@
+---
+/**
+ * Planned-issues forward schedule — compact table.
+ *
+ * Renders as an HTML <table> (matching the Jekyll reference) so the
+ * parity auditor counts it correctly. The data is tabular: issue
+ * number, publication date, cutoff date.
+ */
+import { formatSwissDate } from "~/lib/format";
+
+export interface PlannedIssue {
+  id?: number | string;
+  publication_date?: string | Date;
+  cutoff_date?: string | Date;
+}
+
+export interface Props {
+  issues: PlannedIssue[];
+}
+
+const { issues } = Astro.props;
+const safe = Array.isArray(issues) ? issues.slice(0, 25) : [];
+---
+{safe.length > 0 ? (
+  <section class="planned-issues panel" style="padding: 1.1rem; margin-top: 0;">
+    <header style="display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; margin-bottom: 0.85rem; padding-bottom: 0.6rem; border-bottom: 1px solid var(--border);">
+      <div>
+        <p class="eyebrow" style="font-size: var(--step--4); margin: 0 0 0.3rem;">Forward schedule</p>
+        <h3 style="font-family: var(--font-sans); font-size: var(--step--1); font-weight: 600; margin: 0; color: var(--fg); letter-spacing: -0.01em;">
+          Dates of publication of the next Operational Bulletins
+        </h3>
+      </div>
+      <span class="chip">{safe.length} upcoming</span>
+    </header>
+    <table class="table-bulletin" style="font-size: var(--step--2);">
+      <thead>
+        <tr>
+          <th>No.</th>
+          <th>Publication date</th>
+          <th>Including information received by</th>
+        </tr>
+      </thead>
+      <tbody>
+        {safe.map((p) => {
+          const pub = p.publication_date ? formatSwissDate(new Date(p.publication_date as string)) : "—";
+          const cut = p.cutoff_date ? formatSwissDate(new Date(p.cutoff_date as string)) : "—";
+          const id = p.id ?? "—";
+          const href = typeof id === "number" || /^\d+$/.test(String(id)) ? `/issues/${id}/` : undefined;
+          return (
+            <tr>
+              <td>{href ? (
+                <a href={href} class="num" style="text-decoration: none; color: var(--accent); font-weight: 600;">No. {id}</a>
+              ) : (
+                <span class="num" style="color: var(--fg-3);">No. {id}</span>
+              )}</td>
+              <td class="num">{pub}</td>
+              <td class="num" style="color: var(--fg-3);">{cut}</td>
+            </tr>
+          );
+        })}
+      </tbody>
+    </table>
+  </section>
+) : null}

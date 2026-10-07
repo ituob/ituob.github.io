@@ -1,0 +1,420 @@
+---
+import Base from "~/layouts/Base.astro";
+import {
+  buildRecommendationIndex,
+  loadIssue,
+  loadRegisterCatalog,
+  loadListMetadata,
+  registersAmendedInIssue,
+  generalMessagesForRec,
+  cumulativeAmendmentNumber,
+} from "~/lib/loaders";
+import { loadStateAtIssue, loadManifest, groupHistoryByIssue, type ChangeHistoryEntry } from "~/lib/snapshots";
+import { obIssuesRoot, readYamlOrNull, join } from "~/lib/fs";
+import { existsSync } from "node:fs";
+import { formatSwissDate, slugifyRecCode, deslugifyRecCode } from "~/lib/format";
+import {
+  GENERAL_TYPE_LABELS,
+  type GeneralMessageType,
+  type Language,
+} from "~/lib/catalogs";
+import RecommendationHeader from "~/components/RecommendationHeader.astro";
+import TelephoneService from "~/components/TelephoneService.astro";
+import ServiceRestrictions from "~/components/ServiceRestrictions.astro";
+import TextualMessage from "~/components/TextualMessage.astro";
+import StructuredAmendment from "~/components/StructuredAmendment.astro";
+import TextualAmendment from "~/components/TextualAmendment.astro";
+
+export function getStaticPaths() {
+  const idx = buildRecommendationIndex();
+  return [...idx.keys()].map((code) => ({
+    params: { code: slugifyRecCode(code) },
+  }));
+}
+
+const { code: rawCode } = Astro.params;
+const code = deslugifyRecCode(rawCode!);
+const idx = buildRecommendationIndex();
+const rec = idx.get(code);
+if (!rec) return Astro.redirect("/recommendations/");
+
+const title = rec.title?.en;
+const lang: Language = "en";
+
+// Build a slug → register-title lookup so the per-issue amendment
+// blocks can show the affected register's name.
+const registers = loadRegisterCatalog();
+const registerTitleBySlug = new Map<string, string>();
+for (const r of registers) {
+  if (r.title?.en) registerTitleBySlug.set(r.slug, r.title.en);
+}
+
+// Group issues by year (descending). Each issue block lists every
+// register under this rec that was amended in that issue, plus any
+// general messages (telephone_service_2, ipns, sanc, ...) tied to
+// the rec.
+interface IssueBlock {
+  id: number;
+  date: string | null;
+  positionOn: string | null;
+  positionOnIssue: number | null;
+  registers: {
+    slug: string;
+    title: string;
+    changes: ChangeHistoryEntry[];
+  }[];
+  generalMessages: { type: GeneralMessageType; message: any }[];
+  hasApprovals: boolean;
+}
+
+// Per-issue position_on date — mirrors the deployed "Position
+// amended originally published as annex to OB X — D.MMM.YYYY" line.
+function positionOnForIssue(issueId: number, pubIds: string[]): { date: string | null; issue: number | null } {
+  for (let i = issueId; i >= 0; i--) {
+    const ax = readYamlOrNull<Record<string, any>>(join(obIssuesRoot(), String(i), "annexes.yaml"));
+    if (!ax) continue;
+    for (const pub of pubIds) {
+      if (ax[pub] && ax[pub].position_on) {
+        return { date: ax[pub].position_on, issue: i };
+      }
+    }
+  }
+  return { date: null, issue: null };
+}
+const recPubIds = registers.filter((r) => r.recommendation === code).map((r) => r.register_id);
+
+const yearGroups = new Map<number, IssueBlock[]>();
+for (const id of rec.issueIds) {
+  const issue = loadIssue(id);
+  const isoDate = issue?.meta?.publication_date ?? null;
+  const year = isoDate ? Number.parseInt(isoDate.slice(0, 4), 10) : null;
+  if (year === null) continue;
+
+  const amendedSlugs = registersAmendedInIssue(code, id);
+  const amendedRegisters = amendedSlugs.map((slug) => {
+    const state = loadStateAtIssue(slug, id);
+    const changes = state ? (groupHistoryByIssue(state).get(id) ?? []) : [];
+    return {
+      slug,
+      title: registerTitleBySlug.get(slug) ?? slug,
+      changes,
+    };
+  });
+
+  const generalMessages = generalMessagesForRec(code, id).map((m) => ({
+    type: m.type,
+    message: m,
+  }));
+
+  const hasApprovals = !!issue?.general.approvedRecommendations?.payload?.items?.[code];
+
+  // Skip issues that contribute nothing for this rec.
+  if (amendedRegisters.length === 0 && generalMessages.length === 0 && !hasApprovals) {
+    continue;
+  }
+
+  const positionOn = positionOnForIssue(id, recPubIds);
+
+  const block: IssueBlock = {
+    id,
+    date: isoDate,
+    positionOn: positionOn.date,
+    positionOnIssue: positionOn.issue,
+    registers: amendedRegisters,
+    generalMessages,
+    hasApprovals,
+  };
+  const arr = yearGroups.get(year) ?? [];
+  arr.push(block);
+  yearGroups.set(year, arr);
+}
+
+const years = [...yearGroups.keys()].sort((a, b) => b - a);
+const issueCount = rec.issueIds.length;
+---
+<Base title={`ITU-T ${code}`} wide description={`ITU-T Recommendation ${code} — referenced by the ITU Operational Bulletin.`}>
+  <header class="mb-8">
+    <p class="uppercase font-semibold" style="font-family: var(--font-sans); font-size: var(--step--1); letter-spacing: 0.1em; color: var(--accent);">
+      Messages complement to ITU-T Recommendation
+    </p>
+    <h1 class="sr-only">ITU-T Recommendation {code}</h1>
+    <h2 class="mt-1 num" style="font-family: var(--font-display); font-size: var(--step-4); font-weight: 700;">
+      {code}
+    </h2>
+    {title && (
+      <p class="mt-2" style="font-family: var(--font-display); font-size: var(--step-1); color: var(--fg);">
+        {title}
+      </p>
+    )}
+    {rec.version && (
+      <p class="mt-1 text-[var(--step--1)]" style="font-family: var(--font-sans); color: var(--fg-muted);">
+        Last approved: {formatSwissDate(rec.version)}
+      </p>
+    )}
+    <p class="mt-3 text-[var(--step--1)]" style="font-family: var(--font-sans); color: var(--fg-muted);">
+      Referenced in {issueCount} issue{issueCount !== 1 ? "s" : ""} of the Bulletin.
+    </p>
+    {(() => {
+      // Fall back to list metadata URL when rec.url is absent.
+      // Use registers for THIS recommendation, not the entire catalog.
+      const recRegisters = registers.filter((r) => r.recommendation === code);
+      const listUrl = recRegisters.length > 0
+        ? (recRegisters[0] as any)?.url ?? loadListMetadata(recRegisters[0]?.register_id ?? "")?.url
+        : null;
+      const url = rec.url ?? listUrl;
+      return url ? (
+        <p class="mt-2 text-[var(--step--1)]" style="font-family: var(--font-sans);">
+          <a href={url} class="tint" rel="noopener noreferrer">Authoritative resource ↗</a>
+        </p>
+      ) : null;
+    })()}
+  </header>
+
+  {years.length > 0 ? (
+    <>
+      <nav class="rule-thin pt-3 mb-6" aria-label="Year navigation">
+        <p class="text-[var(--step--1)]" style="font-family: var(--font-sans); color: var(--fg-muted);">
+          Showing data for <span class="num">{years[0]!}</span>.
+          {years.length > 1 && (
+            <>
+              {" "}Browse previous years:{" "}
+              {years.slice(1).map((y, i) => (
+                <>
+                  {i > 0 && " "}
+                  <a href={`#year-${y}`} class="num hover:underline">{y}</a>
+                </>
+              ))}
+            </>
+          )}
+        </p>
+        <ul class="flex flex-wrap gap-2 mt-2" style="font-family: var(--font-sans);">
+          {years.map((y) => (
+            <li>
+              <a
+                href={`#year-${y}`}
+                class="inline-block panel px-3 py-1 no-underline hover:border-[var(--accent)] transition-colors text-[var(--step--1)]"
+              >
+                <span class="num font-semibold">{y}</span>
+                <span class="ml-1" style="color: var(--fg-muted);">{yearGroups.get(y)!.length}</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </nav>
+
+      {years.map((year) => {
+        const blocks = yearGroups.get(year)!;
+        return (
+          <section class="mt-10" id={`year-${year}`}>
+            <header class="rule-thin pt-3 mb-4 flex items-baseline gap-3">
+              <h2 class="text-[var(--step-2)] num" style="font-family: var(--font-display); font-weight: 600;">
+                {year}
+              </h2>
+              <span class="text-[var(--step--1)]" style="color: var(--fg-muted); font-family: var(--font-sans);">
+                {blocks.length} amendment{blocks.length !== 1 ? "s" : ""}
+              </span>
+            </header>
+
+            <div class="sr-only">Date / Message</div>
+            <ul class="space-y-4" style="font-family: var(--font-sans);">
+            {blocks.map((block) => {
+                // Render linked general messages first (mirrors deployed
+                // layout: per-message H3 "Telephone Service OB no. XXXX",
+                // country H4, communication H5, full text + tables).
+                const generalRendered = block.generalMessages.length > 0;
+                const regsRendered = block.registers.length > 0;
+
+                // Build a flat list of amendment "rows": one per general
+                // message and one per amended register. Each row becomes
+                // an H3 "Amd. to {title} OB no. X" matching deployed.
+                type Row =
+                  | { kind: "general"; type: GeneralMessageType; message: any }
+                  | { kind: "register"; reg: { slug: string; title: string; changes: ChangeHistoryEntry[] } };
+
+                const rows: Row[] = [];
+                for (const m of block.generalMessages) rows.push({ kind: "general", type: m.type, message: m.message });
+                for (const r of block.registers) rows.push({ kind: "register", reg: r });
+
+                if (rows.length === 0 && !block.hasApprovals) return null;
+
+                return rows.map((row) => {
+                  if (row.kind === "general") {
+                    const label = GENERAL_TYPE_LABELS[row.type];
+                    return (
+                      <li class="panel p-4">
+                        <h3 class="text-[var(--step-0)] flex items-baseline gap-3 flex-wrap m-0">
+                          <span style="font-family: var(--font-display); font-weight: 600;">
+                            {label}
+                          </span>
+                          <a href={`/issues/${block.id}/#general`} class="no-underline hover:underline">
+                            OB no. <span class="num">{block.id}</span>
+                          </a>
+                        </h3>
+                        <p class="mt-1 text-[var(--step--1)]" style="color: var(--fg-muted);">
+                          Published {block.date ? formatSwissDate(block.date) : "—"}
+                        </p>
+                        <div class="mt-3 prose-bulletin measure">
+                          {(row.type === "telephone_service_2" || row.type === "telephone_service") && Array.isArray((row.message as any).contents) ? (
+                            <TelephoneService contents={(row.message as any).contents as any} lang={lang} />
+                          ) : row.type === "service_restrictions" && Array.isArray((row.message as any).items) ? (
+                            <ServiceRestrictions items={(row.message as any).items as any} lang={lang} />
+                          ) : (
+                            <TextualMessage message={row.message} lang={lang} />
+                          )}
+                        </div>
+                        <p class="mt-3 text-[var(--step--1)]">
+                          <a href={`/issues/${block.id}/`} class="no-underline hover:underline tint">
+                            View source issue →
+                          </a>
+                        </p>
+                      </li>
+                    );
+                  }
+
+                  const reg = row.reg;
+                  const codesByType = new Map<string, string[]>();
+                  for (const c of reg.changes) {
+                    if (c.type === "SEED") continue;
+                    const code = (c.identifier as Record<string, unknown>).code as string | undefined;
+                    if (!code) continue;
+                    const arr = codesByType.get(c.type) ?? [];
+                    arr.push(code);
+                    codesByType.set(c.type, arr);
+                  }
+                  const codeEntries = [...codesByType.entries()];
+
+                  const regState = loadStateAtIssue(reg.slug, block.id);
+                  const entriesByKey = new Map<string, any>();
+                  if (regState) {
+                    for (const e of regState.active_entries as any[]) {
+                      const manifest = loadManifest(reg.slug);
+                      const kf = manifest?.key_field ?? "code";
+                      if (e[kf]) entriesByKey.set(String(e[kf]), e);
+                    }
+                  }
+
+                  const amdNo = cumulativeAmendmentNumber(block.id, reg.slug);
+                  return (
+                    <li class="panel p-4">
+                      <h3 class="text-[var(--step-0)] flex items-baseline gap-3 flex-wrap m-0">
+                        <span style="font-family: var(--font-display); font-weight: 600;">
+                          Amd.{amdNo > 0 ? <span class="num"> no. {amdNo} </span> : " "}to {reg.title}
+                        </span>
+                        <a href={`/issues/${block.id}/`} class="no-underline hover:underline">
+                          OB no. <span class="num">{block.id}</span>
+                        </a>
+                      </h3>
+                      <p class="mt-1 text-[var(--step--1)]" style="color: var(--fg-muted);">
+                        Published {block.date ? formatSwissDate(block.date) : "—"}
+                      </p>
+                      {block.positionOn && block.positionOnIssue && block.positionOnIssue !== block.id && (
+                        <p class="mt-1 text-[var(--step--1)]" style="color: var(--fg-muted); font-family: var(--font-sans);">
+                          Position amended originally published as annex to{" "}
+                          <a href={`/issues/${block.positionOnIssue}/`} class="no-underline hover:underline">
+                            ITU Operational Bulletin No. {block.positionOnIssue}
+                          </a>
+                          {" "}— {formatSwissDate(block.positionOn)}
+                        </p>
+                      )}
+                      {block.positionOn && block.positionOnIssue === block.id && (
+                        <p class="mt-1 text-[var(--step--1)]" style="color: var(--fg-muted); font-family: var(--font-sans);">
+                          Position on {formatSwissDate(block.positionOn)}
+                        </p>
+                      )}
+
+                      {/* Full amendment content (mirrors the issue page rendering). */}
+                      {(() => {
+                        const issue = loadIssue(block.id);
+                        if (!issue) return null;
+                        const structured = issue.amendments.structured[reg.slug];
+                        const textual = issue.amendments.textual[reg.slug];
+                        const placeholder = issue.amendments.placeholder[reg.slug];
+                        return (
+                          <div class="mt-4">
+                            {structured && <StructuredAmendment amendments={structured} lang={lang} />}
+                            {textual && <TextualAmendment amendment={textual} lang={lang} />}
+                            {placeholder && <TextualAmendment placeholder={placeholder} />}
+                          </div>
+                        );
+                      })()}
+
+                      {codeEntries.length > 0 && (
+                        <details class="mt-3">
+                          <summary class="text-[var(--step--1)] cursor-pointer" style="color: var(--fg-muted);">
+                            Changed codes ({codeEntries.reduce((n, [, c]) => n + c.length, 0)})
+                          </summary>
+                          <div class="mt-2 space-y-2 text-[var(--step--1)]">
+                            {codeEntries.map(([type, codes]) => (
+                              <div>
+                                <span class="font-mono font-semibold uppercase" style="color: var(--accent);">
+                                  {type}
+                                </span>
+                                <span class="ml-1" style="color: var(--fg-muted);">
+                                  ({codes.length})
+                                </span>
+                                <ul class="ml-6 mt-1 space-y-0.5">
+                                  {codes.slice(0, 50).map((code) => {
+                                    const entry = entriesByKey.get(code);
+                                    const fields = entry
+                                      ? Object.entries(entry)
+                                          .filter(([k]) => k !== "code" && k !== "carrier_code" && k !== "issue_id_number")
+                                          .slice(0, 3)
+                                          .map(([k, v]) => {
+                                            if (typeof v === "string") return v;
+                                            if (v && typeof v === "object" && (v as any).en) return (v as any).en;
+                                            return String(v);
+                                          })
+                                      : null;
+                                    return (
+                                      <li class="num font-mono" style="color: var(--fg);">
+                                        {code}
+                                        {fields && fields.length > 0 && (
+                                          <span style="color: var(--fg-muted); font-family: var(--font-sans);">
+                                            {" "}— {fields.join(" · ").slice(0, 120)}
+                                          </span>
+                                        )}
+                                      </li>
+                                    );
+                                  })}
+                                  {codes.length > 50 && (
+                                    <li style="color: var(--fg-muted);">
+                                      +{codes.length - 50} more…
+                                    </li>
+                                  )}
+                                </ul>
+                              </div>
+                            ))}
+                          </div>
+                        </details>
+                      )}
+                      <p class="mt-3 text-[var(--step--1)]">
+                        <a href={`/registers/${reg.slug}/at/${block.id}/`} class="no-underline hover:underline tint">
+                          Point-in-time snapshot →
+                        </a>
+                        <span class="mx-2" style="color: var(--fg-muted);">·</span>
+                        <a href={`/issues/${block.id}/`} class="no-underline hover:underline tint">
+                          View source issue →
+                        </a>
+                      </p>
+                    </li>
+                  );
+                });
+              })}
+            </ul>
+          </section>
+        );
+      })}
+    </>
+  ) : (
+    <section>
+      <header class="rule-thin pt-3 mb-4">
+        <h2 class="text-[var(--step-2)]" style="font-family: var(--font-display);">About this Recommendation</h2>
+      </header>
+      <p style="font-family: var(--font-sans); color: var(--fg-muted);">
+        This Recommendation mandates one or more Service Publication
+        registers annexed to the Operational Bulletin. See the linked
+        register(s) for current entries and amendment history.
+      </p>
+    </section>
+  )}
+</Base>

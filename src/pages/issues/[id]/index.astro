@@ -1,0 +1,482 @@
+---
+import Base from "~/layouts/Base.astro";
+import { loadIssue, listIssueIds, loadDatasetMetadata, loadListMetadata, cumulativeAmendmentNumber, loadRegisterCatalog, lastAnnexBefore } from "~/lib/loaders";
+import { formatSwissDate } from "~/lib/format";
+import {
+  MESSAGE_TYPE_ORDER,
+  GENERAL_TYPE_LABELS,
+  PUBLICATION_BY_SLUG,
+  SUPPORTED_LANGUAGES,
+  type GeneralMessageType,
+  type Language,
+} from "~/lib/catalogs";
+import RunningAnnexes from "~/components/RunningAnnexes.astro";
+import ApprovedRecommendations from "~/components/ApprovedRecommendations.astro";
+import AmendmentsLegend from "~/components/AmendmentsLegend.astro";
+import AuthorContacts from "~/components/AuthorContacts.astro";
+import AuthoritativeResource from "~/components/AuthoritativeResource.astro";
+import IncompleteBanner from "~/components/IncompleteBanner.astro";
+import PlannedIssues from "~/components/PlannedIssues.astro";
+import RecommendationHeader from "~/components/RecommendationHeader.astro";
+import TextualMessage from "~/components/TextualMessage.astro";
+import TelephoneService from "~/components/TelephoneService.astro";
+import ServiceRestrictions from "~/components/ServiceRestrictions.astro";
+import StructuredAmendment from "~/components/StructuredAmendment.astro";
+import TextualAmendment from "~/components/TextualAmendment.astro";
+import { availableLanguages } from "~/lib/i18n";
+import type { TextualGeneralMessage } from "~/lib/types";
+
+export function getStaticPaths() {
+  return listIssueIds().map((id) => ({ params: { id: String(id) } }));
+}
+
+const { id: idStr } = Astro.params;
+const id = Number.parseInt(idStr!, 10);
+const issue = loadIssue(id);
+if (!issue) {
+  return Astro.redirect("/404");
+}
+
+const lang: Language = "en";
+
+const presentGeneralTypes = MESSAGE_TYPE_ORDER.filter((t) => {
+  if (t === "running_annexes") return issue.general.runningAnnexes !== null;
+  if (t === "approved_recommendations") return issue.general.approvedRecommendations !== null;
+  return issue.general.textual.some((m) => m.type === t);
+});
+
+const textualByType = new Map<GeneralMessageType, TextualGeneralMessage[]>();
+for (const m of issue.general.textual) {
+  const arr = textualByType.get(m.type) ?? [];
+  arr.push(m);
+  textualByType.set(m.type, arr);
+}
+
+const amendmentSlugs = [
+  ...new Set([
+    ...Object.keys(issue.amendments.structured),
+    ...Object.keys(issue.amendments.textual),
+    ...Object.keys(issue.amendments.placeholder),
+    ...loadRegisterCatalog()
+      .filter((r) => r.seed_issue === id && !r.external)
+      .map((r) => r.slug),
+  ]),
+].sort();
+
+const allIds = listIssueIds();
+const idx = allIds.indexOf(id);
+const prevId = idx > 0 ? allIds[idx - 1] : null;
+const nextId = idx >= 0 && idx < allIds.length - 1 ? allIds[idx + 1] : null;
+const prevHref = prevId ? "/issues/" + prevId + "/" : "";
+const nextHref = nextId ? "/issues/" + nextId + "/" : "";
+
+const langAvail = new Set<Language>();
+for (const m of issue.general.textual) {
+  for (const l of availableLanguages(m.contents)) langAvail.add(l);
+}
+for (const t of Object.values(issue.amendments.textual)) {
+  for (const l of availableLanguages(t.contents)) langAvail.add(l);
+}
+const langLinks = SUPPORTED_LANGUAGES.filter((l) => langAvail.has(l)).map((l) => ({
+  label: l,
+  href: "/issues/" + id + "/" + l + "/",
+}));
+
+function sectionId(label: string): string {
+  return label.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+}
+
+const generalNavItems = presentGeneralTypes.map((t) => {
+  const customTitle = t === "custom" && textualByType.has(t)
+    ? (textualByType.get(t)![0] as any)?.title?.en
+    : null;
+  const label = customTitle ?? GENERAL_TYPE_LABELS[t];
+  return { id: sectionId(label), label, href: "#" + sectionId(label) };
+});
+
+const amendmentNavItems = amendmentSlugs.map((slug) => {
+  const known = PUBLICATION_BY_SLUG.get(slug);
+  const meta = loadDatasetMetadata(slug);
+  const listMeta = known?.publicationId ? loadListMetadata(known.publicationId) : null;
+  const registerEntry = loadRegisterCatalog().find((r) => r.slug === slug);
+  const fullTitle = listMeta?.title?.en ?? meta?.title?.en ?? registerEntry?.title?.en ?? known?.label ?? slug;
+  const rec = listMeta?.recommendation?.code ?? meta?.recommendation?.code ?? known?.recommendation ?? registerEntry?.recommendation;
+  const short = fullTitle.length > 38 ? fullTitle.slice(0, 35) + "…" : fullTitle;
+  return { id: "amd-" + slug, label: short, rec, href: "#amd-" + slug };
+});
+
+const totalAmendmentActions = amendmentSlugs.reduce((n, slug) => {
+  return n + (issue.amendments.structured[slug]?.length ?? 0);
+}, 0) + amendmentSlugs.length;
+
+const issueHref = "/issues/" + id + "/";
+---
+<Base
+  title={"No. " + id}
+  masthead
+  progress
+  full
+  description={"ITU Operational Bulletin No. " + id + ", published " + formatSwissDate(issue.meta.publication_date) + "."}
+  breadcrumbs={[
+    { label: "Home", href: "/" },
+    { label: "Issues", href: "/issues/" },
+    { label: "No. " + id },
+  ]}
+  jsonLd={{
+    "@context": "https://schema.org",
+    "@type": "PublicationIssue",
+    issueNumber: String(id),
+    datePublished: issue.meta.publication_date,
+    inLanguage: "en",
+    issn: issue.meta.issn,
+    isPartOf: { "@type": "PublicationEvent", name: "ITU Operational Bulletin" },
+    publisher: { "@type": "Organization", name: "International Telecommunication Union" },
+  }}
+>
+  <p style="font-size: var(--step--3); color: var(--fg-3); margin: 0 0 0.5rem;">
+    <a href="https://www.itu.int/itu-t/bulletin/" rel="external" style="color: var(--fg-2); text-decoration: none;">ITU Operational Bulletin</a>
+    <span style="color: var(--fg-4); margin: 0 0.3rem;">·</span>
+    Biweekly publication of the ITU
+  </p>
+
+  <IncompleteBanner incomplete={!!(issue.meta as any).incomplete} />
+
+  {/* ========== STICKY SUB-BAR — liquid metal metadata bar ========== */}
+  <div class="sub-bar no-print">
+    <div style="display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 0.55rem 0; flex-wrap: wrap;">
+      <div class="meta-inline" style="flex: 1; min-width: 0;">
+        <span><span class="meta-inline-label">Issue</span><h2 style="display: inline; font-size: inherit; font-weight: 700; margin: 0; letter-spacing: 0;"><span class="num" style="color: var(--fg); font-weight: 700;">No. {id}</span></h2></span>
+        <span><span class="meta-inline-label">Published</span><span class="num">{formatSwissDate(issue.meta.publication_date)}</span></span>
+        <span><span class="meta-inline-label">Cutoff</span><span class="num">{formatSwissDate(issue.meta.cutoff_date)}</span></span>
+        <span><span class="meta-inline-label">ISSN</span><span class="num">{issue.meta.issn}</span></span>
+        <span class="hidden lg:inline-flex"><span class="meta-inline-label">Summary</span><span class="num">{presentGeneralTypes.length}</span> general<span style="color: var(--fg-4); margin: 0 0.3rem;">/</span><span class="num">{amendmentSlugs.length}</span> amd<span style="color: var(--fg-4); margin: 0 0.3rem;">/</span><span class="num">{Object.keys(issue.annexes).length}</span> annex</span>
+        {langLinks.length > 0 && (
+          <span class="hidden lg:inline-flex">
+            {langLinks.map((l) => (
+              <a href={l.href} style="color: var(--fg-3); text-decoration: none;">{l.label}</a>
+            ))}
+          </span>
+        )}
+      </div>
+      <div style="display: flex; gap: 0.4rem; flex-shrink: 0;">
+        {prevId && (
+          <a href={prevHref} class="btn-ghost" style="padding: 0.35rem 0.65rem; font-size: var(--step--3);" title={"No. " + prevId}>
+            <span style="color: var(--fg-4);">←</span><span class="num">{prevId}</span>
+          </a>
+        )}
+        {nextId && (
+          <a href={nextHref} class="btn-primary" style="padding: 0.35rem 0.65rem; font-size: var(--step--3);" title={"No. " + nextId}>
+            <span class="num">{nextId}</span><span style="opacity: 0.7;">→</span>
+          </a>
+        )}
+      </div>
+    </div>
+  </div>
+
+  {/* Planned issues */}
+  {(() => {
+    const upcoming = allIds.slice(idx + 1, idx + 26)
+      .map((uid) => {
+        const u = loadIssue(uid);
+        return u ? { id: uid, publication_date: u.meta.publication_date, cutoff_date: u.meta.cutoff_date } : null;
+      })
+      .filter(Boolean);
+    return upcoming.length > 0 ? (
+      <div style="margin-top: 1.5rem;">
+        <PlannedIssues issues={upcoming} />
+      </div>
+    ) : null;
+  })()}
+
+  {/* ========== 2-COLUMN: full-width content + TOC rail ========== */}
+  <div class="master-layout" style="margin-top: 1.5rem;">
+    {/* ===== CONTENT COLUMN ===== */}
+    <div style="min-width: 0; display: flex; flex-direction: column; gap: 2.5rem;">
+      {/* GENERAL INFORMATION */}
+      <section id="general">
+        <header class="section-header">
+          <h2 style="font-size: var(--step-4); font-weight: 800;">General Information</h2>
+          {presentGeneralTypes.length > 0 && (
+            <span class="chip chip-accent">{presentGeneralTypes.length} sections</span>
+          )}
+        </header>
+        <h3 class="sr-only">General information</h3>
+        {presentGeneralTypes.length === 0 ? (
+          <p style="font-size: var(--step--1); color: var(--fg-3); margin: 0;">No general information messages in this issue.</p>
+        ) : (
+          <div style="display: flex; flex-direction: column; gap: 2rem;">
+            {presentGeneralTypes.map((t, i) => {
+              const customTitle = t === "custom" && textualByType.has(t)
+                ? (textualByType.get(t)![0] as any)?.title?.en
+                : null;
+              const label = customTitle ?? GENERAL_TYPE_LABELS[t];
+              const sid = sectionId(label);
+              const sectionAnchorHref = "#" + sid;
+              const indexLabel = String(i + 1).padStart(2, "0");
+              return (
+                <section id={sid} class="scroll-mt-24">
+                  <header style="display: flex; align-items: baseline; gap: 0.5rem; margin-bottom: 1rem; padding-bottom: 0.4rem; border-bottom: 1px solid var(--border);">
+                    <span class="num" style="font-family: var(--font-mono); font-weight: 600; color: var(--accent); font-size: var(--step--1);">{indexLabel}</span>
+                    <h3 style="font-size: var(--step-1); margin: 0; flex: 1; min-width: 0; letter-spacing: -0.01em;">
+                      {label}
+                      <a href={sectionAnchorHref} class="anchor-link" aria-label="Permalink"></a>
+                    </h3>
+                  </header>
+                  {t === "running_annexes" && issue.general.runningAnnexes && (
+                    <RunningAnnexes issue={issue} />
+                  )}
+                  {t === "approved_recommendations" && issue.general.approvedRecommendations && (
+                    <ApprovedRecommendations message={issue.general.approvedRecommendations} />
+                  )}
+                  {textualByType.has(t) && (
+                    <div style="display: flex; flex-direction: column; gap: 1rem;">
+                      {textualByType.get(t)!.map((m) => (
+                        <>
+                          {(t === "telephone_service_2" || t === "service_restrictions" || t === "callback_procedures") && (
+                            <RecommendationHeader type={t} recommendation={(m as any).recommendation} url={(m as any).url} />
+                          )}
+                          {t === "telephone_service_2" && Array.isArray((m as any).contents) ? (
+                            <TelephoneService contents={(m as any).contents as any} lang={lang} />
+                          ) : t === "service_restrictions" && Array.isArray((m as any).items) ? (
+                            <ServiceRestrictions items={(m as any).items as any} lang={lang} />
+                          ) : (
+                            <TextualMessage message={m} lang={lang} />
+                          )}
+                        </>
+                      ))}
+                    </div>
+                  )}
+                </section>
+              );
+            })}
+          </div>
+        )}
+      </section>
+
+      {/* AMENDMENTS — continuous list, glass cards */}
+      <section id="amendments-to-service-publications" class="scroll-mt-24">
+        <header class="section-header">
+          <h2 style="font-size: var(--step-4); font-weight: 800;">Amendments</h2>
+          <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <AmendmentsLegend />
+            <span class="chip chip-accent">{amendmentSlugs.length} publications</span>
+          </div>
+        </header>
+        {amendmentSlugs.length === 0 && (
+          <p style="font-size: var(--step--1); color: var(--fg-3); margin: 0;">No amendments in this issue.</p>
+        )}
+        <div class="amendment-list">
+          {amendmentSlugs.map((slug, i) => {
+            const known = PUBLICATION_BY_SLUG.get(slug);
+            const sid = "amd-" + slug;
+            const anchorHref = "#" + sid;
+            const datasetHref = "/datasets/" + slug + "/";
+            const meta = loadDatasetMetadata(slug);
+            const registerEntry = loadRegisterCatalog().find((r) => r.slug === slug);
+            const listMeta = known?.publicationId ? loadListMetadata(known.publicationId) : null;
+            const fullTitle = listMeta?.title?.en ?? meta?.title?.en ?? registerEntry?.title?.en ?? known?.label ?? slug;
+            const recCode = listMeta?.recommendation?.code ?? meta?.recommendation?.code ?? known?.recommendation ?? registerEntry?.recommendation;
+            const recVersion = listMeta?.recommendation?.version ?? meta?.recommendation?.version;
+            const recLabel = recCode ? "ITU-T " + recCode + (recVersion ? " " + recVersion : "") : "";
+            const recHref = recCode ? "/recommendations/" + recCode.toLowerCase().replace(/[^a-z0-9.]+/g, "-") + "/" : "";
+            const amdNo = cumulativeAmendmentNumber(id, slug);
+            const amdUrl = listMeta?.url;
+            const annexRef = known?.publicationId ? lastAnnexBefore(id, known.publicationId) : null;
+            const annexInfo = annexRef ? { issueId: annexRef.issueId, positionOn: annexRef.positionOn ?? undefined } : null;
+            const annexHref = annexInfo ? "/issues/" + annexInfo.issueId + "/" : "";
+            const annexDateLabel = annexInfo?.positionOn ? formatSwissDate(annexInfo.positionOn) : "";
+            const indexLabel = String(i + 1).padStart(2, "0");
+            return (
+              <article id={sid} class="scroll-mt-24" style="padding: 1rem 0;">
+                <header style="display: grid; grid-template-columns: auto 1fr auto; gap: 0.75rem; align-items: baseline; margin-bottom: 0.5rem;">
+                  <span class="num" style="font-family: var(--font-mono); font-weight: 600; color: var(--accent); font-size: var(--step-0); min-width: 2rem;">{indexLabel}</span>
+                  <h3 style="font-size: var(--step-0); margin: 0; min-width: 0; line-height: 1.35; font-weight: 600;">
+                    Amd.{amdNo > 0 ? <span class="num"> no. {amdNo} </span> : " "}to <a href={datasetHref} style="color: var(--fg); text-decoration: none;">{fullTitle}</a>
+                    <a href={anchorHref} class="anchor-link" aria-label="Permalink"></a>
+                  </h3>
+                  {recCode && (
+                    <a href={recHref} class="chip chip-accent" style="text-decoration: none;">{recLabel}</a>
+                  )}
+                </header>
+                {(amdNo > 0 || annexInfo || amdUrl) && (
+                  <div style="display: flex; flex-wrap: wrap; gap: 0.2rem 0; padding-left: 2.75rem; margin-bottom: 0.75rem; font-size: var(--step--2); color: var(--fg-3); font-family: var(--font-sans);">
+                    {amdNo > 0 && (
+                      <span style="padding: 0 0.5rem;"><span style="color: var(--fg-4); text-transform: uppercase; letter-spacing: 0.06em; font-size: var(--step--4);">Amd</span> <span class="num" style="color: var(--fg-2);">{amdNo}</span></span>
+                    )}
+                    {annexInfo && (
+                      <span style="padding: 0 0.5rem; border-left: 1px solid var(--border);"><span style="color: var(--fg-4); font-size: var(--step--4);">Position amended originally published as annex to</span> <a href={annexHref} class="num" style="color: var(--link);">OB No. {annexInfo.issueId}</a>{annexDateLabel && <span class="num" style="color: var(--fg-3);"> · {annexDateLabel}</span>}</span>
+                    )}
+                    {amdUrl && (
+                      <span style="padding: 0 0.5rem; border-left: 1px solid var(--border);"><a href={amdUrl} rel="external" style="color: var(--link);">Authoritative ↗</a></span>
+                    )}
+                  </div>
+                )}
+                <div style="padding-left: 2.75rem;">
+                  {issue.amendments.structured[slug] && (
+                    <StructuredAmendment amendments={issue.amendments.structured[slug]} lang={lang} />
+                  )}
+                  {issue.amendments.textual[slug] && (
+                    <TextualAmendment amendment={issue.amendments.textual[slug]} lang={lang} />
+                  )}
+                  {issue.amendments.placeholder[slug] && (
+                    <TextualAmendment placeholder={issue.amendments.placeholder[slug]} />
+                  )}
+                </div>
+              </article>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* ANNEXES */}
+      {Object.keys(issue.annexes).length > 0 && (
+        <section id="annexes-to-this-issue" class="scroll-mt-24">
+          <header class="section-header">
+            <h2 style="font-size: var(--step-4); font-weight: 800;">Annexes to this issue</h2>
+            <span class="chip chip-accent">{Object.keys(issue.annexes).length}</span>
+          </header>
+          <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column;">
+            {Object.entries(issue.annexes).map(([pubId, info], i) => {
+              const known = PUBLICATION_BY_SLUG.get(pubId);
+              const annexSlug = known?.slug ?? pubId;
+              const meta = loadDatasetMetadata(annexSlug);
+              const title = meta?.title?.en ?? known?.label ?? pubId;
+              const annexDatasetHref = "/datasets/" + annexSlug + "/";
+              const annexIndexLabel = String(i + 1).padStart(2, "0");
+              const annexDateLabel = info?.position_on ? formatSwissDate(info.position_on) : "";
+              return (
+                <li style="display: grid; grid-template-columns: auto 1fr auto; gap: 0.75rem; padding: 0.5rem 0; border-bottom: 1px solid var(--border); align-items: baseline;">
+                  <span class="num" style="font-family: var(--font-mono); color: var(--accent); font-weight: 600; font-size: var(--step--2);">{annexIndexLabel}</span>
+                  <a href={annexDatasetHref} style="text-decoration: none; font-weight: 500; font-size: var(--step--1); color: var(--fg);">{title}</a>
+                  {annexDateLabel && (
+                    <span class="num" style="font-size: var(--step--2); color: var(--fg-3);">{annexDateLabel}</span>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      )}
+
+      {/* ISSUE ARCHIVE — compact year navigation for parity */}
+      <section class="scroll-mt-24">
+        <header class="section-header">
+          <h2 style="font-size: var(--step-4); font-weight: 800;">View older issues</h2>
+        </header>
+        <div class="surface" style="padding: 1rem;">
+          <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.4rem;">
+            {(() => {
+              const byYear = new Map<number, number[]>();
+              for (const iid of allIds) {
+                const issue = loadIssue(iid);
+                const iso = issue?.meta?.publication_date;
+                if (!iso) continue;
+                const yr = Number.parseInt(iso.slice(0, 4), 10);
+                const arr = byYear.get(yr) ?? [];
+                arr.push(iid);
+                byYear.set(yr, arr);
+              }
+              return [...byYear.keys()].sort((a, b) => b - a).map((yr) => {
+                const issueIds = byYear.get(yr)!;
+                return (
+                  <li style="display: grid; grid-template-columns: 3rem 1fr; gap: 0.75rem; align-items: baseline;">
+                    <strong class="num" style="font-family: var(--font-mono); font-size: var(--step--1); color: var(--accent); font-weight: 700;">{yr}</strong>
+                    <div style="display: flex; flex-wrap: wrap; gap: 0.1rem; align-content: flex-start;">
+                      {issueIds.map((iid) => {
+                        const issueHref = "/issues/" + iid + "/";
+                        return (
+                          <a href={issueHref} class="num" style={iid === id ? "text-decoration: none; color: var(--accent); font-weight: 700; padding: 0.1rem 0.3rem; border-radius: var(--radius-xs); font-size: var(--step--3); background: var(--accent-soft);" : "text-decoration: none; color: var(--fg-3); padding: 0.1rem 0.3rem; border-radius: var(--radius-xs); font-size: var(--step--3); transition: all var(--dur-fast);"}>{iid}</a>
+                        );
+                      })}
+                    </div>
+                  </li>
+                );
+              });
+            })()}
+          </ul>
+        </div>
+      </section>
+
+      {/* AUTHORITATIVE + CONTACTS — at bottom, not sidebar */}
+      <section style="display: grid; grid-template-columns: 1fr; gap: 1rem;" class="lg:grid-cols-2">
+        <AuthoritativeResource issueId={id} />
+        <AuthorContacts issue={issue} />
+      </section>
+    </div>
+
+    {/* ===== TOC RAIL (sticky, glassmorphic, dense) ===== */}
+    <aside class="no-print sidebar-sticky" style="display: flex; flex-direction: column; gap: 1rem;">
+      <nav aria-label="Sections" style="font-family: var(--font-sans);" class="surface-flat">
+        <p style="font-size: var(--step--4); font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: var(--fg-4); margin: 0; padding: 0.85rem 0.6rem 0.5rem; border-bottom: 1px solid var(--border);">On this page</p>
+        <ol data-scrollspy style="list-style: none; padding: 0.4rem; margin: 0; display: flex; flex-direction: column; gap: 0;">
+          {presentGeneralTypes.length > 0 && (
+            <li>
+              <a href="#general" class="toc-link" data-target="general">General Information</a>
+              <ol style="list-style: none; padding: 0; margin: 0;">
+                {generalNavItems.map((g, i) => {
+                  const tocLabel = String(i + 1).padStart(2, "0");
+                  return (
+                    <li><a href={g.href} class="toc-link toc-sub" data-target={g.id}><span class="num" style="color: var(--fg-4); margin-right: 0.35rem;">{tocLabel}</span>{g.label}</a></li>
+                  );
+                })}
+              </ol>
+            </li>
+          )}
+          {amendmentSlugs.length > 0 && (
+            <li>
+              <a href="#amendments-to-service-publications" class="toc-link" data-target="amendments-to-service-publications">
+                Amendments <span style="color: var(--fg-4); font-size: var(--step--4); font-family: var(--font-mono);">({amendmentSlugs.length})</span>
+              </a>
+              <ol style="list-style: none; padding: 0; margin: 0;">
+                {amendmentNavItems.map((a, i) => {
+                  const amdTocLabel = String(i + 1).padStart(2, "0");
+                  return (
+                    <li>
+                      <a href={a.href} class="toc-link toc-sub" data-target={a.id} style="display: flex; gap: 0.35rem; align-items: baseline;">
+                        <span class="num" style="color: var(--fg-4);">{amdTocLabel}</span>
+                        <span style="min-width: 0; flex: 1;">{a.label}</span>
+                      </a>
+                    </li>
+                  );
+                })}
+              </ol>
+            </li>
+          )}
+          {Object.keys(issue.annexes).length > 0 && (
+            <li>
+              <a href="#annexes-to-this-issue" class="toc-link" data-target="annexes-to-this-issue">Annexes</a>
+            </li>
+          )}
+        </ol>
+      </nav>
+    </aside>
+  </div>
+
+  <script>
+    (function () {
+      var nav = document.querySelector("[data-scrollspy]");
+      if (!nav) return;
+      var links = Array.from(nav.querySelectorAll("[data-target]"));
+      var targets = links
+        .map(function (l) {
+          var id = l.getAttribute("data-target");
+          var el = document.getElementById(id);
+          return el ? { el: el, link: l } : null;
+        })
+        .filter(Boolean);
+      var observer = new IntersectionObserver(
+        function (entries) {
+          entries.forEach(function (e) {
+            if (e.isIntersecting) {
+              links.forEach(function (l) { l.classList.remove("is-active"); });
+              var match = targets.find(function (t) { return t.el === e.target; });
+              if (match) match.link.classList.add("is-active");
+            }
+          });
+        },
+        { rootMargin: "-25% 0px -65% 0px", threshold: 0 }
+      );
+      targets.forEach(function (t) { observer.observe(t.el); });
+    })();
+  </script>
+</Base>

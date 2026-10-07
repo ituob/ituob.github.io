@@ -1,0 +1,77 @@
+---
+/**
+ * Service Restrictions — list of country/page references to prior OB
+ * issues where each country's service restriction was last updated.
+ *
+ * Source shape:
+ *   items:
+ *     - country: { en: 'Seychelles' }
+ *       ob: 1006
+ *       page: 13
+ */
+import type { Language } from "~/lib/catalogs";
+
+type LocalizedString = Partial<Record<Language, string>>;
+
+export interface ServiceRestrictionItem {
+  country?: LocalizedString;
+  ob?: number | string;
+  page?: number | string;
+  note?: LocalizedString;
+}
+
+export interface Props {
+  items: ServiceRestrictionItem[];
+  lang?: Language;
+}
+
+const { items, lang = "en" } = Astro.props;
+
+function pickCountry(value: LocalizedString | undefined): string {
+  if (!value) return "";
+  return value[lang] ?? value.en ?? Object.values(value)[0] ?? "";
+}
+
+function pickNote(value: LocalizedString | undefined): string {
+  if (!value) return "";
+  return value[lang] ?? value.en ?? "";
+}
+---
+
+{Array.isArray(items) && items.length > 0 ? (
+  <div class="overflow-x-auto">
+    <table class="table-bulletin">
+      <thead>
+        <tr>
+          <th>Country / Geographical Area</th>
+          <th>OB No.</th>
+          <th>Page</th>
+          <th>Note</th>
+        </tr>
+      </thead>
+      <tbody>
+        {items.map((item) => {
+          const country = pickCountry(item.country);
+          const ob = item.ob ?? "";
+          const page = item.page ?? "";
+          const note = pickNote(item.note);
+          const obHref = ob ? `/issues/${ob}/` : undefined;
+          return (
+            <tr>
+              <td>{country}</td>
+              <td class="font-mono text-[var(--step--1)]">
+                {obHref ? <a href={obHref} class="hover:underline">{ob}</a> : ob}
+              </td>
+              <td class="font-mono text-[var(--step--1)]">{page}</td>
+              <td class="text-[var(--step--1)]" style="color: var(--fg-muted);">{note}</td>
+            </tr>
+          );
+        })}
+      </tbody>
+    </table>
+  </div>
+) : (
+  <p class="italic text-[var(--step--1)]" style="color: var(--fg-muted);">
+    No service restrictions recorded for this issue.
+  </p>
+)}

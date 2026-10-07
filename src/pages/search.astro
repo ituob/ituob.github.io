@@ -1,0 +1,41 @@
+---
+/**
+ * Search results page — powered by Pagefind.
+ * Pagefind generates the /pagefind/ directory at build time.
+ */
+import Base from "~/layouts/Base.astro";
+---
+<Base title="Search" description="Search the ITU Operational Bulletin." skipSearch>
+  <main id="main" class="mx-auto max-w-[var(--measure)] px-4 py-8">
+    <h1 class="text-[var(--step-3)] mb-4" style="font-family: var(--font-display); font-weight: 700;">
+      Search
+    </h1>
+    <p class="text-[var(--step--1)] mb-6" style="color: var(--fg-muted); font-family: var(--font-sans);">
+      Search across all ITU Operational Bulletin issues, datasets, and recommendations.
+    </p>
+    <div id="search-root">
+      <p style="color: var(--fg-muted); font-style: italic;">
+        Search index loads after the page renders. If this persists, the index may not be built yet.
+      </p>
+    </div>
+  </main>
+
+  <script is:inline>
+    (async () => {
+      var el = document.getElementById("search-root");
+      try {
+        var path = "/page" + "find/page" + "find-ui.js";
+        var mod = await import(path);
+        var ui = new mod.PagefindUI({
+          element: "#search-root",
+          showImages: false,
+          pageSize: 10,
+        });
+      } catch (e) {
+        if (el) {
+          el.innerHTML = "<p style='color: var(--fg-muted); font-style: italic;'>Search index not yet generated. Run <code>npm run build</code> with Pagefind enabled.</p>";
+        }
+      }
+    })();
+  </script>
+</Base>

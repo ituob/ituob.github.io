@@ -1,0 +1,106 @@
+---
+/**
+ * Telephone Service (telephone_service_2) — a list of country entries
+ * each with contact info and dated communications.
+ *
+ * Source shape (from itu-ob-data/issues/{id}/general.yaml):
+ *   contents: [
+ *     { type: 'nnp', country_name: { en: 'Gambia' }, phone_code: '220',
+ *       contact: { en: 'Mr ...' },
+ *       communications: [{ date, contents: { en: ProseMirrorDoc } }] }
+ *   ]
+ *
+ * The component iterates entries and renders each country block.
+ */
+import ProseMirror from "~/components/ProseMirror.astro";
+import type { ProseMirrorDoc, Language } from "~/lib/catalogs";
+import { formatSwissDate } from "~/lib/format";
+
+type LocalizedString = Partial<Record<Language, string>>;
+type LocalizedDoc = Partial<Record<Language, ProseMirrorDoc>>;
+
+export interface TelephoneCountryEntry {
+  type?: string;
+  country_name?: LocalizedString;
+  phone_code?: string;
+  contact?: LocalizedString;
+  communications?: Array<{ date?: string | Date; contents?: LocalizedDoc }>;
+}
+
+export interface Props {
+  contents: TelephoneCountryEntry[];
+  lang?: Language;
+}
+
+const { contents, lang = "en" } = Astro.props;
+
+function pick(value: LocalizedString | undefined): string {
+  if (!value) return "";
+  return value[lang] ?? value.en ?? Object.values(value)[0] ?? "";
+}
+
+function pickDoc(value: LocalizedDoc | undefined): ProseMirrorDoc | null {
+  if (!value) return null;
+  return value[lang] ?? value.en ?? null;
+}
+
+function parseDate(value: string | Date | undefined): Date | null {
+  if (!value) return null;
+  if (value instanceof Date) return value;
+  const d = new Date(value);
+  return Number.isNaN(d.getTime()) ? null : d;
+}
+---
+
+{Array.isArray(contents) && contents.length > 0 ? (
+  <div class="space-y-8">
+    {contents.map((entry, idx) => {
+      const country = pick(entry.country_name);
+      const phone = entry.phone_code ?? "";
+      const contact = pick(entry.contact);
+      const comms = entry.communications ?? [];
+      return (
+        <article class="rule-thin pt-4" id={country ? `ts-${country.toLowerCase().replace(/\s+/g, "-")}` : `ts-${idx}`}>
+          <header class="mb-3">
+            <h4 class="text-[var(--step-1)] mb-1" style="font-family: var(--font-display); font-weight: 600;">
+              {country}
+              {phone && (
+                <span class="ml-2 text-[var(--step--1)] font-mono" style="color: var(--accent);">
+                  {" "}+{phone}
+                </span>
+              )}
+            </h4>
+            {contact && (
+              <pre class="text-[var(--step--1)] whitespace-pre-wrap" style="color: var(--fg-muted); font-family: var(--font-sans);">{contact}</pre>
+            )}
+          </header>
+          {comms.length > 0 && (
+            <div class="space-y-4">
+              {comms.map((c, cidx) => {
+                const date = parseDate(c.date as string | Date | undefined);
+                const doc = pickDoc(c.contents);
+                const dateLabel = date ? formatSwissDate(date) : "Communication";
+                return (
+                  <section class="ml-4 border-l-2 pl-4" style="border-color: var(--rule);">
+                    <h5 class="text-[var(--step--1)] mb-2" style="font-family: var(--font-sans); color: var(--fg-subtle);">
+                      Communication of {dateLabel}
+                    </h5>
+                    {doc && (
+                      <div class="prose-bulletin measure">
+                        {(doc.content ?? []).map((node) => <ProseMirror node={node} />)}
+                      </div>
+                    )}
+                  </section>
+                );
+              })}
+            </div>
+          )}
+        </article>
+      );
+    })}
+  </div>
+) : (
+  <p class="italic text-[var(--step--1)]" style="color: var(--fg-muted);">
+    No content available.
+  </p>
+)}

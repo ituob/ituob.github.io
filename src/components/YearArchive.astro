@@ -1,0 +1,63 @@
+---
+/**
+ * Year-by-year issue archive grid (newspaper style).
+ *
+ * The deployed homepage uses a year grid (1994 → current) for
+ * newspaper-style navigation. This component reproduces that grid.
+ */
+import { listIssueIds, loadIssue } from "~/lib/loaders";
+
+export interface Props {
+  /** Max issues to show per year. Default: show all. */
+  maxPerYear?: number;
+}
+const { maxPerYear } = Astro.props;
+
+const ids = listIssueIds();
+const byYear = new Map<number, number[]>();
+
+for (const id of ids) {
+  const issue = loadIssue(id);
+  if (!issue?.meta?.publication_date) continue;
+  const year = new Date(issue.meta.publication_date as string).getUTCFullYear();
+  const arr = byYear.get(year) ?? [];
+  arr.push(id);
+  byYear.set(year, arr);
+}
+
+const years = [...byYear.keys()].sort((a, b) => b - a);
+---
+
+{years.length > 0 ? (
+  <nav class="year-archive" aria-label="Issues by year">
+    <h2 class="text-[var(--step-2)] mb-3" style="font-family: var(--font-display); font-weight: 600;">
+      Browse by year
+    </h2>
+    <div class="space-y-3">
+      {years.map((year) => {
+        const issues = (byYear.get(year) ?? []).sort((a, b) => a - b);
+        const visible = maxPerYear ? issues.slice(0, maxPerYear) : issues;
+        const hidden = issues.length - visible.length;
+        return (
+          <div class="year-row flex flex-wrap items-baseline gap-x-3 gap-y-1">
+            <span class="font-mono font-semibold text-[var(--step-0)]" style="color: var(--accent); min-width: 4em;">
+              {year}
+            </span>
+            <span class="text-[var(--step--1)] flex flex-wrap gap-x-2" style="font-family: var(--font-sans); color: var(--fg-muted);">
+              {visible.map((id) => (
+                <a href={`/issues/${id}/`} class="hover:text-[var(--accent)] underline-offset-2 hover:underline">
+                  {id}
+                </a>
+              ))}
+              {hidden > 0 && (
+                <span class="text-[var(--step--1)]" style="color: var(--fg-subtle);">
+                  (+{hidden} more)
+                </span>
+              )}
+            </span>
+          </div>
+        );
+      })}
+    </div>
+  </nav>
+) : null}

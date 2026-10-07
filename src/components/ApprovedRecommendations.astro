@@ -1,0 +1,50 @@
+---
+/**
+ * "ITU-T Recommendations Approved" — list of Recommendation codes approved
+ * under a given AAP procedure, with titles fetched from the
+ * itu-ob-data/recommendations/{code}/meta.yaml catalog.
+ */
+import type { ApprovedRecommendationsMessage } from "~/lib/types";
+import { loadRecommendationMetadata } from "~/lib/loaders";
+import { formatObDate, slugifyRecCode } from "~/lib/format";
+
+export interface Props {
+  message: ApprovedRecommendationsMessage;
+}
+const { message } = Astro.props;
+const items = Object.entries(message.payload.items).map(([code, version]) => ({
+  code: code.trim(),
+  version: typeof version === "string" ? version : null,
+}));
+---
+<div class="">
+  <p class="prose-bulletin">
+    {message.payload.by ? (
+      <>By <strong>{message.payload.by}</strong>, it was announced that the following ITU-T Recommendations were approved</>
+    ) : (
+      <>The following ITU-T Recommendations were approved</>
+    )}
+    {message.payload.procedures && (
+      <>, in accordance with the procedures outlined in <em>{message.payload.procedures}</em>:</>
+    )}
+  </p>
+  <ul class="prose-bulletin">
+    {items.map(({ code, version }) => {
+      const meta = loadRecommendationMetadata(code);
+      const title = meta?.title?.en;
+      return (
+        <li>
+          <a href={`/recommendations/${encodeURIComponent(slugifyRecCode(code))}/`} class="no-underline hover:underline">
+            ITU-T {code}
+          </a>
+          {version && (
+            <span class="text-[var(--step--1)]" style="color: var(--fg-subtle);">{" "}({formatObDate(version)})</span>
+          )}
+          {title && (
+            <span class="ml-1" style="color: var(--fg-muted);">: {title}</span>
+          )}
+        </li>
+      );
+    })}
+  </ul>
+</div>

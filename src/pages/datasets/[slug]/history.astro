@@ -1,0 +1,55 @@
+---
+import Base from "~/layouts/Base.astro";
+import {
+  listDatasetSlugs,
+  loadDatasetMetadata,
+  issuesWithDataset,
+  loadIssue,
+} from "~/lib/loaders";
+import { PUBLICATION_BY_SLUG } from "~/lib/catalogs";
+import { formatSwissDate } from "~/lib/format";
+
+export function getStaticPaths() {
+  return listDatasetSlugs().map((slug) => ({ params: { slug } }));
+}
+
+const { slug } = Astro.params;
+const meta = loadDatasetMetadata(slug!);
+const known = PUBLICATION_BY_SLUG.get(slug!);
+const title = meta?.title?.en ?? known?.label ?? slug;
+const issueIds = issuesWithDataset(slug!).sort((a, b) => b - a);
+---
+<Base title={`${title} — history`} description={`Chronological change history of ${title}.`}>
+  <header class="mb-8">
+    <p class="text-[var(--step--1)]" style="font-family: var(--font-sans);">
+      <a href={`/datasets/${slug}/`} class="hover:underline">{title}</a> · Change history
+    </p>
+    <h1 class="mt-1" style="font-family: var(--font-display); font-size: var(--step-4); font-weight: 700;">
+      {title}
+    </h1>
+    <p class="mt-2 text-[var(--step--1)]" style="color: var(--fg-muted);">
+      {issueIds.length} issue{issueIds.length !== 1 ? "s" : ""} modified this dataset.
+    </p>
+  </header>
+
+  <ol class="space-y-2" style="font-family: var(--font-sans);">
+    {issueIds.map((id) => {
+      const issue = loadIssue(id);
+      return (
+        <li>
+          <a
+            href={`/datasets/${slug}/issue/${id}/`}
+            class="flex items-baseline justify-between gap-3 panel px-4 py-3 no-underline hover:border-[var(--accent)]"
+          >
+            <span class="font-semibold">
+              No. <span class="num">{id}</span>
+            </span>
+            <span class="text-[var(--step--1)]" style="color: var(--fg-muted);">
+              {formatSwissDate(issue?.meta.publication_date)}
+            </span>
+          </a>
+        </li>
+      );
+    })}
+  </ol>
+</Base>

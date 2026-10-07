@@ -1,0 +1,77 @@
+---
+/**
+ * Point-in-time register view: /registers/{slug}/at/{ob_issue}/
+ */
+import Base from "~/layouts/Base.astro";
+import {
+  listSnapshotSlugs,
+  loadManifest,
+  loadStateAtIssue,
+} from "~/lib/snapshots";
+import TimelineScrubber from "~/components/TimelineScrubber.astro";
+import RegisterTable from "~/components/RegisterTable.astro";
+
+export function getStaticPaths() {
+  const paths: { params: { slug: string; ob_issue: string } }[] = [];
+  for (const slug of listSnapshotSlugs()) {
+    const manifest = loadManifest(slug);
+    if (!manifest) continue;
+    for (const issue of manifest.touched_issues) {
+      paths.push({ params: { slug, ob_issue: String(issue) } });
+    }
+  }
+  return paths;
+}
+
+const { slug, ob_issue } = Astro.params;
+const obIssue = Number.parseInt(ob_issue!, 10);
+const manifest = loadManifest(slug!);
+const state = loadStateAtIssue(slug!, obIssue);
+
+if (!manifest || !state) {
+  return Astro.redirect("/404");
+}
+
+const title = manifest.title.en ?? manifest.slug;
+---
+<Base
+  title={`${title} — OB No. ${obIssue}`}
+  masthead
+  description={`${title} register at OB No. ${obIssue}. ${state.entry_count} active entries.`}
+>
+  <section class="rule-thin pt-6 pb-6">
+    <p class="uppercase font-semibold text-[var(--step--1)]"
+       style="font-family: var(--font-sans); letter-spacing: 0.1em; color: var(--accent);">
+      Register · Point in time
+    </p>
+    <h2 class="text-[var(--step-4)] mt-1"
+        style="font-family: var(--font-display); font-weight: 700; line-height: 1.1;">
+      {title}
+    </h2>
+    <p class="mt-2 text-[var(--step--1)]" style="color: var(--fg-muted); font-family: var(--font-sans);">
+      State as of OB No. {obIssue} · {state.entry_count} active entries
+    </p>
+  </section>
+
+  <TimelineScrubber
+    slug={slug!}
+    touchedIssues={manifest.touched_issues}
+    currentIssue={obIssue}
+    seedIssue={manifest.seed_issue}
+  />
+
+  <section>
+    <header class="rule-thin pt-4 mb-5">
+      <h3 class="text-[var(--step-3)]" style="font-family: var(--font-display); font-weight: 600;">
+        Entries as of OB No. {obIssue}
+      </h3>
+    </header>
+    <RegisterTable state={state} keyField={manifest.key_field} />
+  </section>
+
+  <p class="mt-6">
+    <a href={`/registers/${slug}/`} class="panel px-3 py-2 no-underline text-[var(--step--1)]">
+      ← Back to current
+    </a>
+  </p>
+</Base>

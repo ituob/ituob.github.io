@@ -1,0 +1,179 @@
+---
+/**
+ * CommandPalette — Cmd+K / Ctrl+K navigation overlay.
+ *
+ * Surfaces issues, datasets, registers, recommendations for fast nav.
+ * Pure client-side: builds an index at runtime from a JSON endpoint.
+ */
+export interface Props {
+  open?: boolean;
+}
+const { open = false } = Astro.props;
+---
+<div id="cmdk-overlay" class="cmdk-overlay no-print" data-open={open ? "true" : "false"} role="dialog" aria-modal="true" aria-label="Command palette" hidden>
+  <div class="cmdk" role="document" onclick="event.stopPropagation()">
+    <input
+      type="text"
+      id="cmdk-input"
+      class="cmdk-input"
+      placeholder="Jump to issue, register, dataset, recommendation…"
+      autocomplete="off"
+      spellcheck="false"
+      aria-label="Search"
+    />
+    <div id="cmdk-list" class="cmdk-list" role="listbox" aria-label="Results"></div>
+    <div style="display: flex; align-items: center; justify-content: space-between; padding: 0.5rem 0.75rem; border-top: 1px solid var(--border-subtle); font-family: var(--font-sans); font-size: var(--step--3); color: var(--fg-subtle);">
+      <span><span class="kbd">↑</span> <span class="kbd">↓</span> navigate · <span class="kbd">↵</span> open · <span class="kbd">esc</span> close</span>
+      <span id="cmdk-count"></span>
+    </div>
+  </div>
+</div>
+
+<script is:inline>
+  (function () {
+    var overlay = document.getElementById("cmdk-overlay");
+    var input = document.getElementById("cmdk-input");
+    var list = document.getElementById("cmdk-list");
+    var count = document.getElementById("cmdk-count");
+    if (!overlay || !input || !list) return;
+
+    var INDEX = null;
+    var FILTERED = [];
+    var FOCUSED = 0;
+
+    function loadIndex(cb) {
+      if (INDEX) return cb(INDEX);
+      fetch("/cmdk-index.json")
+        .then(function (r) { return r.ok ? r.json() : []; })
+        .then(function (data) { INDEX = data; cb(INDEX); })
+        .catch(function () { cb([]); });
+    }
+
+    function open() {
+      overlay.hidden = false;
+      requestAnimationFrame(function () {
+        overlay.setAttribute("data-open", "true");
+        input.value = "";
+        input.focus();
+        loadIndex(function () { render(""); });
+      });
+    }
+
+    function close() {
+      overlay.setAttribute("data-open", "false");
+      setTimeout(function () { overlay.hidden = true; }, 200);
+    }
+
+    function score(hay, needle) {
+      if (!needle) return 1;
+      var h = hay.toLowerCase();
+      var n = needle.toLowerCase();
+      if (h === n) return 1000;
+      if (h.indexOf(n) === 0) return 500;
+      var ix = h.indexOf(n);
+      if (ix >= 0) return 200 - ix;
+      var m = 0, j = 0;
+      for (var i = 0; i < n.length; i++) {
+        var c = n[i];
+        while (j < h.length && h[j] !== c) j++;
+        if (j >= h.length) return -1;
+        m += 1; j++;
+      }
+      return m * 5;
+    }
+
+    function render(query) {
+      if (!INDEX) return;
+      var groups = {};
+      FILTERED = [];
+      for (var i = 0; i < INDEX.length; i++) {
+        var item = INDEX[i];
+        var s = score(item.label + " " + (item.meta || ""), query);
+        if (s < 0) continue;
+        item._score = s + (item.boost || 0);
+        FILTERED.push(item);
+      }
+      FILTERED.sort(function (a, b) { return b._score - a._score; });
+      FILTERED = FILTERED.slice(0, 50);
+
+      groups = {};
+      FILTERED.forEach(function (it) {
+        if (!groups[it.kind]) groups[it.kind] = [];
+        groups[it.kind].push(it);
+      });
+
+      var html = "";
+      var kinds = ["issue", "register", "dataset", "recommendation", "page"];
+      for (var k = 0; k < kinds.length; k++) {
+        var kind = kinds[k];
+        var arr = groups[kind];
+        if (!arr || !arr.length) continue;
+        html += '<div class="cmdk-section-label">' + kind + "s</div>";
+        for (var i = 0; i < arr.length; i++) {
+          var it = arr[i];
+          html += '<a href="' + it.href + '" class="cmdk-item" data-idx="' + FILTERED.indexOf(it) + '">'
+                + '<span class="cmdk-item-title">' + it.label + '</span>'
+                + (it.meta ? '<span class="cmdk-item-meta num">' + it.meta + '</span>' : '')
+                + '</a>';
+        }
+      }
+      if (!html) html = '<div class="cmdk-section-label">No matches</div>';
+      list.innerHTML = html;
+      FOCUSED = 0;
+      updateFocus();
+      if (count) count.textContent = FILTERED.length + " results";
+    }
+
+    function updateFocus() {
+      var items = list.querySelectorAll(".cmdk-item");
+      items.forEach(function (el, i) {
+        el.classList.toggle("is-focused", i === FOCUSED);
+        if (i === FOCUSED) {
+          var r = el.getBoundingClientRect();
+          var pr = el.parentElement.parentElement.getBoundingClientRect();
+          if (r.top < pr.top || r.bottom > pr.bottom) {
+            el.scrollIntoView({ block: "nearest" });
+          }
+        }
+      });
+    }
+
+    function moveFocus(delta) {
+      if (!FILTERED.length) return;
+      FOCUSED = (FOCUSED + delta + FILTERED.length) % FILTERED.length;
+      updateFocus();
+    }
+
+    function openFocused() {
+      var it = FILTERED[FOCUSED];
+      if (it) window.location.href = it.href;
+    }
+
+    input.addEventListener("input", function (e) { render(e.target.value); });
+    input.addEventListener("keydown", function (e) {
+      if (e.key === "ArrowDown") { e.preventDefault(); moveFocus(1); }
+      else if (e.key === "ArrowUp") { e.preventDefault(); moveFocus(-1); }
+      else if (e.key === "Enter") { e.preventDefault(); openFocused(); }
+      else if (e.key === "Escape") { e.preventDefault(); close(); }
+    });
+    list.addEventListener("mouseover", function (e) {
+      var el = e.target.closest(".cmdk-item");
+      if (!el) return;
+      var idx = parseInt(el.getAttribute("data-idx") || "0", 10);
+      FOCUSED = idx;
+      updateFocus();
+    });
+
+    overlay.addEventListener("click", close);
+
+    document.addEventListener("keydown", function (e) {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        if (overlay.getAttribute("data-open") === "true") close();
+        else open();
+      } else if (e.key === "Escape" && overlay.getAttribute("data-open") === "true") {
+        close();
+      }
+    });
+  })();
+</script>

@@ -1,0 +1,79 @@
+---
+import Base from "~/layouts/Base.astro";
+import {
+  listDatasetSlugs,
+  loadDatasetMetadata,
+  loadIssue,
+  listIssueIds,
+} from "~/lib/loaders";
+import { PUBLICATION_BY_SLUG, type Language } from "~/lib/catalogs";
+import { formatSwissDate } from "~/lib/format";
+import StructuredAmendment from "~/components/StructuredAmendment.astro";
+import TextualAmendment from "~/components/TextualAmendment.astro";
+
+export function getStaticPaths() {
+  const datasetSlugs = listDatasetSlugs();
+  // Collect every amendment slug that occurs in any issue, because some
+  // amendment slugs do not have a corresponding dataset directory (aliases).
+  const amdSlugs = new Set<string>();
+  for (const i of listIssueIds()) {
+    const iss = loadIssue(i);
+    if (!iss) continue;
+    for (const s of Object.keys(iss.amendments.structured)) amdSlugs.add(s);
+    for (const s of Object.keys(iss.amendments.textual)) amdSlugs.add(s);
+    for (const s of Object.keys(iss.amendments.placeholder)) amdSlugs.add(s);
+  }
+  const allSlugs = new Set<string>([...datasetSlugs, ...amdSlugs]);
+  const paths: { params: { slug: string; id: string } }[] = [];
+  for (const slug of allSlugs) {
+    for (const id of listIssueIds()) {
+      const issue = loadIssue(id);
+      if (!issue) continue;
+      if (
+        issue.amendments.structured[slug] ||
+        issue.amendments.textual[slug] ||
+        issue.amendments.placeholder[slug]
+      ) {
+        paths.push({ params: { slug, id: String(id) } });
+      }
+    }
+  }
+  return paths;
+}
+
+const { slug, id: idStr } = Astro.params;
+const id = Number.parseInt(idStr!, 10);
+const issue = loadIssue(id);
+// Look up metadata from the dataset directory if it exists, else use the
+// publication registry label.
+const meta = loadDatasetMetadata(slug!);
+const known = PUBLICATION_BY_SLUG.get(slug!);
+const title = meta?.title?.en ?? known?.label ?? slug;
+const lang: Language = "en";
+---
+<Base title={`No. ${id} — ${title}`} description={`Amendments to ${title} in OB No. ${id}.`}>
+  <header class="mb-8">
+    <p class="text-[var(--step--1)]" style="font-family: var(--font-sans);">
+      {meta && <a href={`/datasets/${slug}/`} class="hover:underline">{title}</a>}
+      {!meta && title}
+      {" "}<span style="color: var(--fg-subtle);">·</span>{" "}
+      <a href={`/issues/${id}/`} class="hover:underline">No. {id}</a>
+    </p>
+    <h1 class="mt-1" style="font-family: var(--font-display); font-size: var(--step-3); font-weight: 700;">
+      {title}
+    </h1>
+    <p class="mt-1 text-[var(--step--1)]" style="color: var(--fg-muted); font-family: var(--font-sans);">
+      Amended in No. {id} — {issue ? formatSwissDate(issue.meta.publication_date) : ""}
+    </p>
+  </header>
+
+  {issue?.amendments.structured[slug!] && issue.amendments.structured[slug!]!.length > 0 && (
+    <StructuredAmendment amendments={issue.amendments.structured[slug!]!} lang={lang} />
+  )}
+  {issue?.amendments.textual[slug!] && (
+    <TextualAmendment amendment={issue.amendments.textual[slug!]!} lang={lang} />
+  )}
+  {issue?.amendments.placeholder[slug!] && (
+    <TextualAmendment placeholder={issue.amendments.placeholder[slug!]!} />
+  )}
+</Base>

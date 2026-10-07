@@ -1,0 +1,47 @@
+---
+/**
+ * Render a textual general message — its ProseMirror content, with a
+ * localized fallback chain.
+ *
+ * Includes the optional "In accordance with ITU-T X.YYY (version)"
+ * recommendation reference and an "Online" link when the message type
+ * has either configured.
+ */
+import ProseMirror from "~/components/ProseMirror.astro";
+import type { TextualGeneralMessage } from "~/lib/types";
+import { resolveContent } from "~/lib/i18n";
+import { MESSAGE_TYPE_METADATA } from "~/lib/catalogs";
+import type { Language } from "~/lib/catalogs";
+
+export interface Props {
+  message: TextualGeneralMessage;
+  lang?: Language;
+}
+const { message, lang = "en" } = Astro.props;
+const doc = resolveContent(message.contents, lang);
+const nodes = doc?.content ?? [];
+const meta = MESSAGE_TYPE_METADATA[message.type] ?? {};
+const rec = (message as any).recommendation ?? meta.recommendation;
+const url = (message as any).url ?? meta.url;
+---
+{(rec || url) && (
+  <p class="text-[var(--step--1)] mb-3" style="color: var(--fg-subtle); font-family: var(--font-sans);">
+    {rec && (
+      <span>
+        In accordance with {rec.body ?? "ITU-T"} Recommendation {rec.code}{rec.version ? ` (${rec.version})` : ""}
+      </span>
+    )}
+    {rec && url && <span class="mx-2">·</span>}
+    {url && (
+      <a href={url} rel="external" class="hover:underline">Authoritative resource</a>
+    )}
+  </p>
+)}
+{nodes.length > 0 ? (
+  <div class="prose-bulletin">
+    {nodes.map((node) => <ProseMirror node={node} />)}
+  </div>
+) : (
+  <p style="color: var(--fg-subtle); font-style: italic;">No content available.</p>
+)}
+

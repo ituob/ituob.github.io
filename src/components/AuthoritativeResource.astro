@@ -1,0 +1,25 @@
+---
+import { loadIssue } from "~/lib/loaders";
+
+export interface Props {
+  issueId: number;
+}
+const { issueId } = Astro.props;
+
+const issue = loadIssue(issueId);
+const pubYear = issue?.meta?.publication_date
+  ? issue.meta.publication_date.slice(0, 4)
+  : String(issueId).slice(-4);
+
+const url = `https://www.itu.int/pub/T-SP-OB.${issueId}-${pubYear}`;
+---
+<section class="panel-accent" style="padding: 1.1rem;">
+  <p class="eyebrow" style="font-size: var(--step--4); margin: 0 0 0.6rem;">Official source</p>
+  <a href={url} rel="external" style="display: flex; align-items: flex-start; gap: 0.5rem; text-decoration: none; font-family: var(--font-sans); font-size: var(--step--2); color: var(--fg); line-height: 1.45;"
+     aria-label="Authoritative resource for this OB on the ITU website">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="13" height="13" fill="currentColor" aria-hidden="true" style="flex-shrink: 0; margin-top: 0.15rem; color: var(--accent);">
+      <path d="M12 3 2 12h3v8h6v-6h2v6h6v-8h3z" />
+    </svg>
+    <span>See the authoritative resource for this edition of ITU Operational Bulletin on the ITU website.</span>
+  </a>
+</section>

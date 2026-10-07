@@ -1,0 +1,141 @@
+---
+/**
+ * Render a structured amendment: one or more typed ChangeObjects.
+ *
+ * Each ChangeObject has `data.entries[]` (a list of typed records) plus
+ * `identifier.code` (the position identifier being amended) and an action
+ * type (ADD/SUP/REP/LIR/MOD/DEL). We render the action as a chip and the
+ * entries as a compact table.
+ *
+ * The structured layer is the single source of truth — there is no
+ * ProseMirror fallback. When the parser failed to extract entries, that
+ * is a parser bug to fix in the Ruby `ituob` gem, not a place to render
+ * the deprecated ProseMirror doc.
+ */
+import type { SequencedAmendment } from "~/lib/types";
+import type { ActionType } from "~/lib/catalogs";
+import { ACTION_TYPE_LABELS } from "~/lib/catalogs";
+import { formatObDate } from "~/lib/ob-date";
+import { formatCellValue } from "~/lib/values";
+
+export interface Props {
+  amendments: SequencedAmendment[];
+  lang?: string;
+}
+const { amendments, lang: _lang = "en" } = Astro.props;
+
+/** Column labels per known data class. Falls back to header-less table. */
+function columnsFor(entries: Record<string, unknown>[]): string[] {
+  if (entries.length === 0) return [];
+  const keys = new Set<string>();
+  for (const e of entries) {
+    for (const [k, v] of Object.entries(e)) {
+      if (k === "_class" || k === "source_contents") continue;
+      if (Array.isArray(v) && v.length > 0 && typeof v[0] === "object" && v[0] !== null && !Array.isArray(v[0])) {
+        const first = v[0] as Record<string, unknown>;
+        for (const nk of Object.keys(first)) {
+          if (nk === "_class") continue;
+          keys.add(nk);
+        }
+      } else {
+        keys.add(k);
+      }
+    }
+  }
+  return [...keys];
+}
+
+function resolveCell(entry: Record<string, unknown>, col: string): string {
+  if (col in entry) return formatCellValue(entry[col]);
+  // Nested collections (e.g. a station's measurement services): the
+  // column exists on the element objects — join EVERY element's
+  // value, not just the first (an entry can carry seven services).
+  const parts: string[] = [];
+  for (const v of Object.values(entry)) {
+    if (Array.isArray(v) && v.length > 0 && typeof v[0] === "object" && v[0] !== null && !Array.isArray(v[0])) {
+      for (const el of v as Record<string, unknown>[]) {
+        if (el && col in el) parts.push(formatCellValue(el[col]));
+      }
+    }
+  }
+  return parts.join(" ");
+}
+
+function entriesOf(amd: SequencedAmendment): Record<string, unknown>[] {
+  const e = amd.data?.entries;
+  if (!Array.isArray(e)) return [];
+  return e as Record<string, unknown>[];
+}
+---
+<div style="display: flex; flex-direction: column; gap: 1rem;">
+  {amendments.map((amd, amdIdx) => {
+    const entries = entriesOf(amd);
+    const code = (amd.identifier?.code ?? amd.data?.position ?? "—") as string;
+    const cols = columnsFor(entries);
+    const hasEntries = entries.length > 0 && cols.length > 0;
+    const notes = (amd.data?.notes as string[] | undefined) ?? [];
+    const showNotes = amdIdx === amendments.length - 1;
+    return (
+      <article>
+        <header style="display: flex; flex-wrap: wrap; align-items: center; gap: 0.6rem; margin-bottom: 0.85rem; padding-bottom: 0.6rem; border-bottom: 1px solid var(--border-subtle);">
+          <span class={`chip chip-action-${amd.type}`}>{amd.type}</span>
+          <span class="num" style="font-family: var(--font-mono); font-weight: 600; color: var(--fg); font-size: var(--step-0);">
+            {code}
+          </span>
+          <span style="font-size: var(--step--2); color: var(--fg-muted); font-family: var(--font-sans);">
+            {ACTION_TYPE_LABELS[amd.type as ActionType] ?? amd.type}
+          </span>
+          {amd.date_active && (
+            <span style="margin-left: auto; font-size: var(--step--2); color: var(--fg-subtle); font-family: var(--font-sans); display: inline-flex; align-items: baseline; gap: 0.3rem;">
+              <span style="text-transform: uppercase; letter-spacing: 0.06em; font-size: var(--step--4);">Effective</span>
+              <span class="num" style="color: var(--fg);">{formatObDate(amd.date_active)}</span>
+            </span>
+          )}
+        </header>
+        {(amd.data?.description as string | undefined) && (
+          <p class="num" style="margin: 0 0 0.75rem; font-size: var(--step--2); line-height: 1.45; color: var(--fg-2);">
+            {String(amd.data.description)}
+          </p>
+        )}
+        {hasEntries && (amd.data?.caption as string | undefined) && (
+          <p style="margin: 0 0 0.5rem; font-size: var(--step--2); color: var(--fg-3); font-family: var(--font-sans);">
+            {String(amd.data.caption)}
+          </p>
+        )}
+        {hasEntries ? (
+          <div class="scroll-x">
+            <table class="table-bulletin">
+              <thead>
+                <tr>
+                  {cols.map((c) => (
+                    <th>{c.replace(/_/g, " ")}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {entries.map((e) => (
+                  <tr>
+                    {cols.map((c) => (
+                      <td>{resolveCell(e, c)}</td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <p style="font-size: var(--step--2); font-style: italic; color: var(--fg-muted); margin: 0;">
+            No structured entries — parser did not extract data for this amendment.
+          </p>
+        )}
+        {showNotes && notes.length > 0 && (
+          <footer style="margin-top: 0.85rem; padding-top: 0.6rem; border-top: 1px solid var(--border-subtle); font-size: var(--step--2); color: var(--fg-muted); font-family: var(--font-sans);">
+            {notes.map((n) => (
+              <p style="margin: 0.2rem 0;">{n}</p>
+            ))}
+          </footer>
+        )}
+      </article>
+    );
+  })}
+</div>

@@ -1,0 +1,63 @@
+---
+import Base from "~/layouts/Base.astro";
+import { listDatasetSlugs, loadDatasetMetadata, issuesWithDataset } from "~/lib/loaders";
+import { PUBLICATION_BY_SLUG } from "~/lib/catalogs";
+import { slugifyRecCode } from "~/lib/format";
+
+const slugs = listDatasetSlugs();
+---
+<Base title="Lists annexed" description="All datasets and lists annexed to the ITU Operational Bulletin.">
+  <header class="mb-10">
+    <p class="uppercase font-semibold" style="font-family: var(--font-sans); font-size: var(--step--1); letter-spacing: 0.1em; color: var(--accent);">
+      Lists annexed
+    </p>
+    <h1 class="mt-1" style="font-family: var(--font-display); font-size: var(--step-5); font-weight: 700;">
+      All datasets
+    </h1>
+    <p class="mt-2 text-[var(--step-0)]" style="color: var(--fg-muted);">
+      {slugs.length} publications with current snapshots, schema definitions and full change histories.
+    </p>
+  </header>
+
+  <div class="overflow-x-auto">
+    <table class="table-bulletin">
+      <thead>
+        <tr>
+          <th style="width: 18rem;">Title</th>
+          <th>Slug</th>
+          <th>Recommendation</th>
+          <th class="num">Issues</th>
+        </tr>
+      </thead>
+      <tbody>
+        {slugs.map((slug) => {
+          const meta = loadDatasetMetadata(slug);
+          const known = PUBLICATION_BY_SLUG.get(slug);
+          const title = meta?.title?.en ?? known?.label ?? slug;
+          const issueCount = issuesWithDataset(slug).length;
+          return (
+            <tr>
+              <td>
+                <a href={`/datasets/${slug}/`} class="no-underline hover:underline font-semibold" style="font-family: var(--font-display);">
+                  {title}
+                </a>
+                {meta?.alias_of && (
+                  <span class="ml-2 text-[var(--step--1)]" style="color: var(--fg-subtle);">
+                    (alias of {meta.alias_of})
+                  </span>
+                )}
+              </td>
+              <td><code class="num text-[var(--step--1)]">{slug}</code></td>
+              <td>
+                {known?.recommendation && (
+                  <a href={`/recommendations/${slugifyRecCode(known.recommendation)}/`}>ITU-T {known.recommendation}</a>
+                )}
+              </td>
+              <td class="num">{issueCount}</td>
+            </tr>
+          );
+        })}
+      </tbody>
+    </table>
+  </div>
+</Base>

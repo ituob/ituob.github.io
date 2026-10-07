@@ -1,0 +1,32 @@
+---
+/**
+ * Textual amendment — renders freeform ProseMirror content (NNP, BUREAUFAX,
+ * List V, etc.). Falls back gracefully to a placeholder or empty-state message.
+ */
+import ProseMirror from "~/components/ProseMirror.astro";
+import type { TextAmendment, PlaceholderAmendment } from "~/lib/types";
+import { resolveContent } from "~/lib/i18n";
+import type { Language } from "~/lib/catalogs";
+
+export interface Props {
+  amendment?: TextAmendment;
+  placeholder?: PlaceholderAmendment;
+  lang?: Language;
+}
+const { amendment, placeholder, lang = "en" } = Astro.props;
+
+const doc = amendment ? resolveContent(amendment.contents, lang) : null;
+---
+{doc ? (
+  <div class="prose-bulletin">
+    {doc.content.map((node) => <ProseMirror node={node} />)}
+  </div>
+) : placeholder ? (
+  <p class="italic text-[var(--step--1)]" style="color: var(--fg-muted);">
+    This amendment was declared in source with empty content; no payload was published.
+  </p>
+) : (
+  <p class="italic text-[var(--step--1)]" style="color: var(--fg-muted);">
+    No content available.
+  </p>
+)}

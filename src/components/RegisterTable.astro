@@ -1,0 +1,71 @@
+---
+/**
+ * Register snapshot table — renders the replayed register state
+ * (active entries, with optional lapsed/deleted rows greyed out).
+ */
+import type { RegisterState } from "~/lib/snapshots";
+import { formatCellValue } from "~/lib/values";
+
+export interface Props {
+  state: RegisterState;
+  keyField: string;
+  showLapsed?: boolean;
+}
+const { state, keyField, showLapsed = false } = Astro.props;
+
+// Compute columns as the union of ALL field keys across every
+// active entry, so entries with different field sets all show.
+const colSet = new Set<string>();
+for (const entry of state.active_entries) {
+  for (const key of Object.keys(entry)) {
+    if (key !== "_class" && key !== "source_contents") colSet.add(key);
+  }
+}
+const cols = [...colSet].sort();
+
+
+---
+{state.active_entries.length > 0 ? (
+  <div class="overflow-x-auto">
+    <table class="table-bulletin">
+      <thead>
+        <tr>
+          {cols.map((c) => (
+            <th>{c.replace(/_/g, " ")}</th>
+          ))}
+        </tr>
+      </thead>
+      <tbody>
+        {state.active_entries.map((entry) => (
+          <tr>
+            {cols.map((c) => (
+              <td>{formatCellValue(entry[c])}</td>
+            ))}
+          </tr>
+        ))}
+        {showLapsed && state.lapsed_keys.map((key) => {
+          // LIR'd entries are in history; we don't materialise them
+          // in active_entries, so we just show a placeholder row.
+          return (
+            <tr class="opacity-50">
+              <td colspan={cols.length}>
+                <em>{key} — lapsed</em>
+              </td>
+            </tr>
+          );
+        })}
+      </tbody>
+    </table>
+  </div>
+) : (
+  <p class="italic text-[var(--step--1)]" style="color: var(--fg-muted);">
+    Register is empty at this point in time.
+  </p>
+)}
+
+<p class="text-[var(--step--1)] mt-3" style="color: var(--fg-subtle); font-family: var(--font-sans);">
+  {state.entry_count} active
+  {state.lapsed_count > 0 && ` · ${state.lapsed_count} lapsed`}
+  {state.deleted_count > 0 && ` · ${state.deleted_count} deleted`}
+  {state.at_ob_issue && ` · as of OB No. ${state.at_ob_issue}`}
+</p>

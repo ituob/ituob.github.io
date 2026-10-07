@@ -1,0 +1,67 @@
+---
+import Base from "~/layouts/Base.astro";
+import { listIssueIds, loadIssue } from "~/lib/loaders";
+import { formatShortDate, yearOf } from "~/lib/format";
+
+const ids = listIssueIds();
+const reversed = [...ids].reverse();
+
+// Group by year (descending).
+const byYear = new Map<number, number[]>();
+for (const id of reversed) {
+  const issue = loadIssue(id);
+  if (!issue) continue;
+  const y = yearOf(issue.meta.publication_date) ?? 0;
+  const arr = byYear.get(y) ?? [];
+  arr.push(id);
+  byYear.set(y, arr);
+}
+const years = [...byYear.keys()].sort((a, b) => b - a);
+---
+<Base title="Issue archive" description="All published issues of the ITU Operational Bulletin, in chronological order.">
+  <header class="mb-10">
+    <p class="uppercase font-semibold" style="font-family: var(--font-sans); font-size: var(--step--1); letter-spacing: 0.1em; color: var(--accent);">
+      Archive
+    </p>
+    <h1 class="mt-1" style="font-family: var(--font-display); font-size: var(--step-5); font-weight: 700;">
+      All issues
+    </h1>
+    <p class="mt-2 text-[var(--step-0)]" style="color: var(--fg-muted);">
+      {ids.length} editions of the ITU Operational Bulletin, listed newest first.
+    </p>
+  </header>
+
+  <div class="space-y-12">
+    {years.map((year) => (
+      <section>
+        <header class="rule-thin pt-3 mb-4 flex items-baseline justify-between">
+          <h2 class="text-[var(--step-3)] num" style="font-family: var(--font-display); font-weight: 600;">{year}</h2>
+          <span class="text-[var(--step--1)] uppercase tracking-wider" style="font-family: var(--font-sans); color: var(--fg-muted);">
+            {byYear.get(year)!.length} issue{byYear.get(year)!.length !== 1 ? "s" : ""}
+          </span>
+        </header>
+        <ul class="grid sm:grid-cols-2 lg:grid-cols-3 gap-2" style="font-family: var(--font-sans);">
+          {byYear.get(year)!.map((id) => {
+            const issue = loadIssue(id);
+            if (!issue) return null;
+            return (
+              <li>
+                <a
+                  href={`/issues/${id}/`}
+                  class="flex items-baseline justify-between gap-3 panel px-3 py-2 no-underline hover:border-[var(--accent)] transition-colors"
+                >
+                  <span class="font-semibold">
+                    No. <span class="num">{id}</span>
+                  </span>
+                  <span class="text-[var(--step--1)]" style="color: var(--fg-muted);">
+                    {formatShortDate(issue.meta.publication_date)}
+                  </span>
+                </a>
+              </li>
+            );
+          })}
+        </ul>
+      </section>
+    ))}
+  </div>
+</Base>

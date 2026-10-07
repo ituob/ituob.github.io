@@ -1,0 +1,110 @@
+---
+/**
+ * "Lists annexed to the OB" — section A (cumulative published annexes)
+ * and section B (extra online-only links).
+ *
+ * Uses computeRunningAnnexes() to get the full cumulative state at
+ * this issue's publication date — matching the deployed Jekyll site.
+ */
+import type { LoadedIssue } from "~/lib/types";
+import { PUBLICATION_BY_ID, PUBLICATION_BY_SLUG } from "~/lib/catalogs";
+import { loadDatasetMetadata, loadListMetadata, computeRunningAnnexes } from "~/lib/loaders";
+import { formatSwissDate } from "~/lib/format";
+
+export interface Props {
+  issue: LoadedIssue;
+}
+const { issue } = Astro.props;
+
+// Use the cumulative running-annexes state (all prior issues' annexes).
+const annexEntries = computeRunningAnnexes(issue.id);
+
+// Extra links from the running_annexes message payload.
+const extraLinks = issue.general.runningAnnexes?.payload?.extra_links ?? [];
+---
+<div class="">
+  <p class="prose-bulletin">
+    <strong>A.</strong> The following Lists have been published by TSB or BR
+    as Annexes to the ITU Operational Bulletin:
+  </p>
+  <table class="table-bulletin">
+    <thead>
+      <tr>
+        <th style="width: 7rem;">OB No.</th>
+        <th>List</th>
+      </tr>
+    </thead>
+    <tbody>
+      {annexEntries.map((entry) => {
+        const known = PUBLICATION_BY_ID.get(entry.pubId);
+        const slug = known?.slug ?? entry.pubId.toLowerCase().replace(/[._]/g, "-");
+        const knownBySlug = PUBLICATION_BY_SLUG.get(slug);
+        const meta = loadDatasetMetadata(slug);
+        const listMeta = loadListMetadata(entry.pubId);
+        const title = meta?.title?.en ?? listMeta?.title?.en ?? knownBySlug?.label ?? known?.label ?? entry.pubId;
+        const rec = listMeta?.recommendation ?? meta?.recommendation;
+        const recInfo = rec
+          ? `(according to ${rec.body ?? "ITU-T"} ${rec.code}${rec.version ? ` (${rec.version})` : ""})`
+          : knownBySlug?.recommendation
+            ? `(per ITU-T ${knownBySlug.recommendation})`
+            : null;
+        return (
+          <tr>
+            <td>
+              <a href={`/issues/${entry.annexed_in}/`} class="num font-semibold no-underline hover:underline">
+                {entry.annexed_in}
+              </a>
+            </td>
+            <td>
+              <a href={`/datasets/${slug}/`} class="no-underline hover:underline">{title}</a>
+              {recInfo && (
+                <span class="ml-2 text-[var(--step--1)]" style="color: var(--fg-subtle);">
+                  ({recInfo})
+                </span>
+              )}
+              {entry.position_on && (
+                <span class="ml-2 text-[var(--step--1)]" style="color: var(--fg-subtle);">
+                  (position on {formatSwissDate(entry.position_on as string | Date)})
+                </span>
+              )}
+            </td>
+          </tr>
+        );
+      })}
+    </tbody>
+  </table>
+
+  {extraLinks.length > 0 && (
+    <>
+      <p class="prose-bulletin mt-6">
+        <strong>B.</strong> The following Lists are available online from the ITU-T website:
+      </p>
+      <ul class="prose-bulletin">
+        {extraLinks.map((pubId) => {
+          const known = PUBLICATION_BY_ID.get(pubId);
+          const slug = known?.slug ?? pubId;
+          const meta = loadDatasetMetadata(slug);
+          const listMeta = loadListMetadata(pubId);
+          const title = listMeta?.title?.en ?? meta?.title?.en ?? known?.label ?? pubId;
+          const href = listMeta?.url ?? meta?.url ?? `https://www.itu.int/`;
+          const rec = listMeta?.recommendation;
+          const recInfo = rec
+            ? `(according to ${rec.body ?? "ITU-T"} ${rec.code}${rec.version ? ` (${rec.version})` : ""})`
+            : known?.recommendation
+              ? `(per ITU-T ${known.recommendation})`
+              : null;
+          return (
+            <li>
+              <a href={href} rel="external">{title}</a>
+              {recInfo && (
+                <span class="text-[var(--step--1)]" style="color: var(--fg-subtle);">
+                  {" "}{recInfo}
+                </span>
+              )}
+            </li>
+          );
+        })}
+      </ul>
+    </>
+  )}
+</div>

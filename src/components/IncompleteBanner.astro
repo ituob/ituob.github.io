@@ -1,0 +1,19 @@
+---
+/**
+ * "Incomplete data" banner — shown on issue pages whose source data
+ * isn't fully populated yet. Matches the deployed Jekyll layout.
+ */
+export interface Props {
+  incomplete?: boolean;
+}
+const { incomplete = false } = Astro.props;
+---
+{incomplete && (
+  <p class="incomplete-banner not-prose mb-4 inline-flex items-center gap-2 rounded border border-amber-300 bg-amber-50 px-3 py-2 text-[var(--step--1)] dark:bg-amber-950"
+     style="color: #92400e;">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true">
+      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z" />
+    </svg>
+    <span>This edition's data below may not be complete yet.</span>
+  </p>
+)}

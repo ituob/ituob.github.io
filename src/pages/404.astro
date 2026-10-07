@@ -1,0 +1,19 @@
+---
+import Base from "~/layouts/Base.astro";
+---
+<Base title="Not found" description="Page not found.">
+  <header class="mb-8">
+    <p class="uppercase font-semibold" style="font-family: var(--font-sans); font-size: var(--step--1); letter-spacing: 0.1em; color: var(--accent);">
+      Error 404
+    </p>
+    <h1 class="mt-1" style="font-family: var(--font-display); font-size: var(--step-5); font-weight: 700;">
+      Not found
+    </h1>
+  </header>
+  <p class="measure prose-bulletin">
+    The page you requested does not exist. Try the
+    <a href="/issues/">issue archive</a>, the
+    <a href="/datasets/">list of datasets</a>, or return to the
+    <a href="/">home page</a>.
+  </p>
+</Base>

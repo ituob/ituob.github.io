@@ -1,0 +1,36 @@
+---
+/**
+ * Renders the "In accordance with ITU-T Recommendation X.YYY (version)"
+ * line and optional "Authoritative resource" link shown above message
+ * bodies. Mirrors the deployed Jekyll site's +p.recommendation+ and
+ * +p.online-link+ blocks.
+ */
+import type { GeneralMessageType } from "~/lib/catalogs";
+import { MESSAGE_TYPE_METADATA } from "~/lib/catalogs";
+
+export interface Props {
+  type: GeneralMessageType;
+  /** Override recommendation from the message itself, if present. */
+  recommendation?: { body?: string; code?: string; version?: string } | null;
+  /** Override URL from the message itself, if present. */
+  url?: string | null;
+}
+const { type, recommendation, url } = Astro.props;
+const meta = MESSAGE_TYPE_METADATA[type] ?? {};
+const rec = recommendation ?? meta.recommendation;
+const href = url ?? meta.url;
+---
+{(rec || href) && (
+  <div class="mb-3 text-[var(--step--1)]" style="color: var(--fg-subtle); font-family: var(--font-sans);">
+    {rec && (
+      <p>
+        <span>In accordance with {rec.body ?? "ITU-T"} Recommendation {rec.code}{rec.version ? ` (${rec.version})` : ""}</span>
+      </p>
+    )}
+    {href && (
+      <p>
+        <a href={href} rel="external" class="hover:underline">Authoritative resource</a>
+      </p>
+    )}
+  </div>
+)}

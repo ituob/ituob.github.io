@@ -1,0 +1,115 @@
+---
+/**
+ * Per-register change history / audit trail.
+ *
+ * Lists every patch applied to the register (SEED batch + every OB
+ * amendment), in chronological order. Useful for understanding how
+ * the register drifted over time.
+ */
+import Base from "~/layouts/Base.astro";
+import { listSnapshotSlugs, loadManifest, loadCurrentState } from "~/lib/snapshots";
+
+export function getStaticPaths() {
+  return listSnapshotSlugs().map((slug) => ({ params: { slug } }));
+}
+
+const { slug } = Astro.params;
+const manifest = loadManifest(slug!);
+const current = loadCurrentState(slug!);
+
+if (!manifest || !current) {
+  return Astro.redirect("/404");
+}
+
+const title = manifest.title.en ?? manifest.slug;
+
+// Group history by ob_issue for compact display.
+const byIssue = new Map<number, { type: string; identifier: Record<string, unknown> }[]>();
+for (const h of current.history) {
+  if (h.ob_issue == null) continue;
+  const arr = byIssue.get(h.ob_issue) ?? [];
+  arr.push({ type: h.type, identifier: h.identifier });
+  byIssue.set(h.ob_issue, arr);
+}
+const issues = [...byIssue.keys()].sort((a, b) => a - b);
+
+const actionLabels: Record<string, string> = {
+  ADD: "Added",
+  SUP: "Suppressed",
+  REP: "Replaced",
+  LIR: "Lapsed",
+  MOD: "Modified",
+  DEL: "Deleted",
+  SEED: "Seed batch",
+};
+---
+<Base
+  title={`${title} — Change history`}
+  masthead
+  description={`${title} register change history. ${current.history.length} patches applied.`}
+>
+  <section class="rule-thin pt-6 pb-6">
+    <p class="uppercase font-semibold text-[var(--step--1)]"
+       style="font-family: var(--font-sans); letter-spacing: 0.1em; color: var(--accent);">
+      Register · Change history
+    </p>
+    <h2 class="text-[var(--step-4)] mt-1"
+        style="font-family: var(--font-display); font-weight: 700; line-height: 1.1;">
+      {title}
+    </h2>
+    <p class="mt-2 text-[var(--step--1)]" style="color: var(--fg-muted); font-family: var(--font-sans);">
+      {current.history.length} patches across {issues.length} OB issues
+    </p>
+  </section>
+
+  <p class="mb-4">
+    <a href={`/registers/${slug}/`} class="panel px-3 py-2 no-underline text-[var(--step--1)]">
+      ← Back to current state
+    </a>
+  </p>
+
+  <section>
+    <header class="rule-thin pt-4 mb-5">
+      <h3 class="text-[var(--step-3)]" style="font-family: var(--font-display); font-weight: 600;">
+        Audit trail
+      </h3>
+    </header>
+    <ol class="space-y-3">
+      {issues.map((n) => {
+        const changes = byIssue.get(n)!;
+        const seed = changes.some((c) => c.type === "SEED");
+        return (
+          <li class="panel p-4">
+            <header class="flex items-baseline gap-3 mb-2">
+              <a href={`/registers/${slug}/at/${n}/`} class="num font-mono font-semibold text-[var(--step-1)] no-underline hover:underline">
+                OB No. {n}
+              </a>
+              {seed && (
+                <span class="chip" style="background: var(--accent); color: var(--bg);">★ Seed publication</span>
+              )}
+              <span class="ml-auto text-[var(--step--1)]" style="color: var(--fg-subtle);">
+                {changes.length} change{changes.length !== 1 ? "s" : ""}
+              </span>
+            </header>
+            <ul class="text-[var(--step--1)] grid sm:grid-cols-2 gap-x-6 gap-y-0.5"
+                style="font-family: var(--font-mono; color: var(--fg-muted);">
+              {changes.filter((c) => c.type !== "SEED").slice(0, 50).map((c) => {
+                const code = c.identifier.code && c.identifier.code !== "__seed__"
+                  ? c.identifier.code : null;
+                return (
+                  <li>
+                    <span class="chip chip-action-{c.type.toLowerCase()} mr-1">{c.type}</span>
+                    {code && <code>{code}</code>}
+                  </li>
+                );
+              })}
+              {changes.length > 50 && (
+                <li class="italic">+ {changes.length - 50} more</li>
+              )}
+            </ul>
+          </li>
+        );
+      })}
+    </ol>
+  </section>
+</Base>

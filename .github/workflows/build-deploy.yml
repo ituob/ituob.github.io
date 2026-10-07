@@ -1,0 +1,96 @@
+name: Build and Deploy
+
+on:
+  push:
+    branches: [ main, staging ]
+  pull_request:
+    branches: [ main ]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: recursive
+
+    - uses: actions/setup-node@v4
+      with:
+        node-version: '22'
+        cache: 'npm'
+
+    - uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: '3.3'
+
+    - name: Generate register snapshots
+      working-directory: data-ob
+      env:
+        SNAPSHOTS_OUT: ${{ github.workspace }}/data/snapshots
+      run: |
+        bundle install
+        bundle exec ruby scripts/generate_register_snapshots.rb
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Build Astro site
+      run: npm run build
+
+    - name: Upload build artifact
+      uses: actions/upload-pages-artifact@v3
+      with:
+        path: dist
+
+  deploy-staging:
+    needs: build
+    if: github.ref == 'refs/heads/staging'
+    runs-on: ubuntu-latest
+    environment:
+      name: staging
+      url: https://staging-www.ituob.org
+    steps:
+    - name: Deploy to GitHub Pages (staging)
+      uses: actions/deploy-pages@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+
+  deploy-production:
+    needs: build
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: https://www.ituob.org
+    steps:
+    - name: Deploy to GitHub Pages (production)
+      uses: actions/deploy-pages@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+
+  content-parity-audit:
+    needs: build
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: recursive
+    - uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: '3.3'
+    - name: Run per-issue audit
+      working-directory: data-ob
+      run: |
+        bundle install
+        bundle exec ruby scripts/audit_per_issue.rb
+    - name: Run cross-reference validation
+      working-directory: data-ob
+      run: |
+        bundle install
+        bundle exec ruby scripts/validate_references.rb

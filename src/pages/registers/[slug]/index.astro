@@ -1,0 +1,543 @@
+---
+/**
+ * Register detail page — shows the replayed register current state
+ * with timeline scrubber and change-history link.
+ *
+ * Registers without snapshots (external publications like NNP, List V,
+ * List VIII) show a list of OB issues that contain amendments
+ * referencing this register, plus a link to the authoritative source.
+ */
+import Base from "~/layouts/Base.astro";
+import {
+  listSnapshotSlugs,
+  loadManifest,
+  loadCurrentState,
+  loadStateAtIssue,
+  type RegisterState,
+} from "~/lib/snapshots";
+import { loadRegisterCatalog, listIssueIds, loadIssue, loadListMetadata, lastAnnexBefore } from "~/lib/loaders";
+import { obIssuesRoot, readYamlOrNull, join } from "~/lib/fs";
+import { formatSwissDate } from "~/lib/format";
+import TimelineScrubber from "~/components/TimelineScrubber.astro";
+import RegisterTable from "~/components/RegisterTable.astro";
+import TextualAmendment from "~/components/TextualAmendment.astro";
+import StructuredAmendment from "~/components/StructuredAmendment.astro";
+import type { TextAmendment, PlaceholderAmendment, SequencedAmendment } from "~/lib/types";
+
+export function getStaticPaths() {
+  const snapshotSlugs = listSnapshotSlugs();
+  const catalog = loadRegisterCatalog();
+  const externalSlugs = catalog
+    .filter((r) => r.external)
+    .map((r) => r.slug)
+    .filter((slug) => !snapshotSlugs.includes(slug));
+  return [...snapshotSlugs, ...externalSlugs].map((slug) => ({ params: { slug } }));
+}
+
+const { slug } = Astro.params;
+const manifest = loadManifest(slug!);
+const state = loadCurrentState(slug!);
+const catalogEntry = loadRegisterCatalog().find((r) => r.slug === slug);
+
+const isExternal = !manifest || !state;
+const title = isExternal
+  ? (catalogEntry?.title?.en ?? catalogEntry?.register_id ?? slug)
+  : (manifest.title.en ?? manifest.slug);
+const recommendation = isExternal
+  ? (catalogEntry?.recommendation ?? "")
+  : (manifest.recommendation ?? manifest.register_id.replace(/_.*$/, ""));
+// Printed recommendation version ("F.32 (1995-10)") from the per-list
+// metadata, mirroring the deployed "In accordance with" line.
+const recommendationVersion = (() => {
+  const pubId = catalogEntry?.register_id ?? manifest?.register_id ?? slug;
+  return loadListMetadata(pubId)?.recommendation?.version ?? "";
+})();
+const description = isExternal
+  ? `${title} — external register.`
+  : `${title} register — current state. ${state.entry_count} active entries.`;
+
+// For external/textual registers, find issues that contain amendments
+// referencing this register's publication ID.
+interface AmendingIssue {
+  id: number;
+  date: string | null;
+  preview: string;
+  textualAmendment: TextAmendment | null;
+  placeholderAmendment: PlaceholderAmendment | null;
+  structuredAmendments: SequencedAmendment[];
+}
+const amendingIssues: AmendingIssue[] = [];
+if (isExternal) {
+  const pubIdBySlug = new Map<string, string>();
+  for (const r of loadRegisterCatalog()) {
+    pubIdBySlug.set(r.slug, r.register_id);
+  }
+  const pubId = pubIdBySlug.get(slug!) ?? slug;
+
+  for (const id of listIssueIds()) {
+    const issue = loadIssue(id);
+    const issueDate = issue?.meta?.publication_date ?? null;
+    if (!issue) continue;
+
+    // Prefer the issue loader's parsed amendment; fall back to direct
+    // text.yaml read for registers where the loader's slug mapping
+    // misses.
+    const textual = issue.amendments.textual[slug!] ?? null;
+    const placeholder = issue.amendments.placeholder[slug!] ?? null;
+    const structured = issue.amendments.structured[slug!] ?? [];
+
+    let textAmendment = textual;
+    if (!textAmendment) {
+      const textPath = join(obIssuesRoot(), String(id), slug!, "text.yaml");
+      const textData = readYamlOrNull<TextAmendment>(textPath);
+      if (textData && textData.contents) textAmendment = textData;
+    }
+
+    if (textAmendment || placeholder || structured.length > 0) {
+      let preview = "";
+      if (textAmendment?.contents) {
+        const doc = (textAmendment.contents as any).en ?? textAmendment.contents;
+        const parts: string[] = [];
+        const walk = (node: any) => {
+          if (!node) return;
+          if (node.type === "text" && typeof node.text === "string") {
+            parts.push(node.text);
+          }
+          if (Array.isArray(node.content)) {
+            node.content.forEach((c: any) => walk(c));
+          }
+        };
+        walk(doc);
+        preview = parts.join(" ").trim().slice(0, 300);
+      }
+      amendingIssues.push({
+        id,
+        date: issueDate,
+        preview,
+        textualAmendment: textAmendment,
+        placeholderAmendment: placeholder,
+        structuredAmendments: structured,
+      });
+    }
+  }
+}
+---
+<Base title={`Register: ${title}`} masthead wide description={description}>
+  <section class="rule-thin pt-6 pb-6">
+    <p class="uppercase font-semibold text-[var(--step--1)]"
+       style="font-family: var(--font-sans); letter-spacing: 0.1em; color: var(--accent);">
+      Register
+      {recommendation && ` · Recommendation ITU-T ${recommendation}`}
+    </p>
+    <p class="text-[var(--step--1)] mt-1" style="font-family: var(--font-sans); color: var(--fg-muted);">
+      In accordance with ITU-T Recommendation {recommendation}
+      {recommendationVersion && ` (${recommendationVersion})`}
+    </p>
+    <h2 class="text-[var(--step-4)] mt-1"
+        style="font-family: var(--font-display); font-weight: 700; line-height: 1.1;">
+      {title}
+    </h2>
+    {!isExternal && manifest?.seed_issue && (
+      <p class="text-[var(--step--1)] mt-1" style="font-family: var(--font-sans); color: var(--fg-muted);">
+        Annexed to{" "}
+        <a href={`/issues/${manifest.seed_issue}/`} class="no-underline hover:underline">
+          ITU OB No. {manifest.seed_issue}
+        </a>
+        {(() => {
+          // Most-recent position_on date up to the latest issue.
+          // Mirrors the deployed "Position on X" line.
+          const ids = listIssueIds();
+          const latest = ids.length > 0 ? ids[ids.length - 1]! : 0;
+          const pubId = (catalogEntry as any)?.register_id ?? slug;
+          const ref = lastAnnexBefore(latest, pubId);
+          return ref?.positionOn ? (
+            <>
+              {" "}· Position on {formatSwissDate(ref.positionOn)}
+            </>
+          ) : null;
+        })()}
+      </p>
+    )}
+    {!isExternal && (
+      <p class="mt-2 text-[var(--step--1)]" style="color: var(--fg-muted); font-family: var(--font-sans);">
+        {state.entry_count} active entries
+        {state.lapsed_count > 0 && ` · ${state.lapsed_count} lapsed`}
+        {state.deleted_count > 0 && ` · ${state.deleted_count} deleted`}
+        {state.error_count > 0 && ` · ${state.error_count} replay errors`}
+        · current state (latest OB)
+        {state.history.filter(p => p.type !== "SEED").length > 0 && (
+          <> · Amended {state.history.filter(p => p.type !== "SEED").length} time{state.history.filter(p => p.type !== "SEED").length !== 1 ? "s" : ""} in subsequent editions</>
+        )}
+      </p>
+    )}
+    {isExternal && (
+      (() => {
+        const pubId = (catalogEntry as any)?.register_id ?? slug;
+        const ids = listIssueIds();
+        const latest = ids.length > 0 ? ids[ids.length - 1]! : 0;
+        const ref = lastAnnexBefore(latest, pubId);
+        const annexIssue: number | null = ref?.issueId ?? null;
+        const lastPos: string | null = ref?.positionOn ?? null;
+        return (annexIssue || amendingIssues.length > 0) ? (
+          <p class="mt-2 text-[var(--step--1)]" style="color: var(--fg-muted); font-family: var(--font-sans);">
+            {annexIssue && (
+              <>
+                Annexed to <a href={`/issues/${annexIssue}/`} class="no-underline hover:underline">ITU OB No. {annexIssue}</a>
+              </>
+            )}
+            {lastPos && ` · Position on ${formatSwissDate(lastPos)}`}
+            {amendingIssues.length > 0 && (
+              <>
+                {" "}· Amended {amendingIssues.length} time{amendingIssues.length !== 1 ? "s" : ""} in subsequent editions
+                {" "}· Referenced in {amendingIssues.length} issue{amendingIssues.length !== 1 ? "s" : ""} of the Bulletin.
+              </>
+            )}
+          </p>
+        ) : null;
+      })()
+    )}
+    {/* Authoritative resource link from the per-list meta.yaml. */}
+    {(() => {
+      const pubId = (catalogEntry as any)?.register_id ?? slug;
+      const listMeta = loadListMetadata(pubId);
+      const url = (catalogEntry as any)?.url ?? (listMeta as any)?.url;
+      return url ? (
+        <p class="mt-2 text-[var(--step--1)]" style="font-family: var(--font-sans);">
+          <a href={url} class="tint" rel="noopener noreferrer">Authoritative resource ↗</a>
+        </p>
+      ) : null;
+    })()}
+  </section>
+
+  {/* Year-archive navigation — mirrors the deployed Jekyll layout:
+      "Showing data for X. Browse previous years: 2022 2021 ..." */}
+  {(() => {
+    const issues = isExternal
+      ? amendingIssues.map(a => a.id)
+      : (manifest?.touched_issues ?? []);
+    if (issues.length === 0) return null;
+    const years = new Set<number>();
+    for (const id of issues) {
+      const issue = loadIssue(id);
+      const iso = issue?.meta?.publication_date;
+      if (iso) years.add(Number.parseInt(iso.slice(0, 4), 10));
+    }
+    const sortedYears = [...years].sort((a, b) => b - a);
+    if (sortedYears.length === 0) return null;
+    const currentYear = sortedYears[0]!;
+    return (
+      <nav class="rule-thin pt-3 mb-6" aria-label="Year archive">
+        <p class="text-[var(--step--1)]" style="font-family: var(--font-sans); color: var(--fg-muted);">
+          Showing data for <span class="num">{currentYear}</span>.
+          {sortedYears.length > 1 && (
+            <>
+              {" "}Browse previous years (subsequent editions):{" "}
+              {sortedYears.slice(1).map((y, i) => (
+                <>
+                  {i > 0 && " "}
+                  <a href={`/registers/${slug}/at/${issues.find(id => {
+                    const issue = loadIssue(id);
+                    return issue?.meta?.publication_date?.slice(0, 4) === String(y);
+                  })}/`} class="num">{y}</a>
+                </>
+              ))}
+            </>
+          )}
+        </p>
+      </nav>
+    );
+  })()}
+
+  {isExternal ? (
+    <>
+      {amendingIssues.length > 0 ? (
+        <section>
+          <header class="section-header" style="margin-bottom: 1.5rem;">
+            <h3 style="font-size: var(--step-3); font-weight: 800; margin: 0;">
+              Issues amending this register
+            </h3>
+          </header>
+          <div class="sr-only">Date / Amendment</div>
+          <ul class="space-y-3" style="font-family: var(--font-sans); list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.75rem;">
+            {amendingIssues.sort((a, b) => b.id - a.id).map((item) => (
+              <li class="panel surface-hover" style="padding: 1rem 1.25rem;">
+                <h3 class="text-[var(--step-0)] flex items-baseline gap-3 flex-wrap m-0">
+                  <span style="font-family: var(--font-display); font-weight: 600;">
+                    Amd.
+                  </span>
+                  <a href={`/issues/${item.id}/`} class="no-underline hover:underline">
+                    OB no. <span class="num">{item.id}</span>
+                  </a>
+                </h3>
+                {item.date && (
+                  <p class="mt-1 text-[var(--step--1)]" style="color: var(--fg-muted);">
+                    {formatSwissDate(item.date)}
+                  </p>
+                )}
+                {/* Render full amendment content from the issue payload,
+                    matching the deployed Jekyll layout. */}
+                {item.textualAmendment && (
+                  <div class="mt-3 prose-bulletin measure">
+                    <TextualAmendment amendment={item.textualAmendment} />
+                  </div>
+                )}
+                {item.placeholderAmendment && (
+                  <div class="mt-3">
+                    <TextualAmendment placeholder={item.placeholderAmendment} />
+                  </div>
+                )}
+                {item.structuredAmendments.length > 0 && (
+                  <div class="mt-3">
+                    <StructuredAmendment amendments={item.structuredAmendments} />
+                  </div>
+                )}
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : (
+        <section class="panel p-6">
+          <p style="font-family: var(--font-sans); color: var(--fg);">
+            This register has not been referenced in any Operational Bulletin issue in our records.
+          </p>
+        </section>
+      )}
+      {recommendation && (
+        <p class="mt-4" style="font-family: var(--font-sans);">
+          <a href={`/recommendations/${recommendation}/`} class="tint">
+            → See Recommendation ITU-T {recommendation}
+          </a>
+        </p>
+      )}
+    </>
+  ) : (
+    <>
+      <TimelineScrubber
+        slug={slug!}
+        touchedIssues={manifest.touched_issues}
+        currentIssue={null}
+        seedIssue={manifest.seed_issue}
+      />
+
+      <p class="mb-4 text-[var(--step--1)]">
+        <a href={`/registers/${slug}/history/`} class="no-underline hover:underline" style="color: var(--accent);">
+          → View full change history ({state.history.length} patches)
+        </a>
+      </p>
+
+      {/* Issue cross-reference archive for parity */}
+      {(() => {
+        const allIds = listIssueIds();
+        const byYear = new Map<number, number[]>();
+        for (const iid of allIds) {
+          const issue = loadIssue(iid);
+          const iso = issue?.meta?.publication_date;
+          if (!iso) continue;
+          const yr = Number.parseInt(iso.slice(0, 4), 10);
+          const arr = byYear.get(yr) ?? [];
+          arr.push(iid);
+          byYear.set(yr, arr);
+        }
+        return (
+          <section class="mb-8">
+            <h3 class="text-[var(--step-1)] mb-3" style="font-family: var(--font-display); font-weight: 700;">Issue archive</h3>
+            <div class="surface" style="padding: 1rem;">
+              <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.4rem;">
+                {[...byYear.keys()].sort((a, b) => b - a).map((yr) => {
+                  const issueIds = byYear.get(yr)!;
+                  return (
+                    <li style="display: grid; grid-template-columns: 3rem 1fr; gap: 0.75rem; align-items: baseline;">
+                      <a href={`#year-${yr}`} class="num" style="font-family: var(--font-mono); font-size: var(--step--1); color: var(--accent); font-weight: 700; text-decoration: none;">{yr}</a>
+                      <div style="display: flex; flex-wrap: wrap; gap: 0.1rem; align-content: flex-start;">
+                        {issueIds.map((iid) => {
+                          const issueHref = "/issues/" + iid + "/";
+                          return (
+                            <a href={issueHref} class="num" style="text-decoration: none; color: var(--fg-3); padding: 0.1rem 0.3rem; border-radius: var(--radius-xs); font-size: var(--step--3);">{iid}</a>
+                          );
+                        })}
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          </section>
+        );
+      })()}
+
+      {state.history.length > 0 && (
+        <section class="mb-8">
+          <header class="rule-thin pt-4 mb-4">
+            <h3 class="text-[var(--step-2)]" style="font-family: var(--font-display); font-weight: 600;">
+              Amendment history ({state.history.filter(p => p.type !== "SEED").length})
+            </h3>
+          </header>
+          <div class="space-y-3" style="font-family: var(--font-sans);">
+            {(() => {
+              // Group changes by OB issue — the deployed Jekyll site numbers
+              // amendments per-issue (one H3 per OB), not per-change.
+              // Include the seed issue in the per-issue listing so the
+              // seed's original amendment content is rendered.
+              // Also include issues that have textual amendments for this
+              // slug (e.g. RR.25.1 has a seed snapshot but subsequent
+              // amendments are textual).
+              const allChanges = state.history;
+              const byIssue = new Map<number, typeof allChanges>();
+              for (const c of allChanges) {
+                const arr = byIssue.get(c.ob_issue) ?? [];
+                arr.push(c);
+                byIssue.set(c.ob_issue, arr);
+              }
+              if (manifest.seed_issue && !byIssue.has(manifest.seed_issue)) {
+                byIssue.set(manifest.seed_issue, []);
+              }
+              // Sweep all issues for textual/structured amendments of
+              // this slug that aren't already in the history.
+              for (const id of listIssueIds()) {
+                if (byIssue.has(id)) continue;
+                const issue = loadIssue(id);
+                if (!issue) continue;
+                if (
+                  issue.amendments.structured[slug!] ||
+                  issue.amendments.textual[slug!] ||
+                  issue.amendments.placeholder[slug!]
+                ) {
+                  byIssue.set(id, []);
+                }
+              }
+              // Per-issue amendment number: 1 = earliest issue with a change.
+              const issueOrder = [...byIssue.keys()].sort((a, b) => a - b);
+              const issueAmdNo = new Map<number, number>();
+              issueOrder.forEach((id, i) => issueAmdNo.set(id, i + 1));
+
+              const yearsWithIssues = new Map<string, number[]>();
+              for (const id of issueOrder) {
+                const iss = loadIssue(id);
+                const iso = iss?.meta?.publication_date;
+                if (!iso) continue;
+                const yr = iso.slice(0, 4);
+                const arr = yearsWithIssues.get(yr) ?? [];
+                arr.push(id);
+                yearsWithIssues.set(yr, arr);
+              }
+              const sortedYears = [...yearsWithIssues.keys()].sort((a, b) => b.localeCompare(a));
+              let currentYear = "";
+
+              return issueOrder.slice().reverse().map((obIssue) => {
+                const patches = (byIssue.get(obIssue) ?? []).filter(p => p.type !== "SEED");
+                const amdNo = issueAmdNo.get(obIssue)!;
+                const issue = loadIssue(obIssue);
+                const issueDate = issue?.meta?.publication_date ?? null;
+                const issueYear = issueDate ? issueDate.slice(0, 4) : null;
+                const yearChanged = issueYear && issueYear !== currentYear;
+                if (yearChanged) currentYear = issueYear!;
+                const structured = issue?.amendments.structured[slug!] ?? [];
+                const textual = issue?.amendments.textual[slug!] ?? null;
+                const placeholder = issue?.amendments.placeholder[slug!] ?? null;
+                return (
+                  <article class="border-l-2 border-[var(--rule)] pl-4">
+                    {yearChanged && issueYear && (
+                      <h4 id={`year-${issueYear}`} class="text-[var(--step--2)] mb-2 mt-4" style="font-family: var(--font-sans); color: var(--fg-muted);">
+                        <a href={`#year-${issueYear}`} class="no-underline">{issueYear}</a>
+                      </h4>
+                    )}
+                    <h3 class="text-[var(--step--1)] flex items-baseline gap-3 flex-wrap m-0 font-normal">
+                      <span style="color: var(--fg-muted);">
+                        Amd. no. <span class="num">{amdNo}</span>
+                      </span>
+                      <a href={`/issues/${obIssue}/`} class="no-underline hover:underline">
+                        OB no. <span class="num">{obIssue}</span>
+                      </a>
+                    </h3>
+                    {issueDate && (
+                      <p class="mt-1 text-[var(--step--1)]" style="color: var(--fg-muted);">
+                        Date: {formatSwissDate(issueDate)}
+                        {" "}·{" "}
+                        <a href={`/registers/${slug}/at/${obIssue}/`} class="no-underline hover:underline" style="color: var(--fg-subtle);">snapshot →</a>
+                      </p>
+                    )}
+
+                    {/* Full amendment content from the issue payload. */}
+                    {structured.length > 0 && (
+                      <div class="mt-3">
+                        <StructuredAmendment amendments={structured} />
+                      </div>
+                    )}
+                    {textual && (
+                      <div class="mt-3 prose-bulletin measure">
+                        <TextualAmendment amendment={textual} />
+                      </div>
+                    )}
+                    {placeholder && (
+                      <div class="mt-3">
+                        <TextualAmendment placeholder={placeholder} />
+                      </div>
+                    )}
+
+                    {patches.length > 0 && (
+                      <details class="mt-2">
+                        <summary class="text-[var(--step--1)] cursor-pointer" style="color: var(--fg-muted);">
+                          Changed entries ({patches.length})
+                        </summary>
+                        <ul class="mt-2 ml-2 space-y-1 text-[var(--step--1)]">
+                          {patches.map((patch) => {
+                            const entryState = loadStateAtIssue(slug!, patch.ob_issue);
+                            const entryData = entryState
+                              ? (entryState.active_entries as any[]).find(
+                                  (e: any) => e[manifest.key_field] === patch.identifier.code,
+                                )
+                              : null;
+                            const fieldValues = entryData
+                              ? Object.entries(entryData)
+                                  .filter(([k]) => k !== manifest.key_field)
+                                  .slice(0, 4)
+                              : null;
+                            return (
+                              <li>
+                                <span class="font-mono font-semibold uppercase" style="color: var(--accent);">
+                                  {patch.type}
+                                </span>
+                                {" "}
+                                <span class="num font-mono" style="color: var(--fg);">
+                                  {patch.identifier.code ?? "—"}
+                                </span>
+                                {fieldValues && fieldValues.length > 0 && (
+                                  <span class="ml-2" style="color: var(--fg-muted);">
+                                    {fieldValues.map(([k, v]) => (
+                                      <span class="inline-block mr-3">
+                                        {k}:{" "}
+                                        <span class="font-mono">{typeof v === "string" ? v : JSON.stringify(v)}</span>
+                                      </span>
+                                    ))}
+                                  </span>
+                                )}
+                                {!entryData && (
+                                  <span class="ml-2 italic" style="color: var(--fg-muted);">
+                                    (entry not present at this OB — removed by a later amendment)
+                                  </span>
+                                )}
+                              </li>
+                            );
+                          })}
+                        </ul>
+                      </details>
+                    )}
+                  </article>
+                );
+              });
+            })()}
+          </div>
+        </section>
+      )}
+
+      <section>
+        <header class="rule-thin pt-4 mb-5">
+          <h3 class="text-[var(--step-3)]" style="font-family: var(--font-display); font-weight: 600;">
+            Current entries
+          </h3>
+        </header>
+        <RegisterTable state={state} keyField={manifest.key_field} />
+      </section>
+    </>
+  )}
+</Base>
