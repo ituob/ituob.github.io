@@ -5,7 +5,7 @@
  */
 import Base from "~/layouts/Base.astro";
 ---
-<Base title="Search" description="Search the ITU Operational Bulletin." skipSearch>
+<Base title="Search" description="Search the ITU Operational Bulletin.">
   <main id="main" class="mx-auto max-w-[var(--measure)] px-4 py-8">
     <h1 class="text-[var(--step-3)] mb-4" style="font-family: var(--font-display); font-weight: 700;">
       Search
@@ -26,7 +26,7 @@ import Base from "~/layouts/Base.astro";
       try {
         var path = "/page" + "find/page" + "find-ui.js";
         var mod = await import(path);
-        var ui = new mod.PagefindUI({
+        new mod.PagefindUI({
           element: "#search-root",
           showImages: false,
           pageSize: 10,

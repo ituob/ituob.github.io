@@ -11,7 +11,7 @@ interface CmdkEntry {
   boost?: number;
 }
 
-export const GET: APIRoute = ({ site }) => {
+export const GET: APIRoute = () => {
   const entries: CmdkEntry[] = [];
 
   for (const id of listIssueIds()) {

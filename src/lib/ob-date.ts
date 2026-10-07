@@ -89,10 +89,10 @@ export function parseObDate(text: string | null | undefined): Date | null {
   if (!text) return null;
   const m = text.trim().match(/^(\d{1,2})\.([IVX]+)\.(\d{4})$/);
   if (!m) return null;
-  const day = Number.parseInt(m[1], 10);
+  const day = Number.parseInt(m[1]!, 10);
   const monthIdx = ROMAN_MONTHS.indexOf(m[2] as typeof ROMAN_MONTHS[number]);
   if (monthIdx < 0) return null;
-  const year = Number.parseInt(m[3], 10);
+  const year = Number.parseInt(m[3]!, 10);
   const d = new Date(Date.UTC(year, monthIdx, day));
   return Number.isNaN(d.getTime()) ? null : d;
 }

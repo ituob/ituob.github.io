@@ -94,12 +94,12 @@ function entriesOf(amd: SequencedAmendment): Record<string, unknown>[] {
         </header>
         {(amd.data?.description as string | undefined) && (
           <p class="num" style="margin: 0 0 0.75rem; font-size: var(--step--2); line-height: 1.45; color: var(--fg-2);">
-            {String(amd.data.description)}
+            {String(amd.data?.description)}
           </p>
         )}
         {hasEntries && (amd.data?.caption as string | undefined) && (
           <p style="margin: 0 0 0.5rem; font-size: var(--step--2); color: var(--fg-3); font-family: var(--font-sans);">
-            {String(amd.data.caption)}
+            {String(amd.data?.caption)}
           </p>
         )}
         {hasEntries ? (

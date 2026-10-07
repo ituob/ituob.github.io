@@ -16,6 +16,7 @@ import AmendmentsLegend from "~/components/AmendmentsLegend.astro";
 import AuthorContacts from "~/components/AuthorContacts.astro";
 import AuthoritativeResource from "~/components/AuthoritativeResource.astro";
 import IncompleteBanner from "~/components/IncompleteBanner.astro";
+import IssueArchive from "~/components/IssueArchive.astro";
 import PlannedIssues from "~/components/PlannedIssues.astro";
 import RecommendationHeader from "~/components/RecommendationHeader.astro";
 import TextualMessage from "~/components/TextualMessage.astro";
@@ -106,11 +107,15 @@ const amendmentNavItems = amendmentSlugs.map((slug) => {
   return { id: "amd-" + slug, label: short, rec, href: "#amd-" + slug };
 });
 
-const totalAmendmentActions = amendmentSlugs.reduce((n, slug) => {
-  return n + (issue.amendments.structured[slug]?.length ?? 0);
-}, 0) + amendmentSlugs.length;
+// Planned issues: the next ~25 editions after this one.
+const upcomingIssues = allIds
+  .slice(idx + 1, idx + 26)
+  .map((uid) => {
+    const u = loadIssue(uid);
+    return u ? { id: uid, publication_date: u.meta.publication_date, cutoff_date: u.meta.cutoff_date } : null;
+  })
+  .filter((u): u is NonNullable<typeof u> => u !== null);
 
-const issueHref = "/issues/" + id + "/";
 ---
 <Base
   title={"No. " + id}
@@ -175,19 +180,11 @@ const issueHref = "/issues/" + id + "/";
   </div>
 
   {/* Planned issues */}
-  {(() => {
-    const upcoming = allIds.slice(idx + 1, idx + 26)
-      .map((uid) => {
-        const u = loadIssue(uid);
-        return u ? { id: uid, publication_date: u.meta.publication_date, cutoff_date: u.meta.cutoff_date } : null;
-      })
-      .filter(Boolean);
-    return upcoming.length > 0 ? (
-      <div style="margin-top: 1.5rem;">
-        <PlannedIssues issues={upcoming} />
-      </div>
-    ) : null;
-  })()}
+  {upcomingIssues.length > 0 && (
+    <div style="margin-top: 1.5rem;">
+      <PlannedIssues issues={upcomingIssues} />
+    </div>
+  )}
 
   {/* ========== 2-COLUMN: full-width content + TOC rail ========== */}
   <div class="master-layout" style="margin-top: 1.5rem;">
@@ -364,38 +361,7 @@ const issueHref = "/issues/" + id + "/";
         <header class="section-header">
           <h2 style="font-size: var(--step-4); font-weight: 800;">View older issues</h2>
         </header>
-        <div class="surface" style="padding: 1rem;">
-          <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.4rem;">
-            {(() => {
-              const byYear = new Map<number, number[]>();
-              for (const iid of allIds) {
-                const issue = loadIssue(iid);
-                const iso = issue?.meta?.publication_date;
-                if (!iso) continue;
-                const yr = Number.parseInt(iso.slice(0, 4), 10);
-                const arr = byYear.get(yr) ?? [];
-                arr.push(iid);
-                byYear.set(yr, arr);
-              }
-              return [...byYear.keys()].sort((a, b) => b - a).map((yr) => {
-                const issueIds = byYear.get(yr)!;
-                return (
-                  <li style="display: grid; grid-template-columns: 3rem 1fr; gap: 0.75rem; align-items: baseline;">
-                    <strong class="num" style="font-family: var(--font-mono); font-size: var(--step--1); color: var(--accent); font-weight: 700;">{yr}</strong>
-                    <div style="display: flex; flex-wrap: wrap; gap: 0.1rem; align-content: flex-start;">
-                      {issueIds.map((iid) => {
-                        const issueHref = "/issues/" + iid + "/";
-                        return (
-                          <a href={issueHref} class="num" style={iid === id ? "text-decoration: none; color: var(--accent); font-weight: 700; padding: 0.1rem 0.3rem; border-radius: var(--radius-xs); font-size: var(--step--3); background: var(--accent-soft);" : "text-decoration: none; color: var(--fg-3); padding: 0.1rem 0.3rem; border-radius: var(--radius-xs); font-size: var(--step--3); transition: all var(--dur-fast);"}>{iid}</a>
-                        );
-                      })}
-                    </div>
-                  </li>
-                );
-              });
-            })()}
-          </ul>
-        </div>
+        <IssueArchive currentId={id} />
       </section>
 
       {/* AUTHORITATIVE + CONTACTS — at bottom, not sidebar */}

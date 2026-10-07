@@ -20,11 +20,10 @@ npm run build    # static site into dist/
 npm run preview  # serve dist/ locally
 ```
 
-Note: `npm run check` currently reports 187 pre-existing Astro/TS
-diagnostics (concentrated in `recommendations/[code]` and
-`registers/[slug]` page templates) inherited from the v2 build; the
-production build is unaffected. Fixing these and re-enabling the check
-in CI is tracked follow-up work.
+`npm run check` is a CI gate: the page templates are componentized
+and fully type-checked (RegisterHistory, RecommendationTimeline,
+IssueArchive, RegisterYearArchive carry the computation in their
+frontmatter).
 
 Requires Node 22+. Register snapshots (`data/snapshots/`) are generated,
 not committed — see below.

@@ -33,15 +33,6 @@ for (const h of current.history) {
 }
 const issues = [...byIssue.keys()].sort((a, b) => a - b);
 
-const actionLabels: Record<string, string> = {
-  ADD: "Added",
-  SUP: "Suppressed",
-  REP: "Replaced",
-  LIR: "Lapsed",
-  MOD: "Modified",
-  DEL: "Deleted",
-  SEED: "Seed batch",
-};
 ---
 <Base
   title={`${title} — Change history`}

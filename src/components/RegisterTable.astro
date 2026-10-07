@@ -11,7 +11,7 @@ export interface Props {
   keyField: string;
   showLapsed?: boolean;
 }
-const { state, keyField, showLapsed = false } = Astro.props;
+const { state, showLapsed = false } = Astro.props;
 
 // Compute columns as the union of ALL field keys across every
 // active entry, so entries with different field sets all show.

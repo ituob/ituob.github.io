@@ -1,0 +1,56 @@
+---
+/**
+ * RegisterYearArchive — "Showing data for X. Browse previous years..."
+ * navigation, mirroring the deployed Jekyll layout.
+ */
+import { loadIssue } from "~/lib/loaders";
+
+interface Props {
+  slug: string;
+  isExternal: boolean;
+  touchedIssues: number[];
+  amendingIssueIds: number[];
+}
+
+const { slug, isExternal, touchedIssues, amendingIssueIds } = Astro.props;
+
+const issues = isExternal ? amendingIssueIds : touchedIssues;
+const years = new Set<number>();
+for (const id of issues) {
+  const issue = loadIssue(id);
+  const iso = issue?.meta?.publication_date;
+  if (iso) years.add(Number.parseInt(iso.slice(0, 4), 10));
+}
+const sortedYears = [...years].sort((a, b) => b - a);
+const currentYear = sortedYears[0] ?? 0;
+
+/** First issue id published in the given year, for the archive link. */
+function firstIssueOfYear(year: number): number | undefined {
+  return issues.find((id) => {
+    const issue = loadIssue(id);
+    return issue?.meta?.publication_date?.slice(0, 4) === String(year);
+  });
+}
+---
+
+{issues.length > 0 && sortedYears.length > 0 && (
+  <nav class="rule-thin pt-3 mb-6" aria-label="Year archive">
+    <p class="text-[var(--step--1)]" style="font-family: var(--font-sans); color: var(--fg-muted);">
+      Showing data for <span class="num">{currentYear}</span>.
+      {sortedYears.length > 1 && (
+        <>
+          {" "}Browse previous years (subsequent editions):{" "}
+          {sortedYears.slice(1).map((y, i) => {
+            const target = firstIssueOfYear(y);
+            return (
+              <>
+                {i > 0 && " "}
+                <a href={`/registers/${slug}/at/${target}/`} class="num">{y}</a>
+              </>
+            );
+          })}
+        </>
+      )}
+    </p>
+  </nav>
+)}

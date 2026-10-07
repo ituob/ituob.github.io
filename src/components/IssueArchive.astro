@@ -1,0 +1,54 @@
+---
+/**
+ * IssueArchive — the compact "View older issues / Issue archive" year
+ * navigation (one row per year, every issue id linked). Shared by the
+ * issue page (highlights the current edition) and register pages.
+ */
+import { loadIssue, listIssueIds } from "~/lib/loaders";
+
+interface Props {
+  /** Highlight this issue id (the edition currently being viewed). */
+  currentId?: number;
+  /** Restrict the archive to these issues (defaults to every issue). */
+  issueIds?: number[];
+}
+
+const { currentId, issueIds } = Astro.props;
+
+const allIds = issueIds ?? listIssueIds();
+const byYear = new Map<number, number[]>();
+for (const iid of allIds) {
+  const issue = loadIssue(iid);
+  const iso = issue?.meta?.publication_date;
+  if (!iso) continue;
+  const yr = Number.parseInt(iso.slice(0, 4), 10);
+  const arr = byYear.get(yr) ?? [];
+  arr.push(iid);
+  byYear.set(yr, arr);
+}
+const sortedYears = [...byYear.keys()].sort((a, b) => b - a);
+---
+
+<div class="surface" style="padding: 1rem;">
+    <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.4rem;">
+      {sortedYears.map((yr) => {
+        const issueIdsForYear = byYear.get(yr) ?? [];
+        return (
+          <li style="display: grid; grid-template-columns: 3rem 1fr; gap: 0.75rem; align-items: baseline;">
+            <a href={`#year-${yr}`} class="num" style="font-family: var(--font-mono); font-size: var(--step--1); color: var(--accent); font-weight: 700; text-decoration: none;">{yr}</a>
+            <div style="display: flex; flex-wrap: wrap; gap: 0.1rem; align-content: flex-start;">
+              {issueIdsForYear.map((iid) => (
+                <a
+                  href={`/issues/${iid}/`}
+                  class="num"
+                  style={iid === currentId
+                    ? "text-decoration: none; color: var(--accent); font-weight: 700; padding: 0.1rem 0.3rem; border-radius: var(--radius-xs); font-size: var(--step--3); background: var(--accent-soft);"
+                    : "text-decoration: none; color: var(--fg-3); padding: 0.1rem 0.3rem; border-radius: var(--radius-xs); font-size: var(--step--3);"}
+                >{iid}</a>
+              ))}
+            </div>
+          </li>
+        );
+      })}
+    </ul>
+</div>

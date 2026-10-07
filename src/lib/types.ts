@@ -59,6 +59,7 @@ export interface AuthorEntity {
 }
 
 export interface IssueMeta {
+  incomplete?: boolean;
   id: number;
   publication_date: string;
   cutoff_date: string;
@@ -178,6 +179,8 @@ export interface DatasetMetadata {
 /* -- Aggregated issue view (what the page consumes) ------------------------ */
 
 export interface LoadedIssue {
+  /** True when the issue carries no general messages or amendments (edition not fully populated). */
+  incomplete?: boolean;
   id: number;
   meta: IssueMeta;
   annexes: AnnexesSnapshot;

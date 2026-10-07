@@ -164,8 +164,15 @@ export const loadIssue = memoize((id: number): LoadedIssue | null => {
   };
 });
 
+export interface ListMeta {
+  id: string;
+  title?: { en?: string };
+  url?: string;
+  recommendation?: { body?: string; code: string; version?: string };
+}
+
 function generalIsEmpty(
-  generalDir: string,
+  _generalDir: string,
   textual: TextualGeneralMessage[],
   runningAnnexes: RunningAnnexesMessage | null,
   approvedRecommendations: ApprovedRecommendationsMessage | null,
@@ -260,9 +267,9 @@ export function computeRunningAnnexes(issueId: number): RunningAnnexEntry[] {
  * These use the old naming convention (SR, E180_TNN, F1_IPTS, etc.)
  * that differs from the amendment publication IDs.
  */
-const _listMetaCache = new Map<string, { id: string; title?: { en?: string } }>();
+const _listMetaCache = new Map<string, ListMeta>();
 
-export function loadListMetadata(pubId: string): { id: string; title?: { en?: string } } | null {
+export function loadListMetadata(pubId: string): ListMeta | null {
   if (_listMetaCache.has(pubId)) return _listMetaCache.get(pubId)!;
 
   // Try several possible locations for the list meta.yaml.
@@ -276,7 +283,7 @@ export function loadListMetadata(pubId: string): { id: string; title?: { en?: st
 
   for (const path of candidates) {
     try {
-      const meta = readYamlOrNull<{ id: string; title?: { en?: string } }>(path);
+      const meta = readYamlOrNull<ListMeta>(path);
       if (meta) {
         _listMetaCache.set(pubId, meta);
         return meta;
@@ -715,7 +722,7 @@ export function cumulativeAmendmentNumber(issueId: number, slug: string): number
   const previousIssueId = (() => {
     const ids = listIssueIds();
     const i = ids.indexOf(issueId);
-    return i > 0 ? ids[i - 1] : 0;
+    return i > 0 ? (ids[i - 1] ?? 0) : 0;
   })();
   const previousMap = idx.lastAnnexPerIssue.get(previousIssueId);
   const effectiveLastAnnex = previousMap?.get(slug) ?? 0;

@@ -13,7 +13,8 @@
  * The component iterates entries and renders each country block.
  */
 import ProseMirror from "~/components/ProseMirror.astro";
-import type { ProseMirrorDoc, Language } from "~/lib/catalogs";
+import type { ProseMirrorDoc, ProseMirrorNode } from "~/lib/types";
+import type { Language } from "~/lib/catalogs";
 import { formatSwissDate } from "~/lib/format";
 
 type LocalizedString = Partial<Record<Language, string>>;
@@ -76,7 +77,7 @@ function parseDate(value: string | Date | undefined): Date | null {
           </header>
           {comms.length > 0 && (
             <div class="space-y-4">
-              {comms.map((c, cidx) => {
+              {comms.map((c) => {
                 const date = parseDate(c.date as string | Date | undefined);
                 const doc = pickDoc(c.contents);
                 const dateLabel = date ? formatSwissDate(date) : "Communication";
@@ -87,7 +88,7 @@ function parseDate(value: string | Date | undefined): Date | null {
                     </h5>
                     {doc && (
                       <div class="prose-bulletin measure">
-                        {(doc.content ?? []).map((node) => <ProseMirror node={node} />)}
+                        {(doc.content ?? []).map((node: ProseMirrorNode) => <ProseMirror node={node} />)}
                       </div>
                     )}
                   </section>

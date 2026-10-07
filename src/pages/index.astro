@@ -1,6 +1,5 @@
 ---
 import Base from "~/layouts/Base.astro";
-import DisclaimerBanner from "~/components/DisclaimerBanner.astro";
 import PlannedIssues from "~/components/PlannedIssues.astro";
 import { listIssueIds, loadIssue, loadDatasetMetadata, listDatasetSlugs, buildRecommendationIndex, loadRegisterCatalog, loadRecommendationCatalog, loadListMetadata } from "~/lib/loaders";
 import { formatSwissDate, formatShortDate, slugifyRecCode } from "~/lib/format";
@@ -17,11 +16,36 @@ const plannedIssues = (latest?.general as any)?.planned_issues ??
 
 const recIndex = buildRecommendationIndex();
 const registers = loadRegisterCatalog();
+type RegisterCatalogEntry = (typeof registers)[number];
+
+// Last annex position and amendment count for one register, computed
+// across every issue. Hoisted here from the template so astro-check
+// can type it (TS casts are not parseable inside template expressions).
+function registerAmendmentMeta(reg: RegisterCatalogEntry): { lastPosition: string | null; amdCount: number } {
+  const pubId = reg.register_id;
+  let lastPosition: string | null = null;
+  let lastAnnexIssue = 0;
+  let amdCount = 0;
+  for (const id of ids) {
+    const ax = readYamlOrNull<Record<string, any>>(join(obIssuesRoot(), String(id), "annexes.yaml"));
+    if (ax && ax[pubId] && ax[pubId].position_on) {
+      lastPosition = ax[pubId].position_on;
+      lastAnnexIssue = id;
+    }
+    const issue = loadIssue(id);
+    const hasAmd = issue &&
+      ((issue.amendments.structured as Record<string, unknown>)[reg.slug] ||
+        (issue.amendments.textual as Record<string, unknown>)[reg.slug] ||
+        (issue.amendments.placeholder as Record<string, unknown>)[reg.slug]);
+    if (hasAmd && id > lastAnnexIssue) amdCount++;
+  }
+  return { lastPosition, amdCount };
+}
+
 const spRecommendations = loadRecommendationCatalog();
 
 const latestIssue = latest;
 const latestAmdCount = latestIssue ? Object.keys(latestIssue.amendments.structured).length + Object.keys(latestIssue.amendments.textual).length + Object.keys(latestIssue.amendments.placeholder).length : 0;
-const latestMsgCount = latestIssue ? latestIssue.general.textual.length : 0;
 
 const latestHref = "/issues/" + latestId + "/";
 
@@ -37,7 +61,6 @@ for (const id of ids) {
   byYear.set(year, arr);
 }
 const years = [...byYear.keys()].sort((a, b) => b - a);
-const maxYearCount = Math.max(...[...byYear.values()].map((a) => a.length));
 const firstYear = Math.min(...years);
 ---
 <Base
@@ -114,24 +137,7 @@ const firstYear = Math.min(...years);
             const title = reg.title?.en ?? reg.register_id;
             const rec = reg.recommendation;
             const regHref = "/registers/" + reg.slug + "/";
-            const meta = (() => {
-              const pubId = reg.register_id;
-              let lastPosition: string | null = null;
-              let lastAnnexIssue = 0;
-              let amdCount = 0;
-              for (const id of ids) {
-                const ax = readYamlOrNull<Record<string, any>>(join(obIssuesRoot(), String(id), "annexes.yaml"));
-                if (ax && ax[pubId] && ax[pubId].position_on) {
-                  lastPosition = ax[pubId].position_on;
-                  lastAnnexIssue = id;
-                }
-                const issue = loadIssue(id);
-                if (issue && (issue.amendments.structured[reg.slug] || issue.amendments.textual[reg.slug] || issue.amendments.placeholder[reg.slug])) {
-                  if (id > lastAnnexIssue) amdCount++;
-                }
-              }
-              return { lastPosition, amdCount };
-            })();
+            const meta = registerAmendmentMeta(reg);
             const listMeta = loadListMetadata(reg.register_id);
             const url = (reg as any).url ?? (listMeta as any)?.url;
             return (
@@ -147,7 +153,7 @@ const firstYear = Math.min(...years);
                       {rec && <span class="chip" style="flex-shrink: 0; font-size: 0.5625rem;">{rec}</span>}
                     </div>
                     <div style="display: flex; gap: 0.6rem; margin-top: auto; font-size: var(--step--3); color: var(--fg-3); font-family: var(--font-sans);">
-                      {meta.amdCount > 0 && (
+                      {meta && meta.amdCount > 0 && (
                         <span><span class="num" style="color: var(--fg-1); font-weight: 600;">{meta.amdCount}</span> amd</span>
                       )}
                       {url && <span style="color: var(--accent);">↗</span>}
