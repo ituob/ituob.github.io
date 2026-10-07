@@ -6,6 +6,17 @@ url: "https://www.ituob.org"
 
 ob_root: 'data/issues'
 
+# Path to the new normalized shape (service-publications-docs submodule).
+# When `rendering_pipeline: new` is set, plugins read from these paths
+# instead of (or in addition to) the legacy ob_root paths.
+ob_issues_root: 'data-ob/ob-issues'
+datasets_root: 'data-ob/datasets'
+dataset_mapping: 'data-ob/messages/dataset_mapping.csv'
+
+# Feature flag for the rendering pipeline cutover (see TODO.new-structure/09).
+# Values: 'legacy' (default) | 'new'
+rendering_pipeline: 'legacy'
+
 google_analytics:
   # Google Analytics ID
   id: "G-L3TCVBGNJ0"

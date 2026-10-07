@@ -1,0 +1,33 @@
+---
+layout: default
+---
+
+<header>
+  <h1>Message type: {{ page.message_type }}</h1>
+</header>
+
+<section class="message-type-listing">
+  {% assign issue_count = page.messages_by_issue | size %}
+  {% if issue_count == 0 %}
+    <p>No messages of this type.</p>
+  {% else %}
+    <p>{{ issue_count }} issues contain messages of this type.</p>
+
+    {% for iid, msgs in page.messages_by_issue reversed %}
+      <article class="message-type-issue">
+        <h2>
+          <a href="/issues/{{ iid }}/">OB {{ iid }}</a>
+        </h2>
+
+        {% for msg in msgs %}
+          <details>
+            <summary>Message {{ forloop.index }}</summary>
+            {% if msg.contents %}
+              {% include prosemirror_contents.html doc=msg.contents %}
+            {% endif %}
+          </details>
+        {% endfor %}
+      </article>
+    {% endfor %}
+  {% endif %}
+</section>

@@ -1,0 +1,32 @@
+---
+layout: default
+---
+
+{% assign issues = site.data.ob.issues %}
+
+<header class="dataset-history-header">
+  <h1>{{ page.dataset_metadata.title.en }} — History</h1>
+  <p><a href="/datasets/{{ page.dataset_slug }}/">← Back to current snapshot</a></p>
+</header>
+
+<section class="dataset-history">
+  {% assign affected_issues = '' | split: '' %}
+  {% for iid, idata in issues %}
+    {% if idata.dataset_actions[page.dataset_slug] %}
+      {% assign affected_issues = affected_issues | push: iid %}
+    {% endif %}
+  {% endfor %}
+
+  {% if affected_issues.size == 0 %}
+    <p>No changes recorded for this dataset.</p>
+  {% else %}
+    <ul class="dataset-history-list">
+      {% for iid in affected_issues reversed %}
+        <li>
+          <a href="/datasets/{{ page.dataset_slug }}/issue/{{ iid }}/">OB {{ iid }}</a>
+          — {{ issues[iid].meta.publication_date | date: "%Y-%m-%d" }}
+        </li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+</section>

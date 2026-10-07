@@ -1,0 +1,25 @@
+---
+layout: default
+---
+
+<header>
+  <h1>{{ page.dataset_slug }} — OB Issue {{ page.issue_id }}</h1>
+  <p><a href="/datasets/{{ page.dataset_slug }}/">← Back to dataset</a></p>
+</header>
+
+<section class="dataset-issue-changes">
+  <h2>Changes</h2>
+  {% if page.changes and page.changes.size > 0 %}
+    <ul>
+      {% for c in page.changes %}
+        <li>
+          <strong>{{ c.type }}</strong>
+          {% if c.identifier and c.identifier.code %}({{ c.identifier.code }}){% endif %}
+          {% if c.position_on %}— position {{ c.position_on | date: "%Y-%m-%d" }}{% endif %}
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>No structured changes recorded for this issue.</p>
+  {% endif %}
+</section>

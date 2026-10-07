@@ -1,0 +1,52 @@
+---
+layout: default
+---
+
+{% assign ds = site.data.ob.datasets[page.dataset_slug] %}
+{% assign meta = page.dataset_metadata %}
+
+<header class="dataset-header">
+  <h1>{{ meta.title.en }}</h1>
+  {% if meta.title.fr %}<p class="dataset-title-fr">{{ meta.title.fr }}</p>{% endif %}
+  {% if meta.title.es %}<p class="dataset-title-es">{{ meta.title.es }}</p>{% endif %}
+  {% if meta.url %}<p><a href="{{ meta.url }}">Authoritative publication</a></p>{% endif %}
+  {% if meta.recommendation %}
+    <p class="dataset-rec">
+      Per Recommendation {{ meta.recommendation.body }}
+      {{ meta.recommendation.code }}
+      {% if meta.recommendation.version %}({{ meta.recommendation.version }}){% endif %}
+    </p>
+  {% endif %}
+  {% if meta.external %}
+    <p class="dataset-external">
+      This is an external publication. Local data is not maintained; only OB
+      amendments referencing this publication are tracked.
+    </p>
+  {% endif %}
+  {% if meta.alias_of %}
+    <p class="dataset-alias">
+      This dataset is an alias of
+      <a href="/datasets/{{ meta.alias_of }}/">{{ meta.alias_of }}</a>.
+    </p>
+  {% endif %}
+
+  <nav class="dataset-nav">
+    <a href="/datasets/{{ page.dataset_slug }}/history/">History</a>
+  </nav>
+</header>
+
+<section class="dataset-data">
+  {% if meta.external or meta.alias_of %}
+    <!-- No local data to render. -->
+  {% elsif ds.data and ds.data.size > 0 %}
+    <h2>Current snapshot</h2>
+    <p class="dataset-stats">{{ ds.data.size }} entries.</p>
+
+    <details>
+      <summary>View data</summary>
+      <pre>{{ ds.data | to_json }}</pre>
+    </details>
+  {% else %}
+    <p>No local data.</p>
+  {% endif %}
+</section>
