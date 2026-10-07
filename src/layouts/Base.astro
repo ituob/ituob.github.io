@@ -10,7 +10,9 @@
  */
 import "~/styles/global.css";
 import DisclaimerBanner from "~/components/DisclaimerBanner.astro";
-import CommandPalette from "~/components/CommandPalette.astro";
+import CommandPalette from "~/components/vue/CommandPalette.vue";
+import ThemeToggle from "~/components/vue/ThemeToggle.vue";
+import ReadingProgress from "~/components/vue/ReadingProgress.vue";
 import { OB_ISSN } from "~/lib/catalogs";
 
 export interface Breadcrumb {
@@ -113,21 +115,7 @@ const hideClasses: Record<string, string> = {
       })();
     </script>
 
-    {progress && (
-      <script>
-        const bar = document.createElement("div");
-        bar.className = "reading-progress no-print";
-        document.body.appendChild(bar);
-        function update() {
-          const h = document.documentElement.scrollHeight - document.documentElement.clientHeight;
-          const p = h > 0 ? window.scrollY / h : 0;
-          bar.style.setProperty("--progress", String(p));
-        }
-        window.addEventListener("scroll", update, { passive: true });
-        window.addEventListener("resize", update);
-        document.addEventListener("DOMContentLoaded", update);
-      </script>
-    )}
+    {progress && <ReadingProgress client:idle />}
   </head>
   <body>
     <a
@@ -180,15 +168,7 @@ const hideClasses: Record<string, string> = {
               {item.label}
             </a>
           ))}
-          <button
-            type="button"
-            id="theme-toggle"
-            class="icon-btn"
-            aria-label="Toggle colour theme"
-            title="Toggle theme"
-          >
-            ◐
-          </button>
+          <ThemeToggle client:load />
         </nav>
       </div>
 
@@ -252,27 +232,6 @@ const hideClasses: Record<string, string> = {
       </div>
     </footer>
 
-    <CommandPalette />
-
-    <script is:inline>
-      (function () {
-        var btn = document.getElementById("theme-toggle");
-        if (btn) {
-          btn.addEventListener("click", function () {
-            var isDark = document.documentElement.classList.toggle("dark");
-            document.documentElement.classList.toggle("light", !isDark);
-            try {
-              localStorage.setItem("ob-theme", isDark ? "dark" : "light");
-            } catch (e) {}
-          });
-        }
-        var trig = document.getElementById("cmdk-trigger");
-        if (trig) {
-          trig.addEventListener("click", function () {
-            document.dispatchEvent(new KeyboardEvent("keydown", { key: "k", metaKey: true }));
-          });
-        }
-      })();
-    </script>
+    <CommandPalette client:idle />
   </body>
 </html>

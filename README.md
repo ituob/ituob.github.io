@@ -1,6 +1,8 @@
 # ITU Operational Bulletin — ituob.org
 
-The ituob.org website, rebuilt on Astro 7, Vite 8, and Tailwind 4. The
+The ituob.org website, rebuilt on Astro 7, Vite 8, and Tailwind 4, with
+Vue 3 islands for interactive chrome (command palette, theme toggle,
+reading progress, scrollspy). The
 visual language is "2026 professional elegance, liquid text" — an editorial
 broadsheet aesthetic that retains ITU's newspaper-bulletin heritage while
 modernizing the typography, color, and responsive behavior.
@@ -83,6 +85,9 @@ A sitemap is emitted at `/sitemap-index.xml`.
   static paths.
 - `src/components/ProseMirror.astro` — recursive ProseMirror renderer.
 - `src/components/*Amendment.astro` — per-publication-class renderers.
+- `src/components/vue/*.vue` — Vue 3 islands: CommandPalette (Cmd+K),
+  ThemeToggle, ReadingProgress, ScrollSpy. Head markup stays static;
+  only interactive behaviour is hydrated.
 - `src/layouts/Base.astro` — masthead chrome, light/dark mode, print CSS.
 - `src/styles/global.css` — Tailwind 4 theme tokens, fluid type scale,
   component utilities, print styles.

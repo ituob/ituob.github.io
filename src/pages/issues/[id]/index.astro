@@ -25,6 +25,7 @@ import StructuredAmendment from "~/components/StructuredAmendment.astro";
 import TextualAmendment from "~/components/TextualAmendment.astro";
 import { availableLanguages } from "~/lib/i18n";
 import type { TextualGeneralMessage } from "~/lib/types";
+import ScrollSpy from "~/components/vue/ScrollSpy.vue";
 
 export function getStaticPaths() {
   return listIssueIds().map((id) => ({ params: { id: String(id) } }));
@@ -452,31 +453,5 @@ const issueHref = "/issues/" + id + "/";
     </aside>
   </div>
 
-  <script>
-    (function () {
-      var nav = document.querySelector("[data-scrollspy]");
-      if (!nav) return;
-      var links = Array.from(nav.querySelectorAll("[data-target]"));
-      var targets = links
-        .map(function (l) {
-          var id = l.getAttribute("data-target");
-          var el = document.getElementById(id);
-          return el ? { el: el, link: l } : null;
-        })
-        .filter(Boolean);
-      var observer = new IntersectionObserver(
-        function (entries) {
-          entries.forEach(function (e) {
-            if (e.isIntersecting) {
-              links.forEach(function (l) { l.classList.remove("is-active"); });
-              var match = targets.find(function (t) { return t.el === e.target; });
-              if (match) match.link.classList.add("is-active");
-            }
-          });
-        },
-        { rootMargin: "-25% 0px -65% 0px", threshold: 0 }
-      );
-      targets.forEach(function (t) { observer.observe(t.el); });
-    })();
-  </script>
+  <ScrollSpy client:visible />
 </Base>

@@ -1,6 +1,7 @@
 // @ts-check
 import { defineConfig } from "astro/config";
 import mdx from "@astrojs/mdx";
+import vue from "@astrojs/vue";
 import sitemap from "@astrojs/sitemap";
 import tailwindcss from "@tailwindcss/vite";
 import registerSnapshotsIntegration from "./register-snapshots.integration.mjs";
@@ -22,7 +23,7 @@ export default defineConfig({
   site: "https://www.ituob.org",
   trailingSlash: "always",
   output: "static",
-  integrations: [mdx(), sitemap(), registerSnapshotsIntegration()],
+  integrations: [vue(), mdx(), sitemap(), registerSnapshotsIntegration()],
   vite: {
     plugins: [tailwindcss()],
     define: {

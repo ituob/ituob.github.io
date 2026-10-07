@@ -15,10 +15,12 @@
   "dependencies": {
     "@astrojs/mdx": "^7.0.0",
     "@astrojs/sitemap": "^3.7.0",
+    "@astrojs/vue": "^7.0.3",
     "@tailwindcss/vite": "^4.1.0",
     "astro": "^7.0.0",
     "gray-matter": "^4.0.3",
     "tailwindcss": "^4.1.0",
+    "vue": "^3.5.43",
     "yaml": "^2.8.0",
     "zod": "^4.1.0"
   },
