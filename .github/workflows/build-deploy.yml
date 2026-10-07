@@ -28,6 +28,12 @@ jobs:
       with:
         ruby-version: '3.3'
 
+    - name: Generate TS wire types from the LML ontology
+      working-directory: data-ob
+      env:
+        SITE_TYPES_PATH: ${{ github.workspace }}/src/lib/schema.generated.ts
+      run: bundle exec ruby scripts/generate_ts_types.rb
+
     - name: Generate register snapshots
       working-directory: data-ob
       env:
