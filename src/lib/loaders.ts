@@ -10,6 +10,7 @@ import {
   dataRoot,
   catalogsRoot,
   recommendationsRoot,
+  listsRoot,
   readYaml,
   readYamlOrNull,
   listDirs,
@@ -267,6 +268,7 @@ export function loadListMetadata(pubId: string): { id: string; title?: { en?: st
   // Try several possible locations for the list meta.yaml.
   const root = dataRoot();
   const candidates = [
+    join(listsRoot(), pubId, "meta.yaml"),
     join(root, "..", "itu-ob-data", "lists", pubId, "meta.yaml"),
     join(root, "itu-ob-data", "lists", pubId, "meta.yaml"),
     join(root, "..", "lists", pubId, "meta.yaml"),

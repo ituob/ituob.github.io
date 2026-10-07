@@ -45,6 +45,10 @@ export function recommendationsRoot(): string {
   return join(ITU_OB_DATA_ROOT, "recommendations");
 }
 
+export function listsRoot(): string {
+  return join(ITU_OB_DATA_ROOT, "lists");
+}
+
 /** Parse a YAML string into an unknown. Logs parse errors to stderr. */
 export function parseYamlSafe<T>(raw: string, source = "<inline>"): T | null {
   try {
