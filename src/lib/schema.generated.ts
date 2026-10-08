@@ -274,9 +274,9 @@ export interface F400EntryWire {
   mt?: string;
   ipm?: string;
   other?: string;
-  helpdesk?: string;
-  autoanswer?: string;
-  contact_address?: string;
+  helpdesk?: Record<string, unknown>;
+  autoanswer?: Record<string, unknown>;
+  contact_address?: Record<string, unknown>;
   note?: string;
 }
 
