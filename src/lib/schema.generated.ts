@@ -360,6 +360,11 @@ export interface GeneralTelephoneServicesWire {
   items?: GeneralTelephoneServiceWire[];
 }
 
+export interface IdentifierWire {
+  code?: string;
+  query?: Record<string, unknown>;
+}
+
 export interface IptnEntryWire {
   applicant?: string;
   network?: string;
@@ -584,6 +589,22 @@ export interface RR251EntryWire {
   office_code?: string;
   office_code_note?: MultilingualStringWire;
   subarea?: MultilingualStringWire;
+}
+
+export interface RegisterChangeWire {
+  type?: string;
+  register?: string;
+  identifier?: IdentifierWire;
+  recommendation?: string;
+  data?: Record<string, unknown>;
+  ob_issue_no?: number;
+  date_active?: string;
+  date_requested?: string;
+  reference?: string;
+  description?: Record<string, unknown>;
+  superseded_by?: Record<string, unknown>;
+  reason?: Record<string, unknown>;
+  merge_strategy?: string;
 }
 
 export interface T35AssignmentAuthorityWire {
