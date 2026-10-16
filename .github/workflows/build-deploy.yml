@@ -98,11 +98,15 @@ jobs:
         ruby-version: '3.4'
     - name: Run per-issue audit
       working-directory: data-ob
+      env:
+        BUNDLE_GEMFILE: ituob/Gemfile
       run: |
         bundle install
         bundle exec ruby scripts/audit_per_issue.rb
     - name: Run cross-reference validation
       working-directory: data-ob
+      env:
+        BUNDLE_GEMFILE: ituob/Gemfile
       run: |
         bundle install
         bundle exec ruby scripts/validate_references.rb
