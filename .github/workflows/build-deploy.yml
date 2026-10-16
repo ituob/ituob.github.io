@@ -27,21 +27,23 @@ jobs:
 
     - uses: ruby/setup-ruby@v1
       with:
-        ruby-version: '3.3'
+        ruby-version: '3.4'
 
+    # The data-ob scripts run on the ituob gem bundle (data-ob/ituob/Gemfile,
+    # committed lockfile) — the repo-root Gemfile is the legacy Jekyll chain.
     - name: Generate TS wire types from the LML ontology
       working-directory: data-ob
       env:
+        BUNDLE_GEMFILE: ituob/Gemfile
         SITE_TYPES_PATH: ${{ github.workspace }}/src/lib/schema.generated.ts
-      run: bundle exec ruby scripts/generate_ts_types.rb
+      run: bundle install && bundle exec ruby scripts/generate_ts_types.rb
 
     - name: Generate register snapshots
       working-directory: data-ob
       env:
+        BUNDLE_GEMFILE: ituob/Gemfile
         SNAPSHOTS_OUT: ${{ github.workspace }}/data/snapshots
-      run: |
-        bundle install
-        bundle exec ruby scripts/generate_register_snapshots.rb
+      run: bundle exec ruby scripts/generate_register_snapshots.rb
 
     - name: Install dependencies
       run: npm ci
@@ -93,7 +95,7 @@ jobs:
         submodules: recursive
     - uses: ruby/setup-ruby@v1
       with:
-        ruby-version: '3.3'
+        ruby-version: '3.4'
     - name: Run per-issue audit
       working-directory: data-ob
       run: |
