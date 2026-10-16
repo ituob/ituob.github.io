@@ -1,0 +1,61 @@
+---
+import Base from "~/layouts/Base.astro";
+import {
+  issuesWithGeneralType,
+  loadIssue,
+} from "~/lib/loaders";
+import {
+  ALL_GENERAL_TYPES,
+  GENERAL_TYPE_LABELS,
+  type GeneralMessageType,
+} from "~/lib/catalogs";
+import { formatSwissDate } from "~/lib/format";
+import TextualMessage from "~/components/TextualMessage.astro";
+
+export function getStaticPaths() {
+  return ALL_GENERAL_TYPES.map((type) => ({ params: { type } }));
+}
+
+const { type } = Astro.params;
+const t = type as GeneralMessageType;
+const label = GENERAL_TYPE_LABELS[t];
+const issueIds = issuesWithGeneralType(t).sort((a, b) => b - a);
+---
+<Base title={label} description={`All ${label.toLowerCase()} messages across every issue of the ITU Operational Bulletin.`}>
+  <header class="mb-8">
+    <p class="uppercase font-semibold" style="font-family: var(--font-sans); font-size: var(--step--1); letter-spacing: 0.1em; color: var(--accent);">
+      Message type
+    </p>
+    <h1 class="mt-1" style="font-family: var(--font-display); font-size: var(--step-4); font-weight: 700;">
+      {label}
+    </h1>
+    <p class="mt-2 text-[var(--step--1)]" style="font-family: var(--font-sans); color: var(--fg-muted);">
+      <code class="num">{t}</code> · {issueIds.length} issue{issueIds.length !== 1 ? "s" : ""}
+    </p>
+  </header>
+
+  <div class="space-y-10">
+    {issueIds.map((id) => {
+      const issue = loadIssue(id);
+      if (!issue) return null;
+      const msgs = issue.general.textual.filter((m) => m.type === t);
+      return (
+        <article class="scroll-mt-24" id={`issue-${id}`}>
+          <header class="rule-thin pt-3 mb-4 flex items-baseline justify-between">
+            <h2 class="text-[var(--step-2)]" style="font-family: var(--font-display); font-weight: 600;">
+              <a href={`/issues/${id}/`} class="no-underline hover:underline">
+                No. <span class="num">{id}</span>
+              </a>
+            </h2>
+            <span class="text-[var(--step--1)]" style="font-family: var(--font-sans); color: var(--fg-muted);">
+              {formatSwissDate(issue.meta.publication_date)}
+            </span>
+          </header>
+          <div class="space-y-6">
+            {msgs.map((m) => <TextualMessage message={m} />)}
+          </div>
+        </article>
+      );
+    })}
+  </div>
+</Base>

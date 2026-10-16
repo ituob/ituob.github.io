@@ -1,0 +1,109 @@
+---
+/**
+ * ProseMirror renderer — recursively walks a ProseMirror doc tree and emits
+ * semantic HTML. Handles: doc, paragraph, heading, text, hard_break,
+ * bullet_list, ordered_list, list_item, table, table_row, table_cell,
+ * table_header, blockquote, horizontal_rule. Marks: strong, em, link,
+ * superscript, subscript, code.
+ */
+import type { ProseMirrorNode, ProseMirrorMark } from "~/lib/types";
+
+export interface Props {
+  node: ProseMirrorNode;
+}
+
+function renderMarks(marks: ProseMirrorMark[] | undefined): (children: string) => string {
+  return (children: string) => {
+    if (!marks || marks.length === 0) return children;
+    return marks.reduce((acc, mark) => {
+      switch (mark.type) {
+        case "strong":
+          return `<strong>${acc}</strong>`;
+        case "em":
+          return `<em>${acc}</em>`;
+        case "code":
+          return `<code>${acc}</code>`;
+        case "superscript":
+          return `<sup>${acc}</sup>`;
+        case "subscript":
+          return `<sub>${acc}</sub>`;
+        case "link": {
+          const href = (mark.attrs?.href as string | undefined) ?? "#";
+          const title = mark.attrs?.title as string | undefined;
+          const titleAttr = title ? ` title="${title}"` : "";
+          const external = /^https?:/.test(href);
+          const extAttr = external ? ` target="_blank" rel="noopener noreferrer"` : "";
+          return `<a href="${href}"${titleAttr}${extAttr}>${acc}</a>`;
+        }
+        default:
+          return acc;
+      }
+    }, children);
+  };
+}
+
+function renderNode(node: ProseMirrorNode): string {
+  const children = (node.content ?? []).map(renderNode).join("");
+  const text = node.text ?? "";
+
+  switch (node.type) {
+    case "text":
+      return renderMarks(node.marks)(escape(text));
+    case "paragraph":
+      return `<p>${children}</p>`;
+    case "heading": {
+      const level = Number(node.attrs?.level ?? 1);
+      const clamped = Math.min(Math.max(level + 1, 2), 6);
+      return `<h${clamped}>${children}</h${clamped}>`;
+    }
+    case "bullet_list":
+      return `<ul>${children}</ul>`;
+    case "ordered_list":
+      return `<ol>${children}</ol>`;
+    case "list_item":
+      return `<li>${children}</li>`;
+    case "table":
+      return `<table class="table-bulletin">${children}</table>`;
+    case "table_row":
+      return `<tr>${children}</tr>`;
+    case "table_cell": {
+      const colspan = node.attrs?.colspan as number | undefined;
+      const rowspan = node.attrs?.rowspan as number | undefined;
+      const attrs = [
+        colspan && colspan > 1 ? `colspan="${colspan}"` : "",
+        rowspan && rowspan > 1 ? `rowspan="${rowspan}"` : "",
+      ]
+        .filter(Boolean)
+        .join(" ");
+      return `<td${attrs ? " " + attrs : ""}>${children}</td>`;
+    }
+    case "table_header": {
+      const colspan = node.attrs?.colspan as number | undefined;
+      const attrs = colspan && colspan > 1 ? ` colspan="${colspan}"` : "";
+      return `<th${attrs}>${children}</th>`;
+    }
+    case "blockquote":
+      return `<blockquote>${children}</blockquote>`;
+    case "horizontal_rule":
+      return `<hr/>`;
+    case "hard_break":
+      return `<br/>`;
+    default:
+      return children;
+  }
+}
+
+function escape(s: unknown): string {
+  if (typeof s !== "string") return "";
+  return s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+const { node } = Astro.props;
+const html = renderNode(node);
+---
+<Fragment set:html={html} />

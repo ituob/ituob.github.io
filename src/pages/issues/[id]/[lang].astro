@@ -1,0 +1,154 @@
+---
+import Base from "~/layouts/Base.astro";
+import { loadIssue, listIssueIds } from "~/lib/loaders";
+import { formatSwissDate } from "~/lib/format";
+import {
+  MESSAGE_TYPE_ORDER,
+  GENERAL_TYPE_LABELS,
+  PUBLICATION_BY_SLUG,
+  type GeneralMessageType,
+  type Language,
+} from "~/lib/catalogs";
+import RunningAnnexes from "~/components/RunningAnnexes.astro";
+import ApprovedRecommendations from "~/components/ApprovedRecommendations.astro";
+import TextualMessage from "~/components/TextualMessage.astro";
+import StructuredAmendment from "~/components/StructuredAmendment.astro";
+import TextualAmendment from "~/components/TextualAmendment.astro";
+import { availableLanguages } from "~/lib/i18n";
+import type { TextualGeneralMessage } from "~/lib/types";
+
+export function getStaticPaths() {
+  const paths: { params: { id: string; lang: string } }[] = [];
+  for (const id of listIssueIds()) {
+    const issue = loadIssue(id);
+    if (!issue) continue;
+    const langs = new Set<Language>();
+    for (const m of issue.general.textual) {
+      for (const l of availableLanguages(m.contents)) langs.add(l);
+    }
+    for (const t of Object.values(issue.amendments.textual)) {
+      for (const l of availableLanguages(t.contents)) langs.add(l);
+    }
+    for (const l of langs) {
+      if (l === "en") continue; // English lives at /issues/{id}/
+      paths.push({ params: { id: String(id), lang: l } });
+    }
+  }
+  return paths;
+}
+
+const { id: idStr, lang: langParam } = Astro.params;
+const id = Number.parseInt(idStr!, 10);
+const lang = langParam as Language;
+const issue = loadIssue(id);
+if (!issue) return Astro.redirect("/404");
+
+const presentGeneralTypes = MESSAGE_TYPE_ORDER.filter((t) => {
+  if (t === "running_annexes") return issue.general.runningAnnexes !== null;
+  if (t === "approved_recommendations") return issue.general.approvedRecommendations !== null;
+  return issue.general.textual.some((m) => m.type === t);
+});
+
+const textualByType = new Map<GeneralMessageType, TextualGeneralMessage[]>();
+for (const m of issue.general.textual) {
+  const arr = textualByType.get(m.type) ?? [];
+  arr.push(m);
+  textualByType.set(m.type, arr);
+}
+
+const amendmentSlugs = [
+  ...new Set([
+    ...Object.keys(issue.amendments.structured),
+    ...Object.keys(issue.amendments.textual),
+    ...Object.keys(issue.amendments.placeholder),
+  ]),
+].sort();
+
+const langsAvail = new Set<Language>(["en"]);
+for (const m of issue.general.textual) {
+  for (const l of availableLanguages(m.contents)) langsAvail.add(l);
+}
+
+function sectionId(label: string): string {
+  return label.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+}
+---
+<Base
+  title={`No. ${id} (${lang})`}
+  masthead
+  lang={lang}
+  description={`ITU Operational Bulletin No. ${id} — ${lang} edition.`}
+>
+  <section class="rule-thin pt-6 pb-6">
+    <p class="uppercase font-semibold" style="font-family: var(--font-sans); font-size: var(--step--1); letter-spacing: 0.1em; color: var(--accent);">
+      Edition No. {id} · {lang}
+    </p>
+    <h2 class="mt-1" style="font-family: var(--font-display); font-size: var(--step-4); font-weight: 700;">
+      {formatSwissDate(issue.meta.publication_date)}
+    </h2>
+    <p class="mt-1">
+      <a href={`/issues/${id}/`} class="text-[var(--step--1)]">← English edition</a>
+    </p>
+  </section>
+
+  <div class="space-y-14">
+    {presentGeneralTypes.map((t) => {
+      const label = GENERAL_TYPE_LABELS[t];
+      const sid = sectionId(label);
+      return (
+        <section id={sid} class="scroll-mt-24">
+          <header class="rule-thin pt-4 mb-5">
+            <h2 class="text-[var(--step-3)]" style="font-family: var(--font-display); font-weight: 600;">
+              {label}
+            </h2>
+          </header>
+          {t === "running_annexes" && issue.general.runningAnnexes && (
+            <RunningAnnexes issue={issue} />
+          )}
+          {t === "approved_recommendations" && issue.general.approvedRecommendations && (
+            <ApprovedRecommendations message={issue.general.approvedRecommendations} />
+          )}
+          {textualByType.has(t) && (
+            <div class="space-y-8">
+              {textualByType.get(t)!.map((m) => (
+                <TextualMessage message={m} lang={lang} />
+              ))}
+            </div>
+          )}
+        </section>
+      );
+    })}
+
+    {amendmentSlugs.length > 0 && (
+      <section>
+        <header class="rule-thin pt-4 mb-5">
+          <h2 class="text-[var(--step-3)]" style="font-family: var(--font-display); font-weight: 600;">
+            Amendments to service publications
+          </h2>
+        </header>
+        <div class="space-y-12">
+          {amendmentSlugs.map((slug) => {
+            const known = PUBLICATION_BY_SLUG.get(slug);
+            const title = known?.label ?? slug;
+            return (
+              <article>
+                <h3 class="text-[var(--step-2)] mb-3" style="font-family: var(--font-display); font-weight: 600;">
+                  <a href={`/datasets/${slug}/`} class="no-underline hover:underline">{title}</a>
+                </h3>
+                {issue.amendments.structured[slug] && (
+                  <StructuredAmendment amendments={issue.amendments.structured[slug]} lang={lang} />
+                )}
+                {issue.amendments.textual[slug] && (
+                  <TextualAmendment amendment={issue.amendments.textual[slug]} lang={lang} />
+                )}
+                {issue.amendments.placeholder[slug] && (
+                  <TextualAmendment placeholder={issue.amendments.placeholder[slug]} />
+                )}
+              </article>
+            );
+          })}
+        </div>
+      </section>
+    )}
+  </div>
+</Base>

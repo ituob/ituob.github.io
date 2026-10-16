@@ -1,0 +1,142 @@
+---
+/**
+ * Registers index page — lists all registers (including external ones),
+ * grouped by their parent Recommendation.
+ */
+import Base from "~/layouts/Base.astro";
+import { listSnapshotSlugs, loadManifest, loadCurrentState } from "~/lib/snapshots";
+import { loadRegisterCatalog } from "~/lib/loaders";
+
+const slugs = listSnapshotSlugs();
+const catalog = loadRegisterCatalog();
+
+interface RegisterSummary {
+  slug: string;
+  registerId: string;
+  title: string;
+  recommendation: string;
+  seedIssue: number | null;
+  entryCount: number;
+  lapsedCount: number;
+  touchedIssues: number[];
+  external: boolean;
+}
+
+const summaries: RegisterSummary[] = [];
+
+// Internal registers from snapshots.
+for (const slug of slugs) {
+  const manifest = loadManifest(slug);
+  const current = loadCurrentState(slug);
+  if (!manifest || !current) continue;
+
+  summaries.push({
+    slug,
+    registerId: manifest.register_id,
+    title: manifest.title.en ?? slug,
+    recommendation: manifest.recommendation ?? manifest.register_id.replace(/_.*$/, ""),
+    seedIssue: manifest.seed_issue,
+    entryCount: current.entry_count,
+    lapsedCount: current.lapsed_count,
+    touchedIssues: manifest.touched_issues,
+    external: false,
+  });
+}
+
+// External registers from the catalog (no snapshot).
+for (const entry of catalog.filter((r) => r.external)) {
+  if (summaries.some((s) => s.slug === entry.slug)) continue;
+  summaries.push({
+    slug: entry.slug,
+    registerId: entry.register_id,
+    title: entry.title?.en ?? entry.register_id,
+    recommendation: entry.recommendation,
+    seedIssue: null,
+    entryCount: 0,
+    lapsedCount: 0,
+    touchedIssues: [],
+    external: true,
+  });
+}
+
+// Group by recommendation prefix.
+const byRecommendation = new Map<string, RegisterSummary[]>();
+for (const s of summaries) {
+  const rec = s.recommendation;
+  const arr = byRecommendation.get(rec) ?? [];
+  arr.push(s);
+  byRecommendation.set(rec, arr);
+}
+const recommendations = [...byRecommendation.keys()].sort();
+---
+<Base
+  title="Registers"
+  masthead
+  description="ITU Operational Bulletin registers — datasets mandated by ITU-T Recommendations, maintained through OB amendments."
+>
+  <section class="rule-thin pt-6 pb-6">
+    <h2 class="text-[var(--step-4)]"
+        style="font-family: var(--font-display); font-weight: 700; line-height: 1.1;">
+      Registers
+    </h2>
+    <p class="mt-2 text-[var(--step--1)]" style="color: var(--fg-muted); font-family: var(--font-sans);">
+      {summaries.length} registers across {recommendations.length} Recommendations.
+      Each register's state is a projection of its seed publication plus every OB amendment replayed in order.
+    </p>
+  </section>
+
+  <div class="space-y-10">
+    {recommendations.map((rec) => {
+      const regs = byRecommendation.get(rec)!;
+      return (
+        <section>
+          <h3 class="text-[var(--step-2)] mb-3 flex items-baseline gap-2"
+              style="font-family: var(--font-display); font-weight: 600;">
+            <span class="num font-mono text-[var(--accent)]">ITU-T {rec}</span>
+            <span class="text-[var(--step--1)]" style="color: var(--fg-subtle);">
+              ({regs.length} register{regs.length !== 1 ? "s" : ""})
+            </span>
+          </h3>
+          <div class="grid gap-3">
+            {regs.map((reg) => (
+              <article class="panel p-4">
+                <div class="flex items-baseline justify-between gap-4">
+                  <div>
+                    <a href={`/registers/${reg.slug}/`} class="text-[var(--step-1)] font-semibold no-underline hover:underline"
+                       style="font-family: var(--font-display);">
+                      {reg.title}
+                    </a>
+                    <p class="text-[var(--step--1)] mt-0.5" style="color: var(--fg-subtle); font-family: var(--font-mono);">
+                      {reg.registerId}
+                      {reg.external && <span class="ml-2" style="color: var(--accent);">· external</span>}
+                    </p>
+                  </div>
+                  <div class="text-right text-[var(--step--1)]" style="font-family: var(--font-sans); color: var(--fg-muted);">
+                    {reg.external ? (
+                      <p>maintained externally</p>
+                    ) : (
+                      <>
+                        <p><strong>{reg.entryCount}</strong> active</p>
+                        {reg.lapsedCount > 0 && <p>{reg.lapsedCount} lapsed</p>}
+                        {reg.seedIssue && <p>seed: OB {reg.seedIssue}</p>}
+                        <p>{reg.touchedIssues.length} issues</p>
+                      </>
+                    )}
+                  </div>
+                </div>
+                <div class="mt-2 flex gap-3 text-[var(--step--1)]" style="font-family: var(--font-sans);">
+                  <a href={`/registers/${reg.slug}/`} class="no-underline hover:underline" style="color: var(--accent);">
+                    {reg.external ? "Details →" : "Current state →"}
+                  </a>
+                  {!reg.external && (
+                    <a href={`/registers/${reg.slug}/history/`} class="no-underline hover:underline" style="color: var(--accent);">Change history →</a>
+                  )}
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
+      );
+    })}
+  </div>
+</Base>

@@ -1,0 +1,60 @@
+---
+/**
+ * Author contact metadata — renders the ITU/TSB/BR contact blocks
+ * from issue.meta.authors at the top of the issue page.
+ */
+import type { LoadedIssue } from "~/lib/types";
+
+export interface Props {
+  issue: LoadedIssue;
+}
+const { issue } = Astro.props;
+
+type Contact = { type: string; data: string; recommended?: boolean };
+type Author = {
+  name?: string | { en?: string };
+  address?: string;
+  contacts?: Contact[];
+};
+
+const authors: Author[] = (issue.meta.authors as Author[]) ?? [];
+
+function authorName(a: Author): string {
+  if (!a.name) return "";
+  return typeof a.name === "string" ? a.name : (a.name.en ?? "");
+}
+
+function contactLabel(t: string): string {
+  return { phone: "Tel", fax: "Fax", email: "Email", web: "URL" }[t] ?? t;
+}
+---
+
+{authors.length > 0 && (
+  <section class="panel" style="padding: 1.1rem;">
+    <p class="eyebrow" style="font-size: var(--step--4); margin: 0 0 0.85rem;">Contacts</p>
+    <div style="display: grid; grid-template-columns: 1fr; gap: 1rem; font-size: var(--step--2); font-family: var(--font-sans);">
+      {authors.map((a) => {
+        const name = authorName(a);
+        return (
+          <div>
+            {name && <p style="font-weight: 600; color: var(--fg); margin: 0 0 0.2rem;">{name}</p>}
+            {a.address && (
+              <p style="white-space: pre-line; color: var(--fg-muted); margin: 0 0 0.3rem; line-height: 1.5;">{a.address}</p>
+            )}
+            {a.contacts?.map((c) => (
+              <p style="color: var(--fg-muted); margin: 0.15rem 0;">
+                <span style="font-weight: 600; color: var(--fg-subtle); text-transform: uppercase; letter-spacing: 0.06em; font-size: var(--step--4);">{contactLabel(c.type)}:</span>{" "}
+                {c.type === "email" ? (
+                  <a href={`mailto:${c.data}`} style="color: var(--link);">{c.data}</a>
+                ) : (
+                  <span class="num" style="color: var(--fg);">{c.data}</span>
+                )}
+                {c.recommended && <span style="font-size: var(--step--3); color: var(--accent);"> ★</span>}
+              </p>
+            ))}
+          </div>
+        );
+      })}
+    </div>
+  </section>
+)}

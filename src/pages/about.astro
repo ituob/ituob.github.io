@@ -1,0 +1,62 @@
+---
+import Base from "~/layouts/Base.astro";
+import { OB_ISSN } from "~/lib/catalogs";
+---
+<Base title="About" description="About the ITU Operational Bulletin.">
+  <header class="mb-10">
+    <p class="uppercase font-semibold" style="font-family: var(--font-sans); font-size: var(--step--1); letter-spacing: 0.1em; color: var(--accent);">
+      About
+    </p>
+    <h1 class="mt-1" style="font-family: var(--font-display); font-size: var(--step-5); font-weight: 700;">
+      The Operational Bulletin
+    </h1>
+  </header>
+
+  <article class="prose-bulletin measure drop-cap">
+    <p>
+      The ITU Operational Bulletin (OB) is a biweekly cross-bureau publication
+      issued jointly by the Telecommunication Standardization Bureau (TSB) and
+      the Radiocommunication Bureau (BR) of the International Telecommunication
+      Union (ITU). It disseminates operational information required by
+      administrations, recognized operating agencies, and the wider
+      international telecommunication community.
+    </p>
+
+    <p>
+      Each edition is identified by a sequential issue number and groups its
+      content into two parts: <em>general information</em> — running annexes,
+      approved Recommendations, signalling code assignments, numbering plan
+      notices, and miscellaneous communications — and <em>amendments to
+      service publications</em>, which modify the structured lists annexed to
+      the Bulletin (carrier codes, signalling codes, numbering plans and so on).
+    </p>
+
+    <h2>What you'll find here</h2>
+    <p>
+      This website presents the full run of the Bulletin — every issue from
+      its current series onwards — together with the current snapshot of every
+      annexed dataset and a complete change log per dataset. Each publication
+      type carries its own cross-issue view, and every ITU-T Recommendation
+      referenced from the Bulletin has a dedicated page listing the issues in
+      which it was approved.
+    </p>
+
+    <h2>Identifier conventions</h2>
+    <p>
+      Issues are numbered with sequential integers (e.g. No. 1000). Datasets
+      are addressed by filesystem slug (e.g. <code class="num">m1400-icc</code>,
+      <code class="num">e118-iin</code>, <code class="num">q708-sanc</code>).
+      Amendments apply an <em>action</em> — addition, suppression, replacement,
+      modification, lapse, or deletion — to a position identified by a code
+      (a country code, a carrier code, a signalling point code, and so on).
+    </p>
+
+    <h2>Source and provenance</h2>
+    <p>
+      The data shown here is drawn from the ITU's authoritative source
+      repository, normalized into a per-issue and per-dataset shape, and
+      rendered as static HTML at build time. The site carries ISSN
+      <span class="num">{OB_ISSN}</span> and is published online only.
+    </p>
+  </article>
+</Base>

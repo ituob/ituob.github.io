@@ -1,0 +1,277 @@
+---
+/**
+ * RecommendationTimeline — the per-year approval history of a
+ * Recommendation: grouped year sections, one panel per linked general
+ * message or amended register, with changed-code details and links to
+ * the source issue and point-in-time snapshot. All computation is
+ * hoisted into this frontmatter so the template stays type-checkable.
+ */
+import { loadIssue, cumulativeAmendmentNumber } from "~/lib/loaders";
+import { loadStateAtIssue, loadManifest, type ChangeHistoryEntry } from "~/lib/snapshots";
+import { formatSwissDate } from "~/lib/format";
+import { GENERAL_TYPE_LABELS, type GeneralMessageType, type Language } from "~/lib/catalogs";
+import TelephoneService from "~/components/TelephoneService.astro";
+import ServiceRestrictions from "~/components/ServiceRestrictions.astro";
+import TextualMessage from "~/components/TextualMessage.astro";
+import StructuredAmendment from "~/components/StructuredAmendment.astro";
+import TextualAmendment from "~/components/TextualAmendment.astro";
+
+interface Block {
+  id: number;
+  date: string | null;
+  positionOn: string | null;
+  positionOnIssue: number | null;
+  hasApprovals: boolean;
+  generalMessages: { type: GeneralMessageType; message: any }[];
+  registers: { slug: string; title: string; changes: ChangeHistoryEntry[] }[];
+}
+
+interface Props {
+  years: number[];
+  yearGroups: Map<number, Block[]>;
+  lang: Language;
+}
+
+const { years, yearGroups, lang } = Astro.props;
+
+interface Card {
+  year: number;
+  blockCount: number;
+  kind: "general" | "register";
+  blockId: number;
+  blockDate: string | null;
+  positionOn: string | null;
+  positionOnIssue: number | null;
+  // general row
+  label?: string;
+  messageType?: GeneralMessageType;
+  message?: any;
+  // register row
+  regSlug?: string;
+  regTitle?: string;
+  amdNo?: number;
+  codeEntries?: [string, string[]][];
+  entriesByKey?: Map<string, any>;
+  structured?: any;
+  textual?: any;
+  placeholder?: any;
+}
+
+const cardsByYear = new Map<number, Card[]>();
+for (const year of years) {
+  const blocks = yearGroups.get(year) ?? [];
+  const cards: Card[] = [];
+  for (const block of blocks) {
+    const rows: Card[] = [];
+    for (const m of block.generalMessages) {
+      rows.push({
+        year,
+        blockCount: blocks.length,
+        kind: "general",
+        blockId: block.id,
+        blockDate: block.date,
+        positionOn: block.positionOn,
+        positionOnIssue: block.positionOnIssue,
+        label: GENERAL_TYPE_LABELS[m.type],
+        messageType: m.type,
+        message: m.message,
+      });
+    }
+    for (const reg of block.registers) {
+      const codesByType = new Map<string, string[]>();
+      for (const c of reg.changes) {
+        if (c.type === "SEED") continue;
+        const code = (c.identifier as Record<string, unknown>).code as string | undefined;
+        if (!code) continue;
+        const arr = codesByType.get(c.type) ?? [];
+        arr.push(code);
+        codesByType.set(c.type, arr);
+      }
+      const regState = loadStateAtIssue(reg.slug, block.id);
+      const entriesByKey = new Map<string, any>();
+      if (regState) {
+        for (const e of regState.active_entries as any[]) {
+          const manifest = loadManifest(reg.slug);
+          const kf = manifest?.key_field ?? "code";
+          if (e[kf]) entriesByKey.set(String(e[kf]), e);
+        }
+      }
+      const issue = loadIssue(block.id);
+      rows.push({
+        year,
+        blockCount: blocks.length,
+        kind: "register",
+        blockId: block.id,
+        blockDate: block.date,
+        positionOn: block.positionOn,
+        positionOnIssue: block.positionOnIssue,
+        regSlug: reg.slug,
+        regTitle: reg.title,
+        amdNo: cumulativeAmendmentNumber(block.id, reg.slug),
+        codeEntries: [...codesByType.entries()],
+        entriesByKey,
+        structured: issue?.amendments.structured[reg.slug],
+        textual: issue?.amendments.textual[reg.slug],
+        placeholder: issue?.amendments.placeholder[reg.slug],
+      });
+    }
+    if (rows.length === 0 && !block.hasApprovals) continue;
+    cards.push(...rows);
+  }
+  cardsByYear.set(year, cards);
+}
+
+/** First few display fields of a changed entry, for the details list. */
+function entryFields(entry: any): string[] | null {
+  if (!entry) return null;
+  return Object.entries(entry)
+    .filter(([k]) => k !== "code" && k !== "carrier_code" && k !== "issue_id_number")
+    .slice(0, 3)
+    .map(([, v]) => {
+      if (typeof v === "string") return v;
+      if (v && typeof v === "object" && (v as { en?: string }).en) return (v as { en?: string }).en!;
+      return String(v);
+    });
+}
+---
+
+{years.map((year) => {
+  const cards = cardsByYear.get(year) ?? [];
+  const blockCount = yearGroups.get(year)?.length ?? 0;
+  return (
+    <section class="mt-10" id={`year-${year}`}>
+      <header class="rule-thin pt-3 mb-4 flex items-baseline gap-3">
+        <h2 class="text-[var(--step-2)] num" style="font-family: var(--font-display); font-weight: 600;">
+          {year}
+        </h2>
+        <span class="text-[var(--step--1)]" style="color: var(--fg-muted); font-family: var(--font-sans);">
+          {blockCount} amendment{blockCount !== 1 ? "s" : ""}
+        </span>
+      </header>
+
+      <div class="sr-only">Date / Message</div>
+      <ul class="space-y-4" style="font-family: var(--font-sans);">
+        {cards.map((card) => {
+          if (card.kind === "general") {
+            return (
+              <li class="panel p-4">
+                <h3 class="text-[var(--step-0)] flex items-baseline gap-3 flex-wrap m-0">
+                  <span style="font-family: var(--font-display); font-weight: 600;">
+                    {card.label}
+                  </span>
+                  <a href={`/issues/${card.blockId}/#general`} class="no-underline hover:underline">
+                    OB no. <span class="num">{card.blockId}</span>
+                  </a>
+                </h3>
+                <p class="mt-1 text-[var(--step--1)]" style="color: var(--fg-muted);">
+                  Published {card.blockDate ? formatSwissDate(card.blockDate) : "—"}
+                </p>
+                <div class="mt-3 prose-bulletin measure">
+                  {(card.messageType === "telephone_service_2" || card.messageType === "telephone_service") && Array.isArray(card.message.contents) ? (
+                    <TelephoneService contents={card.message.contents} lang={lang} />
+                  ) : card.messageType === "service_restrictions" && Array.isArray(card.message.items) ? (
+                    <ServiceRestrictions items={card.message.items} lang={lang} />
+                  ) : (
+                    <TextualMessage message={card.message} lang={lang} />
+                  )}
+                </div>
+                <p class="mt-3 text-[var(--step--1)]">
+                  <a href={`/issues/${card.blockId}/`} class="no-underline hover:underline tint">
+                    View source issue →
+                  </a>
+                </p>
+              </li>
+            );
+          }
+
+          const codeCount = (card.codeEntries ?? []).reduce((n, [, codes]) => n + codes.length, 0);
+          return (
+            <li class="panel p-4">
+              <h3 class="text-[var(--step-0)] flex items-baseline gap-3 flex-wrap m-0">
+                <span style="font-family: var(--font-display); font-weight: 600;">
+                  Amd.{card.amdNo !== 0 ? <span class="num"> no. {card.amdNo} </span> : " "}to {card.regTitle}
+                </span>
+                <a href={`/issues/${card.blockId}/`} class="no-underline hover:underline">
+                  OB no. <span class="num">{card.blockId}</span>
+                </a>
+              </h3>
+              <p class="mt-1 text-[var(--step--1)]" style="color: var(--fg-muted);">
+                Published {card.blockDate ? formatSwissDate(card.blockDate) : "—"}
+              </p>
+              {card.positionOn && card.positionOnIssue && card.positionOnIssue !== card.blockId && (
+                <p class="mt-1 text-[var(--step--1)]" style="color: var(--fg-muted); font-family: var(--font-sans);">
+                  Position amended originally published as annex to{" "}
+                  <a href={`/issues/${card.positionOnIssue}/`} class="no-underline hover:underline">
+                    ITU Operational Bulletin No. {card.positionOnIssue}
+                  </a>
+                  {" "}— {formatSwissDate(card.positionOn)}
+                </p>
+              )}
+              {card.positionOn && card.positionOnIssue === card.blockId && (
+                <p class="mt-1 text-[var(--step--1)]" style="color: var(--fg-muted); font-family: var(--font-sans);">
+                  Position on {formatSwissDate(card.positionOn)}
+                </p>
+              )}
+
+              {/* Full amendment content (mirrors the issue page rendering). */}
+              <div class="mt-4">
+                {card.structured && <StructuredAmendment amendments={card.structured} lang={lang} />}
+                {card.textual && <TextualAmendment amendment={card.textual} lang={lang} />}
+                {card.placeholder && <TextualAmendment placeholder={card.placeholder} />}
+              </div>
+
+              {(card.codeEntries ?? []).length > 0 && (
+                <details class="mt-3">
+                  <summary class="text-[var(--step--1)] cursor-pointer" style="color: var(--fg-muted);">
+                    Changed codes ({codeCount})
+                  </summary>
+                  <div class="mt-2 space-y-2 text-[var(--step--1)]">
+                    {(card.codeEntries ?? []).map(([type, codes]) => (
+                      <div>
+                        <span class="font-mono font-semibold uppercase" style="color: var(--accent);">
+                          {type}
+                        </span>
+                        <span class="ml-1" style="color: var(--fg-muted);">
+                          ({codes.length})
+                        </span>
+                        <ul class="ml-6 mt-1 space-y-0.5">
+                          {codes.slice(0, 50).map((code) => {
+                            const fields = entryFields(card.entriesByKey?.get(code));
+                            return (
+                              <li class="num font-mono" style="color: var(--fg);">
+                                {code}
+                                {fields && fields.length > 0 && (
+                                  <span style="color: var(--fg-muted); font-family: var(--font-sans);">
+                                    {" "}— {fields.join(" · ").slice(0, 120)}
+                                  </span>
+                                )}
+                              </li>
+                            );
+                          })}
+                          {codes.length > 50 && (
+                            <li style="color: var(--fg-muted);">
+                              +{codes.length - 50} more…
+                            </li>
+                          )}
+                        </ul>
+                      </div>
+                    ))}
+                  </div>
+                </details>
+              )}
+              <p class="mt-3 text-[var(--step--1)]">
+                <a href={`/registers/${card.regSlug}/at/${card.blockId}/`} class="no-underline hover:underline tint">
+                  Point-in-time snapshot →
+                </a>
+                <span class="mx-2" style="color: var(--fg-muted);">·</span>
+                <a href={`/issues/${card.blockId}/`} class="no-underline hover:underline tint">
+                  View source issue →
+                </a>
+              </p>
+            </li>
+          );
+        })}
+      </ul>
+    </section>
+  );
+})}

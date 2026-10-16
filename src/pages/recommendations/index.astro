@@ -1,0 +1,50 @@
+---
+import Base from "~/layouts/Base.astro";
+import { buildRecommendationIndex } from "~/lib/loaders";
+
+const idx = buildRecommendationIndex();
+const recs = [...idx.values()].sort((a, b) => {
+  // Sort by Recommendation series then number.
+  const pa = a.code.match(/^([A-Z])(?:\.(\d+))?/);
+  const pb = b.code.match(/^([A-Z])(?:\.(\d+))?/);
+  if (!pa || !pb) return a.code.localeCompare(b.code);
+  if (pa[1] !== pb[1]) return pa[1]!.localeCompare(pb[1]!);
+  return Number.parseFloat(pa[2] ?? "0") - Number.parseFloat(pb[2] ?? "0");
+});
+---
+<Base title="ITU-T Recommendations" description="All ITU-T Recommendations referenced by the ITU Operational Bulletin.">
+  <header class="mb-10">
+    <p class="uppercase font-semibold" style="font-family: var(--font-sans); font-size: var(--step--1); letter-spacing: 0.1em; color: var(--accent);">
+      References
+    </p>
+    <h1 class="mt-1" style="font-family: var(--font-display); font-size: var(--step-5); font-weight: 700;">
+      ITU-T Recommendations
+    </h1>
+    <p class="mt-2 text-[var(--step-0)]" style="color: var(--fg-muted);">
+      {recs.length} Recommendations referenced across all issues of the Bulletin.
+    </p>
+  </header>
+
+  <div class="overflow-x-auto">
+    <table class="table-bulletin">
+      <thead>
+        <tr>
+          <th>Recommendation</th>
+          <th class="num">Issues</th>
+        </tr>
+      </thead>
+      <tbody>
+        {recs.map((r) => (
+          <tr>
+            <td>
+              <a href={`/recommendations/${encodeURIComponent(r.code)}/`} class="no-underline hover:underline font-semibold num">
+                ITU-T {r.code}
+              </a>
+            </td>
+            <td class="num">{r.issueIds.length}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+</Base>

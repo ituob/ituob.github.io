@@ -1,0 +1,31 @@
+---
+/**
+ * Legend explaining action-type abbreviations used in the amendments
+ * section. Renders the same <dl> as the deployed Jekyll site.
+ */
+const ABBREVIATIONS: Array<[string, string]> = [
+  ["ADD", "Insert"],
+  ["PAR", "Paragraph"],
+  ["COL", "Column"],
+  ["REP", "Replace"],
+  ["LIR", "Read"],
+  ["SUP", "Delete"],
+  ["P", "Page(s)"],
+];
+---
+<section class="amendments-legend">
+  <h4 class="text-[var(--step-0)] mb-2 flex items-center gap-2" style="font-family: var(--font-display); font-weight: 600;">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true">
+      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z" />
+    </svg>
+    Abbreviations used in this section
+  </h4>
+  <dl class="inline-dl text-[var(--step--1)]" style="font-family: var(--font-sans); color: var(--fg-muted);">
+    {ABBREVIATIONS.map(([abbr, full]) => (
+      <>
+        <dt class="inline font-mono font-semibold" style="color: var(--fg);">{abbr}</dt>
+        <dd class="inline ml-1 mr-3">{full}</dd>
+      </>
+    ))}
+  </dl>
+</section>

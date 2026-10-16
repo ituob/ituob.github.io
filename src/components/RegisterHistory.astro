@@ -1,0 +1,182 @@
+---
+/**
+ * RegisterHistory — the per-issue amendment history: one card per OB
+ * issue that touched the register, grouped by year, with the changed
+ * entries folded into a details list per card. All computation lives
+ * in this frontmatter so the template stays type-checkable.
+ */
+import { loadIssue, listIssueIds } from "~/lib/loaders";
+import { loadStateAtIssue, type RegisterState } from "~/lib/snapshots";
+import { formatSwissDate } from "~/lib/format";
+import StructuredAmendment from "~/components/StructuredAmendment.astro";
+import TextualAmendment from "~/components/TextualAmendment.astro";
+
+interface Props {
+  slug: string;
+  keyField: string;
+  seedIssue: number | null;
+  history: RegisterState["history"];
+}
+
+const { slug, keyField, seedIssue, history } = Astro.props;
+
+// Group changes by OB issue — the deployed Jekyll site numbers
+// amendments per-issue (one H3 per OB), not per-change. Include the
+// seed issue so its original amendment content is rendered, and sweep
+// all issues for textual/structured amendments of this slug that
+// aren't already in the history.
+const byIssue = new Map<number, typeof history>();
+for (const c of history) {
+  const key = c.ob_issue ?? 0;
+  const arr = byIssue.get(key) ?? [];
+  arr.push(c);
+  byIssue.set(key, arr);
+}
+if (seedIssue && !byIssue.has(seedIssue)) {
+  byIssue.set(seedIssue, []);
+}
+for (const id of listIssueIds()) {
+  if (byIssue.has(id)) continue;
+  const issue = loadIssue(id);
+  if (!issue) continue;
+  if (
+    issue.amendments.structured[slug] ||
+    issue.amendments.textual[slug] ||
+    issue.amendments.placeholder[slug]
+  ) {
+    byIssue.set(id, []);
+  }
+}
+
+// Per-issue amendment number: 1 = earliest issue with a change.
+const issueOrder = [...byIssue.keys()].sort((a, b) => a - b);
+
+interface HistoryCard {
+  obIssue: number;
+  amdNo: number;
+  issueDate: string | null;
+  issueYear: string | null;
+  yearChanged: boolean;
+  structured: any[];
+  textual: any;
+  placeholder: any;
+  patches: typeof history;
+}
+
+const cards: HistoryCard[] = [];
+let currentYear = "";
+for (const [index, obIssue] of issueOrder.entries()) {
+  const patches = (byIssue.get(obIssue) ?? []).filter((p) => p.type !== "SEED");
+  const issue = loadIssue(obIssue);
+  const issueDate = issue?.meta?.publication_date ?? null;
+  const issueYear = issueDate ? issueDate.slice(0, 4) : null;
+  const yearChanged = !!issueYear && issueYear !== currentYear;
+  if (issueYear) currentYear = issueYear;
+  const structured = (issue?.amendments.structured as Record<string, any>)[slug] ?? [];
+  const textual = (issue?.amendments.textual as Record<string, any>)[slug] ?? null;
+  const placeholder = (issue?.amendments.placeholder as Record<string, any>)[slug] ?? null;
+  cards.push({ obIssue, amdNo: index + 1, issueDate, issueYear, yearChanged, structured, textual, placeholder, patches });
+}
+// Newest first, as the deployed history renders.
+const orderedCards = cards.slice().reverse();
+---
+
+<section class="mb-8">
+  <header class="rule-thin pt-4 mb-4">
+    <h3 class="text-[var(--step-2)]" style="font-family: var(--font-display); font-weight: 600;">
+      Amendment history ({history.filter(p => p.type !== "SEED").length})
+    </h3>
+  </header>
+  <div class="space-y-3" style="font-family: var(--font-sans);">
+    {orderedCards.map((card) => (
+      <article class="border-l-2 border-[var(--rule)] pl-4">
+        {card.yearChanged && card.issueYear && (
+          <h4 id={`year-${card.issueYear}`} class="text-[var(--step--2)] mb-2 mt-4" style="font-family: var(--font-sans); color: var(--fg-muted);">
+            <a href={`#year-${card.issueYear}`} class="no-underline">{card.issueYear}</a>
+          </h4>
+        )}
+        <h3 class="text-[var(--step--1)] flex items-baseline gap-3 flex-wrap m-0 font-normal">
+          <span style="color: var(--fg-muted);">
+            Amd. no. <span class="num">{card.amdNo}</span>
+          </span>
+          <a href={`/issues/${card.obIssue}/`} class="no-underline hover:underline">
+            OB no. <span class="num">{card.obIssue}</span>
+          </a>
+        </h3>
+        {card.issueDate && (
+          <p class="mt-1 text-[var(--step--1)]" style="color: var(--fg-muted);">
+            Date: {formatSwissDate(card.issueDate)}
+            {" "}·{" "}
+            <a href={`/registers/${slug}/at/${card.obIssue}/`} class="no-underline hover:underline" style="color: var(--fg-subtle);">snapshot →</a>
+          </p>
+        )}
+
+        {/* Full amendment content from the issue payload. */}
+        {card.structured.length > 0 && (
+          <div class="mt-3">
+            <StructuredAmendment amendments={card.structured} />
+          </div>
+        )}
+        {card.textual && (
+          <div class="mt-3 prose-bulletin measure">
+            <TextualAmendment amendment={card.textual} />
+          </div>
+        )}
+        {card.placeholder && (
+          <div class="mt-3">
+            <TextualAmendment placeholder={card.placeholder} />
+          </div>
+        )}
+
+        {card.patches.length > 0 && (
+          <details class="mt-2">
+            <summary class="text-[var(--step--1)] cursor-pointer" style="color: var(--fg-muted);">
+              Changed entries ({card.patches.length})
+            </summary>
+            <ul class="mt-2 ml-2 space-y-1 text-[var(--step--1)]">
+              {card.patches.map((patch) => {
+                const entryState = loadStateAtIssue(slug, patch.ob_issue ?? 0);
+                const entryData = entryState
+                  ? (entryState.active_entries as any[]).find(
+                      (e: any) => e[keyField] === patch.identifier.code,
+                    )
+                  : null;
+                const fieldValues = entryData
+                  ? Object.entries(entryData)
+                      .filter(([k]) => k !== keyField)
+                      .slice(0, 4)
+                  : null;
+                return (
+                  <li>
+                    <span class="font-mono font-semibold uppercase" style="color: var(--accent);">
+                      {patch.type}
+                    </span>
+                    {" "}
+                    <span class="num font-mono" style="color: var(--fg);">
+                      {patch.identifier.code ?? "—"}
+                    </span>
+                    {fieldValues && fieldValues.length > 0 && (
+                      <span class="ml-2" style="color: var(--fg-muted);">
+                        {fieldValues.map(([k, v]) => (
+                          <span class="inline-block mr-3">
+                            {k}:{" "}
+                            <span class="font-mono">{typeof v === "string" ? v : JSON.stringify(v)}</span>
+                          </span>
+                        ))}
+                      </span>
+                    )}
+                    {!entryData && (
+                      <span class="ml-2 italic" style="color: var(--fg-muted);">
+                        (entry not present at this OB — removed by a later amendment)
+                      </span>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
+          </details>
+        )}
+      </article>
+    ))}
+  </div>
+</section>
