@@ -54,25 +54,62 @@ jobs:
     - name: Run TypeScript check
       run: npm run check
 
-    - name: Upload build artifact
+    # GitHub Pages (production today) + a plain artifact for the
+    # Cloudflare deploys below.
+    - name: Upload GitHub Pages artifact
       uses: actions/upload-pages-artifact@v3
       with:
         path: dist
 
-  deploy-staging:
-    needs: build
-    if: github.ref == 'refs/heads/staging'
-    runs-on: ubuntu-latest
-    environment:
-      name: staging
-      url: https://staging-www.ituob.org
-    steps:
-    - name: Deploy to GitHub Pages (staging)
-      uses: actions/deploy-pages@v4
+    - name: Upload dist for Cloudflare deploys
+      uses: actions/upload-artifact@v4
       with:
-        token: ${{ secrets.GITHUB_TOKEN }}
+        name: site-dist
+        path: dist
+        retention-days: 3
 
-  deploy-production:
+  # Cloudflare staging (ituob-org-staging.<account>.workers.dev, later
+  # staging-www.ituob.org). Gated on the repo variable — flip it on
+  # once CLOUDFLARE_API_TOKEN / CLOUDFLARE_ACCOUNT_ID are set.
+  deploy-cloudflare-staging:
+    needs: build
+    if: vars.CLOUDFLARE_DEPLOY == 'true' && github.ref == 'refs/heads/staging' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/download-artifact@v4
+      with:
+        name: site-dist
+        path: dist
+    - name: Deploy to Cloudflare Workers (staging)
+      uses: cloudflare/wrangler-action@v3
+      with:
+        apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        accountId: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+        wranglerVersion: '4'
+        command: deploy -c wrangler.staging.jsonc
+
+  # Cloudflare production (www.ituob.org) — the DNS cutover target.
+  # Same gate; see docs/cloudflare-webapp.adoc for the flip procedure.
+  deploy-cloudflare-production:
+    needs: build
+    if: vars.CLOUDFLARE_DEPLOY == 'true' && github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/download-artifact@v4
+      with:
+        name: site-dist
+        path: dist
+    - name: Deploy to Cloudflare Workers (production)
+      uses: cloudflare/wrangler-action@v3
+      with:
+        apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        accountId: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+        wranglerVersion: '4'
+        command: deploy
+
+  deploy-production-github-pages:
     needs: build
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: ubuntu-latest

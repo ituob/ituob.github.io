@@ -1,0 +1,20 @@
+// Production — www.ituob.org
+//
+// Static assets only today; the same Worker gains an API surface later
+// (add `main` + D1/Access bindings — see docs/cloudflare-webapp.adoc).
+//
+// workers_dev serves <name>.<account>.workers.dev immediately; flip to
+// the custom domain once the ituob.org zone lives on Cloudflare:
+//   "workers_dev": false,
+//   "routes": [{ "pattern": "www.ituob.org", "custom_domain": true }]
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "ituob-org",
+  "compatibility_date": "2026-10-01",
+  "workers_dev": true,
+  "assets": {
+    "directory": "./dist",
+    "html_handling": "auto-trailing-slash",
+    "not_found_handling": "404-page"
+  }
+}

@@ -1,0 +1,152 @@
+= ituob.org on Cloudflare — from static site to webapp
+
+This document records the decisions, constraints, and runbook for
+hosting ituob.org on Cloudflare and growing it into the editing /
+admin / member-submission webapp.
+
+== Goals
+
+. Move hosting off GitHub Pages to Cloudflare (Workers static assets).
+. Stand up a *real* staging environment (the GitHub Pages "staging"
+  job was cosmetic — `actions/deploy-pages` has exactly one destination
+  per repo; the fake staging label the UI showed as
+  `staging-http://www.ituob.org` proved it).
+. Keep the certified build pipeline: GitHub Actions remains the only
+  build orchestrator (submodules + Ruby snapshots + TS types + astro
+  check); Cloudflare only receives the built `dist/`.
+. Grow into a webapp: Cloudflare Access-gated admin, member
+  submissions, and a browser-based issue editor that replaces the
+  Electron `itu-ob-editor`.
+
+== Measured constraints (2026-10-17, dist @ 7,163 pages)
+
+[cols="3,2,3"]
+|===
+| Constraint | Cloudflare limit | Measured
+| Files per project | 20,000 | 14,391 (wrangler) / 7,176 (plain files)
+| Size per file | 25 MiB | max 15 MB (recommendations/E.164/index.html)
+| Total size | — | 823 MB, of which `dist/registers/` = 619 MB of inlined snapshot payloads
+|===
+
+Headroom is real but the registers inlining remains the known debt
+(GRAPH.adoc / CLAUDE.md follow-up): it slows first uploads, bloats
+cache misses, and is the reason the largest page is 15 MB. The
+lazy-loading split (HTML + on-demand JSON) is unaffected by this
+migration and stays on the roadmap.
+
+== Decisions
+
+*Workers static assets, not Pages.* Cloudflare's convergence guidance
+steers new deployments to Workers; the webapp future (API routes in
+the same Worker via `main`, D1 for drafts/members, Access for admin,
+`run_worker_first` for `/api/*`) is the native Workers shape. Assets-only
+now (no `main`, no SSR) — adding the API later is additive.
+
+*Direct upload from GitHub Actions, not Cloudflare's Git integration.*
+The build is the hard, certified part (Ruby bundle, submodules, snapshot
+generation, TS generation, astro check). Cloudflare-side building would
+duplicate all of it with worse tooling. `wrangler deploy` of the built
+artifact keeps one pipeline and one source of truth.
+
+*Two config files, not wrangler environments.* `wrangler.jsonc`
+(production, `ituob-org`) and `wrangler.staging.jsonc`
+(`ituob-org-staging`) — explicit, no inheritance traps.
+
+*Staging deploys now; production flip is a later, explicit step.*
+GitHub Pages keeps serving www (zero downtime) until the Cloudflare
+production host is validated and DNS moves. Both CF jobs are gated on
+the repo variable `CLOUDFLARE_DEPLOY == 'true'` plus secrets
+`CLOUDFLARE_API_TOKEN` / var `CLOUDFLARE_ACCOUNT_ID`.
+
+== Current architecture
+
+[source]
+----------------------------------------------------------------
+GitHub Actions (build: submodules → ruby snapshots → TS → astro
+build → astro check)
+  ├─ GitHub Pages (www.ituob.org)          ← production today
+  ├─ artifact site-dist ──▶ Cloudflare Workers staging
+  │                          ituob-org-staging.<account>.workers.dev
+  │                          (later staging-www.ituob.org)      [gated]
+  └─ (gated, for the flip) ─▶ Cloudflare Workers production
+                               ituob-org.<account>.workers.dev
+                               → www.ituob.org                  [gated]
+----------------------------------------------------------------
+
+== DNS / cutover runbook
+
+. Lower DNS TTLs on www.ituob.org a day ahead.
+. Set repo variable `CLOUDFLARE_DEPLOY=true` + secret
+  `CLOUDFLARE_API_TOKEN` (scope: Workers Scripts Edit; + Zone/ DNS if
+  automating domains) + var `CLOUDFLARE_ACCOUNT_ID`.
+. Verify staging on the workers.dev URL (content spot-checks + parity
+  numbers match the CI audit).
+. Move the ituob.org zone to Cloudflare (registrar nameserver change).
+. Switch configs to custom domains:
+  production `www.ituob.org`, staging `staging-www.ituob.org`
+  (`workers_dev: false` + `routes: custom_domain`), add the DNS
+  records (proxied).
+. Old GitHub Pages records: CNAME www → pages unlink; traffic flips
+  on TTL; GitHub keeps serving anyone still resolving old records
+  until then (no downtime window).
+. Remove the GitHub Pages deploy job + `upload-pages-artifact` step;
+  delete the Pages site. Done.
+
+== The webapp: use cases and phases
+
+*Phase 0 (done)* — static hosting + staging on Cloudflare.
+
+*Phase 1 — API surface.* Add `main` (Hono or itty) to the Worker:
+`/api/health`, read-only endpoints over the normalized data
+(registers/issues from R2 or D1 snapshots synced by CI). `assets`
+binding keeps serving the site; `run_worker_first: ["/api/*"]` routes
+API traffic to the Worker.
+
+*Phase 2 — admin + auth.* Cloudflare Access (Zero Trust) in front of
+`/admin/*` and mutating `/api/*` (email OTP / SSO for the committee;
+free tier covers it). Access service tokens for CI-to-API writes.
+
+*Phase 3 — member submissions.* D1: `members`, `submissions`,
+`review_state`. A member drafts an issue contribution; an admin action
+converts an approved submission into a commit on a branch of
+itu-ob-data via the GitHub API and opens a PR — itu-ob-data stays the
+PR-reviewed source of truth, and the whole gate chain (parsers,
+validators, equivalence, parity) keeps applying. No direct writes to
+main, ever.
+
+*Phase 4 — browser editor (replacing itu-ob-editor).* The Electron
+shell dies, and so does its editing model: **no ProseMirror**. The
+program fully normalizes all data into typed schemas with proven read
+AND write paths — the editor is schema-driven forms over the ontology,
+not rich-text document authoring. (ProseMirror's table-first layout is
+the very thing the parsers had to learn to tolerate; reintroducing it
+would reintroduce freeform authoring.)
+
+[cols="3,3,3"]
+|===
+| itu-ob-editor (Electron) | Role | Web replacement
+| @riboseinc/coulomb db/isogit-yaml | git-over-HTTPS YAML store, local commit/push to itu-ob-data | Worker API + GitHub API: write branch → PR; D1 for drafts pre-review
+| @aeaton/react-prosemirror | rich document editing (source of the table-first layout the parsers had to tolerate) | DROPPED — schema-driven forms generated from messages.lml / schema.generated.ts over the 86 typed classes; structured fields only
+| Blueprint/React 16 screens: issue-editor, batch-commit, issue-scheduler, form-validation | editorial workflow | Form UIs over the same classes on the site's Vue 3 stack under /admin; validation via the compiled classes (client mirrors server)
+| machine-translation.tsx | MT assist | Same provider behind a Worker route (key stays server-side)
+|===
+
+The load-bearing invariant is now stronger than parser tolerance:
+editor output is valid **by construction** — forms bind to the typed
+classes (IssueMetadata, amendments/actions/entries, RegisterChange
+patches), serialize through the same `to_hash`/`from_hash` paths the
+10,532-file round-trip proof exercises, and any text-by-design dataset
+(list-v, coast-stations, bureaufax, rr251, e212-icc) remains a plain
+verbatim textarea. Freeform authoring has no entry point, so the
+fallback class of pain (the 54 TextAmendment structuralizations)
+cannot recur.
+
+== Risks
+
+*First CF upload of 823 MB is slow* (incremental afterwards).
+*File-count headroom* (14.4k/20k) shrinks as the corpus grows — the
+registers lazy-loading work doubles as the fix.
+*`Analyze (ruby)` CodeQL default-setup flakiness* is a GitHub-side
+phenomenon, unaffected.
+*Single-copy lockfile pins* travel with the artifact — Cloudflare
+never builds, so certification is untouched.
