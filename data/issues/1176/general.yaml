@@ -1,0 +1,462 @@
+messages:
+  - extra_links:
+      - M1400_ICC
+      - BUREAUFAX
+      - ROA
+    type: running_annexes
+  - items:
+      'E.806 ': 2019-06-01
+      G.107.1: 2019-06-01
+      G.107.2: 2019-06-01
+      'G.1028 ': 2019-06-01
+      G.1028.2: 2019-06-01
+      P.10/G.100 (2017) Amd 1: 2019-06-01
+      'P.64 ': 2019-06-01
+      P.700: 2019-06-01
+      P.863.1: 2019-06-01
+      'P.1201.2 (2012) Cor 2 ': 2019-06-01
+      'Y.3172 ': 2019-06-01
+    type: approved_recommendations
+    by: AAP-61
+    procedures: Recommendation ITU-T A.8
+  - type: telephone_service_2
+    contents:
+      - country_name:
+          en: 'Denmark '
+        phone_code: '45'
+        contact:
+          en: "Danish Energy Agency\n43 Carsten Niebuhrs Gade\n1577 COPENHAGEN K\nDenmark\nTel:\t+45 33 92 67 00 \nFax:\t+45 33 11 47 43\nE-mail:\tens@ens.dk \nURL:\twww.ens.dk"
+        communications:
+          - date: 2019-06-19
+            contents:
+              en:
+                type: doc
+                content:
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: 'The '
+                      - type: text
+                        marks:
+                          - type: em
+                        text: Danish Energy Agency
+                      - type: text
+                        text: >-
+                          , Copenhagen, announces the following updates to the
+                          national numbering plan of Denmark:
+                  - type: bullet_list
+                    content:
+                      - type: list_item
+                        content:
+                          - type: paragraph
+                            content:
+                              - type: text
+                                text: "·\_\_\_\_\_\_ Withdrawal\_ – Mobile communication services"
+                  - type: table
+                    content:
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Provider
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Numbering series
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Date of withdrawal
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Vectone Mobile ApS
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: >-
+                                      5063efgh, 7197efgh, 7198efgh, 8139efgh,
+                                      8146efgh, 8147efgh, 8148efgh, 8149efgh,
+                                      9126efgh, 9127efgh, 9128efgh, 9157efgh,
+                                      9225efgh, 9226efgh, 9227efgh and 9228efgh
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 3.X.2018
+                  - type: paragraph
+                  - type: bullet_list
+                    content:
+                      - type: list_item
+                        content:
+                          - type: paragraph
+                            content:
+                              - type: text
+                                text: "·\_\_\_\_\_\_ Assignment – Mobile communication services"
+                  - type: table
+                    content:
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Provider
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Numbering series
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Date of assignment
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Ipnordic A/S
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 4412efgh
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 8.V.2019
+                  - type: paragraph
+                  - type: bullet_list
+                    content:
+                      - type: list_item
+                        content:
+                          - type: paragraph
+                            content:
+                              - type: text
+                                text: "·\_\_\_\_\_\_ Modification – Change of Company name"
+                  - type: table
+                    content:
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Provider
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Change of Company name
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Date of modification
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Flexonet International A/S
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Flexonet ApS
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 3.V.2019
+      - country_name:
+          en: 'Gabon '
+        phone_code: '241'
+        contact:
+          en: "Autorité de Régulation des Communications Electroniques et des Postes (ARCEP)\nB.P. 50 000\nLIBREVILLE\nGabon\nTel. 1: \t+241 06078076 (Français)\nTel. 2:\t+241 07387474 (English)\nE-mail: \tmoliere.enynkogho@arcep.ga; thierry.madoungou@arcep.ga\nURL: \twww.arcep.ga"
+        communications:
+          - date: 2019-07-02
+            contents:
+              en:
+                type: doc
+                content:
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: 'The '
+                      - type: text
+                        marks:
+                          - type: em
+                        text: >-
+                          Autorité de Régulation des Communications
+                          Electroniques et des Postes
+                      - type: text
+                        text: >-
+                          , Libreville, announces that the date for the change
+                          of the numbering plan, initially set for 12 July 2019
+                          at 00 h, Gabon time, has been postponed to 
+                      - type: text
+                        marks:
+                          - type: strong
+                        text: 15 November 2019
+                      - type: text
+                        text: .
+      - country_name:
+          en: 'Israel '
+        phone_code: '972'
+        contact:
+          en: "Asaf Avraham\nHead of Emergency and Numbering Section\nCommunication Engineering Division\nMinistry of Communications\n23 Jaffa Street\n9199900 JERUSALEM\nIsrael\nTel:\t+972 3 519 8155\nFax:\t+972 3 519 8244\nE-mail:\tAsafA@moc.gov.il"
+        communications:
+          - date: 2019-06-25
+            contents:
+              en:
+                type: doc
+                content:
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: 'The '
+                      - type: text
+                        marks:
+                          - type: em
+                        text: 'Ministry of Communications,'
+                      - type: text
+                        text: ' Jerusalem, announces the assignment of NDCs or leading digits of N(S)N for mobile and fixed services in Israel.'
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: '1. Assigned '
+                      - type: text
+                        marks:
+                          - type: strong
+                        text: non-geographic prefix
+                      - type: text
+                        text: ' +972-55-26XXXXX for '
+                      - type: text
+                        marks:
+                          - type: strong
+                        text: 'Telzar Ltd. '
+                      - type: text
+                        text: for mobile telephony services in Israel.
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: '2. Assigned '
+                      - type: text
+                        marks:
+                          - type: strong
+                        text: 'non-geographic prefix '
+                      - type: text
+                        text: +972-55-55XXXXX for
+                      - type: text
+                        marks:
+                          - type: strong
+                        text: ' Rami Levi Ltd.'
+                      - type: text
+                        text: ' for mobile telephony services in Israel.'
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: '3. Assigned '
+                      - type: text
+                        marks:
+                          - type: strong
+                        text: non-geographic prefix
+                      - type: text
+                        text: ' +972-79-6XXXXXX for'
+                      - type: text
+                        marks:
+                          - type: strong
+                        text: ' Hashikma N.G.N International Communications 015 Ltd.'
+                      - type: text
+                        text: ' for fixed telephony services in Israel.'
+      - country_name:
+          en: 'Jamaica '
+        phone_code: 1 876 / +1 658
+        contact:
+          en: "Mr Curtis N. Robinson\nConsultant - Numbering \nAdministration and ICT Networks \nOffice of Utilities Regulation\n3rd Floor, PCJ Resource Centre\n36 Trafalgar Road \nKINGSTON 10\nJamaica\nTel: \t+1 876 968 6053\nFax: \t+1 876 929 3635\nE-mail: crobinson@our.org.jm\nURL: \twww.our.org.jm"
+        communications:
+          - date: 2019-06-26
+            contents:
+              en:
+                type: doc
+                content:
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: 'The '
+                      - type: text
+                        marks:
+                          - type: em
+                        text: 'Office of Utilities Regulation (OUR), '
+                      - type: text
+                        text: >-
+                          Kingston, announces that in addition to NPA (Numbering
+                          Plan Area) 876, the North American Numbering Plan
+                          Administrator (NANPA; the Administrator) has assigned
+                          NPA 658 to Jamaica.
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: 'International dialling format: +1 876 NXX XXXX'
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: "\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_ \_\_+1 658 NXX XXXX"
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: >-
+                          Please see the following links to the NANPA website
+                          for the relevant industry notifications and
+                          publications by the Administrator:
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: 'https://nationalnanpa.com/pdf/PL_510.pdf'
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: 'https://nationalnanpa.com/pdf/PL_525.pdf'
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: 'https://nationalnanpa.com/enas/npa_query.do'
+  - type: service_restrictions
+    items:
+      - country:
+          en: Seychelles
+        ob: 1006
+        page: 13
+      - country:
+          en: Slovakia
+        ob: 1007
+        page: 12
+      - country:
+          en: Malaysia
+        ob: 1013
+        page: 5
+      - country:
+          en: Thailand
+        ob: 1034
+        page: 5
+      - country:
+          en: São Tomé and Principe
+        ob: 1039
+        page: 14
+      - country:
+          en: Uruguay
+        ob: 1039
+        page: 14
+      - country:
+          en: 'Hong Kong, China'
+        ob: 1068
+        page: 4
+      - country:
+          en: Ukraine
+        ob: 1148
+        page: 5
+  - type: callback_procedures

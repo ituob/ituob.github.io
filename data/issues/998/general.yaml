@@ -1,0 +1,3522 @@
+messages:
+  - extra_links:
+      - M1400_ICC
+      - BUREAUFAX
+      - ROA
+    type: running_annexes
+  - type: approved_recommendations
+    items:
+      'Q.3945 ': 2011-10-31T23:00:00.000Z
+    by: AAP-75
+    procedures: Recommendation ITU-T A.8
+  - type: iptn
+    contents:
+      en:
+        type: doc
+        content:
+          - type: paragraph
+            content:
+              - type: text
+                marks:
+                  - type: strong
+                text: Note from TSB
+          - type: paragraph
+            content:
+              - type: text
+                marks:
+                  - type: em
+                text: Identification codes for international network
+          - type: paragraph
+            content:
+              - type: text
+                text: >-
+                  Associated with shared country code 882 for international
+                  networks, the following two-digit identification code has
+                  been 
+              - type: text
+                marks:
+                  - type: strong
+                text: 'withdrawn '
+              - type: text
+                text: 'on 31 January 2012:'
+          - type: paragraph
+            content:
+              - type: text
+                text: "\_"
+          - type: table
+            content:
+              - type: table_row
+                content:
+                  - type: table_cell
+                    attrs:
+                      colspan: 1
+                      rowspan: 1
+                      colwidth: null
+                    content:
+                      - type: paragraph
+                        content:
+                          - type: text
+                            text: Applicant
+                  - type: table_cell
+                    attrs:
+                      colspan: 1
+                      rowspan: 1
+                      colwidth: null
+                    content:
+                      - type: paragraph
+                        content:
+                          - type: text
+                            text: Network
+                  - type: table_cell
+                    attrs:
+                      colspan: 1
+                      rowspan: 1
+                      colwidth: null
+                    content:
+                      - type: paragraph
+                        content:
+                          - type: text
+                            text: 'Country Code and '
+                          - type: hard_break
+                          - type: text
+                            text: Identification Code
+              - type: table_row
+                content:
+                  - type: table_cell
+                    attrs:
+                      colspan: 1
+                      rowspan: 1
+                      colwidth: null
+                    content:
+                      - type: paragraph
+                        content:
+                          - type: text
+                            text: Beeline
+                  - type: table_cell
+                    attrs:
+                      colspan: 1
+                      rowspan: 1
+                      colwidth: null
+                    content:
+                      - type: paragraph
+                        content:
+                          - type: text
+                            text: Beeline
+                  - type: table_cell
+                    attrs:
+                      colspan: 1
+                      rowspan: 1
+                      colwidth: null
+                    content:
+                      - type: paragraph
+                        content:
+                          - type: text
+                            text: +882 43
+  - contents:
+      - country_name:
+          en: 'Costa Rica '
+        phone_code: '506'
+        contact:
+          en: "Ing. Pedro Arce Villalobos \nSuperintendencia de Telecomunicaciones (SUTEL)\nApartado Postal 936-1000\nSAN JOSÉ, \nCosta Rica\nTel:\t+506 4000 0000\nFax:\t+506 2215 6821\nE-mail \tpedro.arce@sutel.go.cr"
+        communications:
+          - date: 2012-01-05T21:40:37.098Z
+            contents:
+              en:
+                type: doc
+                content:
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: 'The '
+                      - type: text
+                        marks:
+                          - type: em
+                        text: 'Superintendencia de Telecomunicaciones (SUTEL), '
+                      - type: text
+                        text: San José
+                      - type: text
+                        marks:
+                          - type: em
+                        text: ', '
+                      - type: text
+                        text: >-
+                          which under Decree N°35187-MINAET (National Numbering
+                          Plan) is in charge of the control and administration
+                          of Numbering resources in Costa Rica, acting in
+                          accordance with the provisions of Recommendation ITU-T
+                          E.129
+                      - type: text
+                        marks:
+                          - type: strong
+                        text: ','
+                      - type: text
+                        text: ' presents the:'
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: >-
+                          Modification to the E.164 National Numbering Plan
+                          (NNP) of Costa Rica for country code 506
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: >-
+                          Table 1 – Description of assignment of new numbering
+                          resources in the ITU-T E.164 National Numbering Plan
+                          for country code 506
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: "\_"
+                  - type: table
+                    content:
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 2
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: >-
+                                      NDC (National Destination Code) or leading
+                                      digits of N(S)N (National (Significant)
+                                      Number)
+                                  - type: hard_break
+                                    marks:
+                                      - type: em
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: X = 0 to 9
+                          - type: table_cell
+                            attrs:
+                              colspan: 3
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: N(S)N number length
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 2
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: Usage of E.164 number
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 2
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: 'Time and date of '
+                                  - type: hard_break
+                                    marks:
+                                      - type: em
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: introduction
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 2
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: Maximum length
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: Minimum length
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 2
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: '7001 0XXX '
+                                  - type: hard_break
+                                  - type: text
+                                    text: '7001 1XXX '
+                                  - type: hard_break
+                                  - type: text
+                                    text: '7001 2XXX '
+                                  - type: hard_break
+                                  - type: text
+                                    text: 7001 3XXX
+                                  - type: hard_break
+                                  - type: text
+                                    text: 7001 4XXX
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 8 digits
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 8 digits
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 'Codes MSRN '
+                                  - type: hard_break
+                                  - type: text
+                                    text: >-
+                                      (Mobile Station Roaming Number) Claro CR
+                                      Telecomunicaciones; S.A
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: "5.I.2012 – 00\_:00"
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 2
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 6000 1XXX
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 8 digits
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 8 digits
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: >-
+                                      Codes MSRN (Mobile Station Roaming Number)
+                                      Telefonica de Costa Rica TC; S.A
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: "5.I.2012 – 00\_:00"
+          - date: 2012-01-09T21:41:19.028Z
+            contents:
+              en:
+                type: doc
+                content:
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: >-
+                          Modification to the E.164 National Numbering Plan
+                          (NNP) of Costa Rica for country code 506
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: >-
+                          Table 1 – Description of assignment of new numbering
+                          resources in the ITU-T E.164 National Numbering Plan
+                          for country code 506
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: "\_"
+                  - type: table
+                    content:
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 2
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: >-
+                                      NDC (National Destination Code) or leading
+                                      digits of N(S)N (National (Significant)
+                                      Number)
+                                  - type: hard_break
+                                    marks:
+                                      - type: em
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: X = 0 a 9
+                          - type: table_cell
+                            attrs:
+                              colspan: 2
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: N(S)N number length
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 2
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: Usage of E.164 number
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 2
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: 'Time and date of '
+                                  - type: hard_break
+                                    marks:
+                                      - type: em
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: introduction
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: Maximum length
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: Minimum length
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: '4070 0XXX '
+                                  - type: hard_break
+                                  - type: text
+                                    text: 4070 1XXX
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 8 digits
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 8 digits
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: IP Telephony Service INTERPHONE
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: "9.I.2012 – 00\_:00"
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: '1719'
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 4 digits
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 4digits
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Telemanagement Service INTERPHONE
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: "9.I.2012 – 00\_:00"
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: '1720'
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 4 digits
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 4digits
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: >-
+                                      Access service to prepaid service platform
+                                      INTERPHONE
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: "9.I.2012 – 00\_:00"
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: '1908'
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 4 digits
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 4digits
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: "Pre-selection code for operator\_ INTERPHONE"
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: "9.I.2012 – 00\_:00"
+      - country_name:
+          en: 'Cuba '
+        phone_code: '53'
+        contact:
+          en: "Ing. Wilfredo López Rodríguez\nDirector de Regulaciones y Normas\nMinisterio de la Informática y las  Comunicaciones\nAvenida Independencia y 19 de mayo\nPlaza de la Revolución\nLA HABANA, CP 10600\nCuba\nTel:\t+53 7 882 8135\nFax:\t+53 7 883 5193\nE-mail:\twilfredo@mic.cu"
+        communications:
+          - date: 2012-01-19T21:41:56.036Z
+            contents:
+              en:
+                type: doc
+                content:
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: 'The '
+                      - type: text
+                        marks:
+                          - type: em
+                        text: 'Ministerio de la Informática y las Comunicaciones,'
+                      - type: text
+                        text: ' La Habana, announces the updated National Numbering Plan (NNP)for the Republic of Cuba:'
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: >-
+                          Updated list of emergency telecommunication services
+                          and services of social value for the Republic of Cuba.
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: List of ETS Numbers for the Republic of Cuba
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: "\_"
+                  - type: table
+                    content:
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: Services
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: Number
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Police
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: '106'
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Fire department
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: '105'
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Ambulance
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: '104'
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Child Helpline
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: '116111'
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Persons with hearing impairments
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: '140'
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Consumer protection
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: '118'
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Gas leaks
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 204 5252
+      - country_name:
+          en: 'Denmark '
+        phone_code: '45'
+        contact:
+          en: |-
+            The Danish Telecommunication Authority
+            Holsteinsgade 63
+            DK-2100 Copenhagen
+            Denmark
+            Tel:+45 3545 0000
+            Fax: +45 3545 0010
+            E-mail:  itst@itst.dk
+        communications:
+          - date: 2011-12-20T21:42:26.124Z
+            contents:
+              en:
+                type: doc
+                content:
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: 'The '
+                      - type: text
+                        marks:
+                          - type: em
+                        text: Danish Business Authority
+                      - type: text
+                        text: >-
+                          , Copenhagen, announces the following changes to the
+                          Danish telephone numbering plan:
+                  - type: bullet_list
+                    content:
+                      - type: list_item
+                        content:
+                          - type: paragraph
+                            content:
+                              - type: text
+                                text: withdrawal – service number
+                  - type: table
+                    content:
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: Provider
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: Service number
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: Date of withdrawal
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: TDC A/S
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: '1850'
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 14.XII.2011
+          - date: 2011-12-22T21:42:46.085Z
+            contents:
+              en:
+                type: doc
+                content:
+                  - type: bullet_list
+                    content:
+                      - type: list_item
+                        content:
+                          - type: paragraph
+                            content:
+                              - type: text
+                                text: withdrawal – mobile communication service
+                  - type: table
+                    content:
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: Provider
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: Numbering series
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: Date of withdrawal
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Telecom North America Inc.
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 8145XXXX
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 22.XII.2011
+      - country_name:
+          en: 'Djibouti '
+        phone_code: '253'
+        contact:
+          en: "Mr Abdallah Mohamed-Abdallah\nResponsable du Centre de Tests\nDjibouti Télécom S.A.\n3, Boulevard G. Pompidou\nB.P. 2105\nDJIBOUTI \nDjibouti\nTel:\t+253 83 10 01 (As from 1 March 2012, Tel:\t +253 77 83 10 01)\nFax:\t+253 35 57 57 (As from 1 March 2012, Fax:\t +253 21 35 57 57)\nE-mail:\tabdallah_mohamed@intnet.dj"
+        communications:
+          - date: 2012-01-03T21:43:32.558Z
+            contents:
+              en:
+                type: doc
+                content:
+                  - type: paragraph
+                    content:
+                      - type: text
+                        marks:
+                          - type: em
+                        text: 'Djibouti Télécom S.A, Djibouti'
+                      - type: text
+                        text: ", announces that the National Numbering Plan will change to eight (8) digits for all networks and services of Djibouti Télécom, as from 1\_March 2012:"
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: "Time zone (Djibouti\_: UTC+3)"
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: "The National Numbering Plan (NNP) will change\_ from six (6) to eight (8) digits according to ITU‑T\_Recommendation E.164."
+                      - type: text
+                        marks:
+                          - type: strong
+                        text: "\_"
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: "The international prefix to dial from Djibouti Republic to reach the automatic network remains «\_00\_»."
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: "1\_\_\_\_\_\_\_\_\_\_\_ General Structure:"
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: "\_\_\_\_\_\_\_\_\_\_\_\_\_ The new National Numbering Plan of Djibouti Republic will be a 8 digits closed plan without national prefix in the form: ABPQMCDU"
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: "2.\_\_\_\_\_\_\_\_\_ Tables of\_ transition"
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: "2.1\_\_\_\_\_\_\_ Table of transition of the Geographic numbers for the fixed services"
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: "\_"
+                  - type: table
+                    content:
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 5
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: >-
+                                      ZONE 1 (DJIBOUTI
+                                      CITY+BALBALA+NEIGHBOURHOOD surrounding
+                                      areas)
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 3
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: Old number (PQMCDU)
+                          - type: table_cell
+                            attrs:
+                              colspan: 2
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: New Number (ABPQMCDU)
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: Service
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: Locality
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: Current Number
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: Digits to add
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: 'New Number '
+                                  - type: hard_break
+                                    marks:
+                                      - type: em
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: 21 PQMCDU
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Fixed line
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Djibouti city
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 25 XX XX
+                                  - type: hard_break
+                                  - type: text
+                                    text: 29 XX XX
+                                  - type: hard_break
+                                  - type: text
+                                    text: 30 XX XX
+                                  - type: hard_break
+                                  - type: text
+                                    text: 31 XX XX
+                                  - type: hard_break
+                                  - type: text
+                                    text: 32 XX XX
+                                  - type: hard_break
+                                  - type: text
+                                    text: 34 XX XX
+                                  - type: hard_break
+                                  - type: text
+                                    text: 35 XX XX
+                                  - type: hard_break
+                                  - type: text
+                                    text: 45 XX XX
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: '21'
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 21 25 XX XX
+                                  - type: hard_break
+                                  - type: text
+                                    text: 21 29 XX XX
+                                  - type: hard_break
+                                  - type: text
+                                    text: 21 30 XX XX
+                                  - type: hard_break
+                                  - type: text
+                                    text: 21 31 XX XX
+                                  - type: hard_break
+                                  - type: text
+                                    text: 21 32 XX XX
+                                  - type: hard_break
+                                  - type: text
+                                    text: 21 34 XX XX
+                                  - type: hard_break
+                                  - type: text
+                                    text: 21 35 XX XX
+                                  - type: hard_break
+                                  - type: text
+                                    text: 21 45 XX XX
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: "\_"
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Balbala
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 31 XX XX
+                                  - type: hard_break
+                                  - type: text
+                                    text: 36 XX XX
+                                  - type: hard_break
+                                  - type: text
+                                    text: 39 XX XX
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: '21'
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 21 31 XX XX
+                                  - type: hard_break
+                                  - type: text
+                                    text: 21 36 XX XX
+                                  - type: hard_break
+                                  - type: text
+                                    text: 21 39 XX XX
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: "\_"
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Fixed CDMA ZTE
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Djibouti city
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 57 XX XX
+                                  - type: hard_break
+                                  - type: hard_break
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: '21'
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 21 57 XX XX
+                                  - type: hard_break
+                                  - type: hard_break
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: "\_"
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Balbala
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: "58\_ XX XX"
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: '21'
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 21 58 XX XX
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: "\_"
+                  - type: table
+                    content:
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 5
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: ZONE 2 (DISTRICTS)
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 3
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: Old number (PQMCDU)
+                          - type: table_cell
+                            attrs:
+                              colspan: 2
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: New Number (ABPQMCDU)
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: Service
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: Locality
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: Current number
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: Digits to add
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: 'New Number '
+                                  - type: hard_break
+                                    marks:
+                                      - type: em
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: 27 PQMCDU
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Fixed line
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Dikhil
+                                  - type: hard_break
+                                  - type: text
+                                    text: Arta
+                                  - type: hard_break
+                                  - type: text
+                                    text: Tadjourah
+                                  - type: hard_break
+                                  - type: text
+                                    text: Ali-Sabieh
+                                  - type: hard_break
+                                  - type: text
+                                    text: Obock
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 42 0X XX
+                                  - type: hard_break
+                                  - type: text
+                                    text: 42 2X XX
+                                  - type: hard_break
+                                  - type: text
+                                    text: 42 4X XX
+                                  - type: hard_break
+                                  - type: text
+                                    text: 42 6X XX
+                                  - type: hard_break
+                                  - type: text
+                                    text: 42 8X XX
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: '27'
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 27 42 0X XX
+                                  - type: hard_break
+                                  - type: text
+                                    text: 27 42 2X XX
+                                  - type: hard_break
+                                  - type: text
+                                    text: 27 42 4X XX
+                                  - type: hard_break
+                                  - type: text
+                                    text: 27 42 6X XX
+                                  - type: hard_break
+                                  - type: text
+                                    text: 27 42 8X XX
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Fixed CDMA HUAWEI (rural)
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Arta
+                                  - type: hard_break
+                                  - type: text
+                                    text: Tadjourah
+                                  - type: hard_break
+                                  - type: text
+                                    text: Dikhil
+                                  - type: hard_break
+                                  - type: text
+                                    text: Ali-Sabieh
+                                  - type: hard_break
+                                  - type: text
+                                    text: Obock
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 50 XX XX
+                                  - type: hard_break
+                                  - type: text
+                                    text: 51 XX XX
+                                  - type: hard_break
+                                  - type: text
+                                    text: 52 XX XX
+                                  - type: hard_break
+                                  - type: text
+                                    text: 53 XX XX
+                                  - type: hard_break
+                                  - type: text
+                                    text: 54 XX XX
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: '27'
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 27 50 XX XX
+                                  - type: hard_break
+                                  - type: text
+                                    text: 27 51 XX XX
+                                  - type: hard_break
+                                  - type: text
+                                    text: 27 52 XX XX
+                                  - type: hard_break
+                                  - type: text
+                                    text: 27 53 XX XX
+                                  - type: hard_break
+                                  - type: text
+                                    text: 27 54 XX XX
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: "\_"
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: >-
+                          Table 2.2 Table of transition for the mobile services
+                          numbers
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: Operator Djibouti Télécom
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: "\_"
+                  - type: table
+                    content:
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 2
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: New Number (ABPQMCDU)
+                          - type: table_cell
+                            attrs:
+                              colspan: 2
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: New Number (ABPQMCDU)
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: Service
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: Current Number
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: Digit to add
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: 'New Number '
+                                  - type: hard_break
+                                    marks:
+                                      - type: em
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: 77 PQ MC DU
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Mobile GSM
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 60 XX XX
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 61 XX XX
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 62 XX XX
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 63 XX XX
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 64 XX XX
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 65 XX XX
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 66 XX XX
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 67 XX XX
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 68 XX XX
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 69 XX XX
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 70 XX XX
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 71 XX XX
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 72 XX XX
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 73 XX XX
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 74 XX XX
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 75 XX XX
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 76 XX XX
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 77 XX XX
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 78 XX XX
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 79 XX XX
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 80 XX XX
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 81 XX XX
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 82 XX XX
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 83 XX XX
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 84 XX XX
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 85 XX XX
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 86 XX XX
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 87 XX XX
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 88 XX XX
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 89 XX XX
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: '77'
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 77 60 XX XX
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 77 61 XX XX
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 77 62 XX XX
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 77 63 XX XX
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 77 64 XX XX
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 77 65 XX XX
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 77 66 XX XX
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 77 67 XX XX
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 77 68 XX XX
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 77 69 XX XX
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 77 70 XX XX
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 77 71 XX XX
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 77 72 XX XX
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 77 73 XX XX
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 77 74 XX XX
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 77 75 XX XX
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 77 76 XX XX
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 77 77 XX XX
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 77 78 XX XX
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 77 79 XX XX
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 77 80 XX XX
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 77 81 XX XX
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 77 82 XX XX
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 77 83 XX XX
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 77 84 XX XX
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 77 85 XX XX
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 77 86 XX XX
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 77 87 XX XX
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 77 88 XX XX
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 77 89 XX XX
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: "\_"
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: "3.\_\_\_\_\_\_\_\_\_ Detailed structure of the new numbering plan"
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: "3.1 \_\_\_\_\_\_ Detailed structure of numbers for geographique services (2BPQMCDU)"
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: "\_\_\_\_\_\_\_\_ ·\_\_\_\_ Zone 1 (B=1)\_: Djibouti city + Balbala + surrounding areas"
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: "\_\_\_\_\_\_\_\_ ·\_\_\_\_ Zone 2 (B=7)\_: the 5 internal regions"
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: "\_"
+                  - type: table
+                    content:
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: A
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: B
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: PQMCDU
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: Type of Numbers
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: Theoretical capacity
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: Service
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: Zone
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: Number by PQ
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: "\_"
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: "\_"
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: '2'
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: '1'
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: PQ MC DU
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: "Fixed geographical\_ number Djibouti city + Balbala"
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 1 Million
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: '2'
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: '7'
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: PQ MC DU
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: "Fixed geographical\_ number for the regions"
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 1 Million
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: "\_\_"
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: "3.2 \_\_\_\_\_\_ Detailed structure of numbers for mobile services (2BPQMCDU)"
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: "\_\_\_\_\_\_\_\_ ·\_\_\_\_ Operator 1 (B=7): Djibouti Télécom"
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: "\_"
+                  - type: table
+                    content:
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: A
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: B
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: PQ MC DU
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: Type of Numbers
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: Theoretical capacity
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: Service
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: Zone
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: Number by PQ
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: "\_"
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: "\_"
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: '7'
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: '7'
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: PQ MC DU
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Mobile GSM number Djibouti Telecom
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 1 Million
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: "\_"
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: "The numbers for technical tests for exchanges are as follows\_:"
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: 'Fixed Service:'
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: "Locality of Balbala:\_\_\_\_\_\_\_ Test number: \_\_\_ +253 21 36 00 03"
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: "District\_:\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_ Test number:\_\_\_\_ +253 21 42 60 08"
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: "Locality of Djibouti:\_\_\_\_\_\_ Test number:\_\_\_\_ +253 21 30 00 00, +253 21 35 00 45 et +253 21 57 00 09"
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: "Mobiles service: \_\_\_\_\_\_\_\_\_\_\_ Test\_ number: \_\_ +253 77 83 10 01 et +253 77 84 31 31"
+      - country_name:
+          en: 'Uganda '
+        phone_code: '256'
+        contact:
+          en: "Mr. Patrick Mwesigwa\nDirector - Technology and Licensing\nUganda Communications Commission (UCC)\nP.O. Box 7376 \nKAMPALA\nUganda\nTel :  \t+256 41 433 9000\nFax : \t+256 41 434 8832\nE-mail : \tpmwesigwa@ucc.co.ug"
+        communications:
+          - date: 2012-01-09T21:44:28.744Z
+            contents:
+              en:
+                type: doc
+                content:
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: 'The '
+                      - type: text
+                        marks:
+                          - type: em
+                        text: 'Uganda Communications Commission (UCC), '
+                      - type: text
+                        text: >-
+                          Kampala, announces an update of the National Numbering
+                          Plan of Uganda:
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: >-
+                          PRESENTATION OF E.164 NATIONAL NUMBERING FOR COUNTRY
+                          CODE 256
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: "a)\_\_\_\_\_\_\_\_\_ Overview"
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: "\_\_\_\_\_\_\_\_\_\_\_\_\_ The minimum number length (excluding the country code) is 9 digits"
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: "\_\_\_\_\_\_\_\_\_\_\_\_\_ The maximum number length (excluding the country code) is 9 digits"
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: "b)\_\_\_\_\_\_\_\_\_ Details of numbering scheme"
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: "\_"
+                  - type: table
+                    content:
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 2
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: >-
+                                      NDC (National Destination Code) or leading
+                                      digits of N(S)N (National (Significant)
+                                      Number)
+                          - type: table_cell
+                            attrs:
+                              colspan: 2
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: N(S)N Number Length
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 2
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: Usage of E.164 Number
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 2
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: Additional information
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: Maximum Length
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: Minimum Length
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: '204'
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: '9'
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: '9'
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: >-
+                                      Fixed telephony services for Orange Uganda
+                                      Limited
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Network is fully operational
+    type: telephone_service_2
+  - type: ipns
+    contents:
+      en:
+        type: doc
+        content:
+          - type: paragraph
+            content:
+              - type: text
+                marks:
+                  - type: strong
+                text: Note from TSB
+          - type: paragraph
+            content:
+              - type: text
+                marks:
+                  - type: em
+                text: Identification codes for International Mobile Networks
+          - type: paragraph
+            content:
+              - type: text
+                text: >-
+                  Associated with shared mobile country code 901 (MCC), the
+                  following two-digit mobile network codes (MNC) has been 
+              - type: text
+                marks:
+                  - type: strong
+                text: withdrawn
+              - type: text
+                text: ':'
+          - type: paragraph
+            content:
+              - type: text
+                text: "\_"
+          - type: table
+            content:
+              - type: table_row
+                content:
+                  - type: table_cell
+                    attrs:
+                      colspan: 1
+                      rowspan: 1
+                      colwidth: null
+                    content:
+                      - type: paragraph
+                        content:
+                          - type: text
+                            text: Network
+                  - type: table_cell
+                    attrs:
+                      colspan: 1
+                      rowspan: 1
+                      colwidth: null
+                    content:
+                      - type: paragraph
+                        content:
+                          - type: text
+                            text: >-
+                              Mobile Country Code (MCC)* and Mobile Network Code
+                              (MNC)**
+                  - type: table_cell
+                    attrs:
+                      colspan: 1
+                      rowspan: 1
+                      colwidth: null
+                    content:
+                      - type: paragraph
+                        content:
+                          - type: text
+                            text: Date of withdrawal
+              - type: table_row
+                content:
+                  - type: table_cell
+                    attrs:
+                      colspan: 1
+                      rowspan: 1
+                      colwidth: null
+                    content:
+                      - type: paragraph
+                        content:
+                          - type: text
+                            text: Beeline
+                  - type: table_cell
+                    attrs:
+                      colspan: 1
+                      rowspan: 1
+                      colwidth: null
+                    content:
+                      - type: paragraph
+                        content:
+                          - type: text
+                            text: 901 23
+                  - type: table_cell
+                    attrs:
+                      colspan: 1
+                      rowspan: 1
+                      colwidth: null
+                    content:
+                      - type: paragraph
+                        content:
+                          - type: text
+                            text: 31.I.2012
+          - type: paragraph
+            content:
+              - type: text
+                text: ______________
+          - type: paragraph
+            content:
+              - type: text
+                text: "*\_\_\_\_\_\_\_\_ MCC: Mobile Country Code / Indicatif de pays du mobile / Indicativo de país para el servicio móvil"
+          - type: paragraph
+            content:
+              - type: text
+                text: "**\_\_\_\_\_\_ MNC: Mobile Network Code / Code de réseau mobile / Indicativo de red para el servicio móvil"
+  - type: sanc
+    contents:
+      en:
+        type: doc
+        content:
+          - type: paragraph
+            content:
+              - type: text
+                marks:
+                  - type: strong
+                text: Note du TSB
+          - type: paragraph
+            content:
+              - type: text
+                text: >-
+                  At the request of the Administration of Poland the Director of
+                  TSB has assigned the following signalling area/network code
+                  (SANC) for use in the international part of the signalling
+                  system No. 7 network of the country/geographical areas, in
+                  accordance with ITU-T Recommendation Q.708 (03/99):
+          - type: paragraph
+            content:
+              - type: text
+                text: "\_"
+          - type: table
+            content:
+              - type: table_row
+                content:
+                  - type: table_cell
+                    attrs:
+                      colspan: 1
+                      rowspan: 1
+                      colwidth: null
+                    content:
+                      - type: paragraph
+                        content:
+                          - type: text
+                            text: Country/geographical area or signalling network
+                  - type: table_cell
+                    attrs:
+                      colspan: 1
+                      rowspan: 1
+                      colwidth: null
+                    content:
+                      - type: paragraph
+                        content:
+                          - type: text
+                            text: SANC
+              - type: table_row
+                content:
+                  - type: table_cell
+                    attrs:
+                      colspan: 1
+                      rowspan: 1
+                      colwidth: null
+                    content:
+                      - type: paragraph
+                        content:
+                          - type: text
+                            text: Poland (Republic of)
+                  - type: table_cell
+                    attrs:
+                      colspan: 1
+                      rowspan: 1
+                      colwidth: null
+                    content:
+                      - type: paragraph
+                        content:
+                          - type: text
+                            text: 5-229
+          - type: paragraph
+            content:
+              - type: text
+                text: __________
+          - type: paragraph
+            content:
+              - type: text
+                text: "SANC:\_\_\_ Signalling Area/Network Code"
+          - type: paragraph
+            content:
+              - type: text
+                text: "\_\_\_\_\_\_\_\_\_\_\_\_\_ Code de zone/réseau sémaphore"
+          - type: paragraph
+            content:
+              - type: text
+                text: "\_\_\_\_\_\_\_\_\_\_\_\_\_ Código de zona/red de señalización"
+  - type: custom
+    title:
+      en: Data Transmission Service
+    recommendation: null
+    contents:
+      en:
+        type: doc
+        content:
+          - type: paragraph
+            content:
+              - type: text
+                text: (ITU-T Recommendation X.121 (10/2000))
+          - type: paragraph
+            content:
+              - type: text
+                text: International numbering plan for public data networks
+          - type: paragraph
+            content:
+              - type: text
+                marks:
+                  - type: strong
+                text: Sweden
+          - type: paragraph
+            content:
+              - type: text
+                text: 'Communication of 5.I.2012:'
+          - type: paragraph
+            content:
+              - type: text
+                text: 'The '
+              - type: text
+                marks:
+                  - type: em
+                text: Swedish Post and Telecom Agency
+              - type: text
+                text: >-
+                  , Stockholm, announces the withdrawal of Data Network
+                  Identification Code (DNIC) 
+              - type: text
+                marks:
+                  - type: strong
+                text: 240 2
+              - type: text
+                text: " of the network “WM-data Infrastructur”.\_"
+          - type: paragraph
+            content:
+              - type: text
+                text: >-
+                  Accordingly, the following Data Network Identification Codes
+                  (DNIC) and network names are in use in Sweden.
+          - type: paragraph
+            content:
+              - type: text
+                text: "\_"
+          - type: table
+            content:
+              - type: table_row
+                content:
+                  - type: table_cell
+                    attrs:
+                      colspan: 1
+                      rowspan: 1
+                      colwidth: null
+                    content:
+                      - type: paragraph
+                        content:
+                          - type: text
+                            marks:
+                              - type: em
+                            text: Country/Geographical area
+                  - type: table_cell
+                    attrs:
+                      colspan: 1
+                      rowspan: 1
+                      colwidth: null
+                    content:
+                      - type: paragraph
+                        content:
+                          - type: text
+                            marks:
+                              - type: em
+                            text: DNIC No.
+                  - type: table_cell
+                    attrs:
+                      colspan: 1
+                      rowspan: 1
+                      colwidth: null
+                    content:
+                      - type: paragraph
+                        content:
+                          - type: text
+                            marks:
+                              - type: em
+                            text: Name of network to which a DNIC is allocated
+              - type: table_row
+                content:
+                  - type: table_cell
+                    attrs:
+                      colspan: 1
+                      rowspan: 1
+                      colwidth: null
+                    content:
+                      - type: paragraph
+                        content:
+                          - type: text
+                            marks:
+                              - type: em
+                            text: SUÈDE
+                  - type: table_cell
+                    attrs:
+                      colspan: 1
+                      rowspan: 1
+                      colwidth: null
+                    content:
+                      - type: paragraph
+                        content:
+                          - type: text
+                            text: 240 3
+                  - type: table_cell
+                    attrs:
+                      colspan: 1
+                      rowspan: 1
+                      colwidth: null
+                    content:
+                      - type: paragraph
+                        content:
+                          - type: text
+                            text: >-
+                              Datapak (Packet Switched Public Data Network) –
+                              TeliaSonera AB
+              - type: table_row
+                content:
+                  - type: table_cell
+                    attrs:
+                      colspan: 1
+                      rowspan: 1
+                      colwidth: null
+                    content:
+                      - type: paragraph
+                        content:
+                          - type: text
+                            marks:
+                              - type: em
+                            text: SWEDEN
+                  - type: table_cell
+                    attrs:
+                      colspan: 1
+                      rowspan: 1
+                      colwidth: null
+                    content:
+                      - type: paragraph
+                        content:
+                          - type: text
+                            text: 240 6
+                  - type: table_cell
+                    attrs:
+                      colspan: 1
+                      rowspan: 1
+                      colwidth: null
+                    content:
+                      - type: paragraph
+                        content:
+                          - type: text
+                            text: Flex25 (Public Packet Switched Data Network)
+              - type: table_row
+                content:
+                  - type: table_cell
+                    attrs:
+                      colspan: 1
+                      rowspan: 1
+                      colwidth: null
+                    content:
+                      - type: paragraph
+                        content:
+                          - type: text
+                            marks:
+                              - type: em
+                            text: SUECIA
+                  - type: table_cell
+                    attrs:
+                      colspan: 1
+                      rowspan: 1
+                      colwidth: null
+                    content:
+                      - type: paragraph
+                        content:
+                          - type: text
+                            text: 240 7
+                  - type: table_cell
+                    attrs:
+                      colspan: 1
+                      rowspan: 1
+                      colwidth: null
+                    content:
+                      - type: paragraph
+                        content:
+                          - type: text
+                            text: >-
+                              Private X.25 Networks (DNIC allocated for a group
+                              of private networks) – TeliaSonera AB
+          - type: paragraph
+            content:
+              - type: text
+                text: "\_"
+          - type: paragraph
+            content:
+              - type: text
+                text: 'For further information, please contact:'
+          - type: paragraph
+            content:
+              - type: text
+                text: Mr Joakim Strålmark
+              - type: hard_break
+              - type: text
+                text: 'Swedish Post and Telecom Agency '
+              - type: hard_break
+              - type: text
+                text: Valhallavägen 117
+              - type: hard_break
+              - type: text
+                text: P.O. Box 5398
+              - type: hard_break
+              - type: text
+                text: SE-102 49 STOCKHOLM
+              - type: hard_break
+              - type: text
+                text: Sweden
+              - type: hard_break
+              - type: text
+                text: "Tel:\_\_\_\_\_\_ +46 8 678 5500"
+              - type: hard_break
+              - type: text
+                text: "Fax:\_\_\_\_\_ +46 8 678 5505"
+              - type: hard_break
+              - type: text
+                text: "E-mail\_\_ pts@pts.se "
+              - type: hard_break
+              - type: text
+                text: "URL\_ "
+              - type: text
+                marks:
+                  - type: link
+                    attrs:
+                      href: 'http://www.pts.se'
+                      title: null
+                text: www.pts.se
+  - type: org_changes
+    contents:
+      en:
+        type: doc
+        content:
+          - type: paragraph
+            content:
+              - type: text
+                marks:
+                  - type: strong
+                text: Denmark
+          - type: paragraph
+            content:
+              - type: text
+                text: Communication of 18.I.2012
+          - type: paragraph
+            content:
+              - type: text
+                marks:
+                  - type: em
+                text: Change of name
+          - type: paragraph
+            content:
+              - type: text
+                text: 'The '
+              - type: text
+                marks:
+                  - type: em
+                text: National IT and Telecom Agency (NITA)
+              - type: text
+                text: >-
+                  , Copenhagen, announces that it has changed its name. It is
+                  now called: «Danish Business Authority».
+          - type: paragraph
+            content:
+              - type: text
+                text: Danish Business Authority
+              - type: hard_break
+              - type: text
+                text: Langelinie Allé 17
+              - type: hard_break
+              - type: text
+                text: 2100 COPENHAGEN
+              - type: hard_break
+              - type: text
+                text: Denmark
+              - type: hard_break
+              - type: text
+                text: "Tel:\_\_\_\_\_\_\_\_\_\_ +45 35 29 10 00 "
+              - type: hard_break
+              - type: text
+                text: "Fax:\_\_\_\_\_\_\_\_\_ +45 35 46 60 01 "
+              - type: hard_break
+              - type: text
+                text: "E-mail:\_\_\_ erst@erst.dk "
+              - type: hard_break
+              - type: text
+                text: "URL:\_\_\_\_\_\_\_\_ www.erst.dk"
+          - type: paragraph
+          - type: paragraph
+            content:
+              - type: text
+                marks:
+                  - type: strong
+                text: Denmark
+          - type: paragraph
+            content:
+              - type: text
+                text: Communication of 19.I.2012
+          - type: paragraph
+            content:
+              - type: text
+                marks:
+                  - type: em
+                text: "Change of name\_"
+          - type: paragraph
+            content:
+              - type: text
+                text: The
+              - type: text
+                marks:
+                  - type: em
+                text: ' Ministry of Science, Technology and Innovation, '
+              - type: text
+                text: Copenhagen
+              - type: text
+                marks:
+                  - type: em
+                text: ', '
+              - type: text
+                text: "announces that it has changed its name. It is now called: « Ministry of Business and Growth»\_:"
+          - type: paragraph
+            content:
+              - type: text
+                text: "\_Ministry of Business and Growth"
+              - type: hard_break
+              - type: text
+                text: Slotsholmsgade 10-12
+              - type: hard_break
+              - type: text
+                text: 1216 COPENHAGEN
+              - type: hard_break
+              - type: text
+                text: Denmark
+              - type: hard_break
+              - type: text
+                text: "Tel:\_\_\_\_\_\_\_\_\_\_ +45 33 92 33 50 "
+              - type: hard_break
+              - type: text
+                text: "Fax:\_\_\_\_\_\_\_\_\_ +45 33 12 37 78 "
+              - type: hard_break
+              - type: text
+                text: "E-mail:\_\_\_ evm@evm.dk "
+              - type: hard_break
+              - type: text
+                text: "URL:\_\_\_\_\_\_\_\_ www.evm.dk"
+          - type: paragraph
+            content:
+              - type: text
+                marks:
+                  - type: strong
+                text: "\_"
+          - type: paragraph
+            content:
+              - type: text
+                marks:
+                  - type: strong
+                text: United Kingdom
+          - type: paragraph
+            content:
+              - type: text
+                text: Communication of 1.II.2012
+          - type: paragraph
+            content:
+              - type: text
+                marks:
+                  - type: em
+                text: "Change of name\_"
+          - type: paragraph
+            content:
+              - type: text
+                marks:
+                  - type: em
+                text: 'Jersey Telecom, '
+              - type: text
+                text: 'St Helier,'
+              - type: text
+                marks:
+                  - type: em
+                text: "\_"
+              - type: text
+                text: >-
+                  announces that it has changed its name. It is now called: «JT
+                  (Jersey) Limited»:
+          - type: paragraph
+            content:
+              - type: text
+                text: JT (Jersey) Limited
+              - type: hard_break
+              - type: text
+                text: No. 1 The Forum
+              - type: hard_break
+              - type: text
+                text: Grenville Street
+              - type: hard_break
+              - type: text
+                text: PO Box 53
+              - type: hard_break
+              - type: text
+                text: 'ST. HELIER, Jersey JE4 8PB'
+              - type: hard_break
+              - type: text
+                text: United Kingdom
+              - type: hard_break
+              - type: text
+                text: "Tel:\_\_\_\_\_\_\_\_\_ +44 1534 882803 "
+              - type: hard_break
+              - type: text
+                text: "Fax:\_\_\_\_\_\_\_\_ +44 1534 882339 "
+              - type: hard_break
+              - type: text
+                text: "E-mail:\_\_ daragh.mcdermott@jerseytelecom.com"
+  - type: callback_procedures

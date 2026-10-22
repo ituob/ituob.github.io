@@ -1,0 +1,57 @@
+<bibdata type="standard">
+  <fetched>2021-12-17</fetched>
+  <title type="title-intro" format="text/plain" language="en" script="Latn">Information technology</title>
+  <title type="title-main" format="text/plain" language="en" script="Latn">Relayed multicast protocol: Specification for N-plex group applications</title>
+  <title type="main" format="text/plain" language="en" script="Latn">Information technology - Relayed multicast protocol: Specification for N-plex group applications</title>
+  <uri type="src">https://www.itu.int/ITU-T/recommendations/rec.aspx?rec=11007&amp;lang=en</uri>
+  <docidentifier type="ITU">ITU-T X.603.2</docidentifier>
+  <date type="published">
+    <on>2010-10-14</on>
+  </date>
+  <contributor>
+    <role type="publisher"/>
+    <organization>
+      <name>International Telecommunication Union</name>
+      <abbreviation>ITU</abbreviation>
+      <uri>www.itu.int</uri>
+    </organization>
+  </contributor>
+  <edition>1</edition>
+  <language>en</language>
+  <script>Latn</script>
+  <abstract format="text/plain" language="en" script="Latn">Recommendation ITU-T X.603 describes the relayed multicast protocol part 3 (RMCP-3) which is an application-layer relayed multicast protocol that operates over the IP-based network where the IP multicast is not fully deployed. The RMCP-3 constructs a relayed multicast tree for delivering user data from multiple senders to multiple receivers. The relayed multicast tree consists of multicast agent and session manager. The multicast agent relays many‑to-many multicast data along the relayed multicast tree, whereas the session manager manages the RMCP-3 session. This Recommendation specifies the functions and the procedures of the multicast agent and session manager. The RMCP-3 can support applications requiring capability of many-to-many multicast data delivery. Examples of such applications are multimedia conference, panel discussion, and network gaming.</abstract>
+  <status>
+    <stage>Published</stage>
+  </status>
+  <copyright>
+    <from>2010</from>
+    <owner>
+      <organization>
+        <name>International Telecommunication Union</name>
+        <abbreviation>ITU</abbreviation>
+        <uri>www.itu.int</uri>
+      </organization>
+    </owner>
+  </copyright>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">X Suppl. 34 (01/2019)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">X Suppl. 36 (09/2021)</formattedref>
+    </bibitem>
+  </relation>
+  <place>Geneva</place>
+  <ext>
+    <doctype>recommendation</doctype>
+    <editorialgroup>
+      <bureau>T</bureau>
+      <group type="study-group">
+        <name>ITU-T Study Group 11</name>
+        <acronym>SG</acronym>
+      </group>
+    </editorialgroup>
+  </ext>
+</bibdata>

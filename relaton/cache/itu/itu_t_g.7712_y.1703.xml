@@ -1,0 +1,292 @@
+<bibdata type="standard">
+  <fetched>2021-12-17</fetched>
+  <title type="title-main" format="text/plain" language="en" script="Latn">Architecture and specification of data communication network</title>
+  <title type="main" format="text/plain" language="en" script="Latn">Architecture and specification of data communication network</title>
+  <uri type="src">https://www.itu.int/ITU-T/recommendations/rec.aspx?rec=10895&amp;lang=en</uri>
+  <uri type="obp">https://www.itu.inthttps//handle.itu.int/11.1002/1000/10895-en?locatt=format:pdf&amp;auth</uri>
+  <docidentifier type="ITU">ITU-T G.7712/Y.1703</docidentifier>
+  <date type="published">
+    <on>2010-09-06</on>
+  </date>
+  <contributor>
+    <role type="publisher"/>
+    <organization>
+      <name>International Telecommunication Union</name>
+      <abbreviation>ITU</abbreviation>
+      <uri>www.itu.int</uri>
+    </organization>
+  </contributor>
+  <edition>5</edition>
+  <language>en</language>
+  <script>Latn</script>
+  <abstract format="text/plain" language="en" script="Latn">Recommendation ITU-T G.7712/Y.1703 defines the architecture requirements for a data communication network (DCN) which may support distributed management communications related to the telecommunication management network (TMN), distributed control plane communications (e.g.,signalling and routing) related to the automatically switched optical network (ASON), distributed control plane communications (e.g., signalling and routing) related to multiprotocol label switching transport profile (MPLS-TP), control plane communications related to software defined networking (SDN), and other distributed communications (e.g., orderwire or voice communications, software download). The DCN architecture considers networks that are IP‑only, open system interface (OSI)-only, and mixed (i.e., support both IP and OSI). The interworking between parts of the DCN supporting IP-only, parts supporting OSI‑only, and parts supporting both IP and OSI are also specified other protocols (other than IP or OSI) are outside the current scope of this Recommendation.Various applications (e.g., TMN, ASON) require a packet-based communications network to transport information between various components. For example, the TMN requires a communications network, which is referred to as the management communication network (MCN) to transport management messages between TMN components (e.g., network element function (NEF) component and operations system function (OSF) component). ASON and MPLS-TP require communication networks, which are referred to as the signalling communication networks (SCNs) to transport signalling and routing messages between functional control plane components (e.g.,connection controller (CC) components and routing controller (RC) components). This Recommendation specifies data communication functions that can be used to support one or more application's communication network.The data communication functions provided in the 2001 version (version 1) of this Recommendation support connectionless network services. The 2003 revision (version 2) of this Recommendation adds the support of connection-oriented network SCN services by including a specific MPLS-based mechanism.The 2010 revision (version 4) of this Recommendation provides the requirements for the MPLS transport profile (MPLS-TP) signalling communication channel (SCC) and management communication channel (MCC) data communication functions. The part of this Recommendation that addresses MPLS for transport networks complies with the transport profile of MPLS architecture as defined by Internet Engineering Task Force (IETF). In the event of a difference between this ITU-T Recommendation and any of the normatively referenced request for comments (RFCs) for MPLS-TP, the RFCs will take precedence.The 2020 version (version 5) provides updates that cover control plane communications related to software defined networking (SDN). A new Appendix V is also added to this version to provide a mapping between clauses here and prior versions due to restructuring.This Recommendation forms part of a family of Recommendations covering transport networks.</abstract>
+  <status>
+    <stage>Withdrawal</stage>
+  </status>
+  <copyright>
+    <from>2010</from>
+    <owner>
+      <organization>
+        <name>International Telecommunication Union</name>
+        <abbreviation>ITU</abbreviation>
+        <uri>www.itu.int</uri>
+      </organization>
+    </owner>
+  </copyright>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 4 (12/1972)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 5 (10/1984)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 7 (12/1972)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 8 (12/1972)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 17 (10/1984)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 19 (10/1984)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 22 (10/1984)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 26 (10/1984)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 27 (10/1984)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 28 (10/1984)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 29 (03/1993)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 32 (11/1988)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 34 (11/1988)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 35 (11/1988)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 36 (11/1988)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 39 (02/2016)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 40 (10/2018)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 41 (02/2018)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 42 (10/2018)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 43 (02/2011)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 44 (06/2007)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 45 (05/2009)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 46 (05/2009)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 47 (09/2012)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 48 (06/2010)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 49 (09/2020)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 50 (09/2011)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 51 (06/2017)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 52 (09/2012)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 53 (12/2014)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 54 (07/2015)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 55 (07/2015)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 56 (02/2016)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 57 (07/2015)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 58 (09/2020)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 59 (02/2018)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 60 (09/2016)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 62 (02/2018)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 63 (02/2018)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 64 (02/2018)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 65 (10/2018)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 66 (09/2020)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 67 (07/2019)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 68 (02/2020)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 69 (09/2020)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 70 (09/2020)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 71 (04/2021)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 72 (04/2021)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 73 (10/2021)</formattedref>
+    </bibitem>
+  </relation>
+  <place>Geneva</place>
+  <ext>
+    <doctype>recommendation</doctype>
+    <editorialgroup>
+      <bureau>T</bureau>
+      <group type="study-group">
+        <name>ITU-T Study Group 15</name>
+        <acronym>SG</acronym>
+      </group>
+    </editorialgroup>
+  </ext>
+</bibdata>

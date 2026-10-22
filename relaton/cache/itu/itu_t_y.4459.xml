@@ -1,0 +1,122 @@
+<bibdata type="standard">
+  <fetched>2023-03-06</fetched>
+  <title type="title-main" format="text/plain" language="en" script="Latn">Digital entity architecture framework for Internet of things interoperability</title>
+  <title type="main" format="text/plain" language="en" script="Latn">Digital entity architecture framework for Internet of things interoperability</title>
+  <uri type="src">https://www.itu.int/ITU-T/recommendations/rec.aspx?rec=13861&amp;lang=en</uri>
+  <uri type="obp">https://www.itu.inthttps//handle.itu.int/11.1002/1000/13861-en?locatt=format:pdf&amp;auth</uri>
+  <docidentifier type="ITU">ITU-T Y.4459</docidentifier>
+  <date type="published">
+    <on>2020-01-12</on>
+  </date>
+  <contributor>
+    <role type="publisher"/>
+    <organization>
+      <name>International Telecommunication Union</name>
+      <abbreviation>ITU</abbreviation>
+      <uri>www.itu.int</uri>
+    </organization>
+  </contributor>
+  <edition>1</edition>
+  <language>en</language>
+  <script>Latn</script>
+  <abstract format="text/plain" language="en" script="Latn">Recommendation ITU-T Y.4459 introduces a digital entity architecture and its prospective in addressing interoperability and security among Internet of things (IoT) applications.This Recommendation defines an architecture framework for information-oriented services that makes use of existing infrastructures, including the Internet infrastructure, to enhance secure and managed information sharing over a distributed networking environment. It defines an architecture framework for information management based on the use of digital entities, and a common set of secure services that will help the registration, discovery, resolution and dissemination of such digital entities. The set of services is designed to facilitate sharing across any storage boundaries, any heterogeneous application boundaries and any organization boundaries.A digital entity architecture defines a minimum set of needed architectural components and services to provide a generic information and service interoperability. It will facilitate the interoperability of identification, description, representation, access, storage and security of IoT devices. This architecture framework encourages a common security and management interface across different IoT applications.Under a digital entity architecture, information represented in digital form is structured as digital entities, each of which has an associated unique persistent identifier. However, metadata contained in the digital entities (e.g., location of the object) could be updated without changing its identifier.The identifier allows the digital entities to be identified and discovered, regardless of where they are located or stored. Digital entities are not confined within any particular application boundary and may be moved from host to host, accessed from application to application, shared from organization to organization, without losing its ownership or management control, in order to enhance interoperability. A digital entity's data model allows ownership and access control information to be defined by data owners independently of any specific applications.This Recommendation can be used with different identification and addressing protocols (e.g., Internet protocol (IP) and/or non-IP based networks).</abstract>
+  <status>
+    <stage>Published</stage>
+  </status>
+  <copyright>
+    <from>2020</from>
+    <owner>
+      <organization>
+        <name>International Telecommunication Union</name>
+        <abbreviation>ITU</abbreviation>
+        <uri>www.itu.int</uri>
+      </organization>
+    </owner>
+  </copyright>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">Y Suppl. 27 (01/2016)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">Y Suppl. 32 (07/2020)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">Y Suppl. 33 (07/2020)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">Y Suppl. 34 (07/2020)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">Y Suppl. 45 (09/2017)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">Y Suppl. 52 (12/2018)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">Y Suppl. 53 (12/2018)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">Y Suppl. 54 (04/2019)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">Y Suppl. 56 (12/2019)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">Y Suppl. 58 (05/2021)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">Y Suppl. 61 (07/2020)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">Y Suppl. 62 (07/2020)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">Y Suppl. 63 (07/2020)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">Y Suppl. 68 (05/2021)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">Y Suppl. 69 (05/2021)</formattedref>
+    </bibitem>
+  </relation>
+  <place>Geneva</place>
+  <ext>
+    <doctype>recommendation</doctype>
+    <editorialgroup>
+      <bureau>T</bureau>
+      <group type="study-group">
+        <name>ITU-T Study Group 20</name>
+        <acronym>SG</acronym>
+      </group>
+    </editorialgroup>
+  </ext>
+</bibdata>

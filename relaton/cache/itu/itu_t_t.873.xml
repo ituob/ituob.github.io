@@ -1,0 +1,53 @@
+<bibdata type="standard">
+  <fetched>2023-03-06</fetched>
+  <title type="title-intro" format="text/plain" language="en" script="Latn">Information technology</title>
+  <title type="title-main" format="text/plain" language="en" script="Latn">Digital compression and coding of continuous-tone still images: Reference software</title>
+  <title type="main" format="text/plain" language="en" script="Latn">Information technology - Digital compression and coding of continuous-tone still images: Reference software</title>
+  <uri type="src">https://www.itu.int/ITU-T/recommendations/rec.aspx?rec=13915&amp;lang=en</uri>
+  <docidentifier type="ITU">ITU-T T.873</docidentifier>
+  <docidentifier type="ISO">ISO/IEC 10918-7</docidentifier>
+  <date type="published">
+    <on>2019-05-14</on>
+  </date>
+  <contributor>
+    <role type="publisher"/>
+    <organization>
+      <name>International Telecommunication Union</name>
+      <abbreviation>ITU</abbreviation>
+      <uri>www.itu.int</uri>
+    </organization>
+  </contributor>
+  <edition>2</edition>
+  <language>en</language>
+  <script>Latn</script>
+  <abstract format="text/plain" language="en" script="Latn">The ISO/IEC 10918-x series establishes guidelines and specifies requirements for coding of continuous-tone still images. Rec. ITU-T T.81 | ISO/IEC 10918-1, also known under the name JPEG, specifies the codestream format and the decoding process. It is designed primarily for compression of continuous-tone photographic content.Rec. ITU-T T.873 | ISO/IEC 10918-7 provides reference software for Rec. ITU-T T.81 | ISO/IEC 10918-1. The software has been successfully compiled and tested on Linux and Windows operating systems and conforms to the decoder requirements specified in Recommendation ITU-T T.83 | ISO/IEC 10918-2. It has also been tested for conformance to Rec. ITU-T T.86 | ISO/IEC 10918-4 and ISO/IEC 18477-4.This second edition updates reference software A to version 1.59 and reference software B to version 2.0.x. These versions do not include any new features; they correct implementation errors and improve the overall stability of the software.</abstract>
+  <status>
+    <stage>Withdrawal</stage>
+  </status>
+  <copyright>
+    <from>2019</from>
+    <owner>
+      <organization>
+        <name>International Telecommunication Union</name>
+        <abbreviation>ITU</abbreviation>
+        <uri>www.itu.int</uri>
+      </organization>
+    </owner>
+  </copyright>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">T Suppl. 1 (11/2004)</formattedref>
+    </bibitem>
+  </relation>
+  <place>Geneva</place>
+  <ext>
+    <doctype>recommendation</doctype>
+    <editorialgroup>
+      <bureau>T</bureau>
+      <group type="study-group">
+        <name>ITU-T Study Group 16</name>
+        <acronym>SG</acronym>
+      </group>
+    </editorialgroup>
+  </ext>
+</bibdata>

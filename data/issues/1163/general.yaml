@@ -1,0 +1,460 @@
+messages:
+  - extra_links:
+      - M1400_ICC
+      - BUREAUFAX
+      - ROA
+    type: running_annexes
+  - type: approved_recommendations
+    by: AAP-49
+    procedures: Recommendation ITU-T A.8
+    items:
+      'G.875 ': 2018-12-01
+      'G.8052/Y.1346 ': 2018-12-01
+      'G.8152/Y.1375 ': 2018-12-01
+      'Q.4042.1 ': 2018-12-01
+      'X.609.6 ': 2018-12-01
+      'X.609.7 ': 2018-12-01
+      'Y.2242 ': 2018-12-01
+      'Y.2323 ': 2018-12-01
+      'Y.2815 ': 2018-12-01
+      'Y.3053 (2018) Amd 1 ': 2018-12-01
+      'Y.3104 ': 2018-12-01
+      'Y.3105 ': 2018-12-01
+      'Y.3112 ': 2018-12-01
+      'Y.3324 ': 2018-12-01
+      'Y.3507 ': 2018-12-01
+      'Y.3514 (2017) Cor 1 ': 2018-12-01
+      'Y.3517 ': 2018-12-01
+      'Y.3518 ': 2018-12-01
+      'Y.3519 ': 2018-12-01
+      'Y.3602 ': 2018-12-01
+      'Y.3651 ': 2018-12-01
+  - type: sanc
+    contents:
+      '0': g
+      '1': e
+      '2': n
+      '3': e
+      '4': r
+      '5': a
+      '6': l
+      '7': /
+      '8': s
+      '9': a
+      '10': n
+      '11': c
+      '12': .
+      '13': a
+      '14': d
+      '15': o
+      '16': c
+      en:
+        type: doc
+        content:
+          - type: paragraph
+            content:
+              - type: text
+                marks:
+                  - type: strong
+                text: Note from TSB
+          - type: paragraph
+            content:
+              - type: text
+                text: "At the request of the Administration of Ireland, the Director of TSB has assigned the following signalling area/network code (SANC) for use in the international part of the signalling system No.\_7 network of this country/geographical area, in accordance with Recommendation\_ITU-T Q.708 (03/99):"
+          - type: paragraph
+            content:
+              - type: text
+                text: "\_"
+          - type: table
+            content:
+              - type: table_row
+                content:
+                  - type: table_cell
+                    attrs:
+                      colspan: 1
+                      rowspan: 1
+                      colwidth: null
+                    content:
+                      - type: paragraph
+                        content:
+                          - type: text
+                            marks:
+                              - type: em
+                            text: Country
+                          - type: text
+                            text: /
+                          - type: text
+                            marks:
+                              - type: em
+                            text: geographical area or signalling network
+                  - type: table_cell
+                    attrs:
+                      colspan: 1
+                      rowspan: 1
+                      colwidth: null
+                    content:
+                      - type: paragraph
+                        content:
+                          - type: text
+                            marks:
+                              - type: em
+                            text: SANC
+              - type: table_row
+                content:
+                  - type: table_cell
+                    attrs:
+                      colspan: 1
+                      rowspan: 1
+                      colwidth: null
+                    content:
+                      - type: paragraph
+                        content:
+                          - type: text
+                            text: "\_\_\_\_\_\_\_\_\_\_\_\_\_ Ireland"
+                  - type: table_cell
+                    attrs:
+                      colspan: 1
+                      rowspan: 1
+                      colwidth: null
+                    content:
+                      - type: paragraph
+                        content:
+                          - type: text
+                            text: 5-214
+              - type: table_row
+                content:
+                  - type: table_cell
+                    attrs:
+                      colspan: 1
+                      rowspan: 1
+                      colwidth: null
+                    content:
+                      - type: paragraph
+                        content:
+                          - type: text
+                            text: "\_"
+                  - type: table_cell
+                    attrs:
+                      colspan: 1
+                      rowspan: 1
+                      colwidth: null
+                    content:
+                      - type: paragraph
+                        content:
+                          - type: text
+                            text: "\_"
+          - type: paragraph
+            content:
+              - type: text
+                marks:
+                  - type: strong
+                text: "\_"
+              - type: text
+                text: __________
+          - type: paragraph
+            content:
+              - type: text
+                text: "SANC:\_\_\_ Signalling Area/Network Code."
+              - type: hard_break
+              - type: text
+                text: "\_\_\_\_\_\_\_\_\_\_\_\_\_ Code de zone/réseau sémaphore (CZRS)."
+              - type: hard_break
+              - type: text
+                text: "\_\_\_\_\_\_\_\_\_\_\_\_\_ Código de zona/red de señalización (CZRS)."
+  - contents:
+      - country_name:
+          en: 'Jordan '
+        phone_code: '962'
+        contact:
+          en: "Eng. Hala Kharbat\nTelecommunications Services and Networks Regulation Department\nTelecommunications Regulatory Commission (TRC)\nShmeisani - Abdel Hamid Sharaf Street, \nBuilding No. 90\nAMMAN 11194\nJordan \nTel:\t\t+962 6 5501120 ext: 2330\nFax:\t\t+962 6 5690830\nE-mail:\thala.kharbat@trc.gov.jo"
+        communications:
+          - date: 2018-12-06
+            contents:
+              en:
+                type: doc
+                content:
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: 'The '
+                      - type: text
+                        marks:
+                          - type: em
+                        text: 'Telecommunications Regulatory Commission (TRC), '
+                      - type: text
+                        text: >-
+                          Amman, announces the allocation of new number ranges
+                          as follows:
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: "\_"
+                  - type: table
+                    content:
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Service
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Operator
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Number ranges
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Governorate
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Activation date
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Fixed / Geographic telecommunications
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 'Al Bahrainia '
+                                  - type: hard_break
+                                  - type: text
+                                    text: 'Al Urdunia '
+                                  - type: hard_break
+                                  - type: text
+                                    text: 'Liltaknia Wa '
+                                  - type: hard_break
+                                  - type: text
+                                    text: Alitisalat
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: +962 6 222 XXXX
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Amman
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Immediate
+                  - type: paragraph
+      - country_name:
+          en: 'Mauritius '
+        phone_code: '230'
+        contact:
+          en: "Mr Nikhil JORAI\nInformation and Communication Technologies Authority (ICTA)\nLevel 12 The Celicourt\n6, Sir Celicourt Antelme Street\nPORT LOUIS\nMauritius\nTel: \t+230 217 2222\nFax :\t+230 217 7777\nE-mail:\ticta@intnet.mu\nURL:\twww.icta.mu"
+        communications:
+          - date: 2018-12-07
+            contents:
+              en:
+                type: doc
+                content:
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: 'The '
+                      - type: text
+                        marks:
+                          - type: em
+                        text: >-
+                          Information and Communication Technologies Authority
+                          (ICTA), 
+                      - type: text
+                        text: 'Port-Louis, announces that number block '
+                      - type: hard_break
+                      - type: text
+                        text: >-
+                          +230 583X XXXX is allocated to the operator "Cellplus
+                          Mobile Communications Ltd" for Mobile services since 1
+                          January 2013.
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: >-
+                          All Administrations, recognized operating agencies and
+                          service providers are kindly requested to ensure
+                          access to this number block.
+      - country_name:
+          en: 'Sao Tome and Principe '
+        phone_code: '239'
+        contact:
+          en: "Eng. Candido Frota\nPresident\nAutoridade Geral de Regulação (AGER)\nAvenida 12 de Julho N° 54\nSÃO TOMÉ\nSao Tome and Principe\nTel: \t+239 2224995\nEmail:\tcandidofrota1963@gmail.com"
+        communications:
+          - date: 2018-12-11
+            contents:
+              en:
+                type: doc
+                content:
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: 'The '
+                      - type: text
+                        marks:
+                          - type: em
+                        text: Autoridade Geral de Regulação (AGER)
+                      - type: text
+                        text: >-
+                          , São Tomé, announces the following dialling
+                          procedures and Legal Time:
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: "Country Code:\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_ 239"
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: "International Prefix: \_\_\_ 00"
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: "National Prefix: \_\_\_\_\_\_\_\_\_\_\_\_ Not available"
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: "Length of national (significant) number (excluding the national prefix): \_\_\_\_ minimum 3 digits"
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: "\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_maximum 7 digits"
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: 'Universal Time Coordinated/Summer Time: '
+                      - type: text
+                        marks:
+                          - type: strong
+                        text: UTC+00
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: >-
+                          Remarks: Legal Time that is currently UTC+01, will be
+                          set from 
+                      - type: text
+                        marks:
+                          - type: strong
+                        text: 1st January 2019
+                      - type: text
+                        text: ' at 02:00H AM to '
+                      - type: text
+                        marks:
+                          - type: strong
+                        text: UTC
+                      - type: text
+                        text: ' according to the Government '
+                      - type: text
+                        marks:
+                          - type: strong
+                        text: Decree no. 34/2018
+                      - type: text
+                        text: ' of 11'
+                      - type: text
+                        marks:
+                          - type: superscript
+                        text: th
+                      - type: text
+                        text: ' December 2018.'
+    type: telephone_service_2
+  - type: service_restrictions
+    items:
+      - country:
+          en: Seychelles
+        ob: 1006
+        page: 13
+      - country:
+          en: Slovakia
+        ob: 1007
+        page: 12
+      - country:
+          en: Malaysia
+        ob: 1013
+        page: 5
+      - country:
+          en: Thailand
+        ob: 1034
+        page: 5
+      - country:
+          en: São Tomé and Principe
+        ob: 1039
+        page: 14
+      - country:
+          en: Uruguay
+        ob: 1039
+        page: 14
+      - country:
+          en: 'Hong Kong, China'
+        ob: 1068
+        page: 4
+      - country:
+          en: Ukraine
+        ob: 1148
+        page: 5
+  - type: callback_procedures

@@ -1,0 +1,96 @@
+<bibdata type="standard">
+  <fetched>2023-03-06</fetched>
+  <title type="title-main" format="text/plain" language="en" script="Latn">Directory services architecture for non-standard protocols</title>
+  <title type="main" format="text/plain" language="en" script="Latn">Directory services architecture for non-standard protocols</title>
+  <uri type="src">https://www.itu.int/ITU-T/recommendations/rec.aspx?rec=11299&amp;lang=en</uri>
+  <docidentifier type="ITU">ITU-T H.350.5</docidentifier>
+  <date type="published">
+    <on>2011-05-14</on>
+  </date>
+  <contributor>
+    <role type="publisher"/>
+    <organization>
+      <name>International Telecommunication Union</name>
+      <abbreviation>ITU</abbreviation>
+      <uri>www.itu.int</uri>
+    </organization>
+  </contributor>
+  <edition>2</edition>
+  <language>en</language>
+  <script>Latn</script>
+  <abstract format="text/plain" language="en" script="Latn">Recommendation ITU-T H.350.5 describes a lightweight directory access protocol (LDAP) schema to represent non-standard multimedia communications endpoints, and is meant to provide a very basic framework for representing these elements in a directory. It is an auxiliary class related to Recommendation ITU-T H.350 and derives much of its functionality from that architecture. Implementers should review Recommendation ITU‑T H.350 in detail before proceeding with this Recommendation. The scope of this Recommendation does not include normative methods for the use of the LDAP directory itself or the data it contains. The purpose of the schema is not to represent all possible data elements in the ITU-T H.323 protocol, but rather to represent the minimal set required to accomplish the design goals enumerated in Recommendation ITU-T H.350.This revised version of Recommendation ITU-T H.350.5 introduces several enhancements and clarifications to the previous version, primarily the addition of ITU-T X.500 directories support.This Recommendation includes an electronic attachment containing a schema configuration file for genericIdentity.</abstract>
+  <status>
+    <stage>Published</stage>
+  </status>
+  <copyright>
+    <from>2011</from>
+    <owner>
+      <organization>
+        <name>International Telecommunication Union</name>
+        <abbreviation>ITU</abbreviation>
+        <uri>www.itu.int</uri>
+      </organization>
+    </owner>
+  </copyright>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">H Suppl. 6 (04/2006)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">H Suppl. 9 (05/2008)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">H Suppl. 11 (02/2009)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">H Suppl. 12 (11/2013)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">H Suppl. 13 (10/2015)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">H Suppl. 14 (10/2015)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">H Suppl. 15 (01/2017)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">H Suppl. 17 (11/2014)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">H Suppl. 18 (10/2017)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">H Suppl. 19 (04/2021)</formattedref>
+    </bibitem>
+  </relation>
+  <place>Geneva</place>
+  <ext>
+    <doctype>recommendation</doctype>
+    <editorialgroup>
+      <bureau>T</bureau>
+      <group type="study-group">
+        <name>ITU-T Study Group 16</name>
+        <acronym>SG</acronym>
+      </group>
+    </editorialgroup>
+  </ext>
+</bibdata>

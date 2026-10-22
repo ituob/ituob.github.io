@@ -1,0 +1,47 @@
+<bibdata type="standard">
+  <fetched>2023-03-06</fetched>
+  <title type="title-main" format="text/plain" language="en" script="Latn">Guidelines for defining REST-based managed objects and management interfaces</title>
+  <title type="main" format="text/plain" language="en" script="Latn">Guidelines for defining REST-based managed objects and management interfaces</title>
+  <uri type="src">https://www.itu.int/ITU-T/recommendations/rec.aspx?rec=14745&amp;lang=en</uri>
+  <uri type="obp">https://www.itu.inthttps//handle.itu.int/11.1002/1000/14745-en?locatt=format:pdf&amp;auth</uri>
+  <docidentifier type="ITU">ITU-T X.785</docidentifier>
+  <date type="published">
+    <on>2021-07-29</on>
+  </date>
+  <contributor>
+    <role type="publisher"/>
+    <organization>
+      <name>International Telecommunication Union</name>
+      <abbreviation>ITU</abbreviation>
+      <uri>www.itu.int</uri>
+    </organization>
+  </contributor>
+  <edition>1</edition>
+  <language>en</language>
+  <script>Latn</script>
+  <abstract format="text/plain" language="en" script="Latn">Recommendation ITU-T X.785 defines a set of guidelines for managed object modelling and a management interface for representational state transfer (REST)-based network management. It is part of a framework for REST‑based network management interfaces. It specifies how REST-based management interfaces should be defined. It covers the generic accessing methods of REST-based managed objects, accessing methods for specific managed object (Mos), information modelling in REST / hypertext transfer protocol (HTTP) and YAML ain't markup language (YAML) / JavaScript object notation (JSON) schemas. Some HTTP requests/responses and YAML/JSON schemas are provided for defining some basic data types: generic managed object (MO) and generic MO accessing methods.</abstract>
+  <status>
+    <stage>Published</stage>
+  </status>
+  <copyright>
+    <from>2021</from>
+    <owner>
+      <organization>
+        <name>International Telecommunication Union</name>
+        <abbreviation>ITU</abbreviation>
+        <uri>www.itu.int</uri>
+      </organization>
+    </owner>
+  </copyright>
+  <place>Geneva</place>
+  <ext>
+    <doctype>recommendation</doctype>
+    <editorialgroup>
+      <bureau>T</bureau>
+      <group type="study-group">
+        <name>ITU-T Study Group 2</name>
+        <acronym>SG</acronym>
+      </group>
+    </editorialgroup>
+  </ext>
+</bibdata>

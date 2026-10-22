@@ -1,0 +1,97 @@
+<bibdata type="standard">
+  <fetched>2023-03-06</fetched>
+  <title type="title-main" format="text/plain" language="en" script="Latn">Gateway Control Protocol: ITU-T H.248 Stream grouping and aggregation</title>
+  <title type="main" format="text/plain" language="en" script="Latn">Gateway Control Protocol: ITU-T H.248 Stream grouping and aggregation</title>
+  <uri type="src">https://www.itu.int/ITU-T/recommendations/rec.aspx?rec=12638&amp;lang=en</uri>
+  <uri type="obp">https://www.itu.inthttps//handle.itu.int/11.1002/1000/12638-en?locatt=format:pdf&amp;auth</uri>
+  <docidentifier type="ITU">ITU-T H.248.96</docidentifier>
+  <date type="published">
+    <on>2015-11-29</on>
+  </date>
+  <contributor>
+    <role type="publisher"/>
+    <organization>
+      <name>International Telecommunication Union</name>
+      <abbreviation>ITU</abbreviation>
+      <uri>www.itu.int</uri>
+    </organization>
+  </contributor>
+  <edition>1</edition>
+  <language>en</language>
+  <script>Latn</script>
+  <abstract format="text/plain" language="en" script="Latn">Recommendation ITU-T H.248.96 discusses how ITU-T H.248 Streams may be grouped according to a particular semantic and how they are aggregated or deaggregated internally in the Context for the execution of ITU-T H.248 control actions. It defines an ITU-T H.248 package that allows an explicit grouping semantic to be assigned to a group of streams. It also introduces the concept and support for a new type of ITU-T H.248 Stream, the ''aggregation stream'', the ''deaggregation stream'' and the ''component stream'', to be used only in combination with stream grouping.The ability to group streams and to provide an explicit semantic allows the media gateway controller (MGC) to control the processing of multiple streams. The concept of aggregation allows Signals, Events, Statistics and Topology to be applied to an aggregation stream with benefits including, for example: the ability to report cumulative Statistics rather than multiple individual Statistics or report a single Event rather multiple Events on the component streams. The concept of deaggregation allows a better handling of multiple streams that share the same transport, for example, with regard to the different time dynamics of the transport layer and the upper layer streams.</abstract>
+  <status>
+    <stage>Published</stage>
+  </status>
+  <copyright>
+    <from>2015</from>
+    <owner>
+      <organization>
+        <name>International Telecommunication Union</name>
+        <abbreviation>ITU</abbreviation>
+        <uri>www.itu.int</uri>
+      </organization>
+    </owner>
+  </copyright>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">H Suppl. 6 (04/2006)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">H Suppl. 9 (05/2008)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">H Suppl. 11 (02/2009)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">H Suppl. 12 (11/2013)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">H Suppl. 13 (10/2015)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">H Suppl. 14 (10/2015)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">H Suppl. 15 (01/2017)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">H Suppl. 17 (11/2014)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">H Suppl. 18 (10/2017)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">H Suppl. 19 (04/2021)</formattedref>
+    </bibitem>
+  </relation>
+  <place>Geneva</place>
+  <ext>
+    <doctype>recommendation</doctype>
+    <editorialgroup>
+      <bureau>T</bureau>
+      <group type="study-group">
+        <name>ITU-T Study Group 16</name>
+        <acronym>SG</acronym>
+      </group>
+    </editorialgroup>
+  </ext>
+</bibdata>

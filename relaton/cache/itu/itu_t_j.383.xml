@@ -1,0 +1,97 @@
+<bibdata type="standard">
+  <fetched>2023-03-07</fetched>
+  <title type="title-main" format="text/plain" language="en" script="Latn">Conversion of type length value packet and transport stream for advanced cable transmission systems</title>
+  <title type="main" format="text/plain" language="en" script="Latn">Conversion of type length value packet and transport stream for advanced cable transmission systems</title>
+  <uri type="src">https://www.itu.int/ITU-T/recommendations/rec.aspx?rec=13836&amp;lang=en</uri>
+  <uri type="obp">https://www.itu.inthttps//handle.itu.int/11.1002/1000/13836-en?locatt=format:pdf&amp;auth</uri>
+  <docidentifier type="ITU">ITU-T J.383</docidentifier>
+  <date type="published">
+    <on>2019-01-13</on>
+  </date>
+  <contributor>
+    <role type="publisher"/>
+    <organization>
+      <name>International Telecommunication Union</name>
+      <abbreviation>ITU</abbreviation>
+      <uri>www.itu.int</uri>
+    </organization>
+  </contributor>
+  <edition>1</edition>
+  <language>en</language>
+  <script>Latn</script>
+  <abstract format="text/plain" language="en" script="Latn">Recommendation ITU-T J.383 describes the conversion schemes of the data structures defined in Recommendation ITU‑RBO.2098-0 for cable television systems on the basis of Recommendation ITU-T J.382.Recommendation ITU-R BO.2098-0 specifies two data structures, MPEG-2 TS and TLV. MPEG-2 TS data packets are directly transmitted while any transmission control signals and service information are transmitted using a descriptor specified in ETSI TS 102 991. TLV packets are not directly transmitted in a TLV format but converted to the GSE 6 packet format specified in Recommendation ITU-T J.382.The emergency warning system control signal specified in Recommendation ITU-R BO.2098-0 is also converted into physical layer signalling specified in Recommendation ITU-T J.382, to wake up the receiver when the emergency warning system is activated.</abstract>
+  <status>
+    <stage>Published</stage>
+  </status>
+  <copyright>
+    <from>2019</from>
+    <owner>
+      <organization>
+        <name>International Telecommunication Union</name>
+        <abbreviation>ITU</abbreviation>
+        <uri>www.itu.int</uri>
+      </organization>
+    </owner>
+  </copyright>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">J Suppl. 1 (11/1998)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">J Suppl. 2 (11/1998)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">J Suppl. 3 (11/1998)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">J Suppl. 5 (09/1999)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">J Suppl. 6 (09/2016)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">J Suppl. 7 (04/2021)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">J Suppl. 8 (04/2021)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">J Suppl. 9 (04/2020)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">J Suppl. 10 (09/2022)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">J Suppl. 11 (04/2021)</formattedref>
+    </bibitem>
+  </relation>
+  <place>Geneva</place>
+  <ext>
+    <doctype>recommendation</doctype>
+    <editorialgroup>
+      <bureau>T</bureau>
+      <group type="study-group">
+        <name>ITU-T Study Group 9</name>
+        <acronym>SG</acronym>
+      </group>
+    </editorialgroup>
+  </ext>
+</bibdata>

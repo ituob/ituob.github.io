@@ -1,0 +1,67 @@
+<bibdata type="standard">
+  <fetched>2023-03-06</fetched>
+  <title type="title-main" format="text/plain" language="en" script="Latn">Roadmap for the quality of service of interconnected networks that use the Internet Protocol</title>
+  <title type="main" format="text/plain" language="en" script="Latn">Roadmap for the quality of service of interconnected networks that use the Internet Protocol</title>
+  <uri type="src">https://www.itu.int/ITU-T/recommendations/rec.aspx?rec=11938&amp;lang=en</uri>
+  <uri type="obp">https://www.itu.inthttps//handle.itu.int/11.1002/1000/11938-en?locatt=format:pdf&amp;auth</uri>
+  <docidentifier type="ITU">ITU-T Y.1545</docidentifier>
+  <date type="published">
+    <on>2013-05-14</on>
+  </date>
+  <contributor>
+    <role type="publisher"/>
+    <organization>
+      <name>International Telecommunication Union</name>
+      <abbreviation>ITU</abbreviation>
+      <uri>www.itu.int</uri>
+    </organization>
+  </contributor>
+  <edition>1</edition>
+  <language>en</language>
+  <script>Latn</script>
+  <abstract format="text/plain" language="en" script="Latn">Recommendation ITU-T Y.1545 is intended as a guide to help regulators and network service providers meet QoS performance objectives.Traditional packet networks have been built under the principle that networks will operate on the basis of an unguaranteed best‑effort packet delivery. The best effort paradigm has been spectacularly successful in supporting non-real-time data applications (e.g., email and file transfer); this principle assigns the responsibility for detecting and correcting transmission problems to the customer equipment and higher-level protocols that require better network support. However, the best-effort delivery principle does not provide a reliable quality of user experience in interactive voice telephony and other demanding real-time applications when network bandwidth limitations increase considerably delay, jitter and packet loss. These applications work best across networks that can deliver "better than best-effort" performance for various characteristics.This corrigendum introduces changes related to the withdrawal of IEEE 802.1D.</abstract>
+  <status>
+    <stage>Published</stage>
+  </status>
+  <copyright>
+    <from>2013</from>
+    <owner>
+      <organization>
+        <name>International Telecommunication Union</name>
+        <abbreviation>ITU</abbreviation>
+        <uri>www.itu.int</uri>
+      </organization>
+    </owner>
+  </copyright>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">Y Suppl. 56 (12/2019)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">Y Suppl. 58 (05/2021)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">Y Suppl. 68 (05/2021)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">Y Suppl. 69 (05/2021)</formattedref>
+    </bibitem>
+  </relation>
+  <place>Geneva</place>
+  <ext>
+    <doctype>recommendation</doctype>
+    <editorialgroup>
+      <bureau>T</bureau>
+      <group type="study-group">
+        <name>ITU-T Study Group 12</name>
+        <acronym>SG</acronym>
+      </group>
+    </editorialgroup>
+  </ext>
+</bibdata>

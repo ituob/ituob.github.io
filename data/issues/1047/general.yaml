@@ -1,0 +1,608 @@
+messages:
+  - extra_links:
+      - M1400_ICC
+      - BUREAUFAX
+      - ROA
+    type: running_annexes
+  - type: approved_recommendations
+    items:
+      'E.804 ': 2014-01-31T23:00:00.000Z
+      'E.807 ': 2014-01-31T23:00:00.000Z
+      'F.746.2 ': 2014-01-31T23:00:00.000Z
+      'G.107 ': 2014-01-31T23:00:00.000Z
+      'G.1029 ': 2014-01-31T23:00:00.000Z
+      'G.1030 ': 2014-01-31T23:00:00.000Z
+      'G.1031 ': 2014-01-31T23:00:00.000Z
+      'H.264 (V9) ': 2014-01-31T23:00:00.000Z
+      'K.58 ': 2014-01-31T23:00:00.000Z
+      'K.95 ': 2014-01-31T23:00:00.000Z
+      'K.96 ': 2014-01-31T23:00:00.000Z
+      'K.97 ': 2014-01-31T23:00:00.000Z
+      'L.1005 ': 2014-01-31T23:00:00.000Z
+      'L.1010 ': 2014-01-31T23:00:00.000Z
+      'L.1340 ': 2014-01-31T23:00:00.000Z
+      'P.381 ': 2014-01-31T23:00:00.000Z
+      'P.581 ': 2014-01-31T23:00:00.000Z
+      'P.806 ': 2014-01-31T23:00:00.000Z
+      'P.1501 ': 2014-01-31T23:00:00.000Z
+    by: AAP-28
+    procedures: Recommendation ITU-T A.8
+  - type: custom
+    title:
+      en: >-
+        Extra-territorial use of Mobile Country Code (MCC) and Mobile Network
+        Code (MNC)
+    recommendation: null
+    contents:
+      en:
+        type: doc
+        content:
+          - type: paragraph
+            content:
+              - type: text
+                text: (According to Recommendation ITU-T E.212 (05/2008) – Annex E)
+          - type: paragraph
+            content:
+              - type: text
+                marks:
+                  - type: strong
+                text: Note from TSB*
+          - type: paragraph
+            content:
+              - type: text
+                text: 'Pursuant to Annex E to Recommendation ITU-T E.212, the '
+              - type: text
+                marks:
+                  - type: em
+                text: Swedish Post and Telecom Authority (PTS)
+              - type: text
+                text: ' of Sweden, and the '
+              - type: text
+                marks:
+                  - type: em
+                text: Independent Post and Telecommunications Authority (OPTA)
+              - type: text
+                text: " of the Netherlands, have notified to TSB the withdrawal of the extra-territorial use of MCC+MNC\_240 07."
+          - type: paragraph
+            content:
+              - type: text
+                text: ____________
+          - type: paragraph
+            content:
+              - type: text
+                text: "*\_\_\_\_ See current ITU Operational Bulletin No. 1047 of 1.III.2014, page 9 ."
+  - contents:
+      - country_name:
+          en: 'Chile '
+        phone_code: '56'
+        contact:
+          en: "Mr César Serrailler \nInternational Numbering Plan Manager\nEntel Chile S.A.\nAmunategui 20, piso 10\nSANTIAGO DE CHILI\nChile\nTel: \t+56 2 4234730\nE-mail:\tPlanNum@entel.cl"
+        communications:
+          - date: 2014-02-12T11:52:26.720Z
+            contents:
+              en:
+                type: doc
+                content:
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: The
+                      - type: text
+                        marks:
+                          - type: em
+                        text: ' Subsecretaría de Telecomunicaciones de Chile (Subtel),'
+                      - type: text
+                        text: " Santiago de Chile, announces that on 15\_February\_2014, there will be a change in the fixed telephony in Chile. The modification consists of adding a \"2\" to numbers particularly rural company CTR."
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: 'Dial:'
+                      - type: hard_break
+                      - type: text
+                        text: "Now:\_\_\_\_\_\_\_ 56 2196 XXXX"
+                      - type: hard_break
+                      - type: text
+                        text: "New:\_\_\_\_\_\_\_ 56 2196"
+                      - type: text
+                        marks:
+                          - type: strong
+                        text: '2'
+                      - type: text
+                        text: ' XXXX'
+      - country_name:
+          en: 'Denmark '
+        phone_code: '45'
+        contact:
+          en: "Danish Business Authority\nDahlerups Pakhus\nLangelinie Allé 17\nDK-2100 COPENHAGEN\nDenmark\nTel:\t+45 35 29 10 00 \nFax:\t+45 35 46 60 01 \nE-mail:\terst@erst.dk \nURL:\twww.erst.dk "
+        communications:
+          - date: 2014-02-12T11:52:54.849Z
+            contents:
+              en:
+                type: doc
+                content:
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: 'The '
+                      - type: text
+                        marks:
+                          - type: em
+                        text: Danish Business Authority
+                      - type: text
+                        text: >-
+                          , Copenhagen, announces the following changes to the
+                          Danish telephone numbering plan:
+                  - type: bullet_list
+                    content:
+                      - type: list_item
+                        content:
+                          - type: paragraph
+                            content:
+                              - type: text
+                                text: "assignment – mobile communication service\_"
+                  - type: table
+                    content:
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: Provider
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: Numbering series
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: Date of assignment
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: NEZT ApS
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 7191efgh
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 30.I.2014
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: CoolTEL ApS
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 5220efgh
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 13.I.2014
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: SimService A/S
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 9296efgh
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 13.I.2014
+                  - type: bullet_list
+                    content:
+                      - type: list_item
+                        content:
+                          - type: paragraph
+                            content:
+                              - type: text
+                                text: "\_assignment – fixed communication service"
+                  - type: table
+                    content:
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: Provider
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: Numbering series
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: Date of assignment
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: NEZT ApS
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 70305fgh
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 30.I.2014
+                  - type: bullet_list
+                    content:
+                      - type: list_item
+                        content:
+                          - type: paragraph
+                            content:
+                              - type: text
+                                text: "\_withdrawal – fixed communication service\_"
+                  - type: table
+                    content:
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: Provider
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: Numbering series
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: Date of withdrawal
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Verizon Denmark A/S
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 6911efgh
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 31.I.2014
+                  - type: bullet_list
+                    content:
+                      - type: list_item
+                        content:
+                          - type: paragraph
+                            content:
+                              - type: text
+                                text: withdrawal – carrier select code
+                  - type: table
+                    content:
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: Provider
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: Numbering series
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: Date of withdrawal
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Siminn Danmark A/S
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: '1050'
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 31.I.2014
+    type: telephone_service_2
+  - type: misc_communications
+    contents:
+      en:
+        type: doc
+        content:
+          - type: paragraph
+            content:
+              - type: text
+                marks:
+                  - type: strong
+                text: "Austria\_"
+          - type: paragraph
+            content:
+              - type: text
+                text: 'Communication of 12.II.2014:'
+          - type: paragraph
+            content:
+              - type: text
+                text: >-
+                  On the occasion of the International Marconi-Day, the Austrian
+                  Administration authorizes an Austrian amateur station to use
+                  the special call sign 
+              - type: text
+                marks:
+                  - type: strong
+                text: OE14M
+              - type: text
+                text: " from 25 to 27\_April 2014."
+          - type: paragraph
+          - type: paragraph
+            content:
+              - type: text
+                marks:
+                  - type: strong
+                text: Serbia
+          - type: paragraph
+            content:
+              - type: text
+                text: 'Communications of 10.II.2014:'
+          - type: paragraph
+            content:
+              - type: text
+                text: >-
+                  On the occasion of the 120 years of the establishment of the
+                  primary school "VOJVODA STEPA" in Belgrade, the Republic of
+                  Serbia authorizes a number of Serbian amateur radio stations
+                  to use the special call sign 
+              - type: text
+                marks:
+                  - type: strong
+                text: 'YU120STEPA '
+              - type: text
+                text: "from 1\_ to 31\_March 2014."
+          - type: paragraph
+            content:
+              - type: text
+                text: >-
+                  On the occasion of the 100th anniversary of the Battle of Cer,
+                  the Republic of Serbia authorizes a number of Serbian amateur
+                  radio stations to use the special call sign 
+              - type: text
+                marks:
+                  - type: strong
+                text: 'YU100CER '
+              - type: text
+                text: "from 1\_March to 31\_December 2014."
+  - type: service_restrictions
+    items:
+      - country:
+          en: Seychelles
+        ob: 1006
+        page: 13
+      - country:
+          en: Slovakia
+        ob: 1007
+        page: 12
+      - country:
+          en: Thailand
+        ob: 1034
+        page: 5
+      - country:
+          en: São Tomé and Principe
+        ob: 1039
+        page: 14
+      - country:
+          en: Uruguay
+        ob: 1039
+        page: 14
+  - type: callback_procedures

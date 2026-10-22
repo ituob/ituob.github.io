@@ -1,0 +1,715 @@
+messages:
+  - extra_links:
+      - M1400_ICC
+      - BUREAUFAX
+      - ROA
+    type: running_annexes
+  - type: approved_recommendations
+    items:
+      'G.8051/Y.1345 ': 2020-11-30T23:00:00.000Z
+      'K.34 ': 2020-11-30T23:00:00.000Z
+      'K.35 ': 2020-11-30T23:00:00.000Z
+      'K.44 (2019) Cor 1 ': 2020-11-30T23:00:00.000Z
+      'K.50 (2018) Cor 1 ': 2020-11-30T23:00:00.000Z
+      'K.70 ': 2020-11-30T23:00:00.000Z
+      'K.78 ': 2020-11-30T23:00:00.000Z
+      'K.91 ': 2020-11-30T23:00:00.000Z
+      'K.145 ': 2020-11-30T23:00:00.000Z
+      'K.148 ': 2020-11-30T23:00:00.000Z
+      'K.149 ': 2020-11-30T23:00:00.000Z
+      'K.150 ': 2020-11-30T23:00:00.000Z
+      'L.1031 ': 2020-11-30T23:00:00.000Z
+      'L.1304 ': 2020-11-30T23:00:00.000Z
+      'Q.3060 ': 2020-11-30T23:00:00.000Z
+      'X.1046 ': 2020-11-30T23:00:00.000Z
+      'Y.3802 ': 2020-11-30T23:00:00.000Z
+      'Y.3803 ': 2020-11-30T23:00:00.000Z
+      'Y.4211 ': 2020-11-30T23:00:00.000Z
+    by: AAP-95
+    procedures: Recommendation ITU-T A.8
+  - type: custom
+    title:
+      en: >-
+        Extra-territorial use of Mobile Country Code (MCC) and Mobile Network
+        Code (MNC) (According to Recommendation ITU-T E.212 (09/2016) – Annex E)
+    recommendation: null
+    contents:
+      en:
+        type: doc
+        content:
+          - type: paragraph
+            content:
+              - type: text
+                marks:
+                  - type: strong
+                text: Note from TSB*
+          - type: paragraph
+            content:
+              - type: text
+                text: 'Pursuant to Annex E to Recommendation ITU-T E.212, the '
+              - type: text
+                marks:
+                  - type: em
+                text: 'Institut Luxembourgeois de Régulation (ILR) '
+              - type: text
+                text: 'of Luxembourg, and the '
+              - type: text
+                marks:
+                  - type: em
+                text: >-
+                  Institut Belge des Services Postaux & des Télécommunications
+                  (IBPT)
+              - type: text
+                text: " of Belgium, have notified to TSB that MCC+MNC\_270 99 will be used extra-territorially."
+          - type: paragraph
+            content:
+              - type: text
+                text: ____________
+          - type: paragraph
+            content:
+              - type: text
+                text: "*\_\_\_\_ See current ITU Operational Bulletin No. 1211 of 1.I.2021, page 11"
+  - contents:
+      - country_name:
+          en: 'Malta '
+        phone_code: '356'
+        contact:
+          en: "Alistair Farrugia / Deborah Pisani / Claude Azzopardi\nMalta Communications Authority (MCA)\nValletta Waterfront\nPinto Wharf\nFloriana FRN1913\nMalta\nTel:\t+356 2133 6840\nE-mail:\tnumbering@mca.org.mt\nURL:\twww.mca.org.mt"
+        communications:
+          - date: 2020-12-07T07:31:27.667Z
+            contents:
+              en:
+                type: doc
+                content:
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: 'The '
+                      - type: text
+                        marks:
+                          - type: em
+                        text: Malta Communications Authority (MCA)
+                      - type: text
+                        text: >-
+                          , Floriana, announces an update of the National
+                          Numbering Plan (NNP) of Malta. The main numbering
+                          ranges are:
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: "\_"
+                  - type: table
+                    content:
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                      - type: strong
+                                    text: Service
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                      - type: strong
+                                    text: Operator
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                      - type: strong
+                                    text: Numbering Ranges
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 8
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Fixed
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 2
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: GO
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 2100 ‒ 2399 XXXX
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 2500 ‒ 2599 XXXX
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 4
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Melita
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 2700 ‒ 2799 XXXX
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 2010 ‒ 2018 XXXX
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 2060 XXXX
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 2065 XXXX
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Vanilla
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 2031 ‒ 2034 XXXX
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: epic
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 2090 ‒ 2099 XXXX
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 9
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Mobile
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 3
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: GO Mobile
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 7900 ‒ 7999 XXXX
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 9889 XXXX
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 7210 XXXX
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 4
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: epic
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 9900 ‒ 9999 XXXX
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 9897 XXXX
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 9210 ‒ 9211 XXXX
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 9231 XXXX
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Melita Mobile
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 7700 ‒ 7799 XXXX
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 9811 ‒ 9813 XXXX
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: YOM
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 9696 ‒ 9697 XXXX
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 2
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 'M2M/IoT Connectivity Services and other '
+                                  - type: hard_break
+                                  - type: text
+                                    text: Non-Interpersonal Communications Services
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Melita
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 40005 XXXXX
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: GO
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 40079 XXXXX
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: "\_"
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: "All Administrations and Recognized Operating Agencies (ROAs) are requested to urgently programme their switches to enable immediate access to these numbering ranges. \_Furthermore, the National Numbering Plan is updated in real-time and is made available on the MCA website at the following link: "
+                      - type: hard_break
+                      - type: text
+                        marks:
+                          - type: link
+                            attrs:
+                              href: >-
+                                https://www.mca.org.mt/regulatory/numbering/numbering-plans
+                              title: null
+                        text: >-
+                          https://www.mca.org.mt/regulatory/numbering/numbering-plans
+      - country_name:
+          en: 'Trinidad and Tobago '
+        phone_code: '1868'
+        contact:
+          en: "Ms Cynthia Reddock-Downes\nChief Executive Officer\nTelecommunications Authority of Trinidad and Tobago (TATT)\n5, Eight Avenue Extension, off Twelfth Street\nBARATARIA \nTrinidad and Tobago\nTel:\t+1 868 675 8288 \nFax:\t+1 868 674 1055 \nE-mail: \tinfo@tatt.org.tt\nURL:\twww.tatt.org.tt"
+        communications:
+          - date: 2020-12-10T07:32:23.862Z
+            contents:
+              en:
+                type: doc
+                content:
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: 'The '
+                      - type: text
+                        marks:
+                          - type: em
+                        text: >-
+                          Telecommunications Authority of Trinidad and Tobago
+                          (TATT), 
+                      - type: text
+                        text: >-
+                          Barataria, announces that the following Central Office
+                          codes (CO) have been assigned to an operator in
+                          Trinidad and Tobago.
+                  - type: bullet_list
+                    content:
+                      - type: list_item
+                        content:
+                          - type: paragraph
+                            content:
+                              - type: text
+                                text: "\_Mobile network"
+                  - type: table
+                    content:
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: Name of operator
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: 'Central Office code '
+                                  - type: hard_break
+                                    marks:
+                                      - type: em
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: (NXX)
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: Service
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Digicel Trinidad and Tobago Limited
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 250 - 262
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Mobile
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Digicel Trinidad and Tobago Limited
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 430 - 436
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Mobile
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: "\_"
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: 'International dialling format: +1 868 NXX XXXX'
+    type: telephone_service_2
+  - type: service_restrictions
+    items:
+      - country:
+          en: Seychelles
+        ob: 1006
+        page: 13
+      - country:
+          en: Slovakia
+        ob: 1007
+        page: 12
+      - country:
+          en: Malaysia
+        ob: 1013
+        page: 5
+      - country:
+          en: Thailand
+        ob: 1034
+        page: 5
+      - country:
+          en: São Tomé and Principe
+        ob: 1039
+        page: 14
+      - country:
+          en: Uruguay
+        ob: 1039
+        page: 14
+      - country:
+          en: 'Hong Kong, China'
+        ob: 1068
+        page: 4
+      - country:
+          en: Ukraine
+        ob: 1148
+        page: 5
+  - type: callback_procedures

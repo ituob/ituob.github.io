@@ -1,0 +1,448 @@
+messages:
+  - extra_links:
+      - M1400_ICC
+      - BUREAUFAX
+      - ROA
+    type: running_annexes
+  - type: approved_recommendations
+    items:
+      'F.746.5 ': 2017-12-01
+      'F.746.6 ': 2017-12-01
+      'G.722.2 Annex C ': 2017-12-01
+      'G.722.2 Annex D ': 2017-12-01
+      'G.798 ': 2017-12-01
+      'G.993.5 (2015) Amd 2 ': 2017-12-01
+      'G.994.1 (2012) Amd 9 ': 2017-12-01
+      'G.996.2 (2009) Amd 5 ': 2017-12-01
+      'G.997.1 (2012) Amd 7 ': 2017-12-01
+      'G.997.2 (2015) Amd 4 ': 2017-12-01
+      'G.9701 (2014) Cor 4 ': 2017-12-01
+      'G.9701 (2014) Amd 4 ': 2017-12-01
+      'H.222.0 (2017) Amd 1 ': 2014-12-01
+      'H.248.77 ': 2017-12-01
+      'H.550 ': 2017-12-01
+      'H.560 ': 2017-12-01
+      'H.626.2 ': 2017-12-01
+      'H.724 ': 2017-12-01
+      'H.763.3 ': 2017-12-01
+      'H.782 ': 2017-12-01
+      'H.861.0 ': 2017-12-01
+    by: AAP-26
+    procedures: Recommendation ITU-T A.8
+  - contents:
+      - country_name:
+          en: 'Malawi '
+        phone_code: '265'
+        contact:
+          en: "The Director General\nMalawi Communications Regulatory Authority (MACRA)\nMACRA House\nSalmin Amour Road\nPrivate Bag 261.  \nBLANTYRE\nMalawi\nTel:\t+265 1 883 611\nFax:\t+265 1 883 890\nE-mail:\tdg-macra@macra.org.mw; info@macra.org.mw"
+        communications:
+          - date: 2017-12-11
+            contents:
+              en:
+                type: doc
+                content:
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: >-
+                          The Malawi Communications Regulatory Authority
+                          (MACRA), Blantyre, announces that Telekom Networks
+                          Malawi Plc has implemented a new number segment
+                          +26531.
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: >-
+                          The new segment will be used for its VOIP, non-SIM
+                          based services. The number segment will run in
+                          parallel with the existing +26588 range which is for
+                          all SIM based services.
+                  - type: paragraph
+                    content:
+                      - type: text
+                        marks:
+                          - type: em
+                        text: 'General information:'
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: "The international public telecommunication number structure for this segment will have twelve (12) digits in all (including country code\_+265)."
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: 'CC + N(S)N = twelve (12) digit number length, where:'
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: >-
+                          CC is the country code consisting of three (3) digits
+                          and
+                      - type: hard_break
+                      - type: text
+                        text: >-
+                          N(S)N is the National (Significant) Number consisting
+                          of nine (9) digits.
+                      - type: hard_break
+                      - type: text
+                        text: >-
+                          In Malawi, the N(S)N is the same as the subscriber
+                          number (SN).
+                  - type: paragraph
+                    content:
+                      - type: text
+                        marks:
+                          - type: em
+                        text: "\_"
+                  - type: paragraph
+                    content:
+                      - type: text
+                        marks:
+                          - type: em
+                        text: "Description of introduction of a new number resources in the National Numbering Plan (NNP) for country code\_+265:"
+                  - type: table
+                    content:
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 2
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: N(S)N
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 2
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: Usage of
+                                  - type: hard_break
+                                    marks:
+                                      - type: em
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: E.164 Number
+                          - type: table_cell
+                            attrs:
+                              colspan: 2
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: window of deployment
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 2
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: Operator
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 2
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: Proposed wording
+                                  - type: hard_break
+                                    marks:
+                                      - type: em
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: of announcement
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: Current
+                                  - type: hard_break
+                                    marks:
+                                      - type: em
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: number
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: Additional
+                                  - type: hard_break
+                                    marks:
+                                      - type: em
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: number
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: Begins
+                                  - type: hard_break
+                                    marks:
+                                      - type: em
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: (local time)
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: Ends
+                                  - type: hard_break
+                                    marks:
+                                      - type: em
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: (local time)
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: (0)88 XXX XXXX
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: "\_"
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Non-geographic number
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: SIM based services
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: "\_"
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: "\_"
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Telekom Networks Malawi Plc (TNM Plc)
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Not Applicable
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: "\_"
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: (0)31 XXX XXXX
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Non-geographic number
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 'VOIP, non-SIM based services'
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: '01.XI.2017, at'
+                                  - type: hard_break
+                                  - type: text
+                                    text: '00:00 hours'
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: '30.XI.2017, at'
+                                  - type: hard_break
+                                  - type: text
+                                    text: '23:59 hours'
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Telekom Networks Malawi Plc (TNM Plc)
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Not Applicable
+                  - type: paragraph
+    type: telephone_service_2
+  - type: service_restrictions
+    items:
+      - country:
+          en: Seychelles
+        ob: 1006
+        page: 13
+      - country:
+          en: Slovakia
+        ob: 1007
+        page: 12
+      - country:
+          en: Malaysia
+        ob: 1013
+        page: 5
+      - country:
+          en: Thailand
+        ob: 1034
+        page: 5
+      - country:
+          en: São Tomé and Principe
+        ob: 1039
+        page: 14
+      - country:
+          en: Uruguay
+        ob: 1039
+        page: 14
+      - country:
+          en: 'Hong Kong, China'
+        ob: 1068
+        page: 4
+  - type: callback_procedures

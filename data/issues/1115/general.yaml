@@ -1,0 +1,389 @@
+messages:
+  - extra_links:
+      - M1400_ICC
+      - BUREAUFAX
+      - ROA
+    type: running_annexes
+  - type: approved_recommendations
+    items:
+      'K.20 ': 2016-12-01
+      'K.21 ': 2016-12-01
+      'K.45 ': 2016-12-01
+      'K.50 ': 2016-12-01
+      'K.52 ': 2016-12-01
+      'K.93 ': 2016-12-01
+      'K.117 ': 2016-12-01
+      'K.118 ': 2016-12-01
+      'K.119 ': 2016-12-01
+      'K.120 ': 2016-12-01
+      'K.121 ': 2016-12-01
+      'K.122 ': 2016-12-01
+      'K.123 ': 2016-12-01
+      K.124: 2016-12-01
+      'L.1006 ': 2016-12-01
+      'L.1007 ': 2016-12-01
+      'L.1205 ': 2016-12-01
+      'L.1325 ': 2016-12-01
+      'L.1360 ': 2016-12-01
+      'L.1504 ': 2016-12-01
+    by: AAP-03
+    procedures: Recommendation ITU-T A.8
+  - contents:
+      - country_name:
+          en: 'Costa Rica '
+        phone_code: '506'
+        contact:
+          en: "Ing. Pedro Arce Villalobos \nSuperintendencia de Telecomunicaciones (SUTEL)\nApartado Postal 151-1200\nSAN JOSÉ, Costa Rica\nTel:\t+506 4000 0000\nFax:\t+506 2215 6821\nEmail: \tpedro.arce@sutel.go.cr\nURL: \twww.sutel.go.cr"
+        communications:
+          - date: 2016-12-04
+            contents:
+              en:
+                type: doc
+                content:
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: 'The '
+                      - type: text
+                        marks:
+                          - type: em
+                        text: 'Superintendencia de Telecomunicaciones (SUTEL),'
+                      - type: text
+                        text: ' San José, which under Executive Decree N°35187-MINAET (National Numbering Plan) is in charge of the control and administration of Numbering resources in Costa Rica, acting in accordance with the provisions of Recommendation ITU-T E.129'
+                      - type: text
+                        marks:
+                          - type: strong
+                        text: ','
+                      - type: text
+                        text: ' presents the:'
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: >-
+                          Modification to the ITU-T E.164 National Numbering
+                          Plan (NNP) for country code 506
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: >-
+                          Table 1 – Description of introduction of new resource
+                          in the ITU-T E.164 National Numbering Plan 
+                      - type: hard_break
+                      - type: text
+                        text: for country code 506
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: "\_"
+                  - type: table
+                    content:
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 2
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: >-
+                                      NDC (National Destination Code) or leading
+                                      digits of N(S)N (National (Significant)
+                                      Number))
+                          - type: table_cell
+                            attrs:
+                              colspan: 2
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: N(S)N number length
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 2
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: 'Usage of '
+                                  - type: hard_break
+                                    marks:
+                                      - type: em
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: ITU-T E.164 Number
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 2
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: Date and time of introduction
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: Maximum length
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: Minimum length
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 6400-0000
+                                  - type: hard_break
+                                  - type: text
+                                    text: to
+                                  - type: hard_break
+                                  - type: text
+                                    text: 6499-9999
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 8 digits
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 8 digits
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Mobile telephone service
+                                  - type: hard_break
+                                  - type: text
+                                    text: 'Telefónica de Costa Rica TC, S.A.'
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: '2016 – 11– 02 – 17:15'
+                                  - type: hard_break
+                                  - type: text
+                                    text: >-
+                                      In conformance with resolution
+                                      RCS-241-2016
+      - country_name:
+          en: 'Trinidad and Tobago '
+        phone_code: '1868'
+        contact:
+          en: "Ms Cynthia Reddock-Downes\nChief Executive Officer (Ag.)\nTelecommunications Authority of Trinidad and Tobago (TATT)\n5, Eight Avenue Extension, off Twelfth Street\nBARATARIA \nTrinidad and Tobago\nTel:\t+1 868 675 8288 \nFax:\t+1 868 674 1055 \nE-mail:\tinfo@tatt.org.tt\nURL:\twww.tatt.org.tt"
+        communications:
+          - date: 2016-12-07
+            contents:
+              en:
+                type: doc
+                content:
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: 'The '
+                      - type: text
+                        marks:
+                          - type: em
+                        text: >-
+                          Telecommunications Authority of Trinidad and Tobago
+                          (TATT), 
+                      - type: text
+                        text: >-
+                          Barataria, announces that the following Central Office
+                          codes (NXX) have been assigned to operators within the
+                          North American Numbering Plan (NPA – 868) for Trinidad
+                          and Tobago.
+                  - type: bullet_list
+                    content:
+                      - type: list_item
+                        content:
+                          - type: paragraph
+                            content:
+                              - type: text
+                                text: Fixed network
+                  - type: table
+                    content:
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: Name of operator
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: 'Central office code '
+                                  - type: hard_break
+                                    marks:
+                                      - type: em
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: (NXX)
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: Service
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Columbus Communications Trinidad Limited
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: '220'
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: '227'
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: '228'
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: '229'
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Fixed
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: 'International dialling format: +1 868 NXX XXXX'
+    type: telephone_service_2
+  - type: service_restrictions
+    items:
+      - country:
+          en: Seychelles
+        ob: 1006
+        page: 13
+      - country:
+          en: Slovakia
+        ob: 1007
+        page: 12
+      - country:
+          en: Thailand
+        ob: 1034
+        page: 5
+      - country:
+          en: São Tomé and Principe
+        ob: 1039
+        page: 14
+      - country:
+          en: Uruguay
+        ob: 1039
+        page: 14
+      - country:
+          en: 'Hong Kong, China'
+        ob: 1068
+        page: 4
+  - type: callback_procedures

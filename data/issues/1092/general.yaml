@@ -1,0 +1,655 @@
+messages:
+  - extra_links:
+      - M1400_ICC
+      - BUREAUFAX
+      - ROA
+    type: running_annexes
+  - type: iptn
+    contents:
+      en:
+        type: doc
+        content:
+          - type: paragraph
+            content:
+              - type: text
+                marks:
+                  - type: strong
+                text: Note from TSB
+          - type: paragraph
+            content:
+              - type: text
+                marks:
+                  - type: em
+                text: Identification codes for international networks
+          - type: paragraph
+            content:
+              - type: text
+                text: >-
+                  Associated with shared country code 882 for international
+                  networks, the following two-digit identification code has
+                  been 
+              - type: text
+                marks:
+                  - type: strong
+                text: 'assigned '
+              - type: text
+                text: on 15 December 2015.
+          - type: paragraph
+            content:
+              - type: text
+                text: "\_"
+          - type: table
+            content:
+              - type: table_row
+                content:
+                  - type: table_cell
+                    attrs:
+                      colspan: 1
+                      rowspan: 1
+                      colwidth: null
+                    content:
+                      - type: paragraph
+                        content:
+                          - type: text
+                            text: Applicant
+                  - type: table_cell
+                    attrs:
+                      colspan: 1
+                      rowspan: 1
+                      colwidth: null
+                    content:
+                      - type: paragraph
+                        content:
+                          - type: text
+                            text: Network
+                  - type: table_cell
+                    attrs:
+                      colspan: 1
+                      rowspan: 1
+                      colwidth: null
+                    content:
+                      - type: paragraph
+                        content:
+                          - type: text
+                            text: 'Country Code and '
+                          - type: hard_break
+                          - type: text
+                            text: Identification Code
+              - type: table_row
+                content:
+                  - type: table_cell
+                    attrs:
+                      colspan: 1
+                      rowspan: 1
+                      colwidth: null
+                    content:
+                      - type: paragraph
+                        content:
+                          - type: text
+                            text: Sawatch Limited
+                  - type: table_cell
+                    attrs:
+                      colspan: 1
+                      rowspan: 1
+                      colwidth: null
+                    content:
+                      - type: paragraph
+                        content:
+                          - type: text
+                            text: EchoStar Mobile Limited
+                  - type: table_cell
+                    attrs:
+                      colspan: 1
+                      rowspan: 1
+                      colwidth: null
+                    content:
+                      - type: paragraph
+                        content:
+                          - type: text
+                            text: +882 48
+  - type: ipns
+    contents:
+      en:
+        type: doc
+        content:
+          - type: paragraph
+            content:
+              - type: text
+                marks:
+                  - type: strong
+                text: Note from TSB
+          - type: paragraph
+            content:
+              - type: text
+                marks:
+                  - type: em
+                text: Identification codes for International Mobile Networks
+          - type: paragraph
+            content:
+              - type: text
+                text: >-
+                  Associated with shared mobile country code 901 (MCC), the
+                  following two-digit mobile network code (MNC) has been 
+              - type: text
+                marks:
+                  - type: strong
+                text: 'assigned '
+              - type: text
+                text: 'on 15 December 2015:'
+          - type: paragraph
+            content:
+              - type: text
+                text: "\_"
+          - type: table
+            content:
+              - type: table_row
+                content:
+                  - type: table_cell
+                    attrs:
+                      colspan: 1
+                      rowspan: 1
+                      colwidth: null
+                    content:
+                      - type: paragraph
+                        content:
+                          - type: text
+                            text: Network
+                  - type: table_cell
+                    attrs:
+                      colspan: 1
+                      rowspan: 1
+                      colwidth: null
+                    content:
+                      - type: paragraph
+                        content:
+                          - type: text
+                            text: >-
+                              Mobile Country Code (MCC)* and Mobile Network Code
+                              (MNC)**
+              - type: table_row
+                content:
+                  - type: table_cell
+                    attrs:
+                      colspan: 1
+                      rowspan: 1
+                      colwidth: null
+                    content:
+                      - type: paragraph
+                        content:
+                          - type: text
+                            text: Sawatch Limited / EchoStar Mobile Limited
+                  - type: table_cell
+                    attrs:
+                      colspan: 1
+                      rowspan: 1
+                      colwidth: null
+                    content:
+                      - type: paragraph
+                        content:
+                          - type: text
+                            text: 901 50
+          - type: paragraph
+            content:
+              - type: text
+                text: ______________
+          - type: paragraph
+            content:
+              - type: text
+                text: "*\_\_\_\_\_\_\_\_\_\_\_ MCC: Mobile Country Code / Indicatif de pays du mobile / Indicativo de país para el servicio móvil"
+              - type: hard_break
+              - type: text
+                text: "**\_\_\_\_\_\_\_\_\_ MNC: Mobile Network Code / Code de réseau mobile / Indicativo de red para el servicio móvil"
+  - contents:
+      - country_name:
+          en: 'Denmark '
+        phone_code: '45'
+        contact:
+          en: "Danish Energy Agency\nAmaliegade 44\n1256 COPENHAGEN K\nDenmark\nTel:\t+45 33 92 67 00 \nFax:\t+45 33 11 47 43\nE-mail:\tens@ens.dk \nURL:\twww.ens.dk "
+        communications:
+          - date: 2015-12-21
+            contents:
+              en:
+                type: doc
+                content:
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: 'The '
+                      - type: text
+                        marks:
+                          - type: em
+                        text: Danish Energy Agency
+                      - type: text
+                        text: >-
+                          , Copenhagen, announces the following changes to the
+                          Danish telephone numbering plan:
+                  - type: bullet_list
+                    content:
+                      - type: list_item
+                        content:
+                          - type: paragraph
+                            content:
+                              - type: text
+                                text: assignment – M2M-communication
+                  - type: table
+                    content:
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: Provider
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: Numbering series
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: Date of assignment
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Telenor Connexion AB
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: >-
+                                      37100110ijkl, 37100111ijkl, 37100112ijkl,
+                                      37100113ijkl and 37100114ijkl
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 1.I.2016
+                  - type: bullet_list
+                    content:
+                      - type: list_item
+                        content:
+                          - type: paragraph
+                            content:
+                              - type: text
+                                text: "\_assignment – Mobile communication"
+                  - type: table
+                    content:
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: Provider
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: Numbering series
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: Date of assignment
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Hi3G Denmark ApS
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 9360efgh and 9380efgh
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 1.I.2016
+                  - type: bullet_list
+                    content:
+                      - type: list_item
+                        content:
+                          - type: paragraph
+                            content:
+                              - type: text
+                                text: "\_assignment – Fixed communication"
+                  - type: table
+                    content:
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: Provider
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: Numbering series
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: Date of assignment
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Voxbone SA
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 8987efgh
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 1.III.2016
+      - country_name:
+          en: 'Iridium Communications Inc. '
+        phone_code: 881 6 and 881 7
+        contact:
+          en: "Mr Patrick Livecchi\nSr. Network Engineer\nIridium Satellite LLC\n8440 South River Parkway \nTEMPE, AZ  85284 \nUnited States\nTel:\t+1 480 752 1179\nFax:\t+1 480 752 1105\nE-mail:\tpat.livecchi@iridium.com \nURL:\twww.iridium.com"
+        communications:
+          - date: 2015-12-17
+            contents:
+              en:
+                type: doc
+                content:
+                  - type: paragraph
+                    content:
+                      - type: text
+                        marks:
+                          - type: em
+                        text: Iridium Satellite LLC
+                      - type: text
+                        text: "\_has interconnection agreements with the following carriers listed below. At the present time, these are the only valid directly interconnected IXC carriers for terminating or originating traffic with the Iridium Network. Their local representative should be contacted for pricing and routing information:"
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: "AT&T (U.S.):\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_ www.att.com/worldwide/"
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: "Telstra International (AUS):\_\_\_ \_\_\_\_\_\_\_\_\_\_ www.telstrainternational.asia/ (previously known as Reach)"
+                  - type: paragraph
+                    content:
+                      - type: text
+                        marks:
+                          - type: em
+                        text: Iridium Satellite LLC
+                      - type: text
+                        text: ' requests that access be ensured to the Iridium network using country codes +881 6 and +881 7, and has set up a recorded announcement in its switch that will enable customers to validate their routing.'
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: "To access this service, please dial:\_\_ +881 6 311 10006 and"
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: "\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_ \_+881 7 311 10007"
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: 'Calls placed to these numbers will terminate at '
+                      - type: text
+                        marks:
+                          - type: em
+                        text: Iridium Satellite LLC
+                      - type: text
+                        text: ' switch with the following recorded announcement: “You have reached the Iridium Satellite Tempe Gateway, your access to the Iridium global network. Welcome.”'
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: >-
+                          The contact person below would appreciate an e-mail
+                          message or fax from you with the contact information
+                          for both the person responsible for your main
+                          translations and the main technical point of contact
+                          for your company. This will allow 
+                      - type: text
+                        marks:
+                          - type: em
+                        text: Iridium Satellite LLC
+                      - type: text
+                        text: ' to work together with customers to solve any routing problems and other issues that might arise.'
+    type: telephone_service_2
+  - type: org_changes
+    contents:
+      en:
+        type: doc
+        content:
+          - type: paragraph
+            content:
+              - type: text
+                marks:
+                  - type: strong
+                text: Sri Lanka
+          - type: paragraph
+            content:
+              - type: text
+                text: 'Communication of 18.XII.2015:'
+          - type: paragraph
+            content:
+              - type: text
+                marks:
+                  - type: em
+                text: Change of name
+          - type: paragraph
+            content:
+              - type: text
+                text: The
+              - type: text
+                marks:
+                  - type: em
+                text: ' Ministry of Foreign Affairs, '
+              - type: text
+                text: >-
+                  Sri Lanka, announces that it has changed its name. It is now
+                  called: « 
+              - type: text
+                marks:
+                  - type: em
+                text: 'Ministry of Telecommunication and Digital Infrastructure '
+              - type: text
+                text: ».
+          - type: paragraph
+            content:
+              - type: text
+                text: Ministry of Telecommunication and Digital Infrastructure
+              - type: hard_break
+              - type: text
+                text: '79/1, 5th Lane '
+              - type: hard_break
+              - type: text
+                text: 'COLOMBO 3 '
+              - type: hard_break
+              - type: text
+                text: Sri Lanka
+              - type: hard_break
+              - type: text
+                text: "Tel:\_\_\_\_\_\_\_\_\_ +94 112301380"
+              - type: hard_break
+              - type: text
+                text: "Fax:\_\_\_\_\_\_\_\_ +94 112301381"
+              - type: hard_break
+              - type: text
+                text: "Email:\_\_\_\_ info@mtdi.gov.lk "
+              - type: hard_break
+              - type: text
+                text: "URL:\_\_\_\_\_\_\_ www.mtdi.gov.lk"
+  - type: misc_communications
+    contents:
+      en:
+        type: doc
+        content:
+          - type: paragraph
+            content:
+              - type: text
+                marks:
+                  - type: strong
+                text: Serbia
+          - type: paragraph
+            content:
+              - type: text
+                text: 'Communication of 5.I.2016:'
+          - type: paragraph
+            content:
+              - type: text
+                text: >-
+                  On the occasion of the 160 years of Nikola Tesla's birth, the
+                  Serbian Administration authorizes one Serbian amateur station
+                  to use the special call sign 
+              - type: text
+                marks:
+                  - type: strong
+                text: YU0TESLA
+              - type: text
+                text: " from 1\_February to 31\_December\_2016."
+  - type: service_restrictions
+    items:
+      - country:
+          en: Seychelles
+        ob: 1006
+        page: 13
+      - country:
+          en: Slovakia
+        ob: 1007
+        page: 12
+      - country:
+          en: Thailand
+        ob: 1034
+        page: 5
+      - country:
+          en: São Tomé and Principe
+        ob: 1039
+        page: 14
+      - country:
+          en: Uruguay
+        ob: 1039
+        page: 14
+      - country:
+          en: 'Hong Kong, China'
+        ob: 1068
+        page: 4
+  - type: callback_procedures

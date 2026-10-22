@@ -1,0 +1,54 @@
+<bibdata type="standard">
+  <fetched>2023-03-06</fetched>
+  <title type="title-intro" format="text/plain" language="en" script="Latn">Information technology</title>
+  <title type="title-main" format="text/plain" language="en" script="Latn">JPEG 2000 image coding system: High-throughput JPEG 2000</title>
+  <title type="main" format="text/plain" language="en" script="Latn">Information technology - JPEG 2000 image coding system: High-throughput JPEG 2000</title>
+  <uri type="src">https://www.itu.int/ITU-T/recommendations/rec.aspx?rec=13912&amp;lang=en</uri>
+  <uri type="obp">https://www.itu.inthttps//handle.itu.int/11.1002/1000/13912-en?locatt=format:pdf&amp;auth</uri>
+  <docidentifier type="ITU">ITU-T T.814</docidentifier>
+  <docidentifier type="ISO">ISO/IEC 15444-15</docidentifier>
+  <date type="published">
+    <on>2019-06-13</on>
+  </date>
+  <contributor>
+    <role type="publisher"/>
+    <organization>
+      <name>International Telecommunication Union</name>
+      <abbreviation>ITU</abbreviation>
+      <uri>www.itu.int</uri>
+    </organization>
+  </contributor>
+  <edition>1</edition>
+  <language>en</language>
+  <script>Latn</script>
+  <abstract format="text/plain" language="en" script="Latn">The computational complexity of the block-coding algorithm of Rec. ITU-T T.800 | ISO/IEC 15444-1 can be a challenge in some applications.Rec. ITU-T T.814 | ISO/IEC 15444-15 specifies a high-throughput (HT) block-coding algorithm that can be used in place of the block-coding algorithm specified in Rec. ITU-T T.800 | ISO/IEC 15444-1.The HT block-coding algorithm increases decoding and encoding throughput and allows mathematically lossless transcoding to and from the block-coding algorithm specified in Rec. ITU-T T.800 | ISO/IEC 15444-1. This is achieved at the expense of some loss in coding efficiency and substantial elimination of quality scalability.The HT block-coding algorithm adopts a coding pass structure like that of the block-coding algorithm of Rec. ITU-T T.800 | ISO/IEC 15444-1. No more than three coding passes are required for any given code-block in the final codestream, and arithmetic coding is replaced with a combination of variable length coding tools, adaptive run-length coding and simple bit-packing. The algorithm involves three passes: a significance propagation pass (HT SigProp coding pass), a magnitude refinement pass (HT MagRef coding pass) and a cleanup pass (HT cleanup coding pass).The HT MagRef coding pass is identical to that of the block-coding algorithm of Rec. ITU-T T.800 | ISO/IEC 15444-1, operating in the bypass mode, except that code bits are packed into bytes with a little-endian bit order. That is, the first code bit in a byte appears in its LSB, as opposed to its MSB.The HT SigProp coding pass is also very similar to that of the block-coding algorithm of Rec. ITU-T T.800 | ISO/IEC 15444-1, operating in the BYPASS mode, with the following two differences:The HT cleanup coding pass is, however, significantly different from that of the block-coding algorithm of Rec. ITU-T T.800 | ISO/IEC 15444-1, and most of ITU-T T.814 | ISO/IEC 15444-15 is devoted to its description.Aside from the block-coding algorithm itself and the parsing of packet headers, the HT block-coding algorithm preserves the syntax and semantics of other parts of the codestream specified in Rec. ITU-T T.800 | ISO/IEC 15444-1.Recommendation ITU-T T.814 (2019) is a common text with ISO/IEC 15444-15:2019, both in their first edition.</abstract>
+  <status>
+    <stage>Published</stage>
+  </status>
+  <copyright>
+    <from>2019</from>
+    <owner>
+      <organization>
+        <name>International Telecommunication Union</name>
+        <abbreviation>ITU</abbreviation>
+        <uri>www.itu.int</uri>
+      </organization>
+    </owner>
+  </copyright>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">T Suppl. 1 (11/2004)</formattedref>
+    </bibitem>
+  </relation>
+  <place>Geneva</place>
+  <ext>
+    <doctype>recommendation</doctype>
+    <editorialgroup>
+      <bureau>T</bureau>
+      <group type="study-group">
+        <name>ITU-T Study Group 16</name>
+        <acronym>SG</acronym>
+      </group>
+    </editorialgroup>
+  </ext>
+</bibdata>

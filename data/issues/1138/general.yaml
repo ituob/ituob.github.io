@@ -1,0 +1,436 @@
+messages:
+  - extra_links:
+      - M1400_ICC
+      - BUREAUFAX
+      - ROA
+    type: running_annexes
+  - type: approved_recommendations
+    items:
+      'H.810 (V4) ': 2017-11-01
+      'H.811 ': 2017-11-01
+      'H.812 ': 2017-11-01
+      'H.812.1 ': 2017-11-01
+      'H.812.2 ': 2017-11-01
+      'H.812.3 ': 2017-11-01
+      'H.812.4 ': 2017-11-01
+      'H.813 ': 2017-11-01
+      'H.830.5 (2017) Cor 1 ': 2017-11-01
+      'H.830.6 (2017) Cor 1 ': 2017-11-01
+      'H.845.10 (2017) Cor 1 ': 2017-11-01
+      'H.845.16 (2017) Cor 1 ': 2017-11-01
+    by: AAP-25
+    procedures: Recommendation ITU-T A.8
+  - contents:
+      - country_name:
+          en: 'Trinidad and Tobago '
+        phone_code: '1868'
+        contact:
+          en: "Mr John Prince\nChief Executive Officer\nTelecommunications Authority of Trinidad and Tobago (TATT)\n5, Eight Avenue Extension, off Twelfth Street\nBARATARIA \nTrinidad and Tobago\nTel:\t+1 868 675 8288 \nFax:\t+1 868 674 1055 \nE-mail: info@tatt.org.tt\nURL:\t  www.tatt.org.tt\n"
+        communications:
+          - date: 2017-11-09
+            contents:
+              en:
+                type: doc
+                content:
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: 'The '
+                      - type: text
+                        marks:
+                          - type: em
+                        text: >-
+                          Telecommunications Authority of Trinidad and Tobago
+                          (TATT), 
+                      - type: text
+                        text: >-
+                          Barataria, announces that the following Central Office
+                          codes (NXX) have been assigned to operators within the
+                          North American Numbering Plan (NPA – 868) for Trinidad
+                          and Tobago.
+                  - type: bullet_list
+                    content:
+                      - type: list_item
+                        content:
+                          - type: paragraph
+                            content:
+                              - type: text
+                                text: Fixed network
+                  - type: table
+                    content:
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: Name of operator
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: 'Central office code '
+                                  - type: hard_break
+                                    marks:
+                                      - type: em
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: (NXX)
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: Service
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Air Link Communications Limited
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: '608'
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Fixed
+                  - type: paragraph
+    type: telephone_service_2
+  - type: misc_communications
+    contents:
+      en:
+        type: doc
+        content:
+          - type: paragraph
+            content:
+              - type: text
+                marks:
+                  - type: strong
+                text: "Germany\_"
+          - type: paragraph
+            content:
+              - type: text
+                text: 'Communication of 13.XI.2017:'
+          - type: paragraph
+            content:
+              - type: text
+                text: >-
+                  In Germany the extra-territorial use of E.164 telephone
+                  numbers and E.212 International Mobile Subscriber Identities
+                  (IMSIs) has been permitted for the case of machine-to-machine
+                  (M2M) communication. The permission comprises
+          - type: bullet_list
+            content:
+              - type: list_item
+                content:
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: >-
+                          permanent use of foreign numbering resources within
+                          the territory of Germany and
+          - type: bullet_list
+            content:
+              - type: list_item
+                content:
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: >-
+                          permanent use of telephone numbers for mobile services
+                          allocated in Germany with country code +49 and IMSIs
+                          with the Mobile Country Code 262 outside Germany.
+          - type: paragraph
+            content:
+              - type: text
+                text: >-
+                  In certain cases the permission depends on a previous
+                  notification to the Federal Network Agency for Electricity,
+                  Gas, Telecommunications, Post and Railway (Bundesnetzagentur).
+          - type: paragraph
+            content:
+              - type: text
+                text: >-
+                  The respective regulations including the needed notification
+                  forms can be found at the Website
+          - type: paragraph
+            content:
+              - type: text
+                text: www.bundesnetzagentur.de/EN
+          - type: paragraph
+            content:
+              - type: text
+                text: "→\_ Telecommunications\_ →\_ Stakeholder Information\_ →\_ Number Management\_ →\_ Numbers for mobile services"
+          - type: paragraph
+            content:
+              - type: text
+                text: and
+          - type: paragraph
+            content:
+              - type: text
+                text: "→\_ Telecommunications\_ →\_ Stakeholder Information\_ →\_ Number Management\_ →\_ Numbers for machine-to-machine (M2M) communications"
+          - type: paragraph
+            content:
+              - type: text
+                text: 'Contact:'
+          - type: paragraph
+            content:
+              - type: text
+                text: Bundesnetzagentur
+              - type: hard_break
+              - type: text
+                text: Numbering Policy
+              - type: hard_break
+              - type: text
+                text: Mr. Martin Spangenberg
+              - type: hard_break
+              - type: text
+                text: Tulpenfeld 4
+              - type: hard_break
+              - type: text
+                text: 53113 Bonn
+              - type: hard_break
+              - type: text
+                text: Germany
+              - type: hard_break
+              - type: text
+                text: "Tel:\_\_\_\_\_\_\_\_\_ +49 228 14 1177"
+              - type: hard_break
+              - type: text
+                text: "Fax:\_\_\_\_\_\_\_\_ +49 228 14 6117"
+              - type: hard_break
+              - type: text
+                text: "E-mail:\_\_\_ "
+              - type: text
+                marks:
+                  - type: link
+                    attrs:
+                      href: 'mailto:martin.spangenberg@bnetza.de'
+                      title: null
+                text: martin.spangenberg@bnetza.de
+          - type: paragraph
+            content:
+              - type: text
+                text: "\_"
+          - type: paragraph
+            content:
+              - type: text
+                marks:
+                  - type: strong
+                text: Serbia
+          - type: paragraph
+            content:
+              - type: text
+                text: 'Communication of 20.XI.2017:'
+          - type: paragraph
+            content:
+              - type: text
+                text: On the occasion of the 70
+              - type: text
+                marks:
+                  - type: superscript
+                text: th
+              - type: text
+                text: ' anniversary of the Academic Radio Club "Mihajlo Pupin" from Belgrade, the Serbian Administration authorizes a radio station of the Academic Radio Club "Mihajlo Pupin" to use the special call sign '
+              - type: text
+                marks:
+                  - type: strong
+                text: YU70EXY
+              - type: text
+                text: ' from 1 January to 31 December 2018.'
+  - type: org_changes
+    contents:
+      en:
+        type: doc
+        content:
+          - type: paragraph
+            content:
+              - type: text
+                marks:
+                  - type: strong
+                text: Malta
+          - type: paragraph
+            content:
+              - type: text
+                text: 'Communication of 17.XI.2017:'
+          - type: paragraph
+            content:
+              - type: text
+                marks:
+                  - type: em
+                text: Granting of Recognized Operating Agency (ROA) status
+          - type: paragraph
+            content:
+              - type: text
+                text: "\_"
+          - type: paragraph
+            content:
+              - type: text
+                text: 'The '
+              - type: text
+                marks:
+                  - type: em
+                text: Malta Communications Authority (MCA)
+              - type: text
+                text: ", Floriana\_announces that the following telecommunication operators and service providers has been granted the status of Recognized Operating Agency (ROA), in accordance with Article 6 of, and Nos.\_1007 and 1008 of the Annex to, the Constitution of ITU."
+          - type: paragraph
+            content:
+              - type: text
+                text: >-
+                  The name of the telecommunication operators and service
+                  providers to which the status of Recognized Operating Agency
+                  (ROA) has been granted, is 
+              - type: text
+                marks:
+                  - type: em
+                text: GO plc
+              - type: text
+                text: ' and '
+              - type: text
+                marks:
+                  - type: em
+                text: Vanilla Telecoms Ltd.
+          - type: paragraph
+            content:
+              - type: text
+                text: 'Contact:'
+          - type: paragraph
+            content:
+              - type: text
+                text: GO plc
+              - type: hard_break
+              - type: text
+                text: Triq Fra Diegu
+              - type: hard_break
+              - type: text
+                text: MARSA MRS 1501
+              - type: hard_break
+              - type: text
+                text: Malta
+              - type: hard_break
+              - type: text
+                text: "Tel.: \_\_\_\_\_\_\_ +356 2124 6200"
+              - type: hard_break
+              - type: text
+                text: "E-mail:\_\_\_ mandy.calleja@go.com.mt"
+          - type: paragraph
+            content:
+              - type: text
+                text: 'Contact:'
+          - type: paragraph
+            content:
+              - type: text
+                text: "\_Vanilla Telecoms Ltd"
+              - type: hard_break
+              - type: text
+                text: '162, Cannon Road '
+              - type: hard_break
+              - type: text
+                text: 'SANTA VENERA SVR 5534 '
+              - type: hard_break
+              - type: text
+                text: Malta
+              - type: hard_break
+              - type: text
+                text: "Tel.: \_\_\_\_\_ +356 2033 2033"
+              - type: hard_break
+              - type: text
+                text: "E-mail:\_\_\_ dthake@ms.vanilla.net.mt"
+          - type: paragraph
+            content:
+              - type: text
+                text: 'For further information, please contact:'
+          - type: paragraph
+            content:
+              - type: text
+                text: Malta Communications Authority
+              - type: hard_break
+              - type: text
+                text: 'Valletta Waterfront '
+              - type: hard_break
+              - type: text
+                text: Pinto Wharf
+              - type: hard_break
+              - type: text
+                text: FRN 1913 FLORIANA
+              - type: hard_break
+              - type: text
+                text: Malta
+              - type: hard_break
+              - type: text
+                text: "Fax:\_\_\_\_\_\_\_\_ +356 21336846"
+              - type: hard_break
+              - type: text
+                text: "E-mail:\_\_\_ deborah.pisani@mca.org.mt; numbering.mca@mca.org.mt"
+  - type: service_restrictions
+    items:
+      - country:
+          en: Seychelles
+        ob: 1006
+        page: 13
+      - country:
+          en: Slovakia
+        ob: 1007
+        page: 12
+      - country:
+          en: Malaysia
+        ob: 1013
+        page: 5
+      - country:
+          en: Thailand
+        ob: 1034
+        page: 5
+      - country:
+          en: São Tomé and Principe
+        ob: 1039
+        page: 14
+      - country:
+          en: Uruguay
+        ob: 1039
+        page: 14
+      - country:
+          en: 'Hong Kong, China'
+        ob: 1068
+        page: 4
+  - type: callback_procedures

@@ -1,0 +1,97 @@
+<bibdata type="standard">
+  <fetched>2023-03-06</fetched>
+  <title type="title-main" format="text/plain" language="en" script="Latn">Gateway control protocol: Media gateway overload control package</title>
+  <title type="main" format="text/plain" language="en" script="Latn">Gateway control protocol: Media gateway overload control package</title>
+  <uri type="src">https://www.itu.int/ITU-T/recommendations/rec.aspx?rec=11840&amp;lang=en</uri>
+  <uri type="obp">https://www.itu.inthttps//handle.itu.int/11.1002/1000/11840-en?locatt=format:pdf&amp;auth</uri>
+  <docidentifier type="ITU">ITU-T H.248.11</docidentifier>
+  <date type="published">
+    <on>2013-03-16</on>
+  </date>
+  <contributor>
+    <role type="publisher"/>
+    <organization>
+      <name>International Telecommunication Union</name>
+      <abbreviation>ITU</abbreviation>
+      <uri>www.itu.int</uri>
+    </organization>
+  </contributor>
+  <edition>2</edition>
+  <language>en</language>
+  <script>Latn</script>
+  <abstract format="text/plain" language="en" script="Latn">Recommendation ITU-T H.248.11 describes a package for media gateway (MG) overload control for use with the ITU‑TH.248.1 gateway control protocol. It serves to protect an MG from processing overload that prevents the timely execution of ITU‑TH.248.1 transactions.In summary, in this Recommendation, overload protection is achieved as follows:A separate instance of the overload control shall be initiated at an MGC for each of its dependent MGs (or virtual MGs) that is overloaded. These separate instances should run independently (that is, they do not explicitly exchange information). Their overload control parameters shall be separately configurable, for example, by means of a proprietary management interface, or the use of SNMP to invoke configuration functions.The most general overload scenario the control can handle is where one or more MGCs are jointly overloading a single MG that has several virtual MGs (virtual MG 'i' interacting only with MGC 'i'). The control does not need to know how many MGCs are causing the MG to be overloaded, nor what the MG capacity is. Informative reference [b-Oftel] provides a full explanation of one way this can be achieved, and informative reference [b-Whitehead] provides further material on designing overload controls.The overload control is largely specified by saying how it shall behave, but not how it should be implemented to achieve that behaviour. This has two important consequences.As a first consequence, part of the package (see clause8.5) defines a set of overload scenarios, and any fully-compliant implementation of the package must automatically (i.e., without the need for operator intervention to adjust parameter values from one overload scenario to another) satisfy all the requirements for each of the scenarios.As a second consequence, not all configurable parameters can be known to this package since they depend upon specific implementations of the control. Nevertheless, there is a requirement that the implementation shall provide a means by which an operator can change all parameters which affect the performance of the control. See clause 9 for the management requirements associated with this package. It is expected that they will be realized by a proprietary management interface, or the use of SNMP.This revision adds a note indicating a way for a media gateway to ensure prompt delivery of overload indications.</abstract>
+  <status>
+    <stage>Published</stage>
+  </status>
+  <copyright>
+    <from>2013</from>
+    <owner>
+      <organization>
+        <name>International Telecommunication Union</name>
+        <abbreviation>ITU</abbreviation>
+        <uri>www.itu.int</uri>
+      </organization>
+    </owner>
+  </copyright>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">H Suppl. 6 (04/2006)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">H Suppl. 9 (05/2008)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">H Suppl. 11 (02/2009)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">H Suppl. 12 (11/2013)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">H Suppl. 13 (10/2015)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">H Suppl. 14 (10/2015)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">H Suppl. 15 (01/2017)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">H Suppl. 17 (11/2014)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">H Suppl. 18 (10/2017)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">H Suppl. 19 (04/2021)</formattedref>
+    </bibitem>
+  </relation>
+  <place>Geneva</place>
+  <ext>
+    <doctype>recommendation</doctype>
+    <editorialgroup>
+      <bureau>T</bureau>
+      <group type="study-group">
+        <name>ITU-T Study Group 16</name>
+        <acronym>SG</acronym>
+      </group>
+    </editorialgroup>
+  </ext>
+</bibdata>

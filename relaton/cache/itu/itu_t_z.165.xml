@@ -1,0 +1,53 @@
+<bibdata type="standard">
+  <fetched>2023-03-06</fetched>
+  <title type="title-main" format="text/plain" language="en" script="Latn">Testing and Test Control Notation version 3: TTCN-3 runtime interface (TRI)</title>
+  <title type="main" format="text/plain" language="en" script="Latn">Testing and Test Control Notation version 3: TTCN-3 runtime interface (TRI)</title>
+  <uri type="src">https://www.itu.int/ITU-T/recommendations/rec.aspx?rec=11067&amp;lang=en</uri>
+  <uri type="obp">https://www.itu.inthttps//handle.itu.int/11.1002/1000/11067-en?locatt=format:pdf&amp;auth</uri>
+  <docidentifier type="ITU">ITU-T Z.165</docidentifier>
+  <docidentifier type="ETSI">ETSI ES 201873-5</docidentifier>
+  <date type="published">
+    <on>2011-03-16</on>
+  </date>
+  <contributor>
+    <role type="publisher"/>
+    <organization>
+      <name>International Telecommunication Union</name>
+      <abbreviation>ITU</abbreviation>
+      <uri>www.itu.int</uri>
+    </organization>
+  </contributor>
+  <edition>9</edition>
+  <language>en</language>
+  <script>Latn</script>
+  <abstract format="text/plain" language="en" script="Latn">Recommendation ITU-T Z.165 provides the specification of the runtime interface for TTCN-3 (Testing and Test Control Notation3) test system implementations. The TTCN-3 Runtime Interface (TRI) provides the recommended adaptation for timing and communication of a test system to a particular processing platform and the system under test, respectively. This Recommendation defines the interface as a set of operations independent of target language.The interface is defined to be compatible with Recommendation ITU‑TZ.161. This Recommendation uses the Common Object Request Broker Architecture (CORBA) Interface Definition Language (IDL) to specify the TRI completely. Clauses 6, 7 and 8 of ETSI ES 201 873-5 V4.9.1 specify language mappings of the abstract specification to the target languages Java and ANSI-C. A summary of the IDL-based interface specification is provided in Annex A of ETSI ES 201 873-5 V4.9.1.This revision of the Recommendation contains amendments, clarifications, corrigenda and editorial corrections.</abstract>
+  <status>
+    <stage>Withdrawal</stage>
+  </status>
+  <copyright>
+    <from>2011</from>
+    <owner>
+      <organization>
+        <name>International Telecommunication Union</name>
+        <abbreviation>ITU</abbreviation>
+        <uri>www.itu.int</uri>
+      </organization>
+    </owner>
+  </copyright>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">Z Suppl. 1 (04/2015)</formattedref>
+    </bibitem>
+  </relation>
+  <place>Geneva</place>
+  <ext>
+    <doctype>recommendation</doctype>
+    <editorialgroup>
+      <bureau>T</bureau>
+      <group type="study-group">
+        <name>ITU-T Study Group 17</name>
+        <acronym>SG</acronym>
+      </group>
+    </editorialgroup>
+  </ext>
+</bibdata>

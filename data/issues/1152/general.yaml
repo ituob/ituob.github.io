@@ -1,0 +1,137 @@
+messages:
+  - extra_links:
+      - M1400_ICC
+      - BUREAUFAX
+      - ROA
+    type: running_annexes
+  - type: approved_recommendations
+    items:
+      'G.709.1/Y.1331.1 ': 2018-06-01
+      'G.709.3 ': 2018-06-01
+      'G.996.2 (2009) Cor 1 ': 2018-06-01
+      'G.996.2 (2009) Amd 6 ': 2018-06-01
+      'Y.4003 ': 2018-06-01
+      'Y.4120 ': 2018-06-01
+      'Y.4121 ': 2018-06-01
+      'Y.4415 ': 2018-06-01
+      'Y.4416 ': 2018-06-01
+      'Y.4417 ': 2018-06-01
+      'Y.4418 ': 2018-06-01
+      'Y.4457 ': 2018-06-01
+      'Y.4500.32 ': 2018-06-01
+    by: AAP-38
+    procedures: Recommendation ITU-T A.8
+  - contents:
+      - country_name:
+          en: 'Gibraltar '
+        phone_code: '350'
+        contact:
+          en: "Gibraltar Regulatory Authority\nMr Gavin Santos – Communications Regulatory Manager\ngavin.santos@gra.gi\n2nd Floor, Eurotowers 4, \n1 Europort Road, \nGibraltar, GX11 1AA\nTel: \t+350 20074636\nFax: \t+350 20072166\nE-mail:\tcommunications@gra.gi\nURL:\twww.gra.gi"
+        communications:
+          - date: 2018-06-25
+            contents:
+              en:
+                type: doc
+                content:
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: 'The '
+                      - type: text
+                        marks:
+                          - type: em
+                        text: Gibraltar Regulatory Authority
+                      - type: text
+                        text: >-
+                          , announces that number block +350 629XXXXX is
+                          allocated to Eazi Telecom Ltd (trading as “Limba”
+                          (previously Shine)) for Mobile services since November
+                          2011.
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: >-
+                          All Administrations and recognized operating agencies
+                          are requested to ensure access to this number block.
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: >-
+                          Complete list of allocation can be consulted on this
+                          web page:
+                  - type: paragraph
+                    content:
+                      - type: text
+                        marks:
+                          - type: link
+                            attrs:
+                              href: 'http://www.gra.gi/communications/numbering-plan'
+                              title: null
+                        text: 'http://www.gra.gi/communications/numbering-plan'
+    type: telephone_service_2
+  - type: misc_communications
+    contents:
+      en:
+        type: doc
+        content:
+          - type: paragraph
+            content:
+              - type: text
+                marks:
+                  - type: strong
+                text: Austria
+          - type: paragraph
+            content:
+              - type: text
+                text: 'Communication of 20.VI.2018:'
+          - type: paragraph
+            content:
+              - type: text
+                text: On the occasion of the 100
+              - type: text
+                marks:
+                  - type: superscript
+                text: th
+              - type: text
+                text: ' anniversary of the death of the Austrian artist Egon Schiele, the Austrian Administration authorizes an Austrian amateur station to use the special call sign '
+              - type: text
+                marks:
+                  - type: strong
+                text: OE100ES
+              - type: text
+                text: ' from 22 to 31 October 2018.'
+  - type: service_restrictions
+    items:
+      - country:
+          en: Seychelles
+        ob: 1006
+        page: 13
+      - country:
+          en: Slovakia
+        ob: 1007
+        page: 12
+      - country:
+          en: Malaysia
+        ob: 1013
+        page: 5
+      - country:
+          en: Thailand
+        ob: 1034
+        page: 5
+      - country:
+          en: São Tomé and Principe
+        ob: 1039
+        page: 14
+      - country:
+          en: Uruguay
+        ob: 1039
+        page: 14
+      - country:
+          en: 'Hong Kong, China'
+        ob: 1068
+        page: 4
+      - country:
+          en: Ukraine
+        ob: 1148
+        page: 5
+  - type: callback_procedures

@@ -1,0 +1,67 @@
+<bibdata type="standard">
+  <fetched>2023-03-06</fetched>
+  <title type="title-main" format="text/plain" language="en" script="Latn">Requirements for software-defined cameras</title>
+  <title type="main" format="text/plain" language="en" script="Latn">Requirements for software-defined cameras</title>
+  <uri type="src">https://www.itu.int/ITU-T/recommendations/rec.aspx?rec=14323&amp;lang=en</uri>
+  <uri type="obp">https://www.itu.inthttps//handle.itu.int/11.1002/1000/14323-en?locatt=format:pdf&amp;auth</uri>
+  <docidentifier type="ITU">ITU-T F.735.1</docidentifier>
+  <date type="published">
+    <on>2020-08-13</on>
+  </date>
+  <contributor>
+    <role type="publisher"/>
+    <organization>
+      <name>International Telecommunication Union</name>
+      <abbreviation>ITU</abbreviation>
+      <uri>www.itu.int</uri>
+    </organization>
+  </contributor>
+  <edition>1</edition>
+  <language>en</language>
+  <script>Latn</script>
+  <abstract format="text/plain" language="en" script="Latn">With the development of hardware and intelligent algorithms, various intelligent algorithms are developed for a large number of scenarios. In order to meet the various scenarios and requirements, cameras supporting algorithms on-demand deployment and online upgrade without service interruption are needed. A software-defined camera is a kind of intelligent premises unit (IPU), see Recommendation ITU-T F.743.1, which provides a technical approach to decoupling hardware and software and to support algorithms on-demand deployment, online upgrade without service interruption and continuous online learning to adapt to various scenarios. ThisRecommendation defines the typical scenarios, functional architecture and requirements of such software-defined cameras.Recommendation ITU-T F.735.1 can facilitate a cooperation between camera manufacturers, customers and intelligent algorithm providers. The aim is to define the basic requirements and functional architecture for software-defined cameras.</abstract>
+  <status>
+    <stage>Published</stage>
+  </status>
+  <copyright>
+    <from>2020</from>
+    <owner>
+      <organization>
+        <name>International Telecommunication Union</name>
+        <abbreviation>ITU</abbreviation>
+        <uri>www.itu.int</uri>
+      </organization>
+    </owner>
+  </copyright>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">F Suppl. 1 (11/1988)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">F Suppl. 2 (11/1988)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">F Suppl. 3 (09/2016)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">F Suppl. 4 (04/2021)</formattedref>
+    </bibitem>
+  </relation>
+  <place>Geneva</place>
+  <ext>
+    <doctype>recommendation</doctype>
+    <editorialgroup>
+      <bureau>T</bureau>
+      <group type="study-group">
+        <name>ITU-T Study Group 16</name>
+        <acronym>SG</acronym>
+      </group>
+    </editorialgroup>
+  </ext>
+</bibdata>

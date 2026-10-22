@@ -1,0 +1,140 @@
+= ITU Operational Bulletin Data
+
+The data here is used in building ituob.org site, as we well as PDF & HTML deliverables (work in progress).
+
+image::https://github.com/ituob/itu-ob-data/actions/workflows/deploy.yml/badge.svg["deploy (main)", link="https://github.com/ituob/itu-ob-data/actions/workflows/deploy.yml"]
+image::https://github.com/ituob/itu-ob-data/actions/workflows/deploy.yml/badge.svg["deploy (staging)", link="https://github.com/ituob/itu-ob-data/actions/workflows/deploy.yml"]
+
+== General
+
+Provides a formalized representation of OB and associated ITU publications.
+
+== Modifying data
+
+The link:https://github.com/ituob/itu-ob-editor/[ITU OB editor] app,
+currently in early alpha testing mode,
+will be the primary tool for modifying this data.
+
+The app will enable ITU OB authors to create & edit bulletin editions
+through graphical user interface, and push the changes to the repository
+(subsequently triggering ituob.org CI build).
+
+== Vocabulary
+
+List::
+a dataset maintained by ITU in connection with a certain Recommendation.
+
+List position::
+a snapshot of that dataset deemed as valid at given point in time.
++
+From time to time (could be every few years), a new snapshot of a List is created.
++
+This happens around planned publication date of next OB issue, and that issue
+is then published with dataset snapshot (List position) annexed to it.
++
+Subsequent OB issues may disseminate amendments to that dataset,
+until a new snapshot is published.
+
+Lists annexed::
+see "`Running annexes`".
+
+Running annexes::
+effective datasets (Lists) or their latest snapshots (List positions)
+disseminated by ITU at given point in time.
++
+A list of running annexes at the time of each OB issue’s publication date
+is provided in the beginning of that issue under "`Lists annexed`" section.
+A list of current annexes as of latest issue is provided
+on ITU site under ITU-T publications section.
+
+ITU OB::
+ITU Operational Bulletin.
+
+Message::
+a piece of information disseminated via ITU OB.
+Maps to a section within an OB issue.
++
+Usually a message is connected to an ITU recommendation.
++
+A message may be an amendment, or otherwise be a notice of general kind.
++
+(The system that reads this dataset fills out, partially or fully,
+message contents based on message type, user input,
+linked data and OB issues.)
+
+Amendment::
+an update to a service publication
+(a List position annexed to a previous OB issue, or an external publication).
++
+Always specifies the target being amended.
+
+Amendment target::
+references the original publication being amended.
++
+Must specify `publication` (specifying original publication)
+and, where applicable, `position_on` (specifying the version/issue/snapshot).
+If not provided, `position_on` will be assumed to be the latest position annexed
+to one of the preceding OB editions.
+
+External publication::
+ITU publication not annexed to a previous OB issue,
+such as List V, List VIII or NNP / Telephone Service dataset.
+
+== Message types
+
+See: https://github.com/ituob/ituob.org/blob/main/_config.yml#L10 (https://github.com/ituob/ituob.org/issues/6)
+
+Following message types currently are implemented:
+
+* `running_annexes`
+* `approved_recommendations`
+* `service_restrictions`
+* `callback_procedures`
+* `telephone_service`
+* `org_changes`
+* `misc_communications`
+* `iptn`
+* `mid`
+* `sanc`
+* `amendment`
+
+Most message types specify freeform contents using `contents: <relative path to .adoc file>` key.
+
+Certain message types require messages to specify particular set of keys.
+
+== Localized contents
+
+Data that supports multiple languages is specified in the following format:
+
+[source,yaml]
+--
+some_translatable_field:
+  en: Hello
+  ja: こんにちは
+--
+
+In above example localizable values are strings, but they can also be
+objects (in case of formatted freeform contents output, ProseMirror-style):
+
+
+[source,yaml]
+--
+some_translatable_contents:
+  en:
+    type: doc
+    content:
+      - type: paragraph
+        content:
+          - type: text
+            text: Hello        
+  ja:
+    type: doc
+    content:
+      - type: paragraph
+        content:
+          - type: text
+            text: こんにちは
+--
+
+Translatable string values may also contain relative paths to .adoc files,
+in cases with localizable freeform message contents.

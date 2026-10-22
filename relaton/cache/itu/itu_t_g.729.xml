@@ -1,0 +1,306 @@
+<bibdata type="standard">
+  <fetched>2023-03-06</fetched>
+  <title type="title-main" format="text/plain" language="en" script="Latn">Coding of speech at 8 kbit/s using conjugate-structure algebraic-code-excited linear prediction (CS-ACELP)</title>
+  <title type="main" format="text/plain" language="en" script="Latn">Coding of speech at 8 kbit/s using conjugate-structure algebraic-code-excited linear prediction (CS-ACELP)</title>
+  <uri type="src">https://www.itu.int/ITU-T/recommendations/rec.aspx?rec=11675&amp;lang=en</uri>
+  <docidentifier type="ITU">ITU-T G.729</docidentifier>
+  <date type="published">
+    <on>2012-06-29</on>
+  </date>
+  <contributor>
+    <role type="publisher"/>
+    <organization>
+      <name>International Telecommunication Union</name>
+      <abbreviation>ITU</abbreviation>
+      <uri>www.itu.int</uri>
+    </organization>
+  </contributor>
+  <edition>3</edition>
+  <language>en</language>
+  <script>Latn</script>
+  <abstract format="text/plain" language="en" script="Latn">Recommendation ITU-T G.729 contains the description of an algorithm for the coding of speech signals using conjugate-structure algebraic-code-excited linear prediction (CS-ACELP). In its basic mode, the ITU-T G.729 coder consists of a mono-rate speech coder at 8 kbit/s using fixed-point arithmetic operations. Annexes A, B, and D to J extend its functionalities. Annex A provides a reduced-complexity version at the basic coding rate of 8 kbit/s. Annex B defines source‑controlled rate operation for use with ITU-T G.729 or Annex A. Annexes D, E and H provide multi-rate operation and specify rate-switching mechanisms. Annex D also provides lower bit-rate extension at 6.4 kbit/s and AnnexE also provides higher bit-rate extension at 11.8 kbit/s. Annex H provides bit-rate extensions at both 6.4 kbit/s and 11.8 kbit/s. Therefore, Annexes D, E and H do not implement the discontinuous transmission mode of Annex B. For this functionality, further annexes were developed. Annexes F and G use the basic algorithms of Annex B to provide discontinuous transmission (DTX) functionality for Annexes D and E. Annex I provides DTX functionality for AnnexH and describes the integration of the main body of this Recommendation with Annexes B, D andE. AnnexJ makes reference to the ITU-T G.729 extension for the 8-32 kbit/s scalable wideband speech and audio coding algorithm defined in ITU-T G.729.1, which is interoperable with this Recommendation and its Annexes A and B. As in the main body of this Recommendation, Annexes A, B, and D to J use fixed-point arithmetic. Alternative implementations based on floating‑point arithmetic operations are provided in AnnexC for ITU-T G.729 and Annex A, as well as in AnnexC+ for Annex I.This information is summarized in the Table below.Appendix I deals with external synchronous reset capability in systems using external silence compression in conjunction with the speech coding algorithm in the main body of this Recommendation (fixed‑point) or in its Annex A (low complexity, fixed-point) and Annex C (floating-point). Since the voice activity detection (VAD) algorithm in Annex B was optimized for transmission over connection-oriented circuits, AppendicesII and III deal with optimization of the VAD in Annex B when it is used for packet circuits such as VoIP applications.Appendix IV, introduced in this revision of ITU-T G.729 describes the use of ITU-T G.720.1 Annex A as a VAD for use with Annex B DTX/CNG. It provides better flexibility in terms of compromise between bandwidth saving and audio quality. Bandwidth-saving mode provides the best performance in terms of silence compression while maintaining the subjective quality at a level comparable to both Appendix II and III. Moreover, Appendix IV offers better robustness to a wide variety of background noise types, including music. The target for Appendix IV is new IP multimedia services, and IP telephony and videoconferencing (both for enterprise corporate networks and for mass market); these are some of the most important services for which it has been optimized. Target devices include IP phones or other VoIP handsets, home gateways, IPBX, and media gateways.This Recommendation also corrects the defects identified in the Implementors' Guide for ITU‑TG.729 (2009/11), namely a discrepancy that was found between equation 40 (in clause 3.7.1) and the C-code.Reference ANSI C source code and test vectors are provided as an integral part of this Recommendation and its annexes. Appendices II, III and IV are also associated with C source code and test vectors. No source code is associated with Appendix I. The reference C source code and test vectors for the CS-ACELP algorithms described in the main body, and applicable annexes, and appendices are available as electronic attachments to this Recommendation.</abstract>
+  <status>
+    <stage>Published</stage>
+  </status>
+  <copyright>
+    <from>2012</from>
+    <owner>
+      <organization>
+        <name>International Telecommunication Union</name>
+        <abbreviation>ITU</abbreviation>
+        <uri>www.itu.int</uri>
+      </organization>
+    </owner>
+  </copyright>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 4 (12/1972)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 5 (10/1984)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 7 (12/1972)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 8 (12/1972)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 17 (10/1984)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 19 (10/1984)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 22 (10/1984)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 26 (10/1984)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 27 (10/1984)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 28 (10/1984)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 32 (11/1988)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 34 (11/1988)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 35 (11/1988)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 36 (11/1988)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 39 (02/2016)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 40 (10/2018)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 41 (02/2018)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 42 (10/2018)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 43 (02/2011)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 44 (06/2007)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 45 (09/2022)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 46 (05/2009)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 47 (09/2012)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 48 (06/2010)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 49 (09/2020)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 50 (09/2011)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 51 (06/2017)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 52 (09/2012)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 53 (12/2014)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 54 (07/2015)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 55 (12/2021)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 56 (02/2016)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 57 (07/2015)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 58 (09/2022)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 59 (02/2018)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 60 (09/2016)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 62 (02/2018)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 64 (02/2018)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 65 (10/2018)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 66 (09/2020)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 67 (07/2019)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 68 (02/2020)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 69 (09/2020)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 70 (09/2020)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 71 (04/2021)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 72 (04/2021)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 73 (10/2021)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 74 (12/2021)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 75 (12/2021)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 76 (12/2021)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 77 (06/2022)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 78 (09/2022)</formattedref>
+    </bibitem>
+  </relation>
+  <place>Geneva</place>
+  <ext>
+    <doctype>recommendation</doctype>
+    <editorialgroup>
+      <bureau>T</bureau>
+      <group type="study-group">
+        <name>ITU-T Study Group 16</name>
+        <acronym>SG</acronym>
+      </group>
+    </editorialgroup>
+  </ext>
+</bibdata>

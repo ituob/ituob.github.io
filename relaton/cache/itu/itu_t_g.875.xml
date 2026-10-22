@@ -1,0 +1,307 @@
+<bibdata type="standard">
+  <fetched>2023-03-06</fetched>
+  <title type="title-main" format="text/plain" language="en" script="Latn">Optical transport network: Protocol-neutral management information model for the network element view</title>
+  <title type="main" format="text/plain" language="en" script="Latn">Optical transport network: Protocol-neutral management information model for the network element view</title>
+  <uri type="src">https://www.itu.int/ITU-T/recommendations/rec.aspx?rec=13819&amp;lang=en</uri>
+  <uri type="obp">https://www.itu.inthttps//handle.itu.int/11.1002/1000/13819-en?locatt=format:pdf&amp;auth</uri>
+  <docidentifier type="ITU">ITU-T G.875</docidentifier>
+  <date type="published">
+    <on>2018-12-14</on>
+  </date>
+  <contributor>
+    <role type="publisher"/>
+    <organization>
+      <name>International Telecommunication Union</name>
+      <abbreviation>ITU</abbreviation>
+      <uri>www.itu.int</uri>
+    </organization>
+  </contributor>
+  <edition>5</edition>
+  <language>en</language>
+  <script>Latn</script>
+  <abstract format="text/plain" language="en" script="Latn">Recommendation ITU-T G.875 (ex. ITU-T G.874.1) provides a protocol-neutral management information model for managing network elements in the optical transport network (OTN). The model contains the managed entities and their properties that are useful to describe the information exchanged across interfaces defined in the ITU-T M.3010 telecommunications management network (TMN) architecture. The protocol-neutral management information model shall be used as the base for defining protocol-specific management information models, for example, common management information service element (CMISE), common object request broker architecture (CORBA) and simple network management protocol (SNMP) information models. Mapping from the protocol-neutral entities into protocol-specific objects is a decision of the specific protocol modelling design and should be described in the protocol-specific information model Recommendations.The 2012 revision of this Recommendation updated the management information model to support the management of the new transport functions that were introduced in the 2010 revision of Recommendation ITU-T G.798 and also to support the management requirements enhancement introduced in the 2010 revision of Recommendation ITU-T G.874.Amendment 1 enhanced the model to cover delay measurement (DM), automatic protection switching (APS) configuration, tributary slot configuration, and optical data unit (ODU) type and rate configuration, and to remove the counting of incoming alignment errors (IAEs) and backward incoming alignment errors (BIAEs).Amendment 2 added: (1) the use of an organizationally unique identifier (OUI) to the description of the attributes selectedApplicationIdentifier and supportableApplicationIdentifierList; and (2) sub-classes the OTN current data and history data object classes from the ITU-T Q.822 current data and history data object classes.The 2016 revision of this Recommendation has incorporated Amendment 1 and Amendment 2, and in addition the following updates: (1) changes the unified modelling language (UML) modelling tool from RSA to open source Papyrus tool; (2) updates the ITU-T G.874.1 information model to align with the ITU-T G.7711 v2.0 core information model; (3) drops subclassing the termination point (TP) classes from ITU-T M.3160; and (4) supports the additional management requirements in Recommendation ITU-T G.874.The 2018 revision of this Recommendation up-versions the UML model tool to Papyrus v3.2.0 and the profile to v0.2.13, updates the object class mapping figures to align with ITU-T G.798, updates the model for ODU, optical transport unit (OTU), FlexO, optical tributary signal group overhead (OTSiG-O), optical channel overhead (OCh-O), optical multiplex section overhead (OMS-O), and optical transmission section overhead (OTS-O), adds Annex A for the OTN specification model, deprecates the OTU CTP, OChr and optical physical section (OPS) (OPSn, OPSMnk, OPS0) layer object classes to align with Recommendation ITU-T G.798.The 2020 revision of this Recommendation up-versions the UML model tool to Papyrus v4.1.0 and the profile to v0.2.17; updates and cleans up the model for ODU, adding support for ODUCn, ODU delay measurement, GCC1/2 management, ODU clients (aligning with Recommendation ITU-T G.709 v6), OTU and FlexO; add the model for generic framing procedure (GFP) management; deprecates duplicated attributes and associations; un-deprecates the OTU CTP object classes and fixes some other errors.</abstract>
+  <status>
+    <stage>Withdrawal</stage>
+  </status>
+  <copyright>
+    <from>2018</from>
+    <owner>
+      <organization>
+        <name>International Telecommunication Union</name>
+        <abbreviation>ITU</abbreviation>
+        <uri>www.itu.int</uri>
+      </organization>
+    </owner>
+  </copyright>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 4 (12/1972)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 5 (10/1984)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 7 (12/1972)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 8 (12/1972)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 17 (10/1984)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 19 (10/1984)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 22 (10/1984)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 26 (10/1984)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 27 (10/1984)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 28 (10/1984)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 32 (11/1988)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 34 (11/1988)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 35 (11/1988)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 36 (11/1988)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 39 (02/2016)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 40 (10/2018)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 41 (02/2018)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 42 (10/2018)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 43 (02/2011)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 44 (06/2007)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 45 (09/2022)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 46 (05/2009)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 47 (09/2012)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 48 (06/2010)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 49 (09/2020)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 50 (09/2011)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 51 (06/2017)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 52 (09/2012)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 53 (12/2014)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 54 (07/2015)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 55 (12/2021)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 56 (02/2016)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 57 (07/2015)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 58 (09/2022)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 59 (02/2018)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 60 (09/2016)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 62 (02/2018)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 64 (02/2018)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 65 (10/2018)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 66 (09/2020)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 67 (07/2019)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 68 (02/2020)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 69 (09/2020)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 70 (09/2020)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 71 (04/2021)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 72 (04/2021)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 73 (10/2021)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 74 (12/2021)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 75 (12/2021)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 76 (12/2021)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 77 (06/2022)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">G Suppl. 78 (09/2022)</formattedref>
+    </bibitem>
+  </relation>
+  <place>Geneva</place>
+  <ext>
+    <doctype>recommendation</doctype>
+    <editorialgroup>
+      <bureau>T</bureau>
+      <group type="study-group">
+        <name>ITU-T Study Group 15</name>
+        <acronym>SG</acronym>
+      </group>
+    </editorialgroup>
+  </ext>
+</bibdata>

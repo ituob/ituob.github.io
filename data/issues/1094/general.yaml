@@ -1,0 +1,153 @@
+messages:
+  - extra_links:
+      - M1400_ICC
+      - BUREAUFAX
+      - ROA
+    type: running_annexes
+  - type: custom
+    title:
+      en: >-
+        Extra-territorial use of Mobile Country Code (MCC) and Mobile Network
+        Code (MNC)
+    recommendation: null
+    contents:
+      en:
+        type: doc
+        content:
+          - type: paragraph
+            content:
+              - type: text
+                text: (According to Recommendation ITU-T E.212 (05/2008) – Annex E)
+          - type: paragraph
+            content:
+              - type: text
+                marks:
+                  - type: strong
+                text: Note from TSB*
+          - type: paragraph
+            content:
+              - type: text
+                text: 'Pursuant to Annex E to Recommendation ITU-T E.212, the '
+              - type: text
+                marks:
+                  - type: em
+                text: >-
+                  Autorité de Régulation des Communications Electroniques et des
+                  Postes (ARCEP)
+              - type: text
+                text: ' of France, and the '
+              - type: text
+                marks:
+                  - type: em
+                text: Direction des Communications Electroniques (D.C.E.)
+              - type: text
+                text: " of the Principality of Monaco, have notified to TSB that MCC+MNC\_208\_01 will be used extra-territorially."
+          - type: paragraph
+            content:
+              - type: text
+                text: ____________
+          - type: paragraph
+            content:
+              - type: text
+                text: "*\_\_\_\_ See current ITU Operational Bulletin No. 1094 of 15.II.2016, page 8."
+  - type: org_changes
+    contents:
+      en:
+        type: doc
+        content:
+          - type: paragraph
+            content:
+              - type: text
+                marks:
+                  - type: strong
+                text: Qatar
+          - type: paragraph
+            content:
+              - type: text
+                text: 'Communication of 1.II.2016:'
+          - type: paragraph
+            content:
+              - type: text
+                marks:
+                  - type: em
+                text: Change of name
+          - type: paragraph
+            content:
+              - type: text
+                text: The
+              - type: text
+                marks:
+                  - type: em
+                text: ' Ministry of Information and Communications Technology, '
+              - type: text
+                text: >-
+                  Doha, announces that it has changed its name. It is now
+                  called: « 
+              - type: text
+                marks:
+                  - type: em
+                text: 'Ministry of Transport and Communications '
+              - type: text
+                text: ».
+          - type: paragraph
+            content:
+              - type: text
+                text: Ministry of Transport and Communications
+              - type: hard_break
+              - type: text
+                text: Al Nassr Tower
+              - type: hard_break
+              - type: text
+                text: P.O. Box 23264
+              - type: hard_break
+              - type: text
+                text: 'DOHA '
+              - type: hard_break
+              - type: text
+                text: Qatar
+              - type: hard_break
+              - type: text
+                text: "Tel: \_\_\_\_\_\_\_\_ +974 44995333"
+              - type: hard_break
+              - type: text
+                text: "Fax:\_ \_\_\_\_\_\_ +974 44994655"
+              - type: hard_break
+              - type: text
+                text: "Email:\_\_\_\_ "
+              - type: text
+                marks:
+                  - type: link
+                    attrs:
+                      href: 'mailto:info@ict.gov.qa'
+                      title: null
+                text: info@ict.gov.qa
+              - type: hard_break
+              - type: text
+                text: "URL:\_\_\_\_\_\_\_ www.ictqatar.qa"
+  - type: service_restrictions
+    items:
+      - country:
+          en: Seychelles
+        ob: 1006
+        page: 13
+      - country:
+          en: Slovakia
+        ob: 1007
+        page: 12
+      - country:
+          en: Thailand
+        ob: 1034
+        page: 5
+      - country:
+          en: São Tomé and Principe
+        ob: 1039
+        page: 14
+      - country:
+          en: Uruguay
+        ob: 1039
+        page: 14
+      - country:
+          en: 'Hong Kong, China'
+        ob: 1068
+        page: 4
+  - type: callback_procedures

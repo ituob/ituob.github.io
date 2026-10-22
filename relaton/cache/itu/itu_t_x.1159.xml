@@ -1,0 +1,47 @@
+<bibdata type="standard">
+  <fetched>2023-03-06</fetched>
+  <title type="title-main" format="text/plain" language="en" script="Latn">Delegated non-repudiation architecture based on ITU-T X.813</title>
+  <title type="main" format="text/plain" language="en" script="Latn">Delegated non-repudiation architecture based on ITU-T X.813</title>
+  <uri type="src">https://www.itu.int/ITU-T/recommendations/rec.aspx?rec=12342&amp;lang=en</uri>
+  <uri type="obp">https://www.itu.inthttps//handle.itu.int/11.1002/1000/12342-en?locatt=format:pdf&amp;auth</uri>
+  <docidentifier type="ITU">ITU-T X.1159</docidentifier>
+  <date type="published">
+    <on>2014-11-13</on>
+  </date>
+  <contributor>
+    <role type="publisher"/>
+    <organization>
+      <name>International Telecommunication Union</name>
+      <abbreviation>ITU</abbreviation>
+      <uri>www.itu.int</uri>
+    </organization>
+  </contributor>
+  <edition>1</edition>
+  <language>en</language>
+  <script>Latn</script>
+  <abstract format="text/plain" language="en" script="Latn">Non-repudiation is the ability to prevent entities from denying that they have sent or received electronic transaction data in a telecommunication network. Recommendation ITU-T X.1159 provides a delegated non-repudiation architecture based on Recommendation ITU-T X.813 to generate non-repudiation evidence by a trusted third party (TTP) instead of a user.Recommendation ITU-T X.813 defines six non-repudiation mechanisms: a TTP security token, security tokens and tamper-resistant modules, a digital signature, time stamping, an in-line TTP and a notary. This Recommendation complies with these six mechanisms, and the non-repudiation service can use a combination of these mechanisms to satisfy the security requirements of the application service.In this Recommendation, a right and/or user's signing key for a non-repudiation generation delegates to a TTP, which is a central signing authority, and the central signing authority generates and verifies non-repudiation evidence using the delegated user's signing/validation key or the central signing authority's secret key/validation key. The delegated non-repudiation model in this Recommendation is capable of responding to key loss and theft, is safe in an open network, such as a mobile and cloud network, and provides convenient non-repudiation service.This Recommendation describes the delegated non-repudiation service models and operations for each of the service models. The architecture also defines the security requirements of the delegated non-repudiation service. In this delegated non-repudiation service model, there are two types of service models that use the central signing authority's secret key and the delegated signing key.</abstract>
+  <status>
+    <stage>Published</stage>
+  </status>
+  <copyright>
+    <from>2014</from>
+    <owner>
+      <organization>
+        <name>International Telecommunication Union</name>
+        <abbreviation>ITU</abbreviation>
+        <uri>www.itu.int</uri>
+      </organization>
+    </owner>
+  </copyright>
+  <place>Geneva</place>
+  <ext>
+    <doctype>recommendation</doctype>
+    <editorialgroup>
+      <bureau>T</bureau>
+      <group type="study-group">
+        <name>ITU-T Study Group 17</name>
+        <acronym>SG</acronym>
+      </group>
+    </editorialgroup>
+  </ext>
+</bibdata>

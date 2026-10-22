@@ -1,0 +1,67 @@
+<bibdata type="standard">
+  <fetched>2023-03-06</fetched>
+  <title type="title-main" format="text/plain" language="en" script="Latn">Requirements and architecture for energy management services</title>
+  <title type="main" format="text/plain" language="en" script="Latn">Requirements and architecture for energy management services</title>
+  <uri type="src">https://www.itu.int/ITU-T/recommendations/rec.aspx?rec=13180&amp;lang=en</uri>
+  <uri type="obp">https://www.itu.inthttps//handle.itu.int/11.1002/1000/13180-en?locatt=format:pdf&amp;auth</uri>
+  <docidentifier type="ITU">ITU-T F.747.9</docidentifier>
+  <date type="published">
+    <on>2017-03-01</on>
+  </date>
+  <contributor>
+    <role type="publisher"/>
+    <organization>
+      <name>International Telecommunication Union</name>
+      <abbreviation>ITU</abbreviation>
+      <uri>www.itu.int</uri>
+    </organization>
+  </contributor>
+  <edition>1</edition>
+  <language>en</language>
+  <script>Latn</script>
+  <abstract format="text/plain" language="en" script="Latn">Recommendation ITU-T F.747.9 describes requirements, scenarios and functional architecture for user-side energy management service (EMS) where energy consumption equipment with heterogeneous metering and control capacities coexist. In user-side EMS systems, energy consumption data for both single device and device group need to be collected; these devices can be controlled by coarse-grained (on-off state) and fine-grained instructions. Furthermore, such operations are executed manually or automatically. The user-side EMS system makes energy-saving decisions based on multiple factors, such as the demands and optimization policies from users, pricing strategies from suppliers, government subsidies, device status.</abstract>
+  <status>
+    <stage>Published</stage>
+  </status>
+  <copyright>
+    <from>2017</from>
+    <owner>
+      <organization>
+        <name>International Telecommunication Union</name>
+        <abbreviation>ITU</abbreviation>
+        <uri>www.itu.int</uri>
+      </organization>
+    </owner>
+  </copyright>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">F Suppl. 1 (11/1988)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">F Suppl. 2 (11/1988)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">F Suppl. 3 (09/2016)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">F Suppl. 4 (04/2021)</formattedref>
+    </bibitem>
+  </relation>
+  <place>Geneva</place>
+  <ext>
+    <doctype>recommendation</doctype>
+    <editorialgroup>
+      <bureau>T</bureau>
+      <group type="study-group">
+        <name>ITU-T Study Group 16</name>
+        <acronym>SG</acronym>
+      </group>
+    </editorialgroup>
+  </ext>
+</bibdata>

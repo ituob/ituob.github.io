@@ -1,0 +1,87 @@
+<bibdata type="standard">
+  <fetched>2023-03-06</fetched>
+  <title type="title-main" format="text/plain" language="en" script="Latn">Parametric bitstream-based quality assessment of progressive download and adaptive audiovisual streaming services over reliable transport – Video quality estimation module</title>
+  <title type="main" format="text/plain" language="en" script="Latn">Parametric bitstream-based quality assessment of progressive download and adaptive audiovisual streaming services over reliable transport – Video quality estimation module</title>
+  <uri type="src">https://www.itu.int/ITU-T/recommendations/rec.aspx?rec=13159&amp;lang=en</uri>
+  <uri type="obp">https://www.itu.inthttps//handle.itu.int/11.1002/1000/13159-en?locatt=format:pdf&amp;auth</uri>
+  <docidentifier type="ITU">ITU-T P.1203.1</docidentifier>
+  <date type="published">
+    <on>2016-12-22</on>
+  </date>
+  <contributor>
+    <role type="publisher"/>
+    <organization>
+      <name>International Telecommunication Union</name>
+      <abbreviation>ITU</abbreviation>
+      <uri>www.itu.int</uri>
+    </organization>
+  </contributor>
+  <edition>3</edition>
+  <language>en</language>
+  <script>Latn</script>
+  <abstract format="text/plain" language="en" script="Latn">Recommendation ITU-T P.1203.1 specifies the short-term video representation quality estimation modules for ITU-T P.1203 (Pv module). The ITU-T P.1203-series of Recommendations specifies modules for a set of model algorithms for monitoring the integral media session quality for transport control protocol (TCP) type video streaming. The models comprise modules for short-term video-quality (described in this part of the Recommendation family) and audio-quality estimation. The per-one-second outputs of these short-term modules are integrated into estimates of audio-visual quality and together with information about initial loading delay and media playout stalling events, they are further integrated into the final model output, to provide an estimate of integral quality. The respective ITU-T work item has formerly been referred to as "Parametric non-intrusive assessment of TCP-based multimedia streaming quality", or "P.NATS". The ITU‑TP.1203.1 part of ITU-T P.1203 provides details for the modules for bitstream-based, short-term video quality estimation. Four different modes can be used for the Pv module specified in this Recommendation. These modes referred to as mode 0 to 3 use input information of differing complexity and amount and represent four model algorithms each with a different level of complexity. The Pv modules comprise components reflecting the effects due to video compression, up-scaling of content and the effect due to low frame rates. The four different modes use the same overall model architecture and individual coefficients and all have the same components for up-scaling and framerate. The only Pv module component that differs between modes is the Pv module component related to video compression.This revision to Recommendation ITU-T P.1203.1 (2017) replaces the scale factor defined in clause8.</abstract>
+  <status>
+    <stage>Withdrawal</stage>
+  </status>
+  <copyright>
+    <from>2016</from>
+    <owner>
+      <organization>
+        <name>International Telecommunication Union</name>
+        <abbreviation>ITU</abbreviation>
+        <uri>www.itu.int</uri>
+      </organization>
+    </owner>
+  </copyright>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">P Suppl. 10 (11/1988)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">P Suppl. 16 (11/1988)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">P Suppl. 20 (03/1993)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">P Suppl. 23 (02/1998)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">P Suppl. 24 (10/2005)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">P Suppl. 25 (01/2011)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">P Suppl. 26 (09/2017)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">P Suppl. 28 (09/2020)</formattedref>
+    </bibitem>
+  </relation>
+  <place>Geneva</place>
+  <ext>
+    <doctype>recommendation</doctype>
+    <editorialgroup>
+      <bureau>T</bureau>
+      <group type="study-group">
+        <name>ITU-T Study Group 12</name>
+        <acronym>SG</acronym>
+      </group>
+    </editorialgroup>
+  </ext>
+</bibdata>

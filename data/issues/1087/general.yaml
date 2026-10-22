@@ -1,0 +1,281 @@
+messages:
+  - extra_links:
+      - M1400_ICC
+      - BUREAUFAX
+      - ROA
+    type: running_annexes
+  - type: approved_recommendations
+    items:
+      'Q.3616 ': 2015-10-01
+    by: AAP-67
+    procedures: Recommendation ITU-T A.8
+  - type: ipns
+    contents:
+      en:
+        type: doc
+        content:
+          - type: paragraph
+            content:
+              - type: text
+                marks:
+                  - type: strong
+                text: Note from TSB
+          - type: paragraph
+            content:
+              - type: text
+                marks:
+                  - type: em
+                text: Identification codes for International Mobile Networks
+          - type: paragraph
+            content:
+              - type: text
+                text: >-
+                  Associated with shared mobile country code 901 (MCC), the
+                  following two-digit mobile network code (MNC) has been
+                  assigned on 15 October 2015:
+          - type: paragraph
+            content:
+              - type: text
+                text: "\_"
+          - type: table
+            content:
+              - type: table_row
+                content:
+                  - type: table_cell
+                    attrs:
+                      colspan: 1
+                      rowspan: 1
+                      colwidth: null
+                    content:
+                      - type: paragraph
+                        content:
+                          - type: text
+                            text: Network
+                  - type: table_cell
+                    attrs:
+                      colspan: 1
+                      rowspan: 1
+                      colwidth: null
+                    content:
+                      - type: paragraph
+                        content:
+                          - type: text
+                            text: >-
+                              Mobile Country Code (MCC)* and Mobile Network Code
+                              (MNC)**
+              - type: table_row
+                content:
+                  - type: table_cell
+                    attrs:
+                      colspan: 1
+                      rowspan: 1
+                      colwidth: null
+                    content:
+                      - type: paragraph
+                        content:
+                          - type: text
+                            text: Communications for Devices in Sweden AB
+                  - type: table_cell
+                    attrs:
+                      colspan: 1
+                      rowspan: 1
+                      colwidth: null
+                    content:
+                      - type: paragraph
+                        content:
+                          - type: text
+                            text: 901 48
+          - type: paragraph
+            content:
+              - type: text
+                text: ______________
+          - type: paragraph
+            content:
+              - type: text
+                text: "*\_\_\_\_\_\_\_\_\_\_\_ MCC: Mobile Country Code / Indicatif de pays du mobile / Indicativo de país para el servicio móvil"
+              - type: hard_break
+              - type: text
+                text: "**\_\_\_\_\_\_\_\_\_ MNC: Mobile Network Code / Code de réseau mobile / Indicativo de red para el servicio móvil"
+  - type: sanc
+    contents:
+      en:
+        type: doc
+        content:
+          - type: paragraph
+            content:
+              - type: text
+                marks:
+                  - type: strong
+                text: Note from TSB
+          - type: paragraph
+            content:
+              - type: text
+                text: "At the request of the Administration of France the Director of TSB has assigned the following signalling area/network code (SANC) for use in the international part of the signalling system No.\_7 network of this country/geographical area, in accordance with Recommendation\_ITU-T Q.708 (03/99):"
+          - type: paragraph
+            content:
+              - type: text
+                text: "\_"
+          - type: table
+            content:
+              - type: table_row
+                content:
+                  - type: table_cell
+                    attrs:
+                      colspan: 1
+                      rowspan: 1
+                      colwidth: null
+                    content:
+                      - type: paragraph
+                        content:
+                          - type: text
+                            marks:
+                              - type: em
+                            text: Country
+                          - type: text
+                            text: /
+                          - type: text
+                            marks:
+                              - type: em
+                            text: geographical area or signalling network
+                  - type: table_cell
+                    attrs:
+                      colspan: 1
+                      rowspan: 1
+                      colwidth: null
+                    content:
+                      - type: paragraph
+                        content:
+                          - type: text
+                            marks:
+                              - type: em
+                            text: SANC
+              - type: table_row
+                content:
+                  - type: table_cell
+                    attrs:
+                      colspan: 1
+                      rowspan: 1
+                      colwidth: null
+                    content:
+                      - type: paragraph
+                        content:
+                          - type: text
+                            text: >-
+                              French Departments and Territories in the Indian
+                              Ocean
+                  - type: table_cell
+                    attrs:
+                      colspan: 1
+                      rowspan: 1
+                      colwidth: null
+                    content:
+                      - type: paragraph
+                        content:
+                          - type: text
+                            text: 6-118
+              - type: table_row
+                content:
+                  - type: table_cell
+                    attrs:
+                      colspan: 1
+                      rowspan: 1
+                      colwidth: null
+                    content:
+                      - type: paragraph
+                        content:
+                          - type: text
+                            text: "\_"
+                  - type: table_cell
+                    attrs:
+                      colspan: 1
+                      rowspan: 1
+                      colwidth: null
+                    content:
+                      - type: paragraph
+                        content:
+                          - type: text
+                            text: "\_"
+          - type: paragraph
+            content:
+              - type: text
+                text: ____________
+          - type: paragraph
+            content:
+              - type: text
+                text: 'SANC: Signalling Area/Network Code.'
+              - type: hard_break
+              - type: text
+                text: Code de zone/réseau sémaphore (CZRS).
+              - type: hard_break
+              - type: text
+                text: Código de zona/red de señalización (CZRS).
+  - type: misc_communications
+    contents:
+      en:
+        type: doc
+        content:
+          - type: paragraph
+            content:
+              - type: text
+                marks:
+                  - type: strong
+                text: Serbia
+          - type: paragraph
+            content:
+              - type: text
+                text: 'Communications of 14.X.2015:'
+          - type: paragraph
+            content:
+              - type: text
+                text: >-
+                  On the occasion of the 100th anniversary of the Serbian army's
+                  retreat through Albania (the Albanian Golgotha, 1915-1916),
+                  the Republic of Serbia authorizes a number of Serbian amateur
+                  radio stations to use the special call sign 
+              - type: text
+                marks:
+                  - type: strong
+                text: YT100SG
+              - type: text
+                text: " from 26\_November 2015 to 15\_February 2016."
+          - type: paragraph
+            content:
+              - type: text
+                text: >-
+                  On the occasion of 270 years since the arrival of the Slovaks
+                  in Bački Petrovac, the Republic of Serbia authorizes a number
+                  of Serbian amateur radio stations to use the special call
+                  sign 
+              - type: text
+                marks:
+                  - type: strong
+                text: 'YU270AJM '
+              - type: text
+                text: "from 1\_November to 31\_December 2015."
+  - type: service_restrictions
+    items:
+      - country:
+          en: Seychelles
+        ob: 1006
+        page: 13
+      - country:
+          en: Slovakia
+        ob: 1007
+        page: 12
+      - country:
+          en: Thailand
+        ob: 1034
+        page: 5
+      - country:
+          en: São Tomé and Principe
+        ob: 1039
+        page: 14
+      - country:
+          en: Uruguay
+        ob: 1039
+        page: 14
+      - country:
+          en: 'Hong Kong, China'
+        ob: 1068
+        page: 4
+  - type: callback_procedures

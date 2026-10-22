@@ -1,0 +1,97 @@
+<bibdata type="standard">
+  <fetched>2023-03-06</fetched>
+  <title type="title-main" format="text/plain" language="en" script="Latn">Specifications of IP video broadcast (IPVB) for cable TV networks</title>
+  <title type="main" format="text/plain" language="en" script="Latn">Specifications of IP video broadcast (IPVB) for cable TV networks</title>
+  <uri type="src">https://www.itu.int/ITU-T/recommendations/rec.aspx?rec=14282&amp;lang=en</uri>
+  <uri type="obp">https://www.itu.inthttps//handle.itu.int/11.1002/1000/14282-en?locatt=format:pdf&amp;auth</uri>
+  <docidentifier type="ITU">ITU-T J.1211</docidentifier>
+  <date type="published">
+    <on>2020-05-29</on>
+  </date>
+  <contributor>
+    <role type="publisher"/>
+    <organization>
+      <name>International Telecommunication Union</name>
+      <abbreviation>ITU</abbreviation>
+      <uri>www.itu.int</uri>
+    </organization>
+  </contributor>
+  <edition>1</edition>
+  <language>en</language>
+  <script>Latn</script>
+  <abstract format="text/plain" language="en" script="Latn">In recent years, IP-based video services have developed rapidly in cable (CATV) networks, especially the highly asymmetric IP-based services with large bandwidth, such as 4K, 8K and VR, whose single program bandwidth might easily exceed 35Mbps or even up to 100Mbps. This requires a large downlink bandwidth of transmission channels and poses challenges to existing CATV technologies. For this scenario, it is necessary to propose a low cost and low complexity solution to meet the bandwidth requirements of the current asymmetric IP-based video services.Recommendation ITU-T J.1211 specifies an IPVB technology, which simply adds a one-way IP-based video broadcast system to the existing low-cost bidirectional CATV networks. The IPVB can greatly increase the bandwidth of downlink programs, and at the same time, have the characteristics of being low cost and low complexity. The IPVB in downlink transmits IP-based video streams through broadcast channels which are identified by multicast IP addresses and UDP port numbers, and broadcasts all the IP-based video streams through the CATV networks to all subscribers. By cooperating with the uplink channel provided by the existing bidirectional access networks, it is capable of providing varieties of IP-based high bit rate video services in CATV networks.</abstract>
+  <status>
+    <stage>Published</stage>
+  </status>
+  <copyright>
+    <from>2020</from>
+    <owner>
+      <organization>
+        <name>International Telecommunication Union</name>
+        <abbreviation>ITU</abbreviation>
+        <uri>www.itu.int</uri>
+      </organization>
+    </owner>
+  </copyright>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">J Suppl. 1 (11/1998)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">J Suppl. 2 (11/1998)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">J Suppl. 3 (11/1998)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">J Suppl. 5 (09/1999)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">J Suppl. 6 (09/2016)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">J Suppl. 7 (04/2021)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">J Suppl. 8 (04/2021)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">J Suppl. 9 (04/2020)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">J Suppl. 10 (09/2022)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">J Suppl. 11 (04/2021)</formattedref>
+    </bibitem>
+  </relation>
+  <place>Geneva</place>
+  <ext>
+    <doctype>recommendation</doctype>
+    <editorialgroup>
+      <bureau>T</bureau>
+      <group type="study-group">
+        <name>ITU-T Study Group 9</name>
+        <acronym>SG</acronym>
+      </group>
+    </editorialgroup>
+  </ext>
+</bibdata>

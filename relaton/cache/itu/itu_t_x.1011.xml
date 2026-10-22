@@ -1,0 +1,47 @@
+<bibdata type="standard">
+  <fetched>2023-03-06</fetched>
+  <title type="title-main" format="text/plain" language="en" script="Latn">Guidelines for continuous protection of the service access process</title>
+  <title type="main" format="text/plain" language="en" script="Latn">Guidelines for continuous protection of the service access process</title>
+  <uri type="src">https://www.itu.int/ITU-T/recommendations/rec.aspx?rec=14793&amp;lang=en</uri>
+  <uri type="obp">https://www.itu.inthttps//handle.itu.int/11.1002/1000/14793-en?locatt=format:pdf&amp;auth</uri>
+  <docidentifier type="ITU">ITU-T X.1011</docidentifier>
+  <date type="published">
+    <on>2021-10-29</on>
+  </date>
+  <contributor>
+    <role type="publisher"/>
+    <organization>
+      <name>International Telecommunication Union</name>
+      <abbreviation>ITU</abbreviation>
+      <uri>www.itu.int</uri>
+    </organization>
+  </contributor>
+  <edition>1</edition>
+  <language>en</language>
+  <script>Latn</script>
+  <abstract format="text/plain" language="en" script="Latn">The prevention of unauthorized access to information and abuse of information and communication technology (ICT) resources is fundamental to cybersecurity. An extensive effort had been made towards the standardization of identity and access management. However, the access environment is continuously changing and traditional mechanisms are unable to deal with the challenges of evolving security threats. This is firstly because traditional data centre infrastructure is moving to the cloud, and consequently the perimeter security devices for traditional data centres are not applicable to cloud-based data centres. Secondly, internal threats are becoming more and more serious, e.g., authorized users trying to perform dangerous operations caused by negligence, or internal users being attacked by social engineering which may lead to impersonation risks. Thirdly, the status of user devices or resources may become insecure during the access process, e.g., operating system (OS) or software in user devices and resource platforms being compromised by exploitation of misconfigurations, or access requests being intercepted, etc. The service access process is the process during the interval between a subject (i.e., user and user device) initiating access request(s) and receiving response(s) from a service, which may involve a variety of the above-mentioned security threats.In order to deal with these challenges, it is crucial to continuously analyse related security status, verify the rationality of access activity, protect the security of access processes and prevent unsecure access. Recommendation ITU-T X.1011 defines a reference framework for keeping continuous protection of the service access process.</abstract>
+  <status>
+    <stage>Published</stage>
+  </status>
+  <copyright>
+    <from>2021</from>
+    <owner>
+      <organization>
+        <name>International Telecommunication Union</name>
+        <abbreviation>ITU</abbreviation>
+        <uri>www.itu.int</uri>
+      </organization>
+    </owner>
+  </copyright>
+  <place>Geneva</place>
+  <ext>
+    <doctype>recommendation</doctype>
+    <editorialgroup>
+      <bureau>T</bureau>
+      <group type="study-group">
+        <name>ITU-T Study Group 17</name>
+        <acronym>SG</acronym>
+      </group>
+    </editorialgroup>
+  </ext>
+</bibdata>

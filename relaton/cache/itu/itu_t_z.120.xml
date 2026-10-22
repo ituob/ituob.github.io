@@ -1,0 +1,52 @@
+<bibdata type="standard">
+  <fetched>2023-03-06</fetched>
+  <title type="title-main" format="text/plain" language="en" script="Latn">Message Sequence Chart (MSC)</title>
+  <title type="main" format="text/plain" language="en" script="Latn">Message Sequence Chart (MSC)</title>
+  <uri type="src">https://www.itu.int/ITU-T/recommendations/rec.aspx?rec=11063&amp;lang=en</uri>
+  <uri type="obp">https://www.itu.inthttps//handle.itu.int/11.1002/1000/11063-en?locatt=format:pdf&amp;auth</uri>
+  <docidentifier type="ITU">ITU-T Z.120</docidentifier>
+  <date type="published">
+    <on>2011-02-13</on>
+  </date>
+  <contributor>
+    <role type="publisher"/>
+    <organization>
+      <name>International Telecommunication Union</name>
+      <abbreviation>ITU</abbreviation>
+      <uri>www.itu.int</uri>
+    </organization>
+  </contributor>
+  <edition>5</edition>
+  <language>en</language>
+  <script>Latn</script>
+  <abstract format="text/plain" language="en" script="Latn">The purpose of recommending MSC (Message Sequence Chart) is to provide a trace language for the specification and description of the communication behaviour of system components and their environment by means of message interchange. Since in MSCs the communication behaviour is presented in a very intuitive and transparent manner, particularly in the graphical representation, the MSC language is easy to learn, use and interpret. In connection with other languages it can be used to support methodologies for system specification, design, simulation, testing, and documentation.This Recommendation presents a syntax definition for Message Sequence Charts in textual and graphical representation. An informal semantics description is provided.MSC is widely applicable. It is not tailored for one single application domain. An important area of application for MSC is an overview specification of the communication behaviour for real time systems, in particular telecommunication switching systems. By means of MSCs, selected system traces, primarily "standard" cases, may be specified. Non-standard cases covering exceptional behaviour may be built on them. Thereby, MSCs may be used for requirement specification, interface specification, simulation and validation, test case specification and documentation of real time systems. MSC may be employed in connection with other specification languages, in particular SDL. In this context, MSCs also provide a basis for the design of SDL-systems.MSC is stable. This Recommendation is a maintenance update of the 2004 version correcting a number of errors and consolidating Appendix I into the main text. Otherwise it is intended to be the same as the 2004 version, which was a natural continuation of its 1999 version, refining concepts including:</abstract>
+  <status>
+    <stage>Published</stage>
+  </status>
+  <copyright>
+    <from>2011</from>
+    <owner>
+      <organization>
+        <name>International Telecommunication Union</name>
+        <abbreviation>ITU</abbreviation>
+        <uri>www.itu.int</uri>
+      </organization>
+    </owner>
+  </copyright>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">Z Suppl. 1 (04/2015)</formattedref>
+    </bibitem>
+  </relation>
+  <place>Geneva</place>
+  <ext>
+    <doctype>recommendation</doctype>
+    <editorialgroup>
+      <bureau>T</bureau>
+      <group type="study-group">
+        <name>ITU-T Study Group 17</name>
+        <acronym>SG</acronym>
+      </group>
+    </editorialgroup>
+  </ext>
+</bibdata>

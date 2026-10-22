@@ -1,0 +1,462 @@
+messages:
+  - extra_links:
+      - M1400_ICC
+      - BUREAUFAX
+      - ROA
+    type: running_annexes
+  - type: approved_recommendations
+    items:
+      'G.993.2 (2015) Amd 1 ': 2015-11-01
+      'G.997.1 (2012) Amd 5 ': 2015-11-01
+      'Y.3600 ': 2015-11-01
+    by: AAP-69
+    procedures: Recommendation ITU-T A.8
+  - contents:
+      - country_name:
+          en: 'Denmark '
+        phone_code: '45'
+        contact:
+          en: "Danish Energy Agency\nAmaliegade 44\n1256 COPENHAGEN K\nDenmark\nTel:\t+45 33 92 67 00 \nFax:\t+45 33 11 47 43\nE-mail:\tens@ens.dk \nURL:\twww.ens.dk "
+        communications:
+          - date: 2015-11-10
+            contents:
+              en:
+                type: doc
+                content:
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: 'The '
+                      - type: text
+                        marks:
+                          - type: em
+                        text: Danish Energy Agency
+                      - type: text
+                        text: >-
+                          , Copenhagen, announces the following changes to the
+                          Danish telephone numbering plan:
+                  - type: bullet_list
+                    content:
+                      - type: list_item
+                        content:
+                          - type: paragraph
+                            content:
+                              - type: text
+                                text: assignment – M2M-communication
+                  - type: table
+                    content:
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: Provider
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: Numbering series
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: Date of assignment
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Uni-tel
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 37100109ijkl
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 22.X.2015
+                  - type: bullet_list
+                    content:
+                      - type: list_item
+                        content:
+                          - type: paragraph
+                            content:
+                              - type: text
+                                text: "\_assignment – Mobile communication"
+                  - type: table
+                    content:
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: Provider
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: Numbering series
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: Date of assignment
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: GoTele
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 81379fgh and 82569fgh
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 22.X.2015
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: SimService A/S
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 9316efgh and 9317efgh
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 10.XI.2015
+                  - type: paragraph
+    type: telephone_service_2
+  - type: org_changes
+    contents:
+      en:
+        type: doc
+        content:
+          - type: paragraph
+            content:
+              - type: text
+                marks:
+                  - type: strong
+                text: Greece
+          - type: paragraph
+            content:
+              - type: text
+                text: 'Communication of 6.XI.2015:'
+          - type: paragraph
+            content:
+              - type: text
+                marks:
+                  - type: em
+                text: Change of name
+          - type: paragraph
+            content:
+              - type: text
+                text: The
+              - type: text
+                marks:
+                  - type: em
+                text: ' Ministry of Economy, Infrastructure, Shipping and Tourism, '
+              - type: text
+                text: >-
+                  Athens, announces that it has changed its name. It is now
+                  called: « 
+              - type: text
+                marks:
+                  - type: em
+                text: 'Ministry of Infrastructure, Transport and Networks'
+              - type: text
+                text: ».
+          - type: paragraph
+            content:
+              - type: text
+                text: 'Ministry of Infrastructure, Transport and Networks'
+              - type: hard_break
+              - type: text
+                text: 'Papagos '
+              - type: hard_break
+              - type: text
+                text: 'Anastaseos 2 & Tsigante street '
+              - type: hard_break
+              - type: text
+                text: 15669 ATHENS
+              - type: hard_break
+              - type: text
+                text: Greece
+              - type: hard_break
+              - type: text
+                text: "Tel:\_\_\_\_\_\_\_\_\_ +30 2106508000"
+              - type: hard_break
+              - type: text
+                text: "Fax:\_\_\_\_\_\_\_\_ +30 2106508460"
+              - type: hard_break
+              - type: text
+                text: "E-mail:\_\_\_ "
+              - type: text
+                marks:
+                  - type: link
+                    attrs:
+                      href: 'mailto:yme@yme.gov.gr'
+                      title: null
+                text: yme@yme.gov.gr
+              - type: hard_break
+              - type: text
+                text: "URL: \_\_\_\_\_\_ www.yme.gr"
+          - type: paragraph
+          - type: paragraph
+            content:
+              - type: text
+                marks:
+                  - type: strong
+                text: Ecuador
+          - type: paragraph
+            content:
+              - type: text
+                text: 'Communication of 11.XI.2015:'
+          - type: paragraph
+            content:
+              - type: text
+                marks:
+                  - type: em
+                text: Change of name
+          - type: paragraph
+            content:
+              - type: text
+                text: The
+              - type: text
+                marks:
+                  - type: em
+                text: ' Consejo Nacional de Telecomunicaciones (CONATEL), '
+              - type: text
+                text: >-
+                  Quito, announces that it has been replaced. It is now called:
+                  « 
+              - type: text
+                marks:
+                  - type: em
+                text: >-
+                  Agencia de Regulación y Control de las Telecomunicaciones
+                  (ARCOTEL)
+              - type: text
+                text: ».
+          - type: paragraph
+            content:
+              - type: text
+                text: >-
+                  Agencia de Regulación y Control de las Telecomunicaciones
+                  (ARCOTEL)
+              - type: hard_break
+              - type: text
+                text: 'N31-95 Av. Diego de Almagro, entre Whymper y Alpallana'
+              - type: hard_break
+              - type: text
+                text: 'QUITO '
+              - type: hard_break
+              - type: text
+                text: Ecuador
+              - type: hard_break
+              - type: text
+                text: "Tel:\_\_\_\_\_\_\_\_\_ +593 22947800"
+              - type: hard_break
+              - type: text
+                text: "Fax:\_\_\_\_\_\_\_\_ +593 22901010"
+              - type: hard_break
+              - type: text
+                text: "E-mail:\_\_\_ "
+              - type: text
+                marks:
+                  - type: link
+                    attrs:
+                      href: 'mailto:comunicacion@arcotel.gob.ec'
+                      title: null
+                text: comunicacion@arcotel.gob.ec
+              - type: hard_break
+              - type: text
+                text: "URL: \_\_\_\_\_\_ www.arcotel.gob.ec"
+          - type: paragraph
+            content:
+              - type: text
+                marks:
+                  - type: strong
+                text: Trinidad and Tobago
+          - type: paragraph
+            content:
+              - type: text
+                text: 'Communication of 20.XI.2015:'
+          - type: paragraph
+            content:
+              - type: text
+                marks:
+                  - type: em
+                text: Change of name
+          - type: paragraph
+            content:
+              - type: text
+                text: The
+              - type: text
+                marks:
+                  - type: em
+                text: ' Ministry of Science and Technology, '
+              - type: text
+                text: >-
+                  Port-of-Spain, announces that it has changed its name. It is
+                  now called: «
+              - type: text
+                marks:
+                  - type: em
+                text: Ministry of Public Administration
+              - type: text
+                text: ».
+          - type: paragraph
+            content:
+              - type: text
+                text: Ministry of Public Administration
+              - type: hard_break
+              - type: text
+                text: Levels 5-7 National Library Building
+              - type: hard_break
+              - type: text
+                text: 'Corner Hart and Abercromby Streets '
+              - type: hard_break
+              - type: text
+                text: 'PORT-OF-SPAIN '
+              - type: hard_break
+              - type: text
+                text: Trinidad and Tobago
+              - type: hard_break
+              - type: text
+                text: "Tel:\_\_\_\_\_\_\_\_\_ +1 8686256724"
+              - type: hard_break
+              - type: text
+                text: "Fax:\_\_\_\_\_\_\_\_ +1 8686238636"
+              - type: hard_break
+              - type: text
+                text: "URL: \_\_\_\_\_\_ www.mpa.gov.tt"
+  - type: service_restrictions
+    items:
+      - country:
+          en: Seychelles
+        ob: 1006
+        page: 13
+      - country:
+          en: Slovakia
+        ob: 1007
+        page: 12
+      - country:
+          en: Thailand
+        ob: 1034
+        page: 5
+      - country:
+          en: São Tomé and Principe
+        ob: 1039
+        page: 14
+      - country:
+          en: Uruguay
+        ob: 1039
+        page: 14
+      - country:
+          en: 'Hong Kong, China'
+        ob: 1068
+        page: 4
+  - type: callback_procedures

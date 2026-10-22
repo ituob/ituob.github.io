@@ -1,0 +1,87 @@
+<bibdata type="standard">
+  <fetched>2023-03-06</fetched>
+  <title type="title-main" format="text/plain" language="en" script="Latn">Parametric bitstream-based quality assessment of progressive download and adaptive audiovisual streaming services over reliable transport – Quality integration module</title>
+  <title type="main" format="text/plain" language="en" script="Latn">Parametric bitstream-based quality assessment of progressive download and adaptive audiovisual streaming services over reliable transport – Quality integration module</title>
+  <uri type="src">https://www.itu.int/ITU-T/recommendations/rec.aspx?rec=13161&amp;lang=en</uri>
+  <uri type="obp">https://www.itu.inthttps//handle.itu.int/11.1002/1000/13161-en?locatt=format:pdf&amp;auth</uri>
+  <docidentifier type="ITU">ITU-T P.1203.3</docidentifier>
+  <date type="published">
+    <on>2016-12-22</on>
+  </date>
+  <contributor>
+    <role type="publisher"/>
+    <organization>
+      <name>International Telecommunication Union</name>
+      <abbreviation>ITU</abbreviation>
+      <uri>www.itu.int</uri>
+    </organization>
+  </contributor>
+  <edition>3</edition>
+  <language>en</language>
+  <script>Latn</script>
+  <abstract format="text/plain" language="en" script="Latn">Recommendation ITU-T P.1203.3 specifies the quality integration module for Recommendation ITU‑T P.1203. The ITU-T P.1203 series of ITU-T Recommendations specify modules for monitoring the audio, video and audiovisual quality of video services such as adaptive bit-rate video streaming. The respective ITU‑T work item has formerly been referred to as P.NATS (parametric non-intrusive assessment of TCP-based multimedia streaming quality). The ITU-T P.1203.3 part of Recommendation ITU-T P.1203 can be applied to the monitoring of performance and quality of experience (QoE) of video services such as adaptive bit-rate video streaming. Besides stream-based input information, the ITU-T P.1203.3 quality integration module takes the per-one-second video- and audio-quality scores calculated according to ITU-T P.1203.1 and ITU-T P.1203.2, respectively, asinput.Only one quality integration module is recommended for all four modes 0 to 3 of the Recommendation ITU-T P.1203 model series, unique across all modes.This Recommendation includes an electronic attachment containing the 20 trees described in clause8.4. This revision to Recommendation ITU-T P.1203.3 (2007) replaces equation (20) in clause 8.3.Amendment 1 introduces an adjustment of the audiovisual quality of ITU-T P.1203.3 for the case of very low audio quality and long stalling events. Corrigendum 1 introduces changes related to the qDirChangesLongest parameter in clause 8.1.2.5, aswell as equations 24 and 26.</abstract>
+  <status>
+    <stage>Withdrawal</stage>
+  </status>
+  <copyright>
+    <from>2016</from>
+    <owner>
+      <organization>
+        <name>International Telecommunication Union</name>
+        <abbreviation>ITU</abbreviation>
+        <uri>www.itu.int</uri>
+      </organization>
+    </owner>
+  </copyright>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">P Suppl. 10 (11/1988)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">P Suppl. 16 (11/1988)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">P Suppl. 20 (03/1993)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">P Suppl. 23 (02/1998)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">P Suppl. 24 (10/2005)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">P Suppl. 25 (01/2011)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">P Suppl. 26 (09/2017)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">P Suppl. 28 (09/2020)</formattedref>
+    </bibitem>
+  </relation>
+  <place>Geneva</place>
+  <ext>
+    <doctype>recommendation</doctype>
+    <editorialgroup>
+      <bureau>T</bureau>
+      <group type="study-group">
+        <name>ITU-T Study Group 12</name>
+        <acronym>SG</acronym>
+      </group>
+    </editorialgroup>
+  </ext>
+</bibdata>

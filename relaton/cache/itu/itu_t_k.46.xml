@@ -1,0 +1,97 @@
+<bibdata type="standard">
+  <fetched>2023-03-06</fetched>
+  <title type="title-main" format="text/plain" language="en" script="Latn">Protection of telecommunication lines using metallic symmetric conductors against lightning-induced surges</title>
+  <title type="main" format="text/plain" language="en" script="Latn">Protection of telecommunication lines using metallic symmetric conductors against lightning-induced surges</title>
+  <uri type="src">https://www.itu.int/ITU-T/recommendations/rec.aspx?rec=11630&amp;lang=en</uri>
+  <uri type="obp">https://www.itu.inthttps//handle.itu.int/11.1002/1000/11630-en?locatt=format:pdf&amp;auth</uri>
+  <docidentifier type="ITU">ITU-T K.46</docidentifier>
+  <date type="published">
+    <on>2012-05-29</on>
+  </date>
+  <contributor>
+    <role type="publisher"/>
+    <organization>
+      <name>International Telecommunication Union</name>
+      <abbreviation>ITU</abbreviation>
+      <uri>www.itu.int</uri>
+    </organization>
+  </contributor>
+  <edition>4</edition>
+  <language>en</language>
+  <script>Latn</script>
+  <abstract format="text/plain" language="en" script="Latn">Recommendation ITU-T K.46 gives a procedure to protect telecommunication lines using metallic symmetric conductors (i.e., twisted pair cables) against overvoltages and overcurrents imposed on the lines due to nearby lightning flashes. The procedure is based on the representation of the line by a sequence of sections and nodes, and the evaluation of each node exposure to the lightning-induced surges. Based on the node exposure, the ground flash density and the earth resistivity, the annual number of surges above a given voltage level is calculated. If the voltage level considered is the impulse withstand voltage of the node, then the number of surges above this level corresponds to the annual number of damages to the node. This number shall be multiplied by the loss due to induced surges in order to obtain the risk of failure due to indirect lightning flashes. The highest risk of all nodes is the risk of the line. The risk of failure due to indirect lightning flashes (R'Z) can be used in the risk assessment of a larger system to which the telecommunication line is a part, according to IEC62305-2. The calculated risk can also be used by the line owner (e.g., telecommunication operator) in order to evaluate the need of implementing additional protection measures on the line. In this case, the calculated risk (R'Z) shall be compared with the tolerable risk due to indirect flashes (RTi), the latter calculated based on ITU‑TK.72. If the calculated risk is lower than the tolerable limit, the line is adequately protected. Otherwise, it is necessary to implement additional protection measures until the risk of damage is lower than or equal to the tolerable limit. The appendices are organized as follows: Appendix I provides data on the electrical characteristics of cable shields, Appendix II presents an algorithm to guide the elaboration of software based on this Recommendation, Appendix III presents the calculation of the collection area for flashes near the line and Appendix IV shows some examples of calculation.</abstract>
+  <status>
+    <stage>Published</stage>
+  </status>
+  <copyright>
+    <from>2012</from>
+    <owner>
+      <organization>
+        <name>International Telecommunication Union</name>
+        <abbreviation>ITU</abbreviation>
+        <uri>www.itu.int</uri>
+      </organization>
+    </owner>
+  </copyright>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">K Suppl. 3 (10/2015)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">K Suppl. 8 (11/2017)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">K Suppl. 9 (05/2019)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">K Suppl. 10 (11/2017)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">K Suppl. 13 (12/2021)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">K Suppl. 14 (09/2019)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">K Suppl. 16 (10/2022)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">K Suppl. 19 (09/2019)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">K Suppl. 29 (07/2022)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">K Suppl. 32 (10/2022)</formattedref>
+    </bibitem>
+  </relation>
+  <place>Geneva</place>
+  <ext>
+    <doctype>recommendation</doctype>
+    <editorialgroup>
+      <bureau>T</bureau>
+      <group type="study-group">
+        <name>ITU-T Study Group 5</name>
+        <acronym>SG</acronym>
+      </group>
+    </editorialgroup>
+  </ext>
+</bibdata>

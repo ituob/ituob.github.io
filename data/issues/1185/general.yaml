@@ -1,0 +1,77 @@
+messages:
+  - extra_links:
+      - M1400_ICC
+      - BUREAUFAX
+      - ROA
+    type: running_annexes
+  - type: approved_recommendations
+    items:
+      'G.709/Y.1331 (2016) Cor 2 ': 2019-11-01T00:00:00.000Z
+      'K.20 ': 2019-11-01T00:00:00.000Z
+      'K.39 ': 2019-11-01T00:00:00.000Z
+      'K.40 ': 2019-11-01T00:00:00.000Z
+      'K.66 ': 2019-11-01T00:00:00.000Z
+      'K.73 ': 2019-11-01T00:00:00.000Z
+      'K.91 ': 2019-11-01T00:00:00.000Z
+      'K.142 ': 2019-11-01T00:00:00.000Z
+      'K.143 ': 2019-11-01T00:00:00.000Z
+      'K.144 ': 2019-11-01T00:00:00.000Z
+      'K.145 ': 2019-11-01T00:00:00.000Z
+      'L.1305 ': 2019-11-01T00:00:00.000Z
+      'L.1316 ': 2019-11-01T00:00:00.000Z
+      'L.1380 ': 2019-11-01T00:00:00.000Z
+      'L.1451 ': 2019-11-01T00:00:00.000Z
+      'X.1702 ': 2019-11-01T00:00:00.000Z
+    by: AAP-70
+    procedures: Recommendation ITU-T A.8
+  - contents:
+      - country_name:
+          en: Seychelles
+        phone_code: '1006'
+        contact:
+          en: '13'
+        communications: []
+      - country_name:
+          en: Slovakia
+        phone_code: '1007'
+        contact:
+          en: '12'
+        communications: []
+      - country_name:
+          en: Malaysia
+        phone_code: '1013'
+        contact:
+          en: '5'
+        communications: []
+      - country_name:
+          en: Thailand
+        phone_code: '1034'
+        contact:
+          en: '5'
+        communications: []
+      - country_name:
+          en: São Tomé and Principe
+        phone_code: '1039'
+        contact:
+          en: '14'
+        communications: []
+      - country_name:
+          en: Uruguay
+        phone_code: '1039'
+        contact:
+          en: '14'
+        communications: []
+      - country_name:
+          en: 'Hong Kong, China'
+        phone_code: '1068'
+        contact:
+          en: '4'
+        communications: []
+      - country_name:
+          en: Ukraine
+        phone_code: '1148'
+        contact:
+          en: '5'
+        communications: []
+    type: telephone_service_2
+  - type: callback_procedures

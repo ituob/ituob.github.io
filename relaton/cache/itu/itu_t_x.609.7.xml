@@ -1,0 +1,47 @@
+<bibdata type="standard">
+  <fetched>2023-03-06</fetched>
+  <title type="title-main" format="text/plain" language="en" script="Latn">Managed P2P communications: Content distribution peer protocol</title>
+  <title type="main" format="text/plain" language="en" script="Latn">Managed P2P communications: Content distribution peer protocol</title>
+  <uri type="src">https://www.itu.int/ITU-T/recommendations/rec.aspx?rec=13802&amp;lang=en</uri>
+  <uri type="obp">https://www.itu.inthttps//handle.itu.int/11.1002/1000/13802-en?locatt=format:pdf&amp;auth</uri>
+  <docidentifier type="ITU">ITU-T X.609.7</docidentifier>
+  <date type="published">
+    <on>2018-12-14</on>
+  </date>
+  <contributor>
+    <role type="publisher"/>
+    <organization>
+      <name>International Telecommunication Union</name>
+      <abbreviation>ITU</abbreviation>
+      <uri>www.itu.int</uri>
+    </organization>
+  </contributor>
+  <edition>1</edition>
+  <language>en</language>
+  <script>Latn</script>
+  <abstract format="text/plain" language="en" script="Latn">Recommendation ITU-T X.609.7 specifies a content distribution peer protocol (CDPP) that runs on the interface among entities of managed peer-to-peer (P2P) communications. CDPP is used to distribute one or more contents to a number of peers. Content distribution over traditional P2P communications has incurred various issues such as distribution of illegal content, uncontrollable participation and synchronized distribution of the updated contents. Different from the content distribution over the traditional P2P communications which is not capable of providing manageability, the content distribution over managed P2P communications can be managed by a content provider or service provider. In the content distribution over managed P2P communications, as an example, participation in an overlay network can be controlled so that only predefined peers can join the overlay network and distribute contents to each other. In addition, content to be distributed over an overlay network can be updated anytime and every update will be applied to all peers in the overlay network. The protocol is capable of managing content distribution under the control of a content provider or service provider. This Recommendation provides protocol operations and message formats for content distribution over a managed P2P network.</abstract>
+  <status>
+    <stage>Published</stage>
+  </status>
+  <copyright>
+    <from>2018</from>
+    <owner>
+      <organization>
+        <name>International Telecommunication Union</name>
+        <abbreviation>ITU</abbreviation>
+        <uri>www.itu.int</uri>
+      </organization>
+    </owner>
+  </copyright>
+  <place>Geneva</place>
+  <ext>
+    <doctype>recommendation</doctype>
+    <editorialgroup>
+      <bureau>T</bureau>
+      <group type="study-group">
+        <name>ITU-T Study Group 11</name>
+        <acronym>SG</acronym>
+      </group>
+    </editorialgroup>
+  </ext>
+</bibdata>

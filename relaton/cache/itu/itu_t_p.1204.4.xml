@@ -1,0 +1,87 @@
+<bibdata type="standard">
+  <fetched>2023-03-06</fetched>
+  <title type="title-main" format="text/plain" language="en" script="Latn">Video quality assessment of streaming services over reliable transport for resolutions up to 4K with access to full and reduced reference pixel information</title>
+  <title type="main" format="text/plain" language="en" script="Latn">Video quality assessment of streaming services over reliable transport for resolutions up to 4K with access to full and reduced reference pixel information</title>
+  <uri type="src">https://www.itu.int/ITU-T/recommendations/rec.aspx?rec=14157&amp;lang=en</uri>
+  <uri type="obp">https://www.itu.inthttps//handle.itu.int/11.1002/1000/14157-en?locatt=format:pdf&amp;auth</uri>
+  <docidentifier type="ITU">ITU-T P.1204.4</docidentifier>
+  <date type="published">
+    <on>2020-01-13</on>
+  </date>
+  <contributor>
+    <role type="publisher"/>
+    <organization>
+      <name>International Telecommunication Union</name>
+      <abbreviation>ITU</abbreviation>
+      <uri>www.itu.int</uri>
+    </organization>
+  </contributor>
+  <edition>2</edition>
+  <language>en</language>
+  <script>Latn</script>
+  <abstract format="text/plain" language="en" script="Latn">Recommendation ITU-T P.1204.4 describes the reduced-reference and full-reference video quality estimation model for Recommendation ITU-T P.1204 for monitoring the video quality for streaming using reliable transport (e.g., hypertext transfer protocol- (HTTP-) based adaptive streaming (HAS) over the transmission control protocol (TCP), and quick user datagram protocol Internet connections (QUIC)). The estimate is validated for videos encoded with H.264, H.265, video payload type 9 (VP9), or AOMedia Video 1 (AV1) codecs at any resolution up to 4K/ultra-high definition (UHD) (38402160) resolution for personal computer (PC) monitors and television (TV) and up to 25601440 for smartphone and tablet displays.The ITU-TP.1204 series of Recommendations provides sequence-related (between 5s and 10s) and per-1-second video-quality estimation. In principle, the per-one-second outputs of these video-quality models can be used together with an audio model for integration into audiovisual quality and, together with information about initial loading delay and media playout stalling events, further into a final per-session model output, an estimate of integral per-session quality (see e.g., Recommendations ITU-T P.1203, ITU-T P.1203.2, ITU-T P.1203.3).Recommendation ITU-T P.1204.4 was developed in collaboration with the Video Quality Experts Group (VQEG).This ITU-T P.1204-series of Recommendations addresses three application areas:</abstract>
+  <status>
+    <stage>Withdrawal</stage>
+  </status>
+  <copyright>
+    <from>2020</from>
+    <owner>
+      <organization>
+        <name>International Telecommunication Union</name>
+        <abbreviation>ITU</abbreviation>
+        <uri>www.itu.int</uri>
+      </organization>
+    </owner>
+  </copyright>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">P Suppl. 10 (11/1988)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">P Suppl. 16 (11/1988)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">P Suppl. 20 (03/1993)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">P Suppl. 23 (02/1998)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">P Suppl. 24 (10/2005)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">P Suppl. 25 (01/2011)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">P Suppl. 26 (09/2017)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">P Suppl. 28 (09/2020)</formattedref>
+    </bibitem>
+  </relation>
+  <place>Geneva</place>
+  <ext>
+    <doctype>recommendation</doctype>
+    <editorialgroup>
+      <bureau>T</bureau>
+      <group type="study-group">
+        <name>ITU-T Study Group 12</name>
+        <acronym>SG</acronym>
+      </group>
+    </editorialgroup>
+  </ext>
+</bibdata>

@@ -1,0 +1,52 @@
+<bibdata type="standard">
+  <fetched>2023-03-06</fetched>
+  <title type="title-main" format="text/plain" language="en" script="Latn">Formalization of data for service management</title>
+  <title type="main" format="text/plain" language="en" script="Latn">Formalization of data for service management</title>
+  <uri type="src">https://www.itu.int/ITU-T/recommendations/rec.aspx?rec=11620&amp;lang=en</uri>
+  <uri type="obp">https://www.itu.inthttps//handle.itu.int/11.1002/1000/11620-en?locatt=format:pdf&amp;auth</uri>
+  <docidentifier type="ITU">ITU-T M.1402</docidentifier>
+  <date type="published">
+    <on>2012-05-14</on>
+  </date>
+  <contributor>
+    <role type="publisher"/>
+    <organization>
+      <name>International Telecommunication Union</name>
+      <abbreviation>ITU</abbreviation>
+      <uri>www.itu.int</uri>
+    </organization>
+  </contributor>
+  <edition>2</edition>
+  <language>en</language>
+  <script>Latn</script>
+  <abstract format="text/plain" language="en" script="Latn">Recommendation ITU-T M.1402 contains definitions of data for service management. The data are defined in the way they are presented to the end users at their terminals, and conceptual or internal data structures are not defined. Therefore, this Recommendation defines an external terminology schema for the given application domain.This Recommendation focuses on defining data for products, customers, accounts, contracts, deals, addresses, prices, various segments and relationships between all these. Some attributes that are essential for identifying objects and associations between them are defined, as well.Order data and detailed mappings to network elements are not covered. Also, billing, marketing, sales, retailer, distributor, number management, device management, location management, logistics and finance are not covered. Finally, alarms, trouble tickets, call records and other call centre information are missing.As the data defined in this Recommendation are designed for human usage, they are independent of the functions in which they are used. Hence, the data may be applied in any functions, e.g., in customer requests, call centres, billing, service platforms, etc.This Recommendation uses the notation and conventions found in Recommendation ITU-T M.1401, "Formalization of interconnection designations among operators' telecommunication networks".Appendix I explains the creation of product and customer service databases.Appendix II explains the creation of interfaces to service platforms.</abstract>
+  <status>
+    <stage>Published</stage>
+  </status>
+  <copyright>
+    <from>2012</from>
+    <owner>
+      <organization>
+        <name>International Telecommunication Union</name>
+        <abbreviation>ITU</abbreviation>
+        <uri>www.itu.int</uri>
+      </organization>
+    </owner>
+  </copyright>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">M Suppl. 7 (05/2008)</formattedref>
+    </bibitem>
+  </relation>
+  <place>Geneva</place>
+  <ext>
+    <doctype>recommendation</doctype>
+    <editorialgroup>
+      <bureau>T</bureau>
+      <group type="study-group">
+        <name>ITU-T Study Group 2</name>
+        <acronym>SG</acronym>
+      </group>
+    </editorialgroup>
+  </ext>
+</bibdata>

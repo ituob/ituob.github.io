@@ -1,0 +1,436 @@
+messages:
+  - extra_links:
+      - M1400_ICC
+      - BUREAUFAX
+      - ROA
+    type: running_annexes
+  - type: approved_recommendations
+    items:
+      'H.264 (V11) ': 2016-10-01T00:00:00.000Z
+      'J.94 ': 2016-10-01T00:00:00.000Z
+      'J.196.2 ': 2016-10-01T00:00:00.000Z
+      'J.196.3 ': 2016-10-01T00:00:00.000Z
+      'J.223.2 ': 2016-10-01T00:00:00.000Z
+      'J.230 ': 2016-10-01T00:00:00.000Z
+      'J.302 ': 2016-10-01T00:00:00.000Z
+      'J.1006 ': 2016-10-01T00:00:00.000Z
+      'J.1104 ': 2016-10-01T00:00:00.000Z
+      'J.1105 ': 2016-10-01T00:00:00.000Z
+      'L.1002 ': 2016-10-01T00:00:00.000Z
+      'L.1350 ': 2016-10-01T00:00:00.000Z
+      'Y.4903/L.1603 ': 2016-10-01T00:00:00.000Z
+      'X.500 ': 2016-10-01T00:00:00.000Z
+      'X.501 ': 2016-10-01T00:00:00.000Z
+      'X.509 (2012) Cor 3 ': 2016-10-01T00:00:00.000Z
+      'X.509 ': 2016-10-01T00:00:00.000Z
+      'X.511 ': 2016-10-01T00:00:00.000Z
+      'X.518 ': 2016-10-01T00:00:00.000Z
+      'X.519 ': 2016-10-01T00:00:00.000Z
+      'X.520 ': 2016-10-01T00:00:00.000Z
+      'X.521 ': 2016-10-01T00:00:00.000Z
+      'X.525 ': 2016-10-01T00:00:00.000Z
+      'X.691 (2015) Cor 1 ': 2016-10-01T00:00:00.000Z
+      'X.1038 ': 2016-10-01T00:00:00.000Z
+      'X.1039 ': 2016-10-01T00:00:00.000Z
+      'X.1085 ': 2016-10-01T00:00:00.000Z
+      'X.1087 ': 2016-10-01T00:00:00.000Z
+      'Z.109 ': 2016-10-01T00:00:00.000Z
+      'Z.161 ': 2016-10-01T00:00:00.000Z
+      'Z.164 ': 2016-10-01T00:00:00.000Z
+      'Z.166 ': 2016-10-01T00:00:00.000Z
+      'Z.169 ': 2016-10-01T00:00:00.000Z
+    by: AAP-90
+    procedures: Recommendation ITU-T A.8
+  - type: ipns
+    contents:
+      en:
+        type: doc
+        content:
+          - type: paragraph
+            content:
+              - type: text
+                marks:
+                  - type: strong
+                text: Note from TSB
+          - type: paragraph
+            content:
+              - type: text
+                marks:
+                  - type: em
+                text: Identification codes for International Mobile Networks
+          - type: paragraph
+            content:
+              - type: text
+                text: >-
+                  Associated with shared mobile country code 901 (MCC), the
+                  following two-digit mobile network code (MNC) has been
+                  assigned on 5 October 2016:
+          - type: paragraph
+            content:
+              - type: text
+                text: "\_"
+          - type: table
+            content:
+              - type: table_row
+                content:
+                  - type: table_cell
+                    attrs:
+                      colspan: 1
+                      rowspan: 1
+                      colwidth: null
+                    content:
+                      - type: paragraph
+                        content:
+                          - type: text
+                            marks:
+                              - type: em
+                            text: Network
+                  - type: table_cell
+                    attrs:
+                      colspan: 1
+                      rowspan: 1
+                      colwidth: null
+                    content:
+                      - type: paragraph
+                        content:
+                          - type: text
+                            marks:
+                              - type: em
+                            text: >-
+                              Mobile Country Code (MCC)* and Mobile Network Code
+                              (MNC)**
+              - type: table_row
+                content:
+                  - type: table_cell
+                    attrs:
+                      colspan: 1
+                      rowspan: 1
+                      colwidth: null
+                    content:
+                      - type: paragraph
+                        content:
+                          - type: text
+                            text: Deutsche Telekom AG
+                  - type: table_cell
+                    attrs:
+                      colspan: 1
+                      rowspan: 1
+                      colwidth: null
+                    content:
+                      - type: paragraph
+                        content:
+                          - type: text
+                            text: 901 53
+          - type: paragraph
+            content:
+              - type: text
+                text: ______________
+          - type: paragraph
+            content:
+              - type: text
+                text: "*\_\_\_\_\_\_\_ MCC: Mobile Country Code / Indicatif de pays du mobile / Indicativo de país para el servicio móvil"
+          - type: paragraph
+            content:
+              - type: text
+                text: "**\_\_\_\_\_ MNC: Mobile Network Code / Code de réseau mobile / Indicativo de red para el servicio móvil"
+  - contents:
+      - country_name:
+          en: 'Trinidad and Tobago '
+        phone_code: '1868'
+        contact:
+          en: "Ms Cynthia Reddock-Downes\nChief Executive Officer (Ag.)\nTelecommunications Authority of Trinidad and Tobago (TATT)\n5, Eight Avenue Extension, off Twelfth Street\nBARATARIA \nTrinidad and Tobago\nTel:\t+1 868 675 8288 \nFax:\t+1 868 674 1055 \nE-mail:\tinfo@tatt.org.tt\nURL:\twww.tatt.org.tt"
+        communications:
+          - date: 2016-09-30T00:00:00.000Z
+            contents:
+              en:
+                type: doc
+                content:
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: 'The '
+                      - type: text
+                        marks:
+                          - type: em
+                        text: >-
+                          Telecommunications Authority of Trinidad and Tobago
+                          (TATT), 
+                      - type: text
+                        text: >-
+                          Barataria, announces that the following Central Office
+                          codes (NXX) have been assigned to operators within the
+                          North American Numbering Plan (NPA – 868) for Trinidad
+                          and Tobago.
+                  - type: bullet_list
+                    content:
+                      - type: list_item
+                        content:
+                          - type: paragraph
+                            content:
+                              - type: text
+                                text: Fixed network
+                  - type: table
+                    content:
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: Name of operator
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: 'Central office code '
+                                  - type: hard_break
+                                    marks:
+                                      - type: em
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: (NXX)
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: Service
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Digicel (Trinidad and Tobago) Limited
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: '230'
+                                  - type: hard_break
+                                  - type: text
+                                    text: '236'
+                                  - type: hard_break
+                                  - type: text
+                                    text: '237'
+                                  - type: hard_break
+                                  - type: text
+                                    text: '238'
+                                  - type: hard_break
+                                  - type: text
+                                    text: '239'
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Fixed
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: "\_"
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: 'International dialling format: +1 868 NXX XXXX'
+    type: telephone_service_2
+  - type: org_changes
+    contents:
+      en:
+        type: doc
+        content:
+          - type: paragraph
+            content:
+              - type: text
+                marks:
+                  - type: strong
+                text: Gabon
+          - type: paragraph
+            content:
+              - type: text
+                text: 'Communication of 5.X.2016:'
+          - type: paragraph
+            content:
+              - type: text
+                marks:
+                  - type: em
+                text: Change of name
+          - type: paragraph
+            content:
+              - type: text
+                text: 'The '
+              - type: text
+                marks:
+                  - type: em
+                text: Ministère de l'Economie Numérique et de la Poste
+              - type: text
+                text: ", Libreville, announces that it has changed its name. It is now called: «\_"
+              - type: text
+                marks:
+                  - type: em
+                text: >-
+                  Ministère de l'Economie Numérique, de la Communication, de la
+                  Culture et des Arts, Porte-Parole du Gouvernement
+              - type: text
+                text: ' ».'
+          - type: paragraph
+            content:
+              - type: text
+                text: "\_Ministère de l'Economie Numérique, de la Communication, de la Culture et des Arts,"
+              - type: hard_break
+              - type: text
+                text: Porte-Parole du Gouvernement
+              - type: hard_break
+              - type: text
+                text: Immeuble de la Poste
+              - type: hard_break
+              - type: text
+                text: 'Boulevard de l''Indépendance '
+              - type: hard_break
+              - type: text
+                text: B.P. 2280
+              - type: hard_break
+              - type: text
+                text: 'LIBREVILLE '
+              - type: hard_break
+              - type: text
+                text: Gabon
+              - type: hard_break
+              - type: text
+                text: "Tel:\_\_\_\_\_\_\_\_\_ +241 1763435"
+              - type: hard_break
+              - type: text
+                text: "Fax:\_\_\_\_\_\_\_\_ +241 1760109"
+              - type: hard_break
+              - type: text
+                text: "E-mail:\_\_\_ info-mencp@gouv.ga"
+          - type: paragraph
+          - type: paragraph
+            content:
+              - type: text
+                marks:
+                  - type: strong
+                text: Vanuatu
+          - type: paragraph
+            content:
+              - type: text
+                text: 'Communication of 14.X.2016:'
+          - type: paragraph
+            content:
+              - type: text
+                marks:
+                  - type: em
+                text: Change of name
+          - type: paragraph
+            content:
+              - type: text
+                text: 'The '
+              - type: text
+                marks:
+                  - type: em
+                text: Office of the Government Chief Information Officer
+              - type: text
+                text: ", Port Vila, announces that it has changed its name. It is now called: «\_"
+              - type: text
+                marks:
+                  - type: em
+                text: Office of the Government Chief Information Officer (OGCIO)
+              - type: text
+                text: ' ».'
+          - type: paragraph
+            content:
+              - type: text
+                text: Office of the Government Chief Information Officer (OGCIO)
+              - type: hard_break
+              - type: text
+                text: 'Prime Minister''s Office, Government of the Republic of Vanuatu'
+              - type: hard_break
+              - type: text
+                text: PMB 9108
+              - type: hard_break
+              - type: text
+                text: 'PORT VILA '
+              - type: hard_break
+              - type: text
+                text: Vanuatu
+              - type: hard_break
+              - type: text
+                text: "Tel: \_\_\_\_\_\_\_\_ +678 33380"
+              - type: hard_break
+              - type: text
+                text: "Fax:\_ \_\_\_\_\_\_ +678 26301"
+              - type: hard_break
+              - type: text
+                text: "E-mail:\_\_\_ "
+              - type: text
+                marks:
+                  - type: link
+                    attrs:
+                      href: 'mailto:ictpolicy@vanuatu.gov.vu'
+                      title: null
+                text: ictpolicy@vanuatu.gov.vu
+              - type: hard_break
+              - type: text
+                text: "URL:\_\_\_\_\_\_\_ www.ogcio.gov.vu"
+  - type: service_restrictions
+    items:
+      - country:
+          en: Seychelles
+        ob: 1006
+        page: 13
+      - country:
+          en: Slovakia
+        ob: 1007
+        page: 12
+      - country:
+          en: Thailand
+        ob: 1034
+        page: 5
+      - country:
+          en: São Tomé and Principev
+        ob: 1039
+        page: 14
+      - country:
+          en: Uruguay
+        ob: 1039
+        page: 14
+      - country:
+          en: 'Hong Kong, China'
+        ob: 1068
+        page: 4
+  - type: callback_procedures

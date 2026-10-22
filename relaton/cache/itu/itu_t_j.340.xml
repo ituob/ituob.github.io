@@ -1,0 +1,97 @@
+<bibdata type="standard">
+  <fetched>2021-12-17</fetched>
+  <title type="title-main" format="text/plain" language="en" script="Latn">Reference algorithm for computing peak signal to noise ratio of a processed video sequence with compensation for constant spatial shifts, constant temporal shift, and constant luminance gain and offset</title>
+  <title type="main" format="text/plain" language="en" script="Latn">Reference algorithm for computing peak signal to noise ratio of a processed video sequence with compensation for constant spatial shifts, constant temporal shift, and constant luminance gain and offset</title>
+  <uri type="src">https://www.itu.int/ITU-T/recommendations/rec.aspx?rec=10551&amp;lang=en</uri>
+  <uri type="obp">https://www.itu.inthttps//handle.itu.int/11.1002/1000/10551-en?locatt=format:pdf&amp;auth</uri>
+  <docidentifier type="ITU">ITU-T J.340</docidentifier>
+  <date type="published">
+    <on>2010-06-29</on>
+  </date>
+  <contributor>
+    <role type="publisher"/>
+    <organization>
+      <name>International Telecommunication Union</name>
+      <abbreviation>ITU</abbreviation>
+      <uri>www.itu.int</uri>
+    </organization>
+  </contributor>
+  <edition>1</edition>
+  <language>en</language>
+  <script>Latn</script>
+  <abstract format="text/plain" language="en" script="Latn">Peak signal to noise ratio (PSNR) is a useful benchmark for evaluating performance improvements of new objective perceptual video quality metrics. This PSNR calculation method in Recommendation ITU-T J.340 has the advantage of automatically determining the highest possible PSNR value for a given video sequence over the range of spatial and temporal shifts. Only one temporal shift is allowed for all frames in the entire processed video sequence (i.e., constant delay).This Recommendation defines a full reference (FR) algorithm for computing both the calibration and PSNR estimations for a processed video sequence: peak signal to noise ratio with compensation for constant spatial shifts, constant temporal shift, and constant luminance gain and offset (PSNRconst). Since the PSNRconst algorithm only examines the Y luminance channel (as defined by Recommendation ITU-R BT.601-6) distortions in the CB and CR chrominance channels will not be detected by the algorithm of this Recommendation. The intent of this Recommendation is to define and facilitate a standardized PSNR metric for use by industry and standard organizations. Reference code and test vectors have been included to assure accurate and consistent implementation of this PSNRconst metric.</abstract>
+  <status>
+    <stage>Published</stage>
+  </status>
+  <copyright>
+    <from>2010</from>
+    <owner>
+      <organization>
+        <name>International Telecommunication Union</name>
+        <abbreviation>ITU</abbreviation>
+        <uri>www.itu.int</uri>
+      </organization>
+    </owner>
+  </copyright>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">J Suppl. 1 (11/1998)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">J Suppl. 2 (11/1998)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">J Suppl. 3 (11/1998)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">J Suppl. 5 (09/1999)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">J Suppl. 6 (09/2016)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">J Suppl. 7 (04/2021)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">J Suppl. 8 (04/2021)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">J Suppl. 9 (04/2020)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">J Suppl. 10 (04/2020)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">J Suppl. 11 (04/2021)</formattedref>
+    </bibitem>
+  </relation>
+  <place>Geneva</place>
+  <ext>
+    <doctype>recommendation</doctype>
+    <editorialgroup>
+      <bureau>T</bureau>
+      <group type="study-group">
+        <name>ITU-T Study Group 12</name>
+        <acronym>SG</acronym>
+      </group>
+    </editorialgroup>
+  </ext>
+</bibdata>

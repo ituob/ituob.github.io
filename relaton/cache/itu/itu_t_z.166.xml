@@ -1,0 +1,53 @@
+<bibdata type="standard">
+  <fetched>2023-03-06</fetched>
+  <title type="title-main" format="text/plain" language="en" script="Latn">Testing and Test Control Notation version 3: TTCN-3 control interface (TCI)</title>
+  <title type="main" format="text/plain" language="en" script="Latn">Testing and Test Control Notation version 3: TTCN-3 control interface (TCI)</title>
+  <uri type="src">https://www.itu.int/ITU-T/recommendations/rec.aspx?rec=11068&amp;lang=en</uri>
+  <uri type="obp">https://www.itu.inthttps//handle.itu.int/11.1002/1000/11068-en?locatt=format:pdf&amp;auth</uri>
+  <docidentifier type="ITU">ITU-T Z.166</docidentifier>
+  <docidentifier type="ETSI">ETSI ES 201873-6</docidentifier>
+  <date type="published">
+    <on>2011-03-16</on>
+  </date>
+  <contributor>
+    <role type="publisher"/>
+    <organization>
+      <name>International Telecommunication Union</name>
+      <abbreviation>ITU</abbreviation>
+      <uri>www.itu.int</uri>
+    </organization>
+  </contributor>
+  <edition>13</edition>
+  <language>en</language>
+  <script>Latn</script>
+  <abstract format="text/plain" language="en" script="Latn">Recommendation ITU-T Z.166 specifies the control interfaces for Testing and Test Control Notation3 (TTCN-3) test system implementations. The TTCN-3 control interfaces (TCIs) provide a standardized adaptation for management, test component handling and encoding/decoding of a test system to a particular test platform. This Recommendation defines the interfaces as a set of operations independent of a target language.The interfaces are defined to be compatible with the TTCN-3 standards (see clause 2 of ETSIES201873-6 V4.13.1). The interface definition uses the Common Object Request Broker Architecture (CORBA) Interface Definition Language (IDL) to specify the TCI completely. Clauses8, 9, 10, 11 and 12 of ETSIES201873‑6V4.13.1 present language mappings for this abstract specification to the target languages Java, ANSI C, C++, XML and C#.This revision of the Recommendation contains amendments, clarifications, corrigenda and editorial corrections.</abstract>
+  <status>
+    <stage>Withdrawal</stage>
+  </status>
+  <copyright>
+    <from>2011</from>
+    <owner>
+      <organization>
+        <name>International Telecommunication Union</name>
+        <abbreviation>ITU</abbreviation>
+        <uri>www.itu.int</uri>
+      </organization>
+    </owner>
+  </copyright>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">Z Suppl. 1 (04/2015)</formattedref>
+    </bibitem>
+  </relation>
+  <place>Geneva</place>
+  <ext>
+    <doctype>recommendation</doctype>
+    <editorialgroup>
+      <bureau>T</bureau>
+      <group type="study-group">
+        <name>ITU-T Study Group 17</name>
+        <acronym>SG</acronym>
+      </group>
+    </editorialgroup>
+  </ext>
+</bibdata>

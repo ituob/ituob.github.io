@@ -1,0 +1,102 @@
+<bibdata type="standard">
+  <fetched>2021-12-17</fetched>
+  <title type="title-main" format="text/plain" language="en" script="Latn">Reference software for H.264 advanced video coding</title>
+  <title type="main" format="text/plain" language="en" script="Latn">Reference software for H.264 advanced video coding</title>
+  <uri type="src">https://www.itu.int/ITU-T/recommendations/rec.aspx?rec=10637&amp;lang=en</uri>
+  <docidentifier type="ITU">ITU-T H.264.2</docidentifier>
+  <docidentifier type="ISO">ISO/IEC 14496-5</docidentifier>
+  <date type="published">
+    <on>2010-06-22</on>
+  </date>
+  <contributor>
+    <role type="publisher"/>
+    <organization>
+      <name>International Telecommunication Union</name>
+      <abbreviation>ITU</abbreviation>
+      <uri>www.itu.int</uri>
+    </organization>
+  </contributor>
+  <edition>6</edition>
+  <language>en</language>
+  <script>Latn</script>
+  <abstract format="text/plain" language="en" script="Latn">Recommendation ITU-T H.264.2 provides accompanying reference software for Rec. ITU-TH.264 | ISO/IEC14496-10 as an electronic attachment. The software is an integral part of Rec. ITU-T H.264.2.The purpose of this Recommendation is to provide the following.The use of this reference software is not required for making an implementation of an encoder or decoder inconformance to Rec.ITU-TH.264|ISO/IEC 14496‑10. Requirements established in Rec.ITU‑TH.264 | ISO/IEC14496‑10 take precedence over the behaviour of the reference software.The edition approved in 2009-05 incorporated changes made to the reference software for Rec. ITU-TH.264 | ISO/IEC14496-10 advanced video coding. The changes contain improvements of encoder compression capability, bug fixes, speed and memory resource usage improvements, restructuring of the software for readability and ease of software maintenance, and the addition of support for new profiles of ITU-TH.264. The new profiles are from the set of profiles targeting professional applications that were added to Rec. ITU-TH.264 | ISO/IEC 14496-10 in 2007. No changes were made to the text of the Recommendation.The edition approved in 2010-06 contained improvements of encoder compression capability, bug fixes, speed and memory resource usage improvements, restructuring of the software for readability and ease of software maintenance. In addition, this edition includes support for the Scalable Baseline, Scalable High, Scalable High Intra, Multiview High, and Stereo High profiles. The support for the scalable profiles specified in Annex G of Rec. ITU-T H.264 | ISO/IEC14496‑10 (Scalable Baseline, Scalable High, and Scalable High Intra) and the support for the multiview profiles specified in Annex H of Rec. ITU-T H.264 | ISO/IEC 14496-10 (Multiview High and Stereo High) are provided in separate software solutions.The edition approved in 2012-01 only introduced changes to the reference software of Recommendation ITU‑TH.264.2 (the text is the same as of the edition approved 2010-06). The changes in the reference software improve the encoder compression capability, fix bugs, and improve speed and memory resource usage. The software was also restructured for better readability and ease of maintenance.The edition approved in 2014-07 contains bug fixes for the profiles specified in Annex A of Rec. ITU-T H.264 | ISO/IEC14496-10. In addition, the edition includes support for the MFC High profile specified in Annex H of Rec.ITU‑T H.264 | ISO/IEC 14496-10, support for the Multiview Depth High profile specified in Annex I of Rec.ITU‑T H.264 | ISO/IEC 14496-10, and support for the Enhanced Multiview Depth High profile specified in AnnexJ of Rec. ITU-T H.264 | ISO/IEC 14496-10, which are provided in separate software packages.This edition includes support for the MFC Depth High profile, which was included in the MFC plus Depth extension in ITU‑T H.264 V10. It also includes miscellaneous minor improvements and bug fixes relative to the prior approved version. This Recommendation was developed jointly with ISO/IEC JTC1/SC29/WG11 (MPEG) and corresponds to part ofISO/IEC 14496-5, up to and including ISO/IEC 14496-5:2001 Amendment 39.</abstract>
+  <status>
+    <stage>Withdrawal</stage>
+  </status>
+  <copyright>
+    <from>2010</from>
+    <owner>
+      <organization>
+        <name>International Telecommunication Union</name>
+        <abbreviation>ITU</abbreviation>
+        <uri>www.itu.int</uri>
+      </organization>
+    </owner>
+  </copyright>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">H Suppl. 1 (05/1999)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">H Suppl. 6 (04/2006)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">H Suppl. 9 (05/2008)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">H Suppl. 11 (02/2009)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">H Suppl. 12 (11/2013)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">H Suppl. 13 (10/2015)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">H Suppl. 14 (10/2015)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">H Suppl. 15 (01/2017)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">H Suppl. 17 (11/2014)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">H Suppl. 18 (10/2017)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">H Suppl. 19 (04/2021)</formattedref>
+    </bibitem>
+  </relation>
+  <place>Geneva</place>
+  <ext>
+    <doctype>recommendation</doctype>
+    <editorialgroup>
+      <bureau>T</bureau>
+      <group type="study-group">
+        <name>ITU-T Study Group 16</name>
+        <acronym>SG</acronym>
+      </group>
+    </editorialgroup>
+  </ext>
+</bibdata>

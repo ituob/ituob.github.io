@@ -1,0 +1,52 @@
+<bibdata type="standard">
+  <fetched>2023-03-06</fetched>
+  <title type="title-main" format="text/plain" language="en" script="Latn">IPv6 technical security guidelines</title>
+  <title type="main" format="text/plain" language="en" script="Latn">IPv6 technical security guidelines</title>
+  <uri type="src">https://www.itu.int/ITU-T/recommendations/rec.aspx?rec=11946&amp;lang=en</uri>
+  <uri type="obp">https://www.itu.inthttps//handle.itu.int/11.1002/1000/11946-en?locatt=format:pdf&amp;auth</uri>
+  <docidentifier type="ITU">ITU-T X.1037</docidentifier>
+  <date type="published">
+    <on>2013-10-07</on>
+  </date>
+  <contributor>
+    <role type="publisher"/>
+    <organization>
+      <name>International Telecommunication Union</name>
+      <abbreviation>ITU</abbreviation>
+      <uri>www.itu.int</uri>
+    </organization>
+  </contributor>
+  <edition>1</edition>
+  <language>en</language>
+  <script>Latn</script>
+  <abstract format="text/plain" language="en" script="Latn">The Internet Protocol version 6 (IPv6) is intended to provide many built-in benefits such as large address space, and self-configuration capabilities. Because it is a new protocol that is likely to be massively adopted in the coming years and operates differently than the Internet Protocol version 4 (IPv4), both foreseeable and unforeseeable security issues will arise. Many new functions or requirements of IPv6, i.e., automatic configuration of interfaces, multicast addressing for specific services, the ability to assign multiple IPv6 addresses to a given interface, and for the use of the ICMPv6 protocol as the cornerstone of the IPv6 protocol machinery (dynamic neighbour discovery, ICMPv6 Router Advertisement (RA) messages that convey configuration information so that IPv6 terminal devices can automatically access to the IPv6 network, etc.) can be identified. Although somewhat equivalent capabilities exist in IPv4 and have been exposed to security threats for quite some time, IPv6 implementation and operation differs from IPv4, at the risk of raising specific security issues.From that perspective, Recommendation ITU-T X.1037 provides a set of technical security guidelines for telecommunication organizations to deploy and operate IPv6 networks and services. The content of this Recommendation focuses on how to securely deploy network facilities for telecommunication organizations and how to ensure security operations for the IPv6 environment.</abstract>
+  <status>
+    <stage>Published</stage>
+  </status>
+  <copyright>
+    <from>2013</from>
+    <owner>
+      <organization>
+        <name>International Telecommunication Union</name>
+        <abbreviation>ITU</abbreviation>
+        <uri>www.itu.int</uri>
+      </organization>
+    </owner>
+  </copyright>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">X Suppl. 23 (09/2014)</formattedref>
+    </bibitem>
+  </relation>
+  <place>Geneva</place>
+  <ext>
+    <doctype>recommendation</doctype>
+    <editorialgroup>
+      <bureau>T</bureau>
+      <group type="study-group">
+        <name>ITU-T Study Group 17</name>
+        <acronym>SG</acronym>
+      </group>
+    </editorialgroup>
+  </ext>
+</bibdata>

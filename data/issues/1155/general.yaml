@@ -1,0 +1,382 @@
+messages:
+  - extra_links:
+      - M1400_ICC
+      - BUREAUFAX
+      - ROA
+    type: running_annexes
+  - type: approved_recommendations
+    items:
+      'G.798 (2017) Cor 1 ': 2018-08-01
+      'G.997.2 (2015) Amd 5 ': 2018-08-01
+      'G.9701 (2014) Cor 5 ': 2018-08-01
+      'G.9701 (2014) Amd 5 ': 2018-08-01
+    by: AAP-41
+    procedures: Recommendation ITU-T A.8
+  - type: iptn
+    contents:
+      en:
+        type: doc
+        content:
+          - type: paragraph
+            content:
+              - type: text
+                marks:
+                  - type: strong
+                text: Note from TSB
+          - type: paragraph
+            content:
+              - type: text
+                text: >-
+                  ITU-T Study Group 2, which is the leading study group on
+                  numbering, naming, addressing, identification and routing,
+                  agreed at its meeting of 4 to 13 July 2018 to publish the
+                  following statement in ITU Operational Bulletin:
+          - type: paragraph
+            content:
+              - type: text
+                text: “Global numbers used for the European eCall service
+          - type: paragraph
+            content:
+              - type: text
+                text: >-
+                  Several number ranges under non geographic country codes are
+                  used for eCall, the pan European emergency system for
+                  vehicles. These numbers have been assigned by the ITU and they
+                  have been available for use in association with eCall service.
+          - type: paragraph
+            content:
+              - type: text
+                text: >-
+                  These numbers are used as calling party numbers when the
+                  device automatically calls the emergency number in the event
+                  of an accident. They generally use 15 digit formats. From 31
+                  March 2018, all new type cars sold in Europe must have eCall
+                  capability.
+          - type: paragraph
+            content:
+              - type: text
+                text: >-
+                  In order for the eCall system to operate properly and for the
+                  emergency services (e.g. call centres and intervention teams)
+                  to dial back the phone numbers used by the eCall systems, it
+                  is crucial that the eCall ranges be opened in all networks and
+                  that the CLI (Calling Line Identification) for these calls is
+                  passed between operators in a correct and diallable format
+                  according to the relevant ITU recommendations.
+          - type: paragraph
+            content:
+              - type: text
+                text: >-
+                  Given the criticality of the service, we want to alert the
+                  assignees and all stakeholders on the need for these numbers
+                  to be opened and routed on public networks and in particular
+                  those in Europe.
+          - type: paragraph
+            content:
+              - type: text
+                text: "The ITU has been notified of the following ranges as being used for eCall: 883\_130, 882 39 and 882 37. Other operators using global resources for eCall may also inform the ITU to request similar publications."
+          - type: paragraph
+            content:
+              - type: text
+                text: The ECC recommendation (17)04 “Numbering for eCall” (
+              - type: text
+                marks:
+                  - type: link
+                    attrs:
+                      href: 'https://www.ecodocdb.dk/document/1019'
+                      title: null
+                text: 'https://www.ecodocdb.dk/document/1019'
+              - type: text
+                text: >-
+                  ) also provides more information on numbering options for
+                  eCall.
+          - type: paragraph
+            content:
+              - type: text
+                text: 'Contacts:'
+          - type: paragraph
+            content:
+              - type: text
+                text: "883\_130 assigned to Orange: contact Philippe Fouquart,Orange, "
+              - type: text
+                marks:
+                  - type: link
+                    attrs:
+                      href: 'mailto:Philippe.fouquart@orange.com'
+                      title: null
+                text: Philippe.fouquart@orange.com
+              - type: text
+                text: .
+          - type: paragraph
+            content:
+              - type: text
+                text: >-
+                  882 39 assigned to Vodafone Group: contact MacDougall Robert,
+                  Vodafone Group, 
+              - type: text
+                marks:
+                  - type: link
+                    attrs:
+                      href: 'mailto:Robert.MacDougall@vodafone.com'
+                      title: null
+                text: Robert.MacDougall@vodafone.com
+              - type: text
+                text: .
+          - type: paragraph
+            content:
+              - type: text
+                text: '882 37 assigned to AT&T, contact Mike Corkerry, AT&T, '
+              - type: text
+                marks:
+                  - type: link
+                    attrs:
+                      href: 'mailto:Mike.Corkerry@intl.att.com'
+                      title: null
+                text: Mike.Corkerry@intl.att.com
+              - type: text
+                text: ”.
+  - contents:
+      - country_name:
+          en: 'Denmark '
+        phone_code: '45'
+        contact:
+          en: "Danish Energy Agency\nAmaliegade 44\n1256 COPENHAGEN K\nDenmark\nTel:\t\t+45 33 92 67 00 \nFax:\t\t+45 33 11 47 43\nE-mail:\t\tens@ens.dk \nURL:\t\twww.ens.dk "
+        communications:
+          - date: 2018-08-15
+            contents:
+              en:
+                type: doc
+                content:
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: 'The '
+                      - type: text
+                        marks:
+                          - type: em
+                        text: Danish Energy Agency
+                      - type: text
+                        text: >-
+                          , Copenhagen, announces the following updates to the
+                          national numbering plan of Denmark:
+                  - type: bullet_list
+                    content:
+                      - type: list_item
+                        content:
+                          - type: paragraph
+                            content:
+                              - type: text
+                                text: Assignment – Mobile communications services
+                  - type: table
+                    content:
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: Provider
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: Numbering series
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: Date of assignment
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: SimService A/S
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 493defgh
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 15.VIII.2018
+                  - type: paragraph
+      - country_name:
+          en: 'Norway '
+        phone_code: '47'
+        contact:
+          en: "Norwegian Communications Authority\nPostbox 93\n4791 LILLESAND\nNorway\nTel: \t\t+47 22 82 46 00\nFax: \t\t+47 22 82 46 40\nE-mail: \tfirmapost@nkom.no \nURL: \t\twww.nkom.no"
+        communications:
+          - date: 2018-08-14
+            contents:
+              en:
+                type: doc
+                content:
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: 'The '
+                      - type: text
+                        marks:
+                          - type: em
+                        text: Norwegian Communications Authority
+                      - type: text
+                        text: >-
+                          , Lillesand, announces the following updates to the
+                          national numbering plan of Norway:
+                  - type: bullet_list
+                    content:
+                      - type: list_item
+                        content:
+                          - type: paragraph
+                            content:
+                              - type: text
+                                text: Assignment – fixed communication services
+                  - type: table
+                    content:
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: Provider
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: Numbering series
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: Date of assignment
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Kvantel AS
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 214150000-21419999
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 12.06.2017
+                  - type: paragraph
+    type: telephone_service_2
+  - type: service_restrictions
+    items:
+      - country:
+          en: Seychelles
+        ob: 1006
+        page: 13
+      - country:
+          en: Slovakia
+        ob: 1007
+        page: 12
+      - country:
+          en: Malaysia
+        ob: 1013
+        page: 5
+      - country:
+          en: Thailand
+        ob: 1034
+        page: 5
+      - country:
+          en: São Tomé and Principe
+        ob: 1039
+        page: 14
+      - country:
+          en: Uruguay
+        ob: 1039
+        page: 14
+      - country:
+          en: 'Hong Kong, China'
+        ob: 1068
+        page: 4
+      - country:
+          en: Ukraine
+        ob: 1148
+        page: 5
+  - type: callback_procedures

@@ -1,0 +1,47 @@
+<bibdata type="standard">
+  <fetched>2023-03-06</fetched>
+  <title type="title-main" format="text/plain" language="en" script="Latn">Use of service providers' user authentication infrastructure to implement public key infrastructure for peer-to-peer networks</title>
+  <title type="main" format="text/plain" language="en" script="Latn">Use of service providers' user authentication infrastructure to implement public key infrastructure for peer-to-peer networks</title>
+  <uri type="src">https://www.itu.int/ITU-T/recommendations/rec.aspx?rec=11749&amp;lang=en</uri>
+  <uri type="obp">https://www.itu.inthttps//handle.itu.int/11.1002/1000/11749-en?locatt=format:pdf&amp;auth</uri>
+  <docidentifier type="ITU">ITU-T X.1164</docidentifier>
+  <date type="published">
+    <on>2012-10-14</on>
+  </date>
+  <contributor>
+    <role type="publisher"/>
+    <organization>
+      <name>International Telecommunication Union</name>
+      <abbreviation>ITU</abbreviation>
+      <uri>www.itu.int</uri>
+    </organization>
+  </contributor>
+  <edition>1</edition>
+  <language>en</language>
+  <script>Latn</script>
+  <abstract format="text/plain" language="en" script="Latn">Peer entity authentication is a mandatoryrequirement for securing peer-to-peer communications. However, especially inpure peer-to-peer (P2P) networks, it is difficult for peers to authenticatecorresponding peer entities because there is no central server forauthentication they can rely on. In addition, the existing public key infrastructure (PKI)has little use for this purpose because those peer entities rarely have publickey certificates issued by well-known certification authorities.The purpose of Recommendation ITU-T X.1164 is to define mechanisms toutilize service providers user authentication infrastructure to implement PKIfor P2P networks, with which users who have a valide-mail account managed by a service provider can issue certificates to their devices by themselves and make those certificates verifiable by corresponding peers inP2P networks.</abstract>
+  <status>
+    <stage>Published</stage>
+  </status>
+  <copyright>
+    <from>2012</from>
+    <owner>
+      <organization>
+        <name>International Telecommunication Union</name>
+        <abbreviation>ITU</abbreviation>
+        <uri>www.itu.int</uri>
+      </organization>
+    </owner>
+  </copyright>
+  <place>Geneva</place>
+  <ext>
+    <doctype>recommendation</doctype>
+    <editorialgroup>
+      <bureau>T</bureau>
+      <group type="study-group">
+        <name>ITU-T Study Group 17</name>
+        <acronym>SG</acronym>
+      </group>
+    </editorialgroup>
+  </ext>
+</bibdata>

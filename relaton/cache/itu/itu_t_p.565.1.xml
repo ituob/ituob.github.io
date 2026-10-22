@@ -1,0 +1,86 @@
+<bibdata type="standard">
+  <fetched>2023-03-06</fetched>
+  <title type="title-main" format="text/plain" language="en" script="Latn">Machine learning model for the assessment of transmission network impact on speech quality for mobile packet-switched voice services</title>
+  <title type="main" format="text/plain" language="en" script="Latn">Machine learning model for the assessment of transmission network impact on speech quality for mobile packet-switched voice services</title>
+  <uri type="src">https://www.itu.int/ITU-T/recommendations/rec.aspx?rec=14823&amp;lang=en</uri>
+  <docidentifier type="ITU">ITU-T P.565.1</docidentifier>
+  <date type="published">
+    <on>2021-11-29</on>
+  </date>
+  <contributor>
+    <role type="publisher"/>
+    <organization>
+      <name>International Telecommunication Union</name>
+      <abbreviation>ITU</abbreviation>
+      <uri>www.itu.int</uri>
+    </organization>
+  </contributor>
+  <edition>1</edition>
+  <language>en</language>
+  <script>Latn</script>
+  <abstract format="text/plain" language="en" script="Latn">Recommendation ITU-T P.565.1 is based on the ITU-T P.565 framework. It provides a machine learning based model that predicts the impact on the speech quality from the Internet Protocol (IP) transport and underlying transport, as well as a standardized or pre-defined jitter buffer in the end client; thus, providing a network centric view on the speech quality service delivered on mobile packet switched networks. This is expressed in terms of a mean opinion score-listening quality objective (MOS-LQO) under the assumption of an otherwise clean transmission, without background noise, non-standard-conformant encoding on sending device, automatic gain control, voice enhancement devices, transcoding, bridging, frequency response, non-standard-conformant jitter-buffer (for IMS mobile calls) or decoding, clock drift or any other impairment not caused by the IP transport and underlying transport. The model supports the uses cases and applications defined in revised ITU-T P.565 for IMS mobile calls (VoLTE/VoNR with EVS, AMRWB codecs) and OTT/WhatsApp. In addition, it meets the minimum performance requirements for the provided test vectors (see ITU-T P.565, Annex D) and it also passed an independent validation on an additional unknown live recorded data set (see ITU-T P.565, Annex D). The model enables the assessment of transmission network impact on speech quality for mobile packet-switched voice services. In addition, if this predictor is used together with perceptual speech analysis or perceptual speech quality metrics like [ITU-T P.863], it is possible to identify if the source of problems resides inside or outside the transport network observed by the predictor.</abstract>
+  <status>
+    <stage>Published</stage>
+  </status>
+  <copyright>
+    <from>2021</from>
+    <owner>
+      <organization>
+        <name>International Telecommunication Union</name>
+        <abbreviation>ITU</abbreviation>
+        <uri>www.itu.int</uri>
+      </organization>
+    </owner>
+  </copyright>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">P Suppl. 10 (11/1988)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">P Suppl. 16 (11/1988)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">P Suppl. 20 (03/1993)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">P Suppl. 23 (02/1998)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">P Suppl. 24 (10/2005)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">P Suppl. 25 (01/2011)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">P Suppl. 26 (09/2017)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">P Suppl. 28 (09/2020)</formattedref>
+    </bibitem>
+  </relation>
+  <place>Geneva</place>
+  <ext>
+    <doctype>recommendation</doctype>
+    <editorialgroup>
+      <bureau>T</bureau>
+      <group type="study-group">
+        <name>ITU-T Study Group 12</name>
+        <acronym>SG</acronym>
+      </group>
+    </editorialgroup>
+  </ext>
+</bibdata>

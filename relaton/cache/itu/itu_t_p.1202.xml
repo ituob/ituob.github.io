@@ -1,0 +1,87 @@
+<bibdata type="standard">
+  <fetched>2023-03-06</fetched>
+  <title type="title-main" format="text/plain" language="en" script="Latn">Parametric non-intrusive bitstream assessment of video media streaming quality</title>
+  <title type="main" format="text/plain" language="en" script="Latn">Parametric non-intrusive bitstream assessment of video media streaming quality</title>
+  <uri type="src">https://www.itu.int/ITU-T/recommendations/rec.aspx?rec=11730&amp;lang=en</uri>
+  <uri type="obp">https://www.itu.inthttps//handle.itu.int/11.1002/1000/11730-en?locatt=format:pdf&amp;auth</uri>
+  <docidentifier type="ITU">ITU-T P.1202</docidentifier>
+  <date type="published">
+    <on>2012-10-14</on>
+  </date>
+  <contributor>
+    <role type="publisher"/>
+    <organization>
+      <name>International Telecommunication Union</name>
+      <abbreviation>ITU</abbreviation>
+      <uri>www.itu.int</uri>
+    </organization>
+  </contributor>
+  <edition>1</edition>
+  <language>en</language>
+  <script>Latn</script>
+  <abstract format="text/plain" language="en" script="Latn">Recommendation ITU-T P.1202 provides an overview of algorithmic models for non-intrusive monitoring of the video quality of IP-based video services based on packet-header and bitstream information. The ITU-T P.1202-series of Recommendations addresses two application areas:The ITU-T P.1202 model algorithms are no-reference (i.e.,non-intrusive) models which operate by analysing packet header and bitstream information as available from respective packet trace data provided to the model algorithms in the packet capture format (PCAP). Further input information on more general aspects of the stream, which may not be available from packet header and bitstream information, is provided to the model algorithm out-of-band, for example in the form of stream‑specific side information. ITU-T P.1202.1 describes one model, the model for the LR application area. ITU-T P.1202.2 describes two models for the HR application area corresponding to two modes: mode 1 and mode 2, which are both no-reference (i.e., non-intrusive) models. Mode 1 refers to a parsing mode; the model operates by analysing information in the video bitstream without fully decoding the bitstream (i.e.,no pixel information is used) for MOS estimation. Mode 2 refers to a full decoding mode, in addition to the bitstream information which mode 1 uses, the model can also decode parts or all of the video bitstream (i.e., pixel information is used) for MOS estimation. Further client specific information, such as concealment type, is provided to the algorithm out-of-band, for example in the form of stream-specific side information. As output, the model algorithms provide individual estimates of video quality in terms of the five-point absolute category rating (ACR) mean opinion score (MOS). Further, diagnostic information on causes of quality degradations can be made available, too, since different types of performance parameters are derived during model calculations. Complementary to the ITU-T P.1202 models, there are two further models described in Recommendations ITU‑TP.1201.1 and ITU-T P.1201.2. The respective entry-Recommendation for these models is ITU‑TP.1201. It describes packet-header-only-based video, and audio and audiovisual quality models. The main differences with ITU-T P.1202 can be summarized as follows: The ITU-T P.1201 models use packet header information, while the ITU-T P.1202 models exploit further bitstream information, such as coding-related information. As a consequence, the ITU‑TP.1202 models can be more accurate in their quality predictions. In turn, they require non‑encrypted streams to enable access to payload information. Since the ITU-T P.1202 models are more complex, they also require more computational power to estimate the video quality.</abstract>
+  <status>
+    <stage>Published</stage>
+  </status>
+  <copyright>
+    <from>2012</from>
+    <owner>
+      <organization>
+        <name>International Telecommunication Union</name>
+        <abbreviation>ITU</abbreviation>
+        <uri>www.itu.int</uri>
+      </organization>
+    </owner>
+  </copyright>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">P Suppl. 10 (11/1988)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">P Suppl. 16 (11/1988)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">P Suppl. 20 (03/1993)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">P Suppl. 23 (02/1998)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">P Suppl. 24 (10/2005)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">P Suppl. 25 (01/2011)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">P Suppl. 26 (09/2017)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">P Suppl. 28 (09/2020)</formattedref>
+    </bibitem>
+  </relation>
+  <place>Geneva</place>
+  <ext>
+    <doctype>recommendation</doctype>
+    <editorialgroup>
+      <bureau>T</bureau>
+      <group type="study-group">
+        <name>ITU-T Study Group 12</name>
+        <acronym>SG</acronym>
+      </group>
+    </editorialgroup>
+  </ext>
+</bibdata>

@@ -1,0 +1,1432 @@
+messages:
+  - extra_links:
+      - M1400_ICC
+      - BUREAUFAX
+      - ROA
+    type: running_annexes
+  - type: approved_recommendations
+    items:
+      'G.798 (2010) Amd 2 ': 2012-03-31T22:00:00.000Z
+      'G.874 (2010) Amd 1 ': 2012-03-31T22:00:00.000Z
+      'G.993.2 (2011) Amd 1 ': 2012-03-31T22:00:00.000Z
+      'G.996.2 (2009) Amd 2 ': 2012-03-31T22:00:00.000Z
+      'G.998.4 (2010) Amd 2 ': 2012-03-31T22:00:00.000Z
+      'X.501 (2005) Cor 4 ': 2012-03-31T22:00:00.000Z
+      'X.501 (2008) Cor 2 ': 2012-03-31T22:00:00.000Z
+      'X.509 (2005) Cor 4 ': 2012-03-31T22:00:00.000Z
+      'X.509 (2008) Cor 2 ': 2012-03-31T22:00:00.000Z
+      'X.511 (2005) Cor 4 ': 2012-03-31T22:00:00.000Z
+      'X.511 (2008) Cor 2 ': 2012-03-31T22:00:00.000Z
+      'X.519 (2005) Cor 3 ': 2012-03-31T22:00:00.000Z
+      'X.519 (2008) Cor 2 ': 2012-03-31T22:00:00.000Z
+      'X.520 (2005) Cor 4 ': 2012-03-31T22:00:00.000Z
+      'X.520 (2008) Cor 2 ': 2012-03-31T22:00:00.000Z
+      'X.521 (2005) Cor 1 ': 2012-03-31T22:00:00.000Z
+      'X.521 (2008) Cor 1 ': 2012-03-31T22:00:00.000Z
+      'X.691 (2008) Cor 2 ': 2012-03-31T22:00:00.000Z
+      'X.1086 (2008) Amd 1 ': 2012-03-31T22:00:00.000Z
+      'X.1091 ': 2012-03-31T22:00:00.000Z
+      'X.1194 ': 2012-03-31T22:00:00.000Z
+      'X.1197 ': 2012-03-31T22:00:00.000Z
+    by: AAP-80
+    procedures: Recommendation ITU-T A.8
+  - type: custom
+    title:
+      en: Maritime Identification Digits (MID)
+    recommendation: null
+    contents:
+      en:
+        type: doc
+        content:
+          - type: paragraph
+            content:
+              - type: text
+                text: >-
+                  The Administration of Kingdom of the Netherlands has requested
+                  that the MID “306” allocated to the former Netherlands
+                  Antilles be considered as allocated to the three new
+                  geographical areas, namely: Curaçao, Sint Maarten (Dutch part)
+                  and the islands Bonaire, Sint Eustatius and Saba.
+  - contents:
+      - country_name:
+          en: 'Bahrain '
+        phone_code: '973'
+        contact:
+          en: "Mr Ahmed Jaber Aldoseri\nDirector of ICT\nTelecommunications Regulatory Authority\nP.O. Box 10353\nKingdom of Bahrain \nTel:\t+973 1752 0000\nFax:\t+973 1753 2125\nE-mail:\taaldoseri@tra.org.bh"
+        communications:
+          - date: 2012-03-12T16:20:24.940Z
+            contents:
+              en:
+                type: doc
+                content:
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: 'The '
+                      - type: text
+                        marks:
+                          - type: em
+                        text: Telecommunications Regulatory Authority (TRA
+                      - type: text
+                        text: >-
+                          ), Bahrain, announces that the following new telephone
+                          number series have been assigned to VIVA Bahrain:
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: "\_"
+                  - type: table
+                    content:
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: hard_break
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: (1)
+                          - type: table_cell
+                            attrs:
+                              colspan: 2
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: (2)
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: (3)
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: (4)
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 2
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: >-
+                                      NDC (National Destination Code) or leading
+                                      digits of N(S)N (National (Significant)
+                                      Number))
+                          - type: table_cell
+                            attrs:
+                              colspan: 2
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: N(S)N number length
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 2
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: Usage of E.164 Number
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 2
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: Additional
+                                  - type: hard_break
+                                    marks:
+                                      - type: strong
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: information
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: Maximum length
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: Minimum length
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 35300000 – 35399999
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 8 digits
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 8 digits
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Mobile telephone service
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: VIVA Bahrain
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 35500000 – 35599999
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 8 digits
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 8 digits
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Mobile telephone service
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: VIVA Bahrain
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 63000000 – 63009999
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 8 digits
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 8 digits
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Mobile telephone service
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: VIVA Bahrain
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 63330000 – 63339999
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 8 digits
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 8 digits
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Mobile telephone service
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: VIVA Bahrain
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 63610000 – 63619999
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 8 digits
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 8 digits
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Mobile telephone service
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: VIVA Bahrain
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 63660000 – 63669999
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 8 digits
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 8 digits
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Mobile telephone service
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: VIVA Bahrain
+                  - type: paragraph
+                    content:
+                      - type: text
+                        marks:
+                          - type: strong
+                        text: "\_"
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: "International dialling format:\_\_\_\_\_          +973 353X XXXX"
+                      - type: hard_break
+                      - type: text
+                        text: "\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_ \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_ +973 355X XXXX"
+                      - type: hard_break
+                      - type: text
+                        text: "\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_ \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_ +973 6300 XXXX"
+                      - type: hard_break
+                      - type: text
+                        text: "\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_ \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_ +973 6333 XXXX"
+                      - type: hard_break
+                      - type: text
+                        text: "\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_ \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_ +973 6361 XXXX"
+                      - type: hard_break
+                      - type: text
+                        text: "\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_ \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_ +973 6366 XXXX"
+      - country_name:
+          en: 'Burkina Faso '
+        phone_code: '226'
+        contact:
+          en: "Autorité de Régulation des Communications Electroniques et des Postes (ARCEP) \nB.P. 6437\nOUAGADOUGOU 01\nBurkina Faso \nTel:\t+226 5037 5360/61/62\nFax:\t+226 5037 5364\nE-mail:\tsecretariat@arce.bf\nURL:\twww.arce.bf"
+        communications:
+          - date: 2012-03-26T15:21:00.109Z
+            contents:
+              en:
+                type: doc
+                content:
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: 'The '
+                      - type: text
+                        marks:
+                          - type: em
+                        text: >-
+                          Autorité de Régulation des Communications
+                          Electroniques et des Postes (ARCEP
+                      - type: text
+                        text: >-
+                          ), Ouagadougou, announces assignment of the following
+                          new number series:
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: "\_"
+                  - type: table
+                    content:
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: Operator
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: Service
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: Number series
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: Date of introduction
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Telecel Faso SA
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Mobile
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 68 10XXXX to 68 19XXXX
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 26.III.2012
+      - country_name:
+          en: 'Costa Rica '
+        phone_code: '506'
+        contact:
+          en: "Ing. Pedro Arce Villalobos \nSuperintendencia de Telecomunicaciones (SUTEL)\nApartado Postal 936-1000\nSAN JOSÉ,\nCosta Rica\nTel:\t+506 4000 0000\nFax:\t+506 2215 6821\nE-mail:\tpedro.arce@sutel.go.cr"
+        communications:
+          - date: 2012-03-19T16:21:24.405Z
+            contents:
+              en:
+                type: doc
+                content:
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: 'The '
+                      - type: text
+                        marks:
+                          - type: em
+                        text: 'Superintendencia de Telecomunicaciones (SUTEL), '
+                      - type: text
+                        text: San José
+                      - type: text
+                        marks:
+                          - type: em
+                        text: ', '
+                      - type: text
+                        text: >-
+                          which under Decree N°35187-MINAET (National Numbering
+                          Plan) is in charge of the control and administration
+                          of Numbering resources in Costa Rica, acting in
+                          accordance with the provisions of Recommendation ITU-T
+                          E.129
+                      - type: text
+                        marks:
+                          - type: strong
+                        text: ','
+                      - type: text
+                        text: ' presents the:'
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: >-
+                          Description of assignment of new numbering resources
+                          in the ITU-T E.164 National Numbering Plan for country
+                          code 506
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: "\_"
+                  - type: table
+                    content:
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 2
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: >-
+                                      NDC (National Destination Code) or leading
+                                      digits of N(S)N (National (Significant)
+                                      Number))
+                                  - type: hard_break
+                                  - type: text
+                                    text: X = 0 to 9
+                          - type: table_cell
+                            attrs:
+                              colspan: 2
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: N(S)N number length
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 2
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Usage of E.164 Number
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 2
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Time and date of introduction
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Maximum length
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Minimum length
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 410X XXXX
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 411X XXXX
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 8 digits
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 8 digits
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 'IP telephone service,'
+                                  - type: hard_break
+                                  - type: text
+                                    text: Telefonica de Costa Rica TC; S.A
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: '19.III.2012 – 00:00'
+      - country_name:
+          en: 'Denmark '
+        phone_code: '45'
+        contact:
+          en: "The Danish Business Authority\nDahlerups Pakhus\nDK-2100 Copenhagen\nDenmark\nTel:\t+45 35 291000 \nFax:\t+45 35 466001 \nE-mail:\terst@erst.dk \nURL:\twww.erst.dk "
+        communications:
+          - date: 2012-03-13T16:21:53.165Z
+            contents:
+              en:
+                type: doc
+                content:
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: 'The '
+                      - type: text
+                        marks:
+                          - type: em
+                        text: Danish Business Authority
+                      - type: text
+                        text: >-
+                          , Copenhagen, announces the following changes to the
+                          Danish telephone numbering plan:
+                  - type: bullet_list
+                    content:
+                      - type: list_item
+                        content:
+                          - type: paragraph
+                            content:
+                              - type: text
+                                text: assignment – mobile communication service
+                  - type: table
+                    content:
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: Provider
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: Numbering series
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    marks:
+                                      - type: em
+                                    text: Date of assignment
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: CBB Mobil A/S
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 5296XXXX
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 13.III.2012
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Telenor A/S
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: >-
+                                      9131XXXX, 9132XXXX, 9133XXXX, 9134XXXX,
+                                      9135XXXX, 9136XXXX, 9137XXXX, 9138XXXX and
+                                      9139XXXX
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 19.III.2012
+      - country_name:
+          en: 'Germany '
+        phone_code: '49'
+        contact:
+          en: "Ms Martina Welcher\nFederal Network Agency for Electricity, Gas, Telecommunications, Post and Railway\nCanisiusstr. 21\n55122 MAINZ\nGermany\nTel:\t+49 6131 18 2246\nFax:\t+49 6131 18 5650\nE-mail:\tmartina.welcher@bnetza.de\nURL:\twww.bundesnetzagentur.de"
+        communications:
+          - date: 2012-03-26T15:22:24.190Z
+            contents:
+              en:
+                type: doc
+                content:
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: The
+                      - type: text
+                        marks:
+                          - type: em
+                        text: ' Federal Network Agency for Electricity, Gas, Telecommunications, Post and Railway, ('
+                      - type: text
+                        text: >-
+                          BNetzA), Mainz, announces that an updated National
+                          Numbering Plan (NNP) for Germany has been posted on
+                          ITU numbering website: 
+                      - type: text
+                        marks:
+                          - type: link
+                            attrs:
+                              href: 'http://www.itu.int/ITU-T/inr/nnp/'
+                              title: null
+                        text: www.itu.int/ITU-T/inr/nnp/
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: >-
+                          All Administrations and Recognized Operating Agencies
+                          (ROA) are requested to ensure that access is given to
+                          all national (significant) numbers by notifying the
+                          respective telecommunications companies within their
+                          country.
+      - country_name:
+          en: 'Jordan '
+        phone_code: '962'
+        contact:
+          en: "Mr. Zeid Alkadi\nTechnical Department \nTelecommunications Regulatory Commission (TRC)\nP.O. Box 850967\nAMMAN 11185\nJordan \nTel:\t+962 6 550 1120 ext: 3401\nFax:\t+962 6 586 3641\nE-mail:\tzeid.alkadi@trc.gov.jo"
+        communications:
+          - date: 2012-03-21T16:22:51.136Z
+            contents:
+              en:
+                type: doc
+                content:
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: 'The '
+                      - type: text
+                        marks:
+                          - type: em
+                        text: 'Telecommunications Regulatory Commission (TRC), '
+                      - type: text
+                        text: >-
+                          Amman, announces the withdrawal of number range as
+                          follows:
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: SUP
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: "\_"
+                  - type: table
+                    content:
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Service
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Operator
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Number Series
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Mobile Services
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: >-
+                                      New Generation Telecommunication Company –
+                                      Xpress
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: +962 7 454X XXXX
+                                  - type: hard_break
+                                  - type: text
+                                    text: +962 7 455X XXXX
+                                  - type: hard_break
+                                  - type: text
+                                    text: +962 7 456X XXXX
+                                  - type: hard_break
+                                  - type: text
+                                    text: +962 7 457X XXXX
+      - country_name:
+          en: 'Kuwait '
+        phone_code: '965'
+        contact:
+          en: "ISCC Kuwait\nMinistry of Communications\nP.O. Box 318\n11111 SAFAT\nKuwait\nTel:\t+965 2241 1777\nFax:\t+965 2241 9815\nE-mail:\t iscckuwait@gmail.com\nURL:\twww.moc.kw"
+        communications:
+          - date: 2012-04-17T15:23:49.842Z
+            contents:
+              en:
+                type: doc
+                content:
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: 'The '
+                      - type: text
+                        marks:
+                          - type: em
+                        text: Ministry of Communications (MOC)
+                      - type: text
+                        text: >-
+                          , Safat, announces that the new numbering range 511
+                          XXXXX has been introduced by VIVA Telecom, one of the
+                          mobile operator in Kuwait.
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: 'Format: +965 511 XXXXX'
+      - country_name:
+          en: 'Netherlands '
+        phone_code: '31'
+        contact:
+          en: "Mr Remco Leijendekker\nAssociation COIN\nP.O. Box 777\n2800AT GOUDA\nNetherlands\nTel: \t+31 182 690 076\nFax: \t+31 182 690 075\nE-mail: \tservicedesk@coin.nl\nURL: \twww.coin.nl"
+        communications:
+          - date: 2012-03-14T16:24:15.139Z
+            contents:
+              en:
+                type: doc
+                content:
+                  - type: paragraph
+                    content:
+                      - type: text
+                        marks:
+                          - type: em
+                        text: Machine-to-Machine
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: 'The '
+                      - type: text
+                        marks:
+                          - type: em
+                        text: 'Association COIN, '
+                      - type: text
+                        text: >-
+                          Gouda, announces that the new number series 0970 XXXX
+                          XXXX (12 digits long when calling within the
+                          Netherlands) has been introduced for
+                          Machine-to-Machine numbers in the Netherlands. This
+                          number series can be implemented on fixed and mobile
+                          networks.
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: "\_"
+                  - type: table
+                    content:
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Service
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Operator
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Number series
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Date of introduction
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Machine to Machine
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: All operators in the Netherlands
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: +31 970 XXXX XXXX
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: '1'
+                                  - type: text
+                                    marks:
+                                      - type: superscript
+                                    text: st
+                                  - type: text
+                                    text: ' April 2012'
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: "\_"
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: >-
+                          Administrations and Recognized Operating Agencies
+                          (ROAs) are requested to ensure that access is opened
+                          in their switches to the above new number series.
+    type: telephone_service_2
+  - type: org_changes
+    contents:
+      en:
+        type: doc
+        content:
+          - type: paragraph
+            content:
+              - type: text
+                marks:
+                  - type: strong
+                text: Bulgaria
+          - type: paragraph
+            content:
+              - type: text
+                text: 'Communication of 3.IV.2012:'
+          - type: paragraph
+            content:
+              - type: text
+                marks:
+                  - type: em
+                text: Change in e-mail address
+          - type: paragraph
+            content:
+              - type: text
+                text: 'The '
+              - type: text
+                marks:
+                  - type: em
+                text: 'Bulgarian Telecommunications Company Plc. (BTC),'
+              - type: text
+                text: ' Sofia, announces that its e-mail address has changed:'
+          - type: paragraph
+            content:
+              - type: text
+                text: 'E-mail: emil.georgakiev@vivacom.bg'
+          - type: paragraph
+            content:
+              - type: text
+                text: Bulgarian Telecommunications Company Plc. (BTC)
+              - type: hard_break
+              - type: text
+                text: '8, Gen, Totleben Boulevard'
+              - type: hard_break
+              - type: text
+                text: 1606 SOFIA
+              - type: hard_break
+              - type: text
+                text: Bulgaria
+              - type: hard_break
+              - type: text
+                text: "Tel:\_\_\_\_\_\_\_\_\_\_ +359 2 949 4896 "
+              - type: hard_break
+              - type: text
+                text: "Fax:\_\_\_\_\_\_\_\_\_ +359 2 987 2110 "
+              - type: hard_break
+              - type: text
+                text: "E-mail:\_\_\_ emil.georgakiev@vivacom.bg "
+              - type: hard_break
+              - type: text
+                text: "URL:\_\_\_\_\_\_\_\_ www.btc.bg"
+          - type: paragraph
+          - type: paragraph
+            content:
+              - type: text
+                marks:
+                  - type: strong
+                text: Saint Lucia
+          - type: paragraph
+            content:
+              - type: text
+                text: 'Communication of 4.IV.2012:'
+          - type: paragraph
+            content:
+              - type: text
+                marks:
+                  - type: em
+                text: Change of name and fax number
+          - type: paragraph
+            content:
+              - type: text
+                text: 'The '
+              - type: text
+                marks:
+                  - type: em
+                text: >-
+                  Ministry of Communications, Works, Transport and Public
+                  Utilities
+              - type: text
+                text: >-
+                  , Castries, announces that it has changed its name. It is now
+                  called :«Ministry of Infrastructure, Port Services and
+                  Transport», and that its fax number has changed.
+          - type: paragraph
+            content:
+              - type: text
+                text: 'Ministry of Infrastructure, Port Services and Transport'
+              - type: hard_break
+              - type: text
+                text: 'CASTRIES '
+              - type: hard_break
+              - type: text
+                text: Saint Lucia
+              - type: hard_break
+              - type: text
+                text: "Tel:\_\_\_\_\_\_\_\_\_\_ +1 758 468 43 00 "
+              - type: hard_break
+              - type: text
+                text: "Fax:\_\_\_\_\_\_\_\_\_ +1 758 453 27 69"
+              - type: hard_break
+              - type: text
+                text: "E-mail:\_\_\_ "
+              - type: text
+                marks:
+                  - type: link
+                    attrs:
+                      href: 'mailto:min_com@gosl.gov.lc'
+                      title: null
+                text: min_com@gosl.gov.lc
+  - type: callback_procedures

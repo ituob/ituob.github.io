@@ -1,0 +1,58 @@
+<bibdata type="standard">
+  <fetched>2021-12-17</fetched>
+  <title type="title-main" format="text/plain" language="en" script="Latn">Information technology – JPEG XR image coding system – Motion JPEG XR</title>
+  <title type="main" format="text/plain" language="en" script="Latn">Information technology – JPEG XR image coding system – Motion JPEG XR</title>
+  <uri type="src">https://www.itu.int/ITU-T/recommendations/rec.aspx?rec=10996&amp;lang=en</uri>
+  <uri type="obp">https://www.itu.inthttps//handle.itu.int/11.1002/1000/10996-en?locatt=format:pdf&amp;auth</uri>
+  <docidentifier type="ITU">ITU-T T.833</docidentifier>
+  <docidentifier type="ISO">ISO/IEC 29199-3</docidentifier>
+  <date type="published">
+    <on>2010-09-13</on>
+  </date>
+  <contributor>
+    <role type="publisher"/>
+    <organization>
+      <name>International Telecommunication Union</name>
+      <abbreviation>ITU</abbreviation>
+      <uri>www.itu.int</uri>
+    </organization>
+  </contributor>
+  <edition>1</edition>
+  <language>en</language>
+  <script>Latn</script>
+  <abstract format="text/plain" language="en" script="Latn">Recommendation ITU-T T.833 is technically aligned with ISO/IEC 29199-3 but is not published as identical text. It was drafted in collaboration with ISO/IEC JTC 1/SC 29/WG 1 (which is informally known as "JPEG").This Recommendation | International Standard is the Motion JPEG XR file format specification. The Motion JPEG XR file format is designed to contain one or more motion sequences of JPEG XR images, with their timing. The format is based on the ISO base media file format. It is intended as a 'building block', specifying only the video format. An application would be expected to combine Motion JPEG XR with suitable audio, metadata, etc., for a complete application specification; that specification would normally select profiles and levels of Motion JPEG XR, and could also specify application profiles and levels that apply to the integration.Motion JPEG XR is expected to be used in a variety of applications, particularly where JPEG XR image coding technology is already available for other reasons, or where the high-quality frame-based approach, with no inter-frame coding, is appropriate.Motion JPEG XR is a flexible format, permitting a wide variety of usages, such as editing, display interchange, and streaming.</abstract>
+  <status>
+    <stage>Published</stage>
+  </status>
+  <copyright>
+    <from>2010</from>
+    <owner>
+      <organization>
+        <name>International Telecommunication Union</name>
+        <abbreviation>ITU</abbreviation>
+        <uri>www.itu.int</uri>
+      </organization>
+    </owner>
+  </copyright>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">T Suppl. 1 (11/2004)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">T Suppl. 2 (03/2011)</formattedref>
+    </bibitem>
+  </relation>
+  <place>Geneva</place>
+  <ext>
+    <doctype>recommendation</doctype>
+    <editorialgroup>
+      <bureau>T</bureau>
+      <group type="study-group">
+        <name>ITU-T Study Group 16</name>
+        <acronym>SG</acronym>
+      </group>
+    </editorialgroup>
+  </ext>
+</bibdata>

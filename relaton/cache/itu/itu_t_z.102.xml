@@ -1,0 +1,53 @@
+<bibdata type="standard">
+  <fetched>2023-03-06</fetched>
+  <title type="title-intro" format="text/plain" language="en" script="Latn">Specification and Description Language</title>
+  <title type="title-main" format="text/plain" language="en" script="Latn">Comprehensive SDL-2010</title>
+  <title type="main" format="text/plain" language="en" script="Latn">Specification and Description Language - Comprehensive SDL-2010</title>
+  <uri type="src">https://www.itu.int/ITU-T/recommendations/rec.aspx?rec=11389&amp;lang=en</uri>
+  <uri type="obp">https://www.itu.inthttps//handle.itu.int/11.1002/1000/11389-en?locatt=format:pdf&amp;auth</uri>
+  <docidentifier type="ITU">ITU-T Z.102</docidentifier>
+  <date type="published">
+    <on>2011-12-22</on>
+  </date>
+  <contributor>
+    <role type="publisher"/>
+    <organization>
+      <name>International Telecommunication Union</name>
+      <abbreviation>ITU</abbreviation>
+      <uri>www.itu.int</uri>
+    </organization>
+  </contributor>
+  <edition>4</edition>
+  <language>en</language>
+  <script>Latn</script>
+  <abstract format="text/plain" language="en" script="Latn">Recommendation ITU-T Z.102 defines the comprehensive features of the Specification and Description Language. Together with Recommendations ITU-T Z.100, ITU-T Z.101, ITU-T Z.103, ITU‑TZ.104, ITU-T Z.105, ITU-T Z.106 and ITU-T Z.107, this Recommendation is part of a reference manual for the language. The language defined in this document covers features of the language not included in Basic SDL‑2010 in Recommendation ITU-T Z.101. These features provide comprehensive coverage of abstract grammar of the language except some data features covered in ITU-T Z.104 (and ITU-T Z.107 for object‑oriented data).CoverageThe Specification and Description Language has concepts for behaviour, data description and (particularly for larger systems) structuring. The basis of behaviour description is extended finite state machines communicating by messages. Data description is based on data types for values and objects. The basis for structuring is hierarchical decomposition and type hierarchies. A distinctive feature of the Specification and Description Language is the graphical representation. This Recommendation covers additional features to Recommendation ITU-T Z.101. The concrete grammar given is the graphical representation. The alternative textual programming representation is given in Recommendation ITU-T Z.106. The concrete grammar in this Recommendation with Recommendations ITU-T Z.101 and ITU-T Z.104 (and ITU-T Z.107 for object‑oriented data) gives a canonical syntax, which is extended in ITU-T Z.103 to a syntax that is easier to use. The features of the language defined in Recommendation ITU-T Z.102 make the language more comprehensive.ApplicationsThe Specification and Description Language is applicable within standard bodies and industry. The main application areas for which the Specification and Description Language has been designed are stated in ITU‑TZ.100, but the language is generally suitable for describing reactive systems. The range of applications is from requirement description to implementation. The features of the language defined in Recommendation ITU‑TZ.102 allow more complex models to be defined than is practical with ITU-T Z.101, but without the features of Recommendation ITU-T Z.103 that make the language more concise and informative. This Recommendation provides a basis for the features defined in Recommendation ITU-T Z.103, which (with ITU‑TZ.104 for data and ITU-T Z.107 for object‑oriented data) completes the main language feature set.</abstract>
+  <status>
+    <stage>Withdrawal</stage>
+  </status>
+  <copyright>
+    <from>2011</from>
+    <owner>
+      <organization>
+        <name>International Telecommunication Union</name>
+        <abbreviation>ITU</abbreviation>
+        <uri>www.itu.int</uri>
+      </organization>
+    </owner>
+  </copyright>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">Z Suppl. 1 (04/2015)</formattedref>
+    </bibitem>
+  </relation>
+  <place>Geneva</place>
+  <ext>
+    <doctype>recommendation</doctype>
+    <editorialgroup>
+      <bureau>T</bureau>
+      <group type="study-group">
+        <name>ITU-T Study Group 17</name>
+        <acronym>SG</acronym>
+      </group>
+    </editorialgroup>
+  </ext>
+</bibdata>

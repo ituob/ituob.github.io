@@ -1,0 +1,47 @@
+<bibdata type="standard">
+  <fetched>2023-03-06</fetched>
+  <title type="title-main" format="text/plain" language="en" script="Latn">Quantum noise random number generator architecture</title>
+  <title type="main" format="text/plain" language="en" script="Latn">Quantum noise random number generator architecture</title>
+  <uri type="src">https://www.itu.int/ITU-T/recommendations/rec.aspx?rec=14095&amp;lang=en</uri>
+  <uri type="obp">https://www.itu.inthttps//handle.itu.int/11.1002/1000/14095-en?locatt=format:pdf&amp;auth</uri>
+  <docidentifier type="ITU">ITU-T X.1702</docidentifier>
+  <date type="published">
+    <on>2019-11-13</on>
+  </date>
+  <contributor>
+    <role type="publisher"/>
+    <organization>
+      <name>International Telecommunication Union</name>
+      <abbreviation>ITU</abbreviation>
+      <uri>www.itu.int</uri>
+    </organization>
+  </contributor>
+  <edition>1</edition>
+  <language>en</language>
+  <script>Latn</script>
+  <abstract format="text/plain" language="en" script="Latn">Recommendation ITU-T X.1702 defines a generic functional architecture of a quantum entropy source, a common method to estimate and validate the entropy of a noise source under evaluation, and a common method to specify randomness extractors when they are part of the implemented system.In contrast to the causal nature of classical physics, the inherently probabilistic nature of quantum physics is particularly suited to implement noise sources with an entropy that can be estimated based on information theory. However, there are currently no existing standards that explicitly distinguish between noise sources based on quantum physics and classical physics. This Recommendation is an add-on to existing noise or entropy source standards that allow specification of the noise source under evaluation based on quantum physics.</abstract>
+  <status>
+    <stage>Published</stage>
+  </status>
+  <copyright>
+    <from>2019</from>
+    <owner>
+      <organization>
+        <name>International Telecommunication Union</name>
+        <abbreviation>ITU</abbreviation>
+        <uri>www.itu.int</uri>
+      </organization>
+    </owner>
+  </copyright>
+  <place>Geneva</place>
+  <ext>
+    <doctype>recommendation</doctype>
+    <editorialgroup>
+      <bureau>T</bureau>
+      <group type="study-group">
+        <name>ITU-T Study Group 17</name>
+        <acronym>SG</acronym>
+      </group>
+    </editorialgroup>
+  </ext>
+</bibdata>

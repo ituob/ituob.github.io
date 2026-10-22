@@ -1,0 +1,236 @@
+messages:
+  - extra_links:
+      - M1400_ICC
+      - BUREAUFAX
+      - ROA
+    type: running_annexes
+  - type: approved_recommendations
+    items:
+      'M.3080 ': 2021-01-31T23:00:00.000Z
+      'P.57 ': 2021-01-31T23:00:00.000Z
+      'P.58 ': 2021-01-31T23:00:00.000Z
+      'X.680 ': 2021-01-31T23:00:00.000Z
+      'X.681 ': 2021-01-31T23:00:00.000Z
+      'X.682 ': 2021-01-31T23:00:00.000Z
+      'X.683 ': 2021-01-31T23:00:00.000Z
+      'X.690 ': 2021-01-31T23:00:00.000Z
+      'X.691 ': 2021-01-31T23:00:00.000Z
+      'X.692 ': 2021-01-31T23:00:00.000Z
+      'X.693 ': 2021-01-31T23:00:00.000Z
+      'X.694 ': 2021-01-31T23:00:00.000Z
+      'X.695 ': 2021-01-31T23:00:00.000Z
+      'X.696 ': 2021-01-31T23:00:00.000Z
+      'X.697 ': 2021-01-31T23:00:00.000Z
+      'X.894 (2018) Cor 2 ': 2021-01-31T23:00:00.000Z
+      'Y.3056 ': 2021-01-31T23:00:00.000Z
+      'Y.3113 ': 2021-01-31T23:00:00.000Z
+      Y.3135: 2021-01-31T23:00:00.000Z
+      'Y.3157 ': 2021-01-31T23:00:00.000Z
+      'Y.3177 ': 2021-01-31T23:00:00.000Z
+      'Y.4476 ': 2021-01-31T23:00:00.000Z
+    by: AAP-98
+    procedures: Recommendation ITU-T A.8
+  - type: iptn
+    contents:
+      en:
+        type: doc
+        content:
+          - type: paragraph
+            content:
+              - type: text
+                marks:
+                  - type: strong
+                text: Note from TSB
+          - type: paragraph
+            content:
+              - type: text
+                marks:
+                  - type: em
+                text: Identification codes for international networks
+          - type: paragraph
+            content:
+              - type: text
+                text: >-
+                  Associated with shared country code 883 for international
+                  networks, the following three-digit identification codes have
+                  been 
+              - type: text
+                marks:
+                  - type: strong
+                text: assigned
+              - type: text
+                text: .
+          - type: paragraph
+            content:
+              - type: text
+                text: "\_"
+          - type: table
+            content:
+              - type: table_row
+                content:
+                  - type: table_cell
+                    attrs:
+                      colspan: 1
+                      rowspan: 1
+                      colwidth: null
+                    content:
+                      - type: paragraph
+                        content:
+                          - type: text
+                            marks:
+                              - type: em
+                            text: Applicant
+                  - type: table_cell
+                    attrs:
+                      colspan: 1
+                      rowspan: 1
+                      colwidth: null
+                    content:
+                      - type: paragraph
+                        content:
+                          - type: text
+                            marks:
+                              - type: em
+                            text: Network
+                  - type: table_cell
+                    attrs:
+                      colspan: 1
+                      rowspan: 1
+                      colwidth: null
+                    content:
+                      - type: paragraph
+                        content:
+                          - type: text
+                            marks:
+                              - type: em
+                            text: 'Country Code and '
+                          - type: hard_break
+                            marks:
+                              - type: em
+                          - type: text
+                            marks:
+                              - type: em
+                            text: Identification Code
+                  - type: table_cell
+                    attrs:
+                      colspan: 1
+                      rowspan: 1
+                      colwidth: null
+                    content:
+                      - type: paragraph
+                        content:
+                          - type: text
+                            marks:
+                              - type: em
+                            text: Date of assignment
+              - type: table_row
+                content:
+                  - type: table_cell
+                    attrs:
+                      colspan: 1
+                      rowspan: 1
+                      colwidth: null
+                    content:
+                      - type: paragraph
+                        content:
+                          - type: text
+                            text: Afinna One Srl
+                  - type: table_cell
+                    attrs:
+                      colspan: 1
+                      rowspan: 1
+                      colwidth: null
+                    content:
+                      - type: paragraph
+                        content:
+                          - type: text
+                            text: Afinna One Srl
+                  - type: table_cell
+                    attrs:
+                      colspan: 1
+                      rowspan: 1
+                      colwidth: null
+                    content:
+                      - type: paragraph
+                        content:
+                          - type: text
+                            text: +883 350
+                  - type: table_cell
+                    attrs:
+                      colspan: 1
+                      rowspan: 1
+                      colwidth: null
+                    content:
+                      - type: paragraph
+                        content:
+                          - type: text
+                            text: 5.II.2021
+  - contents:
+      - country_name:
+          en: 'Sierra Leone '
+        phone_code: '232'
+        contact:
+          en: "Mr Abdul Bah\nNational Telecommunications Commission (NATCOM)\n13 Regent Road\nHill Station, FREETOWN\nSierra Leone\nTel:\t\t+232 88 600 003 or +232 78 333 444\nE-mail:\tabah@natcom.gov.sl\nURL:\twww.natcom.gov.sl"
+        communications: []
+    type: telephone_service_2
+  - type: misc_communications
+    contents:
+      en:
+        type: doc
+        content:
+          - type: paragraph
+            content:
+              - type: text
+                text: Austria
+          - type: paragraph
+            content:
+              - type: text
+                text: 'Communication of 4.II.2021:'
+          - type: paragraph
+            content:
+              - type: text
+                text: >-
+                  On the occasion of the "FT8DMC Activity Days 2021", the
+                  Austrian Administration authorizes an Austrian amateur station
+                  to use the special call sign 
+              - type: text
+                marks:
+                  - type: strong
+                text: OE21FTDMC
+              - type: text
+                text: ' from 2 to 15 August 2021.'
+  - type: service_restrictions
+    items:
+      - country:
+          en: Seychelles
+        ob: 1006
+        page: 13
+      - country:
+          en: Slovakia
+        ob: 1007
+        page: 12
+      - country:
+          en: Malaysia
+        ob: 1013
+        page: 5
+      - country:
+          en: Thailand
+        ob: 1034
+        page: 5
+      - country:
+          en: São Tomé and Principe
+        ob: 1039
+        page: 14
+      - country:
+          en: Uruguay
+        ob: 1039
+        page: 14
+      - country:
+          en: 'Hong Kong, China'
+        ob: 1068
+        page: 4
+      - country:
+          en: Ukraine
+        ob: 1148
+        page: 5
+  - type: callback_procedures

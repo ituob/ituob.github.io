@@ -1,0 +1,47 @@
+<bibdata type="standard">
+  <fetched>2023-03-06</fetched>
+  <title type="title-main" format="text/plain" language="en" script="Latn">Biology-to-machine (B2M) protocol</title>
+  <title type="main" format="text/plain" language="en" script="Latn">Biology-to-machine (B2M) protocol</title>
+  <uri type="src">https://www.itu.int/ITU-T/recommendations/rec.aspx?rec=14795&amp;lang=en</uri>
+  <uri type="obp">https://www.itu.inthttps//handle.itu.int/11.1002/1000/14795-en?locatt=format:pdf&amp;auth</uri>
+  <docidentifier type="ITU">ITU-T X.1080.2</docidentifier>
+  <date type="published">
+    <on>2021-10-29</on>
+  </date>
+  <contributor>
+    <role type="publisher"/>
+    <organization>
+      <name>International Telecommunication Union</name>
+      <abbreviation>ITU</abbreviation>
+      <uri>www.itu.int</uri>
+    </organization>
+  </contributor>
+  <edition>1</edition>
+  <language>en</language>
+  <script>Latn</script>
+  <abstract format="text/plain" language="en" script="Latn">Recommendation ITU-T X.1080.2 defines a general protocol for the exchange of biometric information from a patient facility to a medical expert facility so that a medical centre could remotely monitor a patient and retrieve information from that patient. It also allows the medical expert facility to control the sensors and other devices at the patient facility and to establish the environment for a monitor session at the patient facility. It defines a versatile and open-ended information model that allows any type of medical and non-medical information to be transferred.This Recommendation is a biosignal communication protocol between computing devices and biological systems. This protocol is based upon an aggregation of the interactions between a computing device and the biological system. Biometric interactions are described using the telebiometric multimodal model as defined by Recommendation ITU-T X.1081, which is a three-layer model combining the science, sensor and metric layers. It is a horizontal market protocol designed to be used for all IoT biometric metric applications, for example, in the aerospace, medical, automotive, industrial and consumer markets. In the case of clinical medical trials, this protocol enriches the application with a versatile and open-ended information model filled with interaction descriptions thereby ensuring an accurate comparison of measurement processes.</abstract>
+  <status>
+    <stage>Published</stage>
+  </status>
+  <copyright>
+    <from>2021</from>
+    <owner>
+      <organization>
+        <name>International Telecommunication Union</name>
+        <abbreviation>ITU</abbreviation>
+        <uri>www.itu.int</uri>
+      </organization>
+    </owner>
+  </copyright>
+  <place>Geneva</place>
+  <ext>
+    <doctype>recommendation</doctype>
+    <editorialgroup>
+      <bureau>T</bureau>
+      <group type="study-group">
+        <name>ITU-T Study Group 17</name>
+        <acronym>SG</acronym>
+      </group>
+    </editorialgroup>
+  </ext>
+</bibdata>

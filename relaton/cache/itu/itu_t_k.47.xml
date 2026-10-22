@@ -1,0 +1,97 @@
+<bibdata type="standard">
+  <fetched>2023-03-06</fetched>
+  <title type="title-main" format="text/plain" language="en" script="Latn">Protection of telecommunication lines against direct lightning flashes</title>
+  <title type="main" format="text/plain" language="en" script="Latn">Protection of telecommunication lines against direct lightning flashes</title>
+  <uri type="src">https://www.itu.int/ITU-T/recommendations/rec.aspx?rec=11631&amp;lang=en</uri>
+  <uri type="obp">https://www.itu.inthttps//handle.itu.int/11.1002/1000/11631-en?locatt=format:pdf&amp;auth</uri>
+  <docidentifier type="ITU">ITU-T K.47</docidentifier>
+  <date type="published">
+    <on>2012-05-29</on>
+  </date>
+  <contributor>
+    <role type="publisher"/>
+    <organization>
+      <name>International Telecommunication Union</name>
+      <abbreviation>ITU</abbreviation>
+      <uri>www.itu.int</uri>
+    </organization>
+  </contributor>
+  <edition>3</edition>
+  <language>en</language>
+  <script>Latn</script>
+  <abstract format="text/plain" language="en" script="Latn">Recommendation ITU-T K.47 gives a procedure in order to protect telecommunication lines using metallic components (symmetric pair, coaxial or optical fibre cables) against direct lightning flashes to the line itself or to structures that the line enters.The procedure is based on the representation of the line by a sequence of sections and the evaluation of the annual number of damages due to direct flashes for each section and for the structures connected to the line. This number shall be multiplied by the relevant loss in order to obtain the risk of failure due to direct lightning flashes. The sum of the risk of each line section and also the risk associated with the structures connected to the line gives the total risk of the line. The risk of damage due to direct lightning flashes can be used in the risk assessment of a larger system to which the telecommunication line is a part, according to IEC62305-2. The calculated risk can also be used by the line owner (e.g., telecommunication operator) in order to evaluate the need of implementing additional protection measures on the line. In this case, the calculated risk (Rd) shall be compared with the tolerable risk due to direct flashes (RTd), the latter calculated based on Recommendation ITU‑TK.72. If the calculated risk is lower than the tolerable limit, the line is adequately protected. Otherwise, it is necessary to implement additional protection measures until the risk of damage is lower than or equal to the tolerable limit.Several parts of this Recommendation make reference to the cable sheath breakdown current (Is) and test current (It), so that the assessment of these parameters are given in Annex A and AnnexB, respectively. The appendices are organized as follows: Appendix I provides some guidance for the evaluation of the expected loss per damage (L), and AppendixII presents a rationale for the protective effect of guard-wires.</abstract>
+  <status>
+    <stage>Published</stage>
+  </status>
+  <copyright>
+    <from>2012</from>
+    <owner>
+      <organization>
+        <name>International Telecommunication Union</name>
+        <abbreviation>ITU</abbreviation>
+        <uri>www.itu.int</uri>
+      </organization>
+    </owner>
+  </copyright>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">K Suppl. 3 (10/2015)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">K Suppl. 8 (11/2017)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">K Suppl. 9 (05/2019)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">K Suppl. 10 (11/2017)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">K Suppl. 13 (12/2021)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">K Suppl. 14 (09/2019)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">K Suppl. 16 (10/2022)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">K Suppl. 19 (09/2019)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">K Suppl. 29 (07/2022)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">K Suppl. 32 (10/2022)</formattedref>
+    </bibitem>
+  </relation>
+  <place>Geneva</place>
+  <ext>
+    <doctype>recommendation</doctype>
+    <editorialgroup>
+      <bureau>T</bureau>
+      <group type="study-group">
+        <name>ITU-T Study Group 5</name>
+        <acronym>SG</acronym>
+      </group>
+    </editorialgroup>
+  </ext>
+</bibdata>

@@ -1,0 +1,86 @@
+<bibdata type="standard">
+  <fetched>2023-03-06</fetched>
+  <title type="title-main" format="text/plain" language="en" script="Latn">Framework for creation and performance testing of machine learning based models for the assessment of transmission network impact on speech quality for mobile packet-switched voice services</title>
+  <title type="main" format="text/plain" language="en" script="Latn">Framework for creation and performance testing of machine learning based models for the assessment of transmission network impact on speech quality for mobile packet-switched voice services</title>
+  <uri type="src">https://www.itu.int/ITU-T/recommendations/rec.aspx?rec=14152&amp;lang=en</uri>
+  <docidentifier type="ITU">ITU-T P.565</docidentifier>
+  <date type="published">
+    <on>2020-01-13</on>
+  </date>
+  <contributor>
+    <role type="publisher"/>
+    <organization>
+      <name>International Telecommunication Union</name>
+      <abbreviation>ITU</abbreviation>
+      <uri>www.itu.int</uri>
+    </organization>
+  </contributor>
+  <edition>2</edition>
+  <language>en</language>
+  <script>Latn</script>
+  <abstract format="text/plain" language="en" script="Latn">Recommendation ITU-T P.565 provides the output of the framework which is a machine learning based speech quality prediction model that predicts the impact on speech quality from Internet protocol (IP) transport and underlying transport, as well as a standardized or pre-defined jitter buffer in the end client; thus, providing a network centric view on the speech quality service delivered on mobile packet switched networks. This is expressed in terms of a mean opinion score-listening quality objective (MOS-LQO) under the assumption of an otherwise clean transmission, without background noise, non-standard-conformant encoding on sending device, automatic gain control, voice enhancement devices, transcoding, bridging, frequency response, non-standard-conformant jitter-buffer (for IP multimedia systems (IMS) mobile calls) or decoding, clock drift or any other impairment not caused by the IP transport and underlying transport. The models according to this framework can use information on the temporal structure of the reference signal to identify the importance of individual sections of the bitstream with regard to speech quality. These models do not perform any perceptual analysis of the recorded speech signal.The framework specifies three modules required for the development of these kinds of metrics: the databases generator module, the machine learning module, and the validation module for the trained model. In addition, the database content and the features used by the machine learning algorithm are described. The framework also provides a large set of test vectors, in the form of error (jitter and packet loss) patterns files for learning and validation. This Recommendation specifies the minimum required performance, as well as conditions and requirements for an independent additional validation for models developed based on the framework. This Recommendation also specifies implementation requirements.The models developed based on the framework enable the assessment of transmission network impact on speech quality for mobile packet-switched voice services, and therefore benefit operators and regulators alike with a fast and easy speech quality trend monitoring/benchmarking and troubleshooting. In addition, if predictors according to this framework are used together with perceptual speech quality metrics such as ITU-T P.863, it is possible to identify if the source of problems resides inside or outside the transport network observed by the predictor according to this framework. Consequently, a more detailed analysis of the situation can be achieved and troubleshooting of less obvious degradations such as the ones occurring outside of the transport network (e.g., emerged from automatic gain control, voice enhancement devices, transcoding or analogue processing) is enabled.This Recommendation includes electronic attachments containing detailed descriptions of generic jitter files and a reference speech sample (see Annex D).</abstract>
+  <status>
+    <stage>Withdrawal</stage>
+  </status>
+  <copyright>
+    <from>2020</from>
+    <owner>
+      <organization>
+        <name>International Telecommunication Union</name>
+        <abbreviation>ITU</abbreviation>
+        <uri>www.itu.int</uri>
+      </organization>
+    </owner>
+  </copyright>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">P Suppl. 10 (11/1988)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">P Suppl. 16 (11/1988)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">P Suppl. 20 (03/1993)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">P Suppl. 23 (02/1998)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">P Suppl. 24 (10/2005)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">P Suppl. 25 (01/2011)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">P Suppl. 26 (09/2017)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">P Suppl. 28 (09/2020)</formattedref>
+    </bibitem>
+  </relation>
+  <place>Geneva</place>
+  <ext>
+    <doctype>recommendation</doctype>
+    <editorialgroup>
+      <bureau>T</bureau>
+      <group type="study-group">
+        <name>ITU-T Study Group 12</name>
+        <acronym>SG</acronym>
+      </group>
+    </editorialgroup>
+  </ext>
+</bibdata>

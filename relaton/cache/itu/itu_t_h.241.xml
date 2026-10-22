@@ -1,0 +1,97 @@
+<bibdata type="standard">
+  <fetched>2023-03-06</fetched>
+  <title type="title-main" format="text/plain" language="en" script="Latn">Extended video procedures and control signals for ITU-T H.300-series terminals</title>
+  <title type="main" format="text/plain" language="en" script="Latn">Extended video procedures and control signals for ITU-T H.300-series terminals</title>
+  <uri type="src">https://www.itu.int/ITU-T/recommendations/rec.aspx?rec=11538&amp;lang=en</uri>
+  <uri type="obp">https://www.itu.inthttps//handle.itu.int/11.1002/1000/11538-en?locatt=format:pdf&amp;auth</uri>
+  <docidentifier type="ITU">ITU-T H.241</docidentifier>
+  <date type="published">
+    <on>2012-02-29</on>
+  </date>
+  <contributor>
+    <role type="publisher"/>
+    <organization>
+      <name>International Telecommunication Union</name>
+      <abbreviation>ITU</abbreviation>
+      <uri>www.itu.int</uri>
+    </organization>
+  </contributor>
+  <edition>4</edition>
+  <language>en</language>
+  <script>Latn</script>
+  <abstract format="text/plain" language="en" script="Latn">Recommendation ITU-T H.241 defines the use of advanced video codecs, including those based on Recommendation ITU-T H.264, in ITU-T H.300-series terminals, including ITU-T H.310, ITU‑TH.320, ITU-T H.321, ITU-T H.322, ITU-T H.323 and ITU-T H.324 terminals. It also defines generic extended signalling for use with all video codecs in the ITU-T H.300‑series terminals.This revised version introduces a number of enhancements and clarifications to the previous version. Clarification concerns primarily the description on the signalling for ITU-T H.264 Annex G Scalable Baseline and Scalable High Profiles, a procedure for selecting the operating point of a scalable video coding (SVC) video stream, and the Capability Class of ITU-T H.241 capabilities. This version incorporates clause6.2.5 introduced in ITU-T H.241 (2006) Amd. 1 (2008), allowing for the negotiation of particular video submodes of ITU-T H.264 encoding. It also incorporates clause8.3.2.14, defining a new optional ITU-T H.264 capability parameter (MaxFPS), and Appendix II which contains non-normative examples describing the use of clause 6.2.5. Clause8.3.2.14 and Appendix II were both introduced in ITU-T H.241(2006)Amd.2 (2009).Amendment 1 to this Recommendation extends the AdditionalModesSupported parameter of the ITU-T H.264 capability specified in clause 8.3.2.12, to include support for the Constrained High, Scalable Constrained Baseline, and Scalable Constrained High ITU-T H.264 profiles.</abstract>
+  <status>
+    <stage>Published</stage>
+  </status>
+  <copyright>
+    <from>2012</from>
+    <owner>
+      <organization>
+        <name>International Telecommunication Union</name>
+        <abbreviation>ITU</abbreviation>
+        <uri>www.itu.int</uri>
+      </organization>
+    </owner>
+  </copyright>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">H Suppl. 6 (04/2006)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">H Suppl. 9 (05/2008)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">H Suppl. 11 (02/2009)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">H Suppl. 12 (11/2013)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">H Suppl. 13 (10/2015)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">H Suppl. 14 (10/2015)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">H Suppl. 15 (01/2017)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">H Suppl. 17 (11/2014)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">H Suppl. 18 (10/2017)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">H Suppl. 19 (04/2021)</formattedref>
+    </bibitem>
+  </relation>
+  <place>Geneva</place>
+  <ext>
+    <doctype>recommendation</doctype>
+    <editorialgroup>
+      <bureau>T</bureau>
+      <group type="study-group">
+        <name>ITU-T Study Group 16</name>
+        <acronym>SG</acronym>
+      </group>
+    </editorialgroup>
+  </ext>
+</bibdata>

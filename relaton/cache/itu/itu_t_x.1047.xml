@@ -1,0 +1,47 @@
+<bibdata type="standard">
+  <fetched>2023-03-06</fetched>
+  <title type="title-main" format="text/plain" language="en" script="Latn">Security requirements and architecture for network slice management and orchestration</title>
+  <title type="main" format="text/plain" language="en" script="Latn">Security requirements and architecture for network slice management and orchestration</title>
+  <uri type="src">https://www.itu.int/ITU-T/recommendations/rec.aspx?rec=14794&amp;lang=en</uri>
+  <uri type="obp">https://www.itu.inthttps//handle.itu.int/11.1002/1000/14794-en?locatt=format:pdf&amp;auth</uri>
+  <docidentifier type="ITU">ITU-T X.1047</docidentifier>
+  <date type="published">
+    <on>2021-10-29</on>
+  </date>
+  <contributor>
+    <role type="publisher"/>
+    <organization>
+      <name>International Telecommunication Union</name>
+      <abbreviation>ITU</abbreviation>
+      <uri>www.itu.int</uri>
+    </organization>
+  </contributor>
+  <edition>1</edition>
+  <language>en</language>
+  <script>Latn</script>
+  <abstract format="text/plain" language="en" script="Latn">Recommendation ITU-T X.1047 establishes the security requirements and architecture for network slice management and orchestration, as well as the automatic creation of an end-to-end (E2E) network slices with customized security capabilities, to deploy full-scale E2E network slicing for consumers, businesses and government segments.Mobile communication is fast developing and reaching industries such as the automotive, manufacturing, logistics and energy, as well as sectors such as the finance and healthcare that do not currently fully exploit the potentiality of mobile services. However, various applications have different requirements. Some applications may require ultra-reliable communication, whereas others may require ultra-high-bandwidth communication or extremely low latency. Hence, network slicing has been introduced to offer a differentiated mix of capabilities to meet all these diverse requirements at the same time.With network slicing, various types of users or customers can enjoy connectivity and data processing tailored to their specific requirements (e.g., data speed, quality, latency, reliability, security and pricing model) that adhere to a service level agreement (SLA) that agrees with consumers, enterprises and vertical industries. However, there are also challenges for implementing full-scale E2E network slicing deployments for consumers, businesses and government segments, e.g., E2E precision slicing, network slice reliability, network slice scalability and network slice lifecycle management. Among these challenges, the most important one is network slice security, which is receiving far more attention from academia and various industries.3GPP TR 33.811 is a study on the security for the interface exposed to network slice management and integrity protection of the network slice subnet template, and 3GPP TS 33.501 specified security management of network slices (e.g., authentication, authorization, integrity protection and confidentiality protection for the interface between the producer and the consumer of management service). 3GPP TR 33.813 further focusses on the network slice specific authentication and authorization, data confidentiality and integrity, user identification privacy and inter-slice security isolation.</abstract>
+  <status>
+    <stage>Published</stage>
+  </status>
+  <copyright>
+    <from>2021</from>
+    <owner>
+      <organization>
+        <name>International Telecommunication Union</name>
+        <abbreviation>ITU</abbreviation>
+        <uri>www.itu.int</uri>
+      </organization>
+    </owner>
+  </copyright>
+  <place>Geneva</place>
+  <ext>
+    <doctype>recommendation</doctype>
+    <editorialgroup>
+      <bureau>T</bureau>
+      <group type="study-group">
+        <name>ITU-T Study Group 17</name>
+        <acronym>SG</acronym>
+      </group>
+    </editorialgroup>
+  </ext>
+</bibdata>

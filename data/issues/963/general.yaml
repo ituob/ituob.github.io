@@ -1,0 +1,1610 @@
+messages:
+  - extra_links:
+      - M1400_ICC
+      - BUREAUFAX
+      - ROA
+    type: running_annexes
+  - type: approved_recommendations
+    items:
+      'G.709/Y.1331 (2009) Cor 1 ': 2010-06-30T22:00:00.000Z
+      'G.709/Y.1331 (2009) Amd 1 ': 2010-06-30T22:00:00.000Z
+      'G.8260 ': 2010-07-31T22:00:00.000Z
+      'G.8262/Y.1362 ': 2010-06-30T22:00:00.000Z
+      'J.202 ': 2010-07-31T22:00:00.000Z
+      'Q.3040 ': 2010-07-31T22:00:00.000Z
+    by: AAP-42
+    procedures: Recommendation ITU-T A.8
+  - type: sanc
+    contents:
+      en:
+        type: doc
+        content:
+          - type: paragraph
+            content:
+              - type: text
+                marks:
+                  - type: strong
+                text: Note from TSB
+          - type: paragraph
+            content:
+              - type: text
+                text: "\_"
+          - type: paragraph
+            content:
+              - type: text
+                text: >-
+                  At the request of the Administrations of Congo, Croatia and
+                  Singapore, the Director of the TSB has assigned the following
+                  signalling area/network codes (SANC) for use in the
+                  international part of the signalling system No. 7 network of
+                  these countries/geographical areas, in accordance with ITU-T
+                  Recommendation Q.708 (03/99):
+          - type: paragraph
+            content:
+              - type: text
+                text: "\_"
+          - type: table
+            content:
+              - type: table_row
+                content:
+                  - type: table_cell
+                    attrs:
+                      colspan: 1
+                      rowspan: 1
+                      colwidth: null
+                    content:
+                      - type: paragraph
+                        content:
+                          - type: text
+                            text: Country/geographical area or signalling network
+                  - type: table_cell
+                    attrs:
+                      colspan: 2
+                      rowspan: 1
+                      colwidth: null
+                    content:
+                      - type: paragraph
+                        content:
+                          - type: text
+                            text: SANC
+              - type: table_row
+                content:
+                  - type: table_cell
+                    attrs:
+                      colspan: 2
+                      rowspan: 1
+                      colwidth: null
+                    content:
+                      - type: paragraph
+                        content:
+                          - type: text
+                            text: Congo (Republic of the)
+                  - type: table_cell
+                    attrs:
+                      colspan: 1
+                      rowspan: 1
+                      colwidth: null
+                    content:
+                      - type: paragraph
+                        content:
+                          - type: text
+                            text: 6-088
+              - type: table_row
+                content:
+                  - type: table_cell
+                    attrs:
+                      colspan: 2
+                      rowspan: 1
+                      colwidth: null
+                    content:
+                      - type: paragraph
+                        content:
+                          - type: text
+                            text: Croatia (Republic of)
+                  - type: table_cell
+                    attrs:
+                      colspan: 1
+                      rowspan: 1
+                      colwidth: null
+                    content:
+                      - type: paragraph
+                        content:
+                          - type: text
+                            text: 5-232
+              - type: table_row
+                content:
+                  - type: table_cell
+                    attrs:
+                      colspan: 2
+                      rowspan: 1
+                      colwidth: null
+                    content:
+                      - type: paragraph
+                        content:
+                          - type: text
+                            text: Singapore (Republic of)
+                  - type: table_cell
+                    attrs:
+                      colspan: 1
+                      rowspan: 1
+                      colwidth: null
+                    content:
+                      - type: paragraph
+                        content:
+                          - type: text
+                            text: 5-142
+              - type: table_row
+                content:
+                  - type: table_cell
+                    attrs:
+                      colspan: 1
+                      rowspan: 1
+                      colwidth: null
+                    content:
+                      - type: paragraph
+                  - type: table_cell
+                    attrs:
+                      colspan: 1
+                      rowspan: 1
+                      colwidth: null
+                    content:
+                      - type: paragraph
+                  - type: table_cell
+                    attrs:
+                      colspan: 1
+                      rowspan: 1
+                      colwidth: null
+                    content:
+                      - type: paragraph
+          - type: paragraph
+            content:
+              - type: text
+                text: "\_"
+          - type: paragraph
+            content:
+              - type: text
+                text: _________________
+          - type: paragraph
+            content:
+              - type: text
+                text: "SANC:\_\_\_ Signalling Area/Network Code"
+              - type: hard_break
+              - type: text
+                text: "\_\_\_\_\_\_ \_\_\_\_\_\_ Code de zone/réseau sémaphore"
+              - type: hard_break
+              - type: text
+                text: "\_\_\_\_\_\_ \_\_\_\_\_\_ Código de zona/red de señalización"
+  - contents:
+      - country_name:
+          en: 'Denmark '
+        phone_code: '45'
+        contact:
+          en: "IT- and Mobile Division\nNational IT and Telecom Agency Denmark (NITA)\nHolsteinsgade 63\nDK-2100 COPENHAGEN\nDenmark\nTel: \t+45 3545 0000  \nFax: \t+45 3545 0010 \nE-mail:\tltst@itst.dk"
+        communications:
+          - date: 2010-08-16T20:55:29.392Z
+            contents:
+              en:
+                type: doc
+                content:
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: 'The '
+                      - type: text
+                        marks:
+                          - type: em
+                        text: National IT and Telecom Agency (NITA)
+                      - type: text
+                        text: >-
+                          , Copenhagen, announces the following changes to the
+                          Danish telephone numbering plan:
+                  - type: bullet_list
+                    content:
+                      - type: list_item
+                        content:
+                          - type: paragraph
+                            content:
+                              - type: text
+                                text: "\_"
+                              - type: text
+                                marks:
+                                  - type: em
+                                text: 'Cancellation – carrier select code:'
+                              - type: text
+                                text: "\_"
+                  - type: table
+                    content:
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Provider
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Carrier select code
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Date of cancellation
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: SuperTel Danmark A/S
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: '1035'
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 14.VII.2010
+      - country_name:
+          en: 'Egypt '
+        phone_code: '20'
+        contact:
+          en: "Eng. Abd Elhalim Mohamed Elchiaty \nNumbering Department \nNational Telecom Regulatory Authority (NTRA)\nSmart Village, Building (B4)\nAlex Desert Road\nCAIRO\nEgypt\nTel: \t+20 2 3534 4239  \nFax:  \t+20 2 3534 4155\nE-mail:\tnumbering@tra.gov.eg"
+        communications:
+          - date: 2010-08-12T20:55:56.953Z
+            contents:
+              en:
+                type: doc
+                content:
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: 'The '
+                      - type: text
+                        marks:
+                          - type: em
+                        text: National
+                      - type: text
+                        text: ' '
+                      - type: text
+                        marks:
+                          - type: em
+                        text: 'Telecom Regulatory Authority (NTRA),'
+                      - type: text
+                        text: ' Cairo, announces the following updated subscriber number ranges and extensions (E):'
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: "\_"
+                  - type: table
+                    content:
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Name of Exchange
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Area Code
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Numbering Range
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: In Service Date
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: El marg II
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: '2'
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 28700000 – 28749999
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 27.VI.2010
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: El marg II
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: '2'
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 28780000 – 28789999
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 27.VI.2010
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: El quantara EL Beidaa
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: '47'
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 3190000 – 3191023
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 30.VI.2010
+      - country_name:
+          en: 'Kuwait '
+        phone_code: '965'
+        contact:
+          en: "ISCC Kuwait\nMinistry of Communications\nP.O. Box 318\n11111 SAFAT\nKuwait\nTel:\t+965 2241 1777\nFax:\t+965 2241 9815\nE-mail:\tiscckuwait@hotmail.com\nwww:\twww.moc.kw"
+        communications:
+          - date: 2010-08-11T20:56:20.249Z
+            contents:
+              en:
+                type: doc
+                content:
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: 'The '
+                      - type: text
+                        marks:
+                          - type: em
+                        text: Ministry of Communications (MOC)
+                      - type: text
+                        text: >-
+                          , Safat, announces the introduction of the following
+                          new numbering ranges in Kuwait:
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: "\_"
+                  - type: table
+                    content:
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Service
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Mobile Operator
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Number range
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: International dialling format
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Mobile
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Zain
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 909 XXXXX
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: +965 909 XXXXX
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Voice mail
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Wataniya Telecom
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 6581 6XXX XXXX
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: +965 6581 6XXX XXXX
+      - country_name:
+          en: 'Peru '
+        phone_code: '51'
+        contact:
+          en: "Ministerio de Transportes y Comunicaciones\nDirección de Regulación y Asuntos Internacionales de Comunicaciones\nJirón Zorritos No 1203 \nLIMA 1 \nPeru\nTel:\t+51 1 615 7800\nFax:  \t+51 1 615 7784\nURL:\twww.mtc.gob.pe "
+        communications:
+          - date: 2010-08-04T20:56:49.104Z
+            contents:
+              en:
+                type: doc
+                content:
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: 'The '
+                      - type: text
+                        marks:
+                          - type: em
+                        text: Ministerio de Transportes y Comunicaciones
+                      - type: text
+                        text: ", Lima, announces the implementation, by Ministerial Resolution No 477-2009-MTC/03, of the Virtual Mobile Area, which is due to come into effect on 4\_September\_2010."
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: >-
+                          The Virtual Mobile Area is a single mobile area for
+                          the whole of Peru (national coverage), whereby the
+                          numbering of mobile services is henceforth considered
+                          to be "non-geographic", i.e. not associated with any
+                          given 
+                      - type: text
+                        marks:
+                          - type: em
+                        text: departamento
+                      - type: text
+                        text: >-
+                          . The effect of this is to do away, where mobile
+                          services are concerned, with numbering areas defined
+                          according to 
+                      - type: text
+                        marks:
+                          - type: em
+                        text: departamentos
+                      - type: text
+                        text: >-
+                          . Calls will therefore no longer be differentiated
+                          according to geographic considerations, i.e. according
+                          to whether they are local or national long-distance.
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: >-
+                          Application of the Virtual Mobile Area encompasses the
+                          following public telecommunication services:
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: "1)\_\_\_\_\_\_\_\_\_ Mobile telephony"
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: "2)\_\_\_\_\_\_\_\_\_ Personal communications service (PCS)"
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: "3)\_\_\_\_\_\_\_\_\_ Automatic dialling (digital trunked) multiple channel service"
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: "4)\_\_\_\_\_\_\_\_\_ Mobile-satellite service."
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: 'At the international level:'
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: >-
+                          Persons located in another country and wishing to
+                          place a call to a mobile telephone in Peru must take
+                          account of the following changes:
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: "\_"
+                  - type: table
+                    content:
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 2
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: >-
+                                      From another country to a mobile telephone
+                                      in Peru
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Old dialling arrangement
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 'New dialling arrangement '
+                                  - type: hard_break
+                                  - type: text
+                                    text: (as from 4 September 2010)
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 51 + city code + mobile telephone number
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 51 + mobile telephone number
+                  - type: paragraph
+                    content:
+                      - type: hard_break
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: "\_"
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: >-
+                          In other words, callers will need to key in only the
+                          country code for Peru (51), followed by the nine-digit
+                          number of the called mobile telephone, for any region
+                          within Peru.
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: "\_"
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: 'At the national level:'
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: >-
+                          To call a mobile telephone from anywhere in Peru, from
+                          a fixed or mobile telephone or payphone, it will be
+                          necessary to key in only the nine-digit number of the
+                          called mobile telephone.
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: >-
+                          To place a call from a mobile to a fixed telephone,
+                          the caller will first key in “0”, followed by the city
+                          code and number of the fixed telephone in question.
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: "\_"
+                  - type: table
+                    content:
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 3
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: From one mobile telephone to another
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 2
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Old dialling arrangement
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: New dialling arrangement
+                                  - type: hard_break
+                                  - type: text
+                                    text: (as from 4 September 2010)
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Local
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: National long distance
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Nationwide
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Mobile telephone number
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 0 + city code + mobile telephone number
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Mobile telephone number
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: "\_"
+                  - type: table
+                    content:
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 3
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: >-
+                                      From a fixed telephone (subscriber or
+                                      payphone) to a mobile telephone
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 2
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Old dialling arrangement
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 'New dialling arrangement '
+                                  - type: hard_break
+                                  - type: text
+                                    text: (as from 4 September 2010)
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Local
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: National long distance
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Nationwide
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Mobile telephone number
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 0 + city code + mobile telephone number
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Mobile telephone number
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: "\_"
+                  - type: table
+                    content:
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 3
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: From a mobile to a fixed telephone
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 2
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Old dialling arrangement
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 'New dialling arrangement '
+                                  - type: hard_break
+                                  - type: text
+                                    text: (as from 4 September 2010)
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Local
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: National long distance
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Nationwide
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Fixed telephone number
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 0 + city code + fixed telephone number
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 0 + city code + fixed telephone number
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: >-
+                          NOTE – There is no change in dialling procedures
+                          between fixed telephones.
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: "For further information regarding the Virtual Mobile Area, please contact:\_"
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: "Ministerio de Transportes y Comunicaciones:\_ www.mtc.gob.pe"
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: 'OSIPTEL: www.osiptel.gob.pe'
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: 'For further information, please visit the Web page:'
+                      - type: hard_break
+                      - type: text
+                        text: >-
+                          www.osiptel.gob.pe/WebSiteAjax/archivos/comunicaciones/portabilidad/portabilidad_inicio.htm
+    type: telephone_service_2
+  - type: custom
+    title:
+      en: Telegram Service
+    recommendation: null
+    contents:
+      en:
+        type: doc
+        content:
+          - type: paragraph
+            content:
+              - type: text
+                marks:
+                  - type: strong
+                text: Bahrain
+          - type: paragraph
+            content:
+              - type: text
+                text: 'Communication of 19.VIII.2010:'
+          - type: paragraph
+            content:
+              - type: text
+                marks:
+                  - type: em
+                text: Change in the Telegram Service
+          - type: paragraph
+            content:
+              - type: text
+                marks:
+                  - type: em
+                text: Bahrain Telecommunications Company
+              - type: text
+                text: ' ('
+              - type: text
+                marks:
+                  - type: em
+                text: Batelco
+              - type: text
+                text: "), Manama, announces that with immediate effect all international telegrams to and from Bahrain must be routed through Unitel.\_ The telegram destination indicator BNBA allocated to Bahrain remains in force and must be used for all telegrams to Bahrain. This applies for both ITA2 and APU80 telegrams."
+          - type: paragraph
+            content:
+              - type: text
+                text: "Responsibility for international rates and settlements will reside with Unitel which will handle all accounting and settlements relating to telegram traffic to and from Bahrain on a cascade accounting basis.\_"
+          - type: paragraph
+            content:
+              - type: text
+                text: >-
+                  Telegram operating companies are therefore kindly requested to
+                  contact Unitel directly as shown below to arrange for the
+                  provision of access and negotiate accounting rates to apply.
+          - type: paragraph
+            content:
+              - type: text
+                text: 'For further information please contact:'
+          - type: paragraph
+            content:
+              - type: text
+                text: "\_"
+          - type: table
+            content:
+              - type: table_row
+                content:
+                  - type: table_cell
+                    attrs:
+                      colspan: 1
+                      rowspan: 1
+                      colwidth: null
+                    content:
+                      - type: paragraph
+                        content:
+                          - type: text
+                            text: Mr. Mohammed Khalil
+                          - type: hard_break
+                          - type: text
+                            text: Batelco
+                          - type: hard_break
+                          - type: text
+                            text: 'P.O. Box 14 '
+                          - type: hard_break
+                          - type: text
+                            text: MANAMA
+                          - type: hard_break
+                          - type: text
+                            text: Kingdom of Bahrain
+                          - type: hard_break
+                          - type: text
+                            text: "Tel: \_\_\_\_\_\_ +973 1788 4935"
+                          - type: hard_break
+                          - type: text
+                            text: "Fax: \_\_\_\_\_ +973 1761 1791"
+                          - type: hard_break
+                          - type: text
+                            text: "E-mail:\_ wi2@btc.com.bh"
+                  - type: table_cell
+                    attrs:
+                      colspan: 1
+                      rowspan: 1
+                      colwidth: null
+                    content:
+                      - type: paragraph
+                        content:
+                          - type: text
+                            text: Mr. David Abbey
+                          - type: hard_break
+                          - type: text
+                            text: UTS GmbH
+                          - type: hard_break
+                          - type: text
+                            text: Poststrasse 6
+                          - type: hard_break
+                          - type: text
+                            text: CH 6300 ZUG
+                          - type: hard_break
+                          - type: text
+                            text: Switzerland
+                          - type: hard_break
+                          - type: text
+                            text: "Tel: \_\_\_\_\_\_ +44 1244 571 231"
+                          - type: hard_break
+                          - type: text
+                            text: "Fax: \_\_\_\_\_ +41 41\_ 5004224"
+                          - type: hard_break
+                          - type: text
+                            text: 'E-mail: d.abbey@uniteltelegram.com'
+          - type: paragraph
+            content:
+              - type: text
+                text: "\_"
+          - type: paragraph
+            content:
+              - type: text
+                text: ____________
+          - type: paragraph
+            content:
+              - type: text
+                text: >-
+                  * See present ITU Operational Bulletin No. 963 of 1.IX.2010,
+                  page 14.
+  - type: org_changes
+    contents:
+      en:
+        type: doc
+        content:
+          - type: paragraph
+            content:
+              - type: text
+                marks:
+                  - type: strong
+                text: Jordan
+          - type: paragraph
+            content:
+              - type: text
+                text: 'Communication of 10.VIII.2010:'
+          - type: paragraph
+            content:
+              - type: text
+                marks:
+                  - type: em
+                text: Change of e-mail address
+          - type: paragraph
+            content:
+              - type: text
+                marks:
+                  - type: em
+                text: 'Jordan Telecom Group, '
+              - type: text
+                text: >-
+                  Amman, announces that it has changed its e-mail address. It is
+                  now the following:
+          - type: paragraph
+            content:
+              - type: text
+                text: "E-mail:\_\_\_\_\_\_\_\_\_ ibraheem.harb@orange-jtg.jo"
+          - type: paragraph
+            content:
+              - type: text
+                text: Jordan Telecom Group
+              - type: hard_break
+              - type: text
+                text: P.O. Box 1689
+              - type: hard_break
+              - type: text
+                text: AMMAN 11118
+              - type: hard_break
+              - type: text
+                text: Jordan
+              - type: hard_break
+              - type: text
+                text: "Tel:\_\_\_\_\_\_\_\_\_\_ +962 64 606416 "
+              - type: hard_break
+              - type: text
+                text: "Fax:\_\_\_\_\_\_\_\_\_ +962 64 606330 "
+              - type: hard_break
+              - type: text
+                text: "E-mail:\_\_\_ ibraheem.harb@orange-jtg.jo "
+              - type: hard_break
+              - type: text
+                text: "URL:\_\_\_\_\_\_\_\_ www.jordantelecomgroup.jo"
+          - type: paragraph
+            content:
+              - type: text
+                text: "\_"
+          - type: paragraph
+            content:
+              - type: text
+                marks:
+                  - type: strong
+                text: Kiribati
+          - type: paragraph
+            content:
+              - type: text
+                text: 'Communication du 6.VIII.2010:'
+          - type: paragraph
+            content:
+              - type: text
+                marks:
+                  - type: em
+                text: Change of name
+          - type: paragraph
+            content:
+              - type: text
+                text: 'Le '
+              - type: text
+                marks:
+                  - type: em
+                text: 'Ministry of Communications, Transport and Tourism'
+              - type: text
+                text: >-
+                  , Betio, Tarawa, announces that it has changed its name. It is
+                  now called: "Ministry of Communications, Transport and Tourism
+                  Development".
+          - type: paragraph
+            content:
+              - type: text
+                text: 'Ministry of Communications, Transport and Tourism Development'
+              - type: hard_break
+              - type: text
+                text: P.O. Box 487
+              - type: hard_break
+              - type: text
+                text: 'BETIO, TARAWA '
+              - type: hard_break
+              - type: text
+                text: Kiribati
+              - type: hard_break
+              - type: text
+                text: "Tel:\_\_\_\_\_\_\_\_\_\_ +686 26003 "
+              - type: hard_break
+              - type: text
+                text: "Fax:\_\_\_\_\_\_\_\_\_ +686 26193"
+          - type: paragraph
+            content:
+              - type: text
+                text: "\_"
+          - type: paragraph
+            content:
+              - type: text
+                marks:
+                  - type: strong
+                text: Russian Federation
+          - type: paragraph
+            content:
+              - type: text
+                text: 'Communication of 3.VIII.2010:'
+          - type: paragraph
+            content:
+              - type: text
+                marks:
+                  - type: em
+                text: Changes in telephone and fax numbers
+          - type: paragraph
+            content:
+              - type: text
+                marks:
+                  - type: em
+                text: OJSC Rostelecom
+              - type: text
+                text: >-
+                  , Moscow, announces that its telephone and fax numbers have
+                  changed. These are now the following:
+          - type: paragraph
+            content:
+              - type: text
+                text: OJSC Rostelecom
+              - type: hard_break
+              - type: text
+                text: '14, First Tverskaya - Yamskaya street'
+              - type: hard_break
+              - type: text
+                text: 125047 MOSCOW
+              - type: hard_break
+              - type: text
+                text: Russian Federation
+              - type: hard_break
+              - type: text
+                text: "Tel:\_\_\_\_\_\_\_\_\_\_ +7 499 9998283 "
+              - type: hard_break
+              - type: text
+                text: "Fax:\_\_\_\_\_\_\_\_\_ +7 499 9998222 "
+              - type: hard_break
+              - type: text
+                text: "E-mail:\_\_\_ rostelecom@rt.ru"
+          - type: paragraph
+            content:
+              - type: text
+                marks:
+                  - type: strong
+                text: "\_"
+          - type: paragraph
+            content:
+              - type: text
+                marks:
+                  - type: strong
+                text: Slovakia
+          - type: paragraph
+            content:
+              - type: text
+                text: 'Communication of 13.VIII.2010:'
+          - type: paragraph
+            content:
+              - type: text
+                marks:
+                  - type: em
+                text: Changes of name and in address
+          - type: paragraph
+            content:
+              - type: text
+                text: The
+              - type: text
+                marks:
+                  - type: strong
+                text: ' '
+              - type: text
+                marks:
+                  - type: em
+                text: Telecommunications Office of the Slovak Republic
+              - type: text
+                text: >-
+                  , Bratislava, announces that it has changed its name. It is
+                  now called "Telecommunications Regulatory Authority of the
+                  Slovak Republic". It has also changed its address.
+          - type: paragraph
+            content:
+              - type: text
+                text: Telecommunications Regulatory Authority of the Slovak Republic
+              - type: hard_break
+              - type: text
+                text: Továrenská 7
+              - type: hard_break
+              - type: text
+                text: P.O. Box 40
+              - type: hard_break
+              - type: text
+                text: 828 55 BRATISLAVA 24
+              - type: hard_break
+              - type: text
+                text: Slovakia
+              - type: hard_break
+              - type: text
+                text: "Tel:\_\_\_\_\_\_\_\_\_\_ +421 2 57881111 "
+              - type: hard_break
+              - type: text
+                text: "Fax\_:\_\_\_\_\_\_\_\_ +421 2 52932095 "
+              - type: hard_break
+              - type: text
+                text: "E-mail:\_\_\_ secretary@teleoff.gov.sk / frequency@teleoff.gov.sk "
+              - type: hard_break
+              - type: text
+                text: "URL:\_\_\_\_\_\_\_\_ www.teleoff.gov.sk"
+          - type: paragraph
+            content:
+              - type: text
+                marks:
+                  - type: strong
+                text: "\_"
+          - type: paragraph
+            content:
+              - type: text
+                marks:
+                  - type: strong
+                text: Tonga
+          - type: paragraph
+            content:
+              - type: text
+                text: 'Communication of 6.VIII.2010:'
+          - type: paragraph
+            content:
+              - type: text
+                marks:
+                  - type: em
+                text: Change of name
+          - type: paragraph
+            content:
+              - type: text
+                text: The
+              - type: text
+                marks:
+                  - type: strong
+                text: ' '
+              - type: text
+                marks:
+                  - type: em
+                text: 'Ministry of Communications, '
+              - type: text
+                text: >-
+                  Nuku’alofa, announces that it has changed its name. It is now
+                  called: "Ministry of Information and Communications".
+          - type: paragraph
+            content:
+              - type: text
+                text: "For further information, please contact\_:"
+          - type: paragraph
+            content:
+              - type: text
+                text: Ministry of Information and Communications
+              - type: hard_break
+              - type: text
+                text: FWC Fasi Building
+              - type: hard_break
+              - type: text
+                text: Salote Road
+              - type: hard_break
+              - type: text
+                text: P.O. Box 1380
+              - type: hard_break
+              - type: text
+                text: 'NUKU''ALOFA '
+              - type: hard_break
+              - type: text
+                text: Tonga
+              - type: hard_break
+              - type: text
+                text: "Tel:\_\_\_\_\_\_\_\_\_\_ +676 28170 / +676 28173"
+              - type: hard_break
+              - type: text
+                text: "Fax:\_\_\_\_\_\_\_\_\_ +676 24861 "
+              - type: hard_break
+              - type: text
+                text: "URL:\_\_\_\_\_\_\_\_ www.mic.gov.to"

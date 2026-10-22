@@ -1,0 +1,97 @@
+<bibdata type="standard">
+  <fetched>2023-03-06</fetched>
+  <title type="title-main" format="text/plain" language="en" script="Latn">IPTV application event handling: Audience measurement for IPTV distributed content services</title>
+  <title type="main" format="text/plain" language="en" script="Latn">IPTV application event handling: Audience measurement for IPTV distributed content services</title>
+  <uri type="src">https://www.itu.int/ITU-T/recommendations/rec.aspx?rec=11662&amp;lang=en</uri>
+  <uri type="obp">https://www.itu.inthttps//handle.itu.int/11.1002/1000/11662-en?locatt=format:pdf&amp;auth</uri>
+  <docidentifier type="ITU">ITU-T H.741.3</docidentifier>
+  <date type="published">
+    <on>2012-06-29</on>
+  </date>
+  <contributor>
+    <role type="publisher"/>
+    <organization>
+      <name>International Telecommunication Union</name>
+      <abbreviation>ITU</abbreviation>
+      <uri>www.itu.int</uri>
+    </organization>
+  </contributor>
+  <edition>1</edition>
+  <language>en</language>
+  <script>Latn</script>
+  <abstract format="text/plain" language="en" script="Latn">The ITU-T H.741.x series of Recommendations defines a foundational platform for audience measurement (AM) of IPTV services. They focus on the interface between terminal devices and an audience measurement aggregation function.The AM platform integrates a method for end users to report personal information, and is designed to easily add time-shifted and interactive services and non-terminal device measurement points. While the ITU-T H.741.x series allows the implementation of audience measurement for IPTV services, its mechanism may be equally applicable to non-IPTV services.The design philosophy in the ITU-T H.741.x series is focused on scalability, minimizing the use of resources, security, flexibility to support a variety of service provider deployments and rich privacy support to meet emerging regulations and legislation.Recommendation ITU-T H.741.3 specifies audience measurement for IPTV distributed content services and, in particular, linear TV services. It describes specific configuration for linear TV and metadata and data structures used in the payload of AM messages. The informative appendices discuss specific implementation considerations for linear TV-specific implementation considerations, provide examples and describe capabilities and profiles.Amendment 1 to Recommendation ITU-T H.741.3 includes XML schema on the measurement data structures for linear TV service in Appendix IV and XML schema instances for TD-AMF configuration, reports for linear TV services in Appendix V.</abstract>
+  <status>
+    <stage>Published</stage>
+  </status>
+  <copyright>
+    <from>2012</from>
+    <owner>
+      <organization>
+        <name>International Telecommunication Union</name>
+        <abbreviation>ITU</abbreviation>
+        <uri>www.itu.int</uri>
+      </organization>
+    </owner>
+  </copyright>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">H Suppl. 6 (04/2006)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">H Suppl. 9 (05/2008)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">H Suppl. 11 (02/2009)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">H Suppl. 12 (11/2013)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">H Suppl. 13 (10/2015)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">H Suppl. 14 (10/2015)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">H Suppl. 15 (01/2017)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">H Suppl. 17 (11/2014)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">H Suppl. 18 (10/2017)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">H Suppl. 19 (04/2021)</formattedref>
+    </bibitem>
+  </relation>
+  <place>Geneva</place>
+  <ext>
+    <doctype>recommendation</doctype>
+    <editorialgroup>
+      <bureau>T</bureau>
+      <group type="study-group">
+        <name>ITU-T Study Group 16</name>
+        <acronym>SG</acronym>
+      </group>
+    </editorialgroup>
+  </ext>
+</bibdata>

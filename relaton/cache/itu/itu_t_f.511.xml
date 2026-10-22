@@ -1,0 +1,68 @@
+<bibdata type="standard">
+  <fetched>2023-03-06</fetched>
+  <title type="title-intro" format="text/plain" language="en" script="Latn">Directory service</title>
+  <title type="title-main" format="text/plain" language="en" script="Latn">Support of tag-based identification services</title>
+  <title type="main" format="text/plain" language="en" script="Latn">Directory service - Support of tag-based identification services</title>
+  <uri type="src">https://www.itu.int/ITU-T/recommendations/rec.aspx?rec=12143&amp;lang=en</uri>
+  <uri type="obp">https://www.itu.inthttps//handle.itu.int/11.1002/1000/12143-en?locatt=format:pdf&amp;auth</uri>
+  <docidentifier type="ITU">ITU-T F.511</docidentifier>
+  <date type="published">
+    <on>2014-04-06</on>
+  </date>
+  <contributor>
+    <role type="publisher"/>
+    <organization>
+      <name>International Telecommunication Union</name>
+      <abbreviation>ITU</abbreviation>
+      <uri>www.itu.int</uri>
+    </organization>
+  </contributor>
+  <edition>1</edition>
+  <language>en</language>
+  <script>Latn</script>
+  <abstract format="text/plain" language="en" script="Latn">Recommendation ITU-T F.511 provides guidance for the use of directory services to support tag‑based identification applications by reference to the directory capabilities specified in the ITU‑TX.500 series of Recommendations | ISO/IEC 9594 (all parts), and in the lightweight directory access protocol (LDAP) specifications as developed within Internet Engineering Task Force (IETF). A tag is also called an automatic identification and data capture (AIDC) media. It holds an identifier that identifies the item to which the AIDC media is affixed or associated. The directory may be used to store information associated with the AIDC media.This Recommendation identifies two cases: one case is where the identifier is used as a whole to access a centralized directory, and the other case is where the structure of the identifier is explored to access distributed directory systems, when it is not feasible for a specific environment to hold all relevant information in a single directory. In the latter situation the top-level information could be held by some types of independent service providers, while the company and/or item-related information may be held by the information owner.The primary focus is on radio frequency identification (RFID) tags as specified in the GS1 EPCglobal specifications and in ISO and ISO/IEC International Standards.</abstract>
+  <status>
+    <stage>Published</stage>
+  </status>
+  <copyright>
+    <from>2014</from>
+    <owner>
+      <organization>
+        <name>International Telecommunication Union</name>
+        <abbreviation>ITU</abbreviation>
+        <uri>www.itu.int</uri>
+      </organization>
+    </owner>
+  </copyright>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">F Suppl. 1 (11/1988)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">F Suppl. 2 (11/1988)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">F Suppl. 3 (09/2016)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">F Suppl. 4 (04/2021)</formattedref>
+    </bibitem>
+  </relation>
+  <place>Geneva</place>
+  <ext>
+    <doctype>recommendation</doctype>
+    <editorialgroup>
+      <bureau>T</bureau>
+      <group type="study-group">
+        <name>ITU-T Study Group 17</name>
+        <acronym>SG</acronym>
+      </group>
+    </editorialgroup>
+  </ext>
+</bibdata>

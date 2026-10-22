@@ -1,0 +1,53 @@
+<bibdata type="standard">
+  <fetched>2023-03-06</fetched>
+  <title type="title-intro" format="text/plain" language="en" script="Latn">Specification and Description Language</title>
+  <title type="title-main" format="text/plain" language="en" script="Latn">Data and action language in SDL-2010</title>
+  <title type="main" format="text/plain" language="en" script="Latn">Specification and Description Language - Data and action language in SDL-2010</title>
+  <uri type="src">https://www.itu.int/ITU-T/recommendations/rec.aspx?rec=11391&amp;lang=en</uri>
+  <uri type="obp">https://www.itu.inthttps//handle.itu.int/11.1002/1000/11391-en?locatt=format:pdf&amp;auth</uri>
+  <docidentifier type="ITU">ITU-T Z.104</docidentifier>
+  <date type="published">
+    <on>2011-12-22</on>
+  </date>
+  <contributor>
+    <role type="publisher"/>
+    <organization>
+      <name>International Telecommunication Union</name>
+      <abbreviation>ITU</abbreviation>
+      <uri>www.itu.int</uri>
+    </organization>
+  </contributor>
+  <edition>5</edition>
+  <language>en</language>
+  <script>Latn</script>
+  <abstract format="text/plain" language="en" script="Latn">Recommendation ITU-T Z.104 defines the data features of the Specification and Description Language so that data definitions and expressions are well defined. Together with Recommendations ITU‑TZ.100, ITU‑T Z.101, ITU-T Z.102, ITU-T Z.103, ITU-T Z.105, ITU-T Z.106 and ITU-T Z.107, this Recommendation is part of a reference manual for the language. The language defined in this Recommendation partially overlaps features of the language included in Basic SDL‑2010 in Recommendation ITU‑TZ.101 and used in Comprehensive SDL‑2010 in Recommendation ITU‑TZ.102 and the features of Recommendation ITU‑TZ.103.The Specification and Description Language has concepts for behaviour, data description and (particularly for larger systems) structuring. The basis of behaviour description is extended finite state machines communicating by messages. Data description is based on data types for values. The basis for structuring is hierarchical decomposition and type hierarchies. Though a distinctive feature of the Specification and Description Language is the graphical representation, the data and expression language is textual. This Recommendation covers the features of the language used to encode and decode data communicated by channels, define data types with values and operations and variables (including parameters) based on data types and expression actions that use the data types. This Recommendation does not always provide a canonical syntax, but by applying the Model descriptions given, a specification is transformed to Basic SDL‑2010 defined in ITU-T Z.101 except in those cases where additional abstract syntax is added in this Recommendation. Object-oriented data in ITU‑TZ.107 is an extension to this Recommendation.The Specification and Description Language is applicable within standards bodies and industry. The main application areas for which the Specification and Description Language has been designed are stated in Recommendation ITU‑TZ.100, but the language is generally suitable for describing reactive systems. The range of applications is from requirement description to implementation. The features of the language defined in Recommendation ITU‑TZ.104 are essential for the data within a system.</abstract>
+  <status>
+    <stage>Withdrawal</stage>
+  </status>
+  <copyright>
+    <from>2011</from>
+    <owner>
+      <organization>
+        <name>International Telecommunication Union</name>
+        <abbreviation>ITU</abbreviation>
+        <uri>www.itu.int</uri>
+      </organization>
+    </owner>
+  </copyright>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">Z Suppl. 1 (04/2015)</formattedref>
+    </bibitem>
+  </relation>
+  <place>Geneva</place>
+  <ext>
+    <doctype>recommendation</doctype>
+    <editorialgroup>
+      <bureau>T</bureau>
+      <group type="study-group">
+        <name>ITU-T Study Group 17</name>
+        <acronym>SG</acronym>
+      </group>
+    </editorialgroup>
+  </ext>
+</bibdata>

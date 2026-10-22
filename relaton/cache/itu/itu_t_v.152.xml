@@ -1,0 +1,47 @@
+<bibdata type="standard">
+  <fetched>2021-12-17</fetched>
+  <title type="title-main" format="text/plain" language="en" script="Latn">Procedures for supporting voice-band data over IP networks</title>
+  <title type="main" format="text/plain" language="en" script="Latn">Procedures for supporting voice-band data over IP networks</title>
+  <uri type="src">https://www.itu.int/ITU-T/recommendations/rec.aspx?rec=10997&amp;lang=en</uri>
+  <uri type="obp">https://www.itu.inthttps//handle.itu.int/11.1002/1000/10997-en?locatt=format:pdf&amp;auth</uri>
+  <docidentifier type="ITU">ITU-T V.152</docidentifier>
+  <date type="published">
+    <on>2010-09-13</on>
+  </date>
+  <contributor>
+    <role type="publisher"/>
+    <organization>
+      <name>International Telecommunication Union</name>
+      <abbreviation>ITU</abbreviation>
+      <uri>www.itu.int</uri>
+    </organization>
+  </contributor>
+  <edition>2</edition>
+  <language>en</language>
+  <script>Latn</script>
+  <abstract format="text/plain" language="en" script="Latn">Voice-band data traffic has traditionally been transported by circuit switched systems and equipment. With the advent of the networks optimized for the transport of Internet Protocol (IP), and as a result of its considerable growth and pervasive nature, more and more voice-band data traffic is expected to be carried over IP networks.Given that voice and voice-band data services remain a significant part of telecommunications, there is a need to ensure a high quality of service for voice and voice-band data carried in part, or wholly, via IP. Recommendation ITU-T V.152 defines procedures for equipment that interconnect GSTN networks with IP networks to provide satisfactory, transparent delivery of modulated voice-band data (VBD) as encoded audio content over IP (data modems, facsimile terminals and text telephones).Annex B defines a method that uses data signal detection and silence insertion in voiceband data that adds a means of providing bandwidth savings during transmission. Annex C addresses a problem discovered during the implementation of ITU-T V.152 gateways with the transmission of facsimile terminals. While this issue has been resolved by an amendment to Recommendation ITU-T T.30, due to the extremely large numbers of terminals deployed in the field and the low probability that they would be corrected retroactively, it was considered pre-emptive to include a solution in an ITU-T V.152 media gateway.This Recommendation is complementary to the modem relay and voice-band data Recommendations (RecommendationsITU-TV.150.0 and V.150.1).This revision includes the updating of references, general editing improvements for clarity and many additional examples of call control. It also integrates changes introduced by Corrigendum1 (2005) for clarification to clauses 7.1 and 7.1.1; by Corrigendum2 (2006) for clarifications on the use and control of echo cancellers and the application of IETF RFC 2833 with VBD; and by Amendment 1 (2009) for new Annexes B and C.</abstract>
+  <status>
+    <stage>Published</stage>
+  </status>
+  <copyright>
+    <from>2010</from>
+    <owner>
+      <organization>
+        <name>International Telecommunication Union</name>
+        <abbreviation>ITU</abbreviation>
+        <uri>www.itu.int</uri>
+      </organization>
+    </owner>
+  </copyright>
+  <place>Geneva</place>
+  <ext>
+    <doctype>recommendation</doctype>
+    <editorialgroup>
+      <bureau>T</bureau>
+      <group type="study-group">
+        <name>ITU-T Study Group 16</name>
+        <acronym>SG</acronym>
+      </group>
+    </editorialgroup>
+  </ext>
+</bibdata>

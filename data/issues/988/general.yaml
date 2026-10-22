@@ -1,0 +1,998 @@
+messages:
+  - extra_links:
+      - M1400_ICC
+      - BUREAUFAX
+      - ROA
+    type: running_annexes
+  - contents:
+      - country_name:
+          en: 'Costa Rica '
+        phone_code: '506'
+        contact:
+          en: "Ing. Pedro Arce Villalobos \nSuperintendencia de Telecomunicaciones (SUTEL)\nApartado Postal 936-1000\nSAN JOSE,\nCosta Rica\nTel:\t+506 4000 0000\nFax:\t+506 2215 6821\nE-mail:\tpedro.arce@sutel.go.cr"
+        communications:
+          - date: 2011-08-08T21:11:27.378Z
+            contents:
+              en:
+                type: doc
+                content:
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: 'The '
+                      - type: text
+                        marks:
+                          - type: em
+                        text: Superintendencia de Telecomunicaciones (SUTEL
+                      - type: text
+                        text: "), San José, which under Decree N°35187-MINAET (National Numbering Plan)\_ is in charge of the control and administration of Numbering resources in Costa Rica, acting in accordance with the provisions of Recommendation ITU-T E.129"
+                      - type: text
+                        marks:
+                          - type: strong
+                        text: ','
+                      - type: text
+                        text: ' presents the:'
+                  - type: paragraph
+                    content:
+                      - type: text
+                        marks:
+                          - type: em
+                        text: >-
+                          Description of numbering change in ITU-T E.164
+                          National Numbering Plan for country code 506
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: "\_"
+                  - type: table
+                    content:
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 2
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: >-
+                                      NDC (National Destination Code) or leading
+                                      digits of N(S)N (National (Significant)
+                                      Number)
+                                  - type: hard_break
+                                  - type: text
+                                    text: X = 0 to 9
+                          - type: table_cell
+                            attrs:
+                              colspan: 2
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: N(S)N number length
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 2
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Usage of E.164 number
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 2
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 'Time and date of '
+                                  - type: hard_break
+                                  - type: text
+                                    text: introduction
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Maximum length
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Minimum length
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 405X XXXX
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 8 digits
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 8 digits
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: >-
+                                      Telephony Service IP, American Data
+                                      Network S.A
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: '8.VIII.2011– 00:00'
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: '1222'
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 4 digits
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 4 digits
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 'Special Service, American Data Network S.A'
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: '8.VIII.2011– 00:00'
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: '1333'
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 4 digits
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 4 digits
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 'Special Service, American Data Network S.A'
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: '8.VIII.2011– 00:00'
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: '1919'
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 4 digits
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: 4 digits
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: >-
+                                      Pre-selection code for operator American
+                                      Data Network S.A
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: '8.VIII.2011– 00:00'
+      - country_name:
+          en: 'Germany '
+        phone_code: '49'
+        contact:
+          en: "Ms Martina Welcher\nFederal Network Agency for Electricity, Gas, Telecommunications, Post and Railway\nCanisiusstr. 21\n55122 MAINZ\nGermany\nTel:\t+49 6131 18 2246\nFax:\t+49 6131 18 5650\nE-mail:\tmartina.welcher@bnetza.de\nURL:\twww.bundesnetzagentur.de"
+        communications:
+          - date: 2011-08-10T21:11:54.138Z
+            contents:
+              en:
+                type: doc
+                content:
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: The
+                      - type: text
+                        marks:
+                          - type: em
+                        text: ' Federal Network Agency for Electricity, Gas, Telecommunications, Post and Railway ,('
+                      - type: text
+                        text: >-
+                          BNetzA), Mainz, announces that an updated National
+                          Numbering Plan (NNP) for Germany has been posted on
+                          ITU numbering website: 
+                      - type: text
+                        marks:
+                          - type: link
+                            attrs:
+                              href: 'http://www.itu.int/ITU-T/inr/nnp/'
+                              title: null
+                        text: www.itu.int/ITU-T/inr/nnp/
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: >-
+                          All Administrations and Recognized Operating Agencies
+                          (ROA) are requested to ensure that access is given to
+                          all national (significant) numbers by notifying the
+                          respective telecommunications companies within their
+                          country.
+      - country_name:
+          en: 'Moldova '
+        phone_code: '373'
+        contact:
+          en: "National Regulatory Agency for Electronic Communications and InformationTechnology (ANRCETI)\n134, Stefan cel Mare Bv.\nCHISINAU 2012\nMoldova\nTel:\t+373 22 25 1317\nFax:\t+373 22 22 2885\nE-mail:\toffice@anrceti.md\nURL: \twww.anrceti.md"
+        communications:
+          - date: 2011-08-08T21:12:20.483Z
+            contents:
+              en:
+                type: doc
+                content:
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: The
+                      - type: text
+                        marks:
+                          - type: em
+                        text: ' National Regulatory Agency for Electronic Communications and Information Technology , '
+                      - type: text
+                        text: >-
+                          Chisinau, announces the allocation of block of numbers
+                          to the following mobile operators in the Republic of
+                          Moldova during the years 2009 to 2011.
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: "\_"
+                  - type: table
+                    content:
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: (1)
+                          - type: table_cell
+                            attrs:
+                              colspan: 2
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: (2)
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: (3)
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: (4)
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 2
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: >-
+                                      NDC (National Destination Code) or leading
+                                      digits of
+                                  - type: hard_break
+                                  - type: text
+                                    text: "\_N(S)N\_ (National (Significant) Number)"
+                          - type: table_cell
+                            attrs:
+                              colspan: 2
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: N(S)N number length
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 2
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Usage of
+                                  - type: hard_break
+                                  - type: text
+                                    text: E.164 Number
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 2
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Additional information
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Maximum
+                                  - type: hard_break
+                                  - type: text
+                                    text: length
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Minimum length
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: '600-609, 685-689'
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: '8'
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: '8'
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: mobile
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Orange Moldova S.A
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: '780-786,788'
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: '8'
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: '8'
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: mobile
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Moldcell S.A
+                      - type: table_row
+                        content:
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: '673,674'
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: '8'
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: '8'
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: mobile
+                          - type: table_cell
+                            attrs:
+                              colspan: 1
+                              rowspan: 1
+                              colwidth: null
+                            content:
+                              - type: paragraph
+                                content:
+                                  - type: text
+                                    text: Moldtelecom S.A Unite
+      - country_name:
+          en: 'Togo '
+        phone_code: '228'
+        contact:
+          en: "Mme GNOGNO Etoh \nAutorité de Règlementation des secteurs de Postes et Télécommunications (ART&P)\nBP 358 LOME\nTogo\nTel:\t+228 22 23 63 63\nFax:\t+228 22 23 63 64\nE-mail:\tjgnogno@artp.tg \nURL:\twww.artp.tg"
+        communications:
+          - date: 2011-08-10T21:13:00.820Z
+            contents:
+              en:
+                type: doc
+                content:
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: 'The '
+                      - type: text
+                        marks:
+                          - type: em
+                        text: >-
+                          Autorité de Réglementation des secteurs de Postes et
+                          Télécommunications
+                      - type: text
+                        text: "\_recalls, "
+                      - type: text
+                        marks:
+                          - type: em
+                        text: Lomé
+                      - type: text
+                        text: >-
+                          , that as from 7 August 2011 at 00:00 hours UTC,
+                          numbering in Togo changed to eight (8) digits.
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: Fixed telephony
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: "Operator:\_\_\_\_\_\_\_\_\_\_\_ "
+                      - type: text
+                        marks:
+                          - type: em
+                        text: Togo Télécom
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: >-
+                          Following the country code (+228) add digit 2 followed
+                          by your correspondent’s number.
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: "Example\_\_\_\_\_\_\_\_\_\_\_\_\_\_ +228\_ 221 4401 becomes +228 2221 4401"
+                  - type: paragraph
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: >-
+                          Former seven (7) digit numbers for Togo Télécom
+                          commence with: 22, 23, 24, 25, 26, 27, 32, 33, 44, 55,
+                          66 and 77.
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: Mobile telephony
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: "Operator:\_\_\_\_\_\_\_\_\_\_\_ "
+                      - type: text
+                        marks:
+                          - type: em
+                        text: Togo Cellulaire
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: "a)\_\_\_\_\_\_\_\_\_ For numbers commencing with digit 9"
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: "\_\_\_\_\_\_\_\_\_\_\_\_\_ Following the country code (+228) replace digit 9 by 90; the rest remains unchanged."
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: "\_\_\_\_\_\_\_\_\_\_\_\_\_ Example:\_\_\_\_\_\_\_\_\_\_\_\_ +228 9 010 001 becomes +228 90 010 001"
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: "b)\_\_\_\_\_\_\_\_\_ For numbers commencing with digit 0 and 8"
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: "\_\_\_\_\_\_\_\_\_\_\_\_\_ Following the country code (+228) replace digit 0 or 8 by 91."
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: "\_\_\_\_\_\_\_\_\_\_\_\_\_ Example:\_\_\_\_\_\_\_\_\_\_\_\_ +228 8 345 620 becomes +228 91 345 620"
+                      - type: hard_break
+                      - type: text
+                        text: "\_\_\_\_\_\_\_\_\_\_\_\_\_ \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_ +228 0 345 620\_ becomes +228 91 345 620"
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: "c)\_\_\_\_\_\_\_\_\_\_ For numbers commencing with digit 7"
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: "\_\_\_\_\_\_\_\_\_\_\_\_\_ Following the country code (+228) replace digit 7 by 92"
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: "\_\_\_\_\_\_\_\_\_\_\_\_\_ Example:\_\_\_\_\_\_\_\_\_\_\_\_ +228 7 620 401 becomes +228 92 620 401"
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: >-
+                          Former seven (7) digit numbers for Togo Cellulaire
+                          commence with: 04, 06, 07, 08, 09, 72, 73, 74, 75, 76,
+                          81, 82, 83, 85, 90, 91, 92, 93, 97, 98 and 99.
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: "Operator:\_\_\_\_\_\_\_\_\_\_\_ "
+                      - type: text
+                        marks:
+                          - type: em
+                        text: Atlantique Telecom Togo
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: "a)\_\_\_\_\_\_\_\_\_ For numbers commencing with digit 0, 6 and 8\_:"
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: "\_\_\_\_\_\_\_\_\_\_\_\_\_ Following the country code (+228) replace digit 0, 6 or 8 by 98"
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: "\_\_\_\_\_\_\_\_\_\_\_\_\_ Example:\_\_\_\_\_\_\_\_\_\_\_\_ +228 0 113 040 becomes +228 98 113 040"
+                      - type: hard_break
+                      - type: text
+                        text: "\_\_\_\_\_\_\_\_\_\_\_\_\_ \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_ \_\_\_\_\_\_\_\_\_\_\_\_\_ +228 6 022 220 becomes +228 98 022 220"
+                      - type: hard_break
+                      - type: text
+                        text: "\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_ \_\_\_\_\_\_\_\_\_\_\_\_\_ +228 8 452 080 becomes +228 98 452 080"
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: "b)\_\_\_\_\_\_\_\_\_ For numbers commencing with digit 5, 7 and 9"
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: "\_\_\_\_\_\_\_\_\_\_\_\_\_ Following the country code (+228) replace digit 5, 7 or 9 by 99"
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: "\_\_\_\_\_\_\_\_\_\_\_\_\_ Example: \_\_\_\_\_\_\_\_\_\_\_ +228 5 213 040 becomes +228 99 213 040"
+                      - type: hard_break
+                      - type: text
+                        text: "\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_ +228 7 011 080 becomes +228 99 011 080"
+                      - type: hard_break
+                      - type: text
+                        text: "\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_ +228 9 452 080 becomes +228 99 452 080"
+                  - type: paragraph
+                    content:
+                      - type: text
+                        text: >-
+                          Former seven (7) digit numbers for Atlantique Telecom
+                          Togo commence with: 01, 02, 03, 05, 52, 53, 60, 70,
+                          71, 84, 86, 87, 94, 95 and 96.
+    type: telephone_service_2
+  - type: org_changes
+    contents:
+      en:
+        type: doc
+        content:
+          - type: paragraph
+            content:
+              - type: text
+                marks:
+                  - type: strong
+                text: Japan
+          - type: paragraph
+            content:
+              - type: text
+                text: 'Communication of 5.VIII.2011:'
+          - type: paragraph
+            content:
+              - type: text
+                marks:
+                  - type: em
+                text: Change in e-mail address
+          - type: paragraph
+            content:
+              - type: text
+                marks:
+                  - type: em
+                text: NTT Communications Corporation
+              - type: text
+                text: '.,'
+              - type: text
+                marks:
+                  - type: em
+                text: ' '
+              - type: text
+                text: 'Tokyo, announces that it has changed its e-mail address:'
+          - type: paragraph
+            content:
+              - type: text
+                text: 'E-mail: tama.ito@ntt.com'
+          - type: paragraph
+            content:
+              - type: text
+                text: "\_NTT Communications Corporation"
+              - type: hard_break
+              - type: text
+                text: Process & Knowledge Management Department
+              - type: hard_break
+              - type: text
+                text: '1-1-6 Uchisaiwaicho 1-chome,'
+              - type: hard_break
+              - type: text
+                text: Chiyoda-ku
+              - type: hard_break
+              - type: text
+                text: 100-8019 TOKYO
+              - type: hard_break
+              - type: text
+                text: Japan
+              - type: hard_break
+              - type: text
+                text: "Tel:\_\_\_\_\_\_\_ +81 3 6700 4211 "
+              - type: hard_break
+              - type: text
+                text: "Fax:\_\_\_\_\_\_ +81 3 3539 3077 "
+              - type: hard_break
+              - type: text
+                text: 'E-mail: tama.ito@ntt.com '
+              - type: hard_break
+              - type: text
+                text: "URL:\_\_\_\_\_ "
+              - type: text
+                marks:
+                  - type: link
+                    attrs:
+                      href: 'http://www.ntt.com'
+                      title: null
+                text: www.ntt.com
+          - type: paragraph
+          - type: paragraph
+            content:
+              - type: text
+                marks:
+                  - type: strong
+                text: Egypt
+          - type: paragraph
+            content:
+              - type: text
+                text: 'Communication of 10.VIII.2011:'
+          - type: paragraph
+            content:
+              - type: text
+                marks:
+                  - type: em
+                text: 'Changes in address, telephone number and e-mail address'
+          - type: paragraph
+            content:
+              - type: text
+                text: 'The '
+              - type: text
+                marks:
+                  - type: em
+                text: Regulatory Affairs
+              - type: text
+                text: ", Cairo,\_announces that "
+              - type: text
+                marks:
+                  - type: em
+                text: 'Telecom Egypt '
+              - type: text
+                text: "has changed its address, its telephone number and its e-mail address.\_"
+          - type: paragraph
+            content:
+              - type: text
+                text: 'E-mail: naglaa.mounir@telecomegypt.com'
+          - type: paragraph
+            content:
+              - type: text
+                text: "\_Telecom Egypt"
+              - type: hard_break
+              - type: text
+                text: Eng. Naglaa Mounir
+              - type: hard_break
+              - type: text
+                text: Chief Sector of Regulatory Affairs
+              - type: hard_break
+              - type: text
+                text: Smart Village
+              - type: hard_break
+              - type: text
+                text: K 28 Cairo-Alexandria Desert Road
+              - type: hard_break
+              - type: text
+                text: P.O. Box 12577
+              - type: hard_break
+              - type: text
+                text: GIZA
+              - type: hard_break
+              - type: text
+                text: Egypt
+              - type: hard_break
+              - type: text
+                text: "Tel:\_\_\_\_\_\_\_\_\_\_ +20 2 3131 6634"
+              - type: hard_break
+              - type: text
+                text: "Fax:\_\_\_\_\_\_\_\_\_ +20 2 3131 5198 "
+              - type: hard_break
+              - type: text
+                text: "E-mail:\_\_\_ naglaa.mounir@telecomegypt.com "
+              - type: hard_break
+              - type: text
+                text: "URL:\_\_\_\_\_\_\_\_ www.telecomegypt.com.eg"

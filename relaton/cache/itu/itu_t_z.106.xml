@@ -1,0 +1,53 @@
+<bibdata type="standard">
+  <fetched>2023-03-06</fetched>
+  <title type="title-intro" format="text/plain" language="en" script="Latn">Specification and Description Language</title>
+  <title type="title-main" format="text/plain" language="en" script="Latn">Common interchange format for SDL-2010</title>
+  <title type="main" format="text/plain" language="en" script="Latn">Specification and Description Language - Common interchange format for SDL-2010</title>
+  <uri type="src">https://www.itu.int/ITU-T/recommendations/rec.aspx?rec=11393&amp;lang=en</uri>
+  <uri type="obp">https://www.itu.inthttps//handle.itu.int/11.1002/1000/11393-en?locatt=format:pdf&amp;auth</uri>
+  <docidentifier type="ITU">ITU-T Z.106</docidentifier>
+  <date type="published">
+    <on>2011-12-22</on>
+  </date>
+  <contributor>
+    <role type="publisher"/>
+    <organization>
+      <name>International Telecommunication Union</name>
+      <abbreviation>ITU</abbreviation>
+      <uri>www.itu.int</uri>
+    </organization>
+  </contributor>
+  <edition>7</edition>
+  <language>en</language>
+  <script>Latn</script>
+  <abstract format="text/plain" language="en" script="Latn">Recommendation ITU-T Z.106 defines the common interchange format of Specification and Description Language (SDL‑CIF). The SDL‑CIF is intended for the interchange of graphical SDL‑2010 specifications (SDL‑GR) made on different tools that do not use the same storage format. Prior to the definition of SDL‑CIF, the textual phrase representation of SDL-2010 (SDL‑PR) was used to interchange specifications with the disadvantage that all graphical information was lost, making the same specifications often look very dissimilar in different environments. With the SDL‑CIF, this disadvantage is reduced to a minimum, as it contains most of the graphical information. The SDL‑CIF improves the independence from specific tool vendors and allows standards bodies to accept specifications in SDL‑CIF irrespective of the tool they use for their internal work. This also improves productivity by allowing specifications to be made on the accustomed tool. All SDL‑2010 tool vendors are encouraged to provide facilities for importing and exporting SDL‑CIF.This Recommendation defines how SDL‑2010 descriptions are stored in order to be interchanged between tools coming from different vendors. It does not take into account the message sequence chart (MSC) notation. SDL‑CIF is an optional part of SDL-2010. SDL‑CIF is based on the SDL‑PR syntax, the textual phrase representation of SDL‑2010 also defined in this Recommendation. SDL‑CIF is readable and written by tools as well as users. All the constructs available in SDL‑2010 are able to be expressed in graphical form or in the purely textual SDL‑PR form. Constraints on graphical presentation are expressed in SDL‑CIF by adding specific annotations to SDL‑PR. As a result, most SDL‑PR descriptions are legal SDL‑CIF descriptions. SDL‑CIF is an open storage format as it includes a mechanism of tool-specific directives. This mechanism allows an SDL‑CIF‑compliant tool to extend the format by adding specific information. SDL‑CIF is also easily implemented and provides tool vendors with two levels of tool conformance and concepts of mandatory and optional directives.SDL‑PR is an alternative text-only syntax for the Specification and Description Language. Before 2002, SDL‑PR was published as part of ITU-T Z.100, but as the main use of this notation is for communication within and between tools the definition has been moved to this Recommendation. SDL‑PR is Level 0 SDL‑CIF and allows the interchange of syntactically complete SDL-2010 descriptions, usually as a single file per system. Conformance to SDL‑PR requires the model to conform to the corresponding semantics defined in Recommendations ITU‑TZ.101, ITU‑TZ.102, ITU‑TZ.103, ITU‑TZ.104, ITU‑TZ.105 and ITU‑TZ.107.This Recommendation introduces two further levels of SDL‑CIF. Two further conformance levels are defined, one at a more liberal SDL‑PR level and the second including graphical information. The complete grammar is described with the related semantics. Mandatory and optional directives are described, as well as the format for tool-specific directives. Current tool-specific directives are described in Appendix I.Two levels of SDL‑CIF conformance are defined as level 1 and level 2. Level 1 is very close to SDL‑PR, but it supports incomplete descriptions in SDL-2010. Level 2 includes level 1 and is able to capture most of the graphical information of SDL‑GR diagrams. An SDL‑CIF specification shall identify which of these two levels it complies with. Similarly, tool vendors that use the SDL‑CIF should also identify the SDL‑CIF level they comply with for their import and export functions.</abstract>
+  <status>
+    <stage>Withdrawal</stage>
+  </status>
+  <copyright>
+    <from>2011</from>
+    <owner>
+      <organization>
+        <name>International Telecommunication Union</name>
+        <abbreviation>ITU</abbreviation>
+        <uri>www.itu.int</uri>
+      </organization>
+    </owner>
+  </copyright>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">Z Suppl. 1 (04/2015)</formattedref>
+    </bibitem>
+  </relation>
+  <place>Geneva</place>
+  <ext>
+    <doctype>recommendation</doctype>
+    <editorialgroup>
+      <bureau>T</bureau>
+      <group type="study-group">
+        <name>ITU-T Study Group 17</name>
+        <acronym>SG</acronym>
+      </group>
+    </editorialgroup>
+  </ext>
+</bibdata>

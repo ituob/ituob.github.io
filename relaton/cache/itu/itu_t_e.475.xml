@@ -1,0 +1,52 @@
+<bibdata type="standard">
+  <fetched>2023-03-06</fetched>
+  <title type="title-main" format="text/plain" language="en" script="Latn">Guidelines for intelligent network analytics and diagnostics</title>
+  <title type="main" format="text/plain" language="en" script="Latn">Guidelines for intelligent network analytics and diagnostics</title>
+  <uri type="src">https://www.itu.int/ITU-T/recommendations/rec.aspx?rec=14148&amp;lang=en</uri>
+  <uri type="obp">https://www.itu.inthttps//handle.itu.int/11.1002/1000/14148-en?locatt=format:pdf&amp;auth</uri>
+  <docidentifier type="ITU">ITU-T E.475</docidentifier>
+  <date type="published">
+    <on>2020-01-13</on>
+  </date>
+  <contributor>
+    <role type="publisher"/>
+    <organization>
+      <name>International Telecommunication Union</name>
+      <abbreviation>ITU</abbreviation>
+      <uri>www.itu.int</uri>
+    </organization>
+  </contributor>
+  <edition>1</edition>
+  <language>en</language>
+  <script>Latn</script>
+  <abstract format="text/plain" language="en" script="Latn">With the increased number of connected devices and the proliferation of web and multimedia services, cloud services and Internet of things (IoT) applications, networks are subject to various network incidents and unregulated network changes which may be measured by network alerts and logs received from the underlying networks. Therefore, it is important for the networks to be aware of the services and applications they transport to optimize the operation and ensure that service quality meets user expectations. The absence of network alerts or network logs is generally interpreted as an indication of good network health. However, this is not necessarily the case. Service quality problems may not be the result of network device failures, but instead due to issues that are not detected by traditional network monitoring tools such as configuration errors, insufficient network capacity, wireless access point issues (e.g., insufficient coverage, interference or overlapping channel), or third party network issues.Typically, the manual network reconfiguration is time consuming and often error prone. In addition, service quality assessment methodologies need to further distinguish between network impairments and other causes of the performance degradation by considering application-specific factors (e.g., encoding/decoding, interaction between an application and a network) as the traditional assessment tools cannot provide accurate fault diagnosis, fault prediction, and root cause analysis. Furthermore, the reaction time of traditional assessment tools tends to be slow, responding after the service disruption occurs. In addition, the network performance metrics may contribute to quality of service/quality of experience (QoS/QoE) assessment, but many of the existing network performance metrics may reflect only limited aspects of the network quality.When the objectively-measured results indicate an unsatisfactory level of network performance or anomaly degree, it is desirable that the system performs the necessary corrective actions automatically to resolve the identified quality problems.Recommendation ITU-T E.475 specifies guidelines for intelligent network analytics and diagnostics for managing and troubleshooting networks. The intelligent network analytics and diagnostics (INAD) function is responsible for aggregating network data and setting up automatic tasks for network maintenance, providing the assurance of appropriate network performance, locating the service degradation area and service channels with poor performance, finding root causes of the detected network faults, probing network status, and predicting the possible network performance degradation at an early stage.Specifically, this Recommendation describes the design considerations, functional architecture, network anomaly analysis models for network analytics and diagnostics. The network anomaly analysis model can be used to assess network anomaly degree, network performance, risk degree, to analyse the location and time of the network impairment and further to determine the root causes of the network impairments and to allow increased network visibility and network fault management automation.This Recommendation also presents the concept of network health indicator (NHI) which provides a numerical indication of the network anomaly degree based on dig data analytics. The NHI is not focused on a specific multimedia application rating (e.g., rating of specific audio application, video conferencing application) and application layer monitoring. Instead, it aims at network monitoring and evaluation of specific networks (e.g., LAN, WAN, storage network, data centre network) and further triggers network diagnosis using big data based fault diagnosis algorithms and determine the root causes of the network anomaly events.</abstract>
+  <status>
+    <stage>Published</stage>
+  </status>
+  <copyright>
+    <from>2020</from>
+    <owner>
+      <organization>
+        <name>International Telecommunication Union</name>
+        <abbreviation>ITU</abbreviation>
+        <uri>www.itu.int</uri>
+      </organization>
+    </owner>
+  </copyright>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">E Suppl. 11 (06/2020)</formattedref>
+    </bibitem>
+  </relation>
+  <place>Geneva</place>
+  <ext>
+    <doctype>recommendation</doctype>
+    <editorialgroup>
+      <bureau>T</bureau>
+      <group type="study-group">
+        <name>ITU-T Study Group 12</name>
+        <acronym>SG</acronym>
+      </group>
+    </editorialgroup>
+  </ext>
+</bibdata>

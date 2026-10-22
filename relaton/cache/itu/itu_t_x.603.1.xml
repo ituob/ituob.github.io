@@ -1,0 +1,48 @@
+<bibdata type="standard">
+  <fetched>2023-03-06</fetched>
+  <title type="title-main" format="text/plain" language="en" script="Latn">Information technology – Relayed multicast protocol: Specification for simplex group applications</title>
+  <title type="main" format="text/plain" language="en" script="Latn">Information technology – Relayed multicast protocol: Specification for simplex group applications</title>
+  <uri type="src">https://www.itu.int/ITU-T/recommendations/rec.aspx?rec=11719&amp;lang=en</uri>
+  <uri type="obp">https://www.itu.inthttps//handle.itu.int/11.1002/1000/11719-en?locatt=format:pdf&amp;auth</uri>
+  <docidentifier type="ITU">ITU-T X.603.1</docidentifier>
+  <docidentifier type="ISO">ISO/IEC 16512-2</docidentifier>
+  <date type="published">
+    <on>2012-08-13</on>
+  </date>
+  <contributor>
+    <role type="publisher"/>
+    <organization>
+      <name>International Telecommunication Union</name>
+      <abbreviation>ITU</abbreviation>
+      <uri>www.itu.int</uri>
+    </organization>
+  </contributor>
+  <edition>3</edition>
+  <language>en</language>
+  <script>Latn</script>
+  <abstract format="text/plain" language="en" script="Latn">Recommendation ITU-T X.603.1 | International Standard ISO/IEC 16512-2 describes the functions and procedures of the relayed multicast protocol part 2 (RMCP-2), which is an application-layer protocol constructing a one-to-many overlay multicast tree for multicast data delivery from one sender to multiple receivers over an IP-based network. The RMCP-2 consists of a multicast agent (MA) and a session manager (SM). The MA constructs the one-to-many relayed data path to provide multicast-based services. The SM controls and manages the RMCP-2 sessions. RMCP-2 can be used for applications that require one-to-many data delivery services, such as multimedia streaming services, file distribution services, e-learning, etc.This Recommendation | International Standard also describes the security functionalities of RMCP-2. It provides various security facilities to fulfil general, as well as, specific security requirements. Some detailed functions that can operate with a variety of standardized security mechanisms are provided.</abstract>
+  <status>
+    <stage>Published</stage>
+  </status>
+  <copyright>
+    <from>2012</from>
+    <owner>
+      <organization>
+        <name>International Telecommunication Union</name>
+        <abbreviation>ITU</abbreviation>
+        <uri>www.itu.int</uri>
+      </organization>
+    </owner>
+  </copyright>
+  <place>Geneva</place>
+  <ext>
+    <doctype>recommendation</doctype>
+    <editorialgroup>
+      <bureau>T</bureau>
+      <group type="study-group">
+        <name>ITU-T Study Group 11</name>
+        <acronym>SG</acronym>
+      </group>
+    </editorialgroup>
+  </ext>
+</bibdata>

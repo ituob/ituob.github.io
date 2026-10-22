@@ -1,0 +1,67 @@
+<bibdata type="standard">
+  <fetched>2023-03-06</fetched>
+  <title type="title-main" format="text/plain" language="en" script="Latn">Requirements for low-latency interactive multimedia streaming</title>
+  <title type="main" format="text/plain" language="en" script="Latn">Requirements for low-latency interactive multimedia streaming</title>
+  <uri type="src">https://www.itu.int/ITU-T/recommendations/rec.aspx?rec=12225&amp;lang=en</uri>
+  <uri type="obp">https://www.itu.inthttps//handle.itu.int/11.1002/1000/12225-en?locatt=format:pdf&amp;auth</uri>
+  <docidentifier type="ITU">ITU-T F.746.1</docidentifier>
+  <date type="published">
+    <on>2014-10-14</on>
+  </date>
+  <contributor>
+    <role type="publisher"/>
+    <organization>
+      <name>International Telecommunication Union</name>
+      <abbreviation>ITU</abbreviation>
+      <uri>www.itu.int</uri>
+    </organization>
+  </contributor>
+  <edition>1</edition>
+  <language>en</language>
+  <script>Latn</script>
+  <abstract format="text/plain" language="en" script="Latn">Recommendation ITU-T F.746.1 describes the major functions and their interactions for low-latency interactive multimedia streaming (LIMS). The scenarios and requirements are also identified in this Recommendation.Desktop and client-server applications can be provided to users through LIMS. The desktop application software and client software of client-server applications are deployed in the LIMS platform (server) and the outputs of the applications are delivered back to users as media streams.In such a way, the traditional data storing, computing and graphic processing tasks are offloaded from user devices to LIMS servers. Provided the interaction delay is kept low, LIMS can provide the same experience to end users with less powerful devices.The output of one instance of the application can be encoded into different audio and video formats, which can be sent to one or more user devices simultaneously. That means the application can be used continuously when the user switches from a powerful device such as a high-end computer to a less powerful device such as a mobile phone or vice versa.Since the software is no longer installed in the user device, easier deployment, maintenance and upgrade of the software is possible in the centrally-managed LIMS servers are much easier than before. If needed, it is easy to provide centralized management capability to fulfil the requirements of enterprises, such as single sign-on and access control.It is very difficult to hack an application provided through LIMS. Furthermore, software reverse engineering is no longer possible, which is useful for the protection of intellectual property rights.Since the delay of interaction with the application has a major impact on the user experience, it is critical for LIMS to keep the interaction delay in a range that the end user is willing to tolerate.</abstract>
+  <status>
+    <stage>Published</stage>
+  </status>
+  <copyright>
+    <from>2014</from>
+    <owner>
+      <organization>
+        <name>International Telecommunication Union</name>
+        <abbreviation>ITU</abbreviation>
+        <uri>www.itu.int</uri>
+      </organization>
+    </owner>
+  </copyright>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">F Suppl. 1 (11/1988)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">F Suppl. 2 (11/1988)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">F Suppl. 3 (09/2016)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">F Suppl. 4 (04/2021)</formattedref>
+    </bibitem>
+  </relation>
+  <place>Geneva</place>
+  <ext>
+    <doctype>recommendation</doctype>
+    <editorialgroup>
+      <bureau>T</bureau>
+      <group type="study-group">
+        <name>ITU-T Study Group 16</name>
+        <acronym>SG</acronym>
+      </group>
+    </editorialgroup>
+  </ext>
+</bibdata>

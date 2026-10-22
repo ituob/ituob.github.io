@@ -1,0 +1,72 @@
+<bibdata type="standard">
+  <fetched>2023-03-06</fetched>
+  <title type="title-main" format="text/plain" language="en" script="Latn">Internet protocol data communication service – IP packet transfer and availability performance parameters</title>
+  <title type="main" format="text/plain" language="en" script="Latn">Internet protocol data communication service – IP packet transfer and availability performance parameters</title>
+  <uri type="src">https://www.itu.int/ITU-T/recommendations/rec.aspx?rec=11079&amp;lang=en</uri>
+  <uri type="obp">https://www.itu.inthttps//handle.itu.int/11.1002/1000/11079-en?locatt=format:pdf&amp;auth</uri>
+  <docidentifier type="ITU">ITU-T Y.1540</docidentifier>
+  <date type="published">
+    <on>2011-03-01</on>
+  </date>
+  <contributor>
+    <role type="publisher"/>
+    <organization>
+      <name>International Telecommunication Union</name>
+      <abbreviation>ITU</abbreviation>
+      <uri>www.itu.int</uri>
+    </organization>
+  </contributor>
+  <edition>6</edition>
+  <language>en</language>
+  <script>Latn</script>
+  <abstract format="text/plain" language="en" script="Latn">Recommendation ITU-T Y.1540 defines the parameters that may be used in specifying and assessing the performance of speed, accuracy, dependability and availability of IP packet transfer of regional and international Internet protocol (IP) data communication services. The defined parameters apply to an end-to-end, point-to-point IP service and to the network portions that provide, or contribute to the provision of, such a service in accordance with the normative references specified in clause 2. Connectionless transport is a distinguishing aspect of the IP service that is considered in this Recommendation. Following over 20 years as an in-force Recommendation, the 2019 edition recognizes many changes in the design of IP services and in the protocols employed by end users. It introduces the new Annex A that defines IP-layer capacity parameters in ways that cater toward assessment, and provides requirements for methods of measurement of IP-layer capacity. This new annex is the result of years of study, and application of ITU-T Study Group 12 principles of accurately evaluating performance parameters and methods of measurement against a "ground truth" reference in laboratory and field measurements. Flow-related throughput parameters and methods of measurement (reliable delivery transport), remain for further study, and the text makes a clear distinction between this IP-layer capacity parameters. In the same way, parameters describing performance of a specific reliable transport layer protocol (TCP) remain for further study, and recognize that reliable transport protocols for the Internet are constantly changing and the subject of ongoing research.Annex B provides a second, more capable search algorithm for the IP capacity method of measurement defined in Annex A.</abstract>
+  <status>
+    <stage>Withdrawal</stage>
+  </status>
+  <copyright>
+    <from>2011</from>
+    <owner>
+      <organization>
+        <name>International Telecommunication Union</name>
+        <abbreviation>ITU</abbreviation>
+        <uri>www.itu.int</uri>
+      </organization>
+    </owner>
+  </copyright>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">Y Suppl. 56 (12/2019)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">Y Suppl. 58 (05/2021)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">Y Suppl. 60 (06/2022)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">Y Suppl. 68 (05/2021)</formattedref>
+    </bibitem>
+  </relation>
+  <relation type="complements">
+    <bibitem type="standard">
+      <formattedref format="text/plain" language="en" script="Latn">Y Suppl. 69 (05/2021)</formattedref>
+    </bibitem>
+  </relation>
+  <place>Geneva</place>
+  <ext>
+    <doctype>recommendation</doctype>
+    <editorialgroup>
+      <bureau>T</bureau>
+      <group type="study-group">
+        <name>ITU-T Study Group 12</name>
+        <acronym>SG</acronym>
+      </group>
+    </editorialgroup>
+  </ext>
+</bibdata>
