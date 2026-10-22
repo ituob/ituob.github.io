@@ -3,15 +3,14 @@
 // Static assets only today; the same Worker gains an API surface later
 // (add `main` + D1/Access bindings — see docs/cloudflare-webapp.adoc).
 //
-// workers_dev serves <name>.<account>.workers.dev immediately; flip to
-// the custom domain once the ituob.org zone lives on Cloudflare:
-//   "workers_dev": false,
-//   "routes": [{ "pattern": "www.ituob.org", "custom_domain": true }]
+// The ituob.org zone is on Cloudflare (pending nameserver activation);
+// the custom domain provisions its DNS record + certificate on deploy.
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "ituob-org",
   "compatibility_date": "2026-10-01",
-  "workers_dev": true,
+  "workers_dev": false,
+  "routes": [{ "pattern": "www.ituob.org", "custom_domain": true }],
   "assets": {
     "directory": "./dist",
     "html_handling": "auto-trailing-slash",
