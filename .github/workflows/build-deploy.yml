@@ -69,7 +69,7 @@ jobs:
   # once CLOUDFLARE_API_TOKEN / CLOUDFLARE_ACCOUNT_ID are set.
   deploy-cloudflare-staging:
     needs: build
-    if: vars.CLOUDFLARE_DEPLOY == 'true' && github.ref == 'refs/heads/staging' && github.event_name == 'push'
+    if: github.ref == 'refs/heads/staging' && github.event_name == 'push'
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
@@ -87,9 +87,11 @@ jobs:
 
   # Cloudflare production (www.ituob.org) — the DNS cutover target.
   # Same gate; see docs/cloudflare-webapp.adoc for the flip procedure.
+  # Production flips ONLY when the owner sets CLOUDFLARE_DEPLOY_PRODUCTION=true.
+  # Staging deploys unconditionally on pushes to the staging branch.
   deploy-cloudflare-production:
     needs: build
-    if: vars.CLOUDFLARE_DEPLOY == 'true' && github.ref == 'refs/heads/main' && github.event_name == 'push'
+    if: vars.CLOUDFLARE_DEPLOY_PRODUCTION == 'true' && github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
