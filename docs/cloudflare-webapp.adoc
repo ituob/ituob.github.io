@@ -96,11 +96,12 @@ build → astro check)
 
 *Phase 0 (done)* — static hosting + staging on Cloudflare.
 
-*Phase 1 — API surface.* Add `main` (Hono or itty) to the Worker:
-`/api/health`, read-only endpoints over the normalized data
-(registers/issues from R2 or D1 snapshots synced by CI). `assets`
-binding keeps serving the site; `run_worker_first: ["/api/*"]` routes
-API traffic to the Worker.
+*Phase 1 — API surface (STARTED).* The Worker runs first
+(`run_worker_first`), serves the site through the `ASSETS` binding,
+canonicalizes apex → www (no zone redirect rule needed), and exposes
+`/api/health`; unknown `/api/*` 404s. Read-only data endpoints
+(registers/issues over R2/D1 synced by CI) come next on the same
+surface.
 
 *Phase 2 — admin + auth.* Cloudflare Access (Zero Trust) in front of
 `/admin/*` and mutating `/api/*` (email OTP / SSO for the committee;

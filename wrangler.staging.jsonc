@@ -2,16 +2,19 @@
 //
 // Deploys from the `staging` branch; serves <name>.<account>.workers.dev
 // until the staging-www.ituob.org custom domain is provisioned (needs the
-// ituob.org zone on Cloudflare):
+// ituob.org zone active on Cloudflare):
 //   "workers_dev": false,
 //   "routes": [{ "pattern": "staging-www.ituob.org", "custom_domain": true }]
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "ituob-org-staging",
+  "main": "worker/index.ts",
   "compatibility_date": "2026-10-01",
   "workers_dev": true,
+  "run_worker_first": true,
   "assets": {
     "directory": "./dist",
+    "binding": "ASSETS",
     "html_handling": "auto-trailing-slash",
     "not_found_handling": "404-page"
   }
