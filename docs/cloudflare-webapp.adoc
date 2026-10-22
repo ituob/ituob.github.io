@@ -8,9 +8,11 @@ admin / member-submission webapp.
 
 . Move hosting off GitHub Pages to Cloudflare (Workers static assets).
 . Stand up a *real* staging environment (the GitHub Pages "staging"
-  job was cosmetic — `actions/deploy-pages` has exactly one destination
-  per repo; the fake staging label the UI showed as
-  `staging-http://www.ituob.org` proved it).
+  job was cosmetic: `actions/deploy-pages` has exactly one destination
+  per repo, so that job could only re-deploy the production site and
+  the Actions UI displayed its URL mislabeled with a "staging-" prefix.
+  Staging is now the Cloudflare Worker `ituob-org-staging` serving
+  https://staging-www.ituob.org).
 . Keep the certified build pipeline: GitHub Actions remains the only
   build orchestrator (submodules + Ruby snapshots + TS types + astro
   check); Cloudflare only receives the built `dist/`.
