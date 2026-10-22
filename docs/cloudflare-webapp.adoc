@@ -84,8 +84,10 @@ build → astro check)
 . Move the ituob.org zone to Cloudflare (registrar nameserver change).
 . Switch configs to custom domains:
   production `www.ituob.org`, staging `staging-www.ituob.org`
-  (`workers_dev: false` + `routes: custom_domain`), add the DNS
-  records (proxied).
+  (`workers_dev: false` + `routes: custom_domain`) — DONE 2026-10-22;
+  deploy auto-provisions the DNS records. Security headers
+  (HSTS/nosniff/frame-deny/referrer) + immutable /_astro caching ship
+  via public/_headers.
 . Old GitHub Pages records: CNAME www → pages unlink; traffic flips
   on TTL; GitHub keeps serving anyone still resolving old records
   until then (no downtime window).
