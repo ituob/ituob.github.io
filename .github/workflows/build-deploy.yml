@@ -38,6 +38,9 @@ jobs:
         SITE_TYPES_PATH: ${{ github.workspace }}/src/lib/schema.generated.ts
       run: bundle install && bundle exec ruby scripts/generate_ts_types.rb
 
+    - name: Verify committed wire types match the ontology
+      run: git diff --exit-code -- src/lib/schema.generated.ts
+
     - name: Generate register snapshots
       working-directory: data-ob
       env:

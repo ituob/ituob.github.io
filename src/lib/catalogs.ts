@@ -358,3 +358,61 @@ export function generalTypesForRec(code: string): readonly GeneralMessageType[] 
 
 /** ISSN (immutable across all issues). */
 export const OB_ISSN = "1564-5223";
+
+/** Register — a named dataset mandated by one ITU-T Recommendation.
+ *  Mirrors catalogs/registers.yaml (keep in sync with the Ruby gem). */
+export interface RegisterEntry {
+  registerId: string;
+  /** Slug under /registers/ and data/snapshots/, and the amendment
+   *  directory name under ob-issues/{issue}/{slug}/. */
+  slug: string;
+  /** Dataset directory (under datasets/) the register seeds from, when
+   *  the register's slug differs from it. */
+  seedDatasetSlug?: string;
+}
+
+export const REGISTERS: readonly RegisterEntry[] = [
+  { registerId: "E118_IIN", slug: "e118-iin", seedDatasetSlug: "1161-E.118" },
+  { registerId: "DP", slug: "dp", seedDatasetSlug: "994-E.164C" },
+  { registerId: "E164_ACN", slug: "e164-acn", seedDatasetSlug: "1015-E.164B" },
+  { registerId: "E164_CC", slug: "e164-cc", seedDatasetSlug: "1114-E.164D" },
+  { registerId: "NNP", slug: "nnp" },
+  { registerId: "E212_MNC", slug: "e212-mnc", seedDatasetSlug: "1162-E.212" },
+  { registerId: "E212_ICC", slug: "e212-icc" },
+  { registerId: "E218_TRCC", slug: "e218-trcc", seedDatasetSlug: "1125-E.218" },
+  { registerId: "F1", slug: "f1", seedDatasetSlug: "669-F.1" },
+  { registerId: "F32_TDI", slug: "f32-tdi", seedDatasetSlug: "980-F.32" },
+  { registerId: "BUREAUFAX", slug: "bureaufax", seedDatasetSlug: "bureaufax" },
+  { registerId: "F400_ADMD", slug: "f400-admd", seedDatasetSlug: "974-F.400" },
+  { registerId: "M1400_ICC", slug: "m1400-icc", seedDatasetSlug: "1060-M.1400" },
+  { registerId: "Q708_ISPC", slug: "q708-ispc", seedDatasetSlug: "1109-Q.708B" },
+  { registerId: "Q708_SANC", slug: "q708-sanc", seedDatasetSlug: "1125-Q.708A" },
+  { registerId: "T35_NA", slug: "t35-na", seedDatasetSlug: "1001-T.35B" },
+  { registerId: "T35_CC", slug: "t35-cc", seedDatasetSlug: "1002-T.35" },
+  { registerId: "X121_DNIC", slug: "x121-dnic", seedDatasetSlug: "977-X.121B" },
+  { registerId: "RR.25.1", slug: "rr251", seedDatasetSlug: "1154-RR.25.1" },
+  {
+    registerId: "List of Coast Stations and Special Service Stations",
+    slug: "coast-stations",
+  },
+  { registerId: "R_SP_LM.V", slug: "list-v" },
+  { registerId: "R_SP_LN.VIII", slug: "list-viii" },
+];
+
+const _REGISTER_BY_SEED: ReadonlyMap<string, RegisterEntry> = new Map(
+  REGISTERS.filter((r) => r.seedDatasetSlug).map((r) => [r.seedDatasetSlug!, r]),
+);
+
+/** The register a dataset directory feeds (dataset dir → register slug),
+ *  e.g. 1060-M.1400 → m1400-icc. Null when the dataset has no register. */
+export function registerForDataset(datasetSlug: string): RegisterEntry | null {
+  return _REGISTER_BY_SEED.get(datasetSlug) ?? null;
+}
+
+/** Datasets whose updates are published as general messages rather than
+ *  register amendments, e.g. the SR.1 recapitulatory list is updated by the
+ *  service_restrictions message in each issue. */
+export const DATASET_GENERAL_TYPES: Readonly<Record<string, GeneralMessageType>> = {
+  "1000-SR.1": "service_restrictions",
+  "991-PP.RES.21.pp": "callback_procedures",
+};

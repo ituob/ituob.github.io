@@ -19,9 +19,9 @@
 
 @theme {
   /* -- Type families ------------------------------------------------------ */
-  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  --font-mono: "JetBrains Mono", "SFMono-Regular", Menlo, Consolas, monospace;
-  --font-display: var(--font-sans);
+  --font-sans: Helvetica, Arial, sans-serif;
+  --font-mono: "SFMono-Regular", Menlo, Consolas, monospace;
+  --font-display: Helvetica, Arial, sans-serif;
 
   /* -- Neutral scale (deep space dark) ----------------------------------- */
   --color-neutral-0: #000000;
@@ -41,10 +41,10 @@
   --color-neutral-1100: #f5f7fa;
 
   /* -- Accent (electric blue — liquid mercury edge) ---------------------- */
-  --color-blue-300: #93c5fd;
-  --color-blue-400: #60a5fa;
-  --color-blue-500: #3b82f6;
-  --color-blue-600: #2563eb;
+  --color-blue-300: #52bce8;
+  --color-blue-400: #1aa1da;
+  --color-blue-500: #178ec4;
+  --color-blue-600: #137aa8;
 
   /* -- Secondary accent (cyan — for metallic shimmer) -------------------- */
   --color-cyan-300: #67e8f9;
@@ -107,12 +107,12 @@
   --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
 
   /* -- Glass surfaces ---------------------------------------------------- */
-  --glass-bg: rgba(15, 18, 24, 0.65);
-  --glass-bg-hover: rgba(21, 25, 34, 0.75);
-  --glass-border: rgba(255, 255, 255, 0.08);
-  --glass-border-hover: rgba(255, 255, 255, 0.14);
-  --glass-blur: 16px;
-  --glass-blur-heavy: 24px;
+  --glass-bg: #ffffff;
+  --glass-bg-hover: #ffffff;
+  --glass-border: rgba(0, 0, 0, 0.1);
+  --glass-border-hover: rgba(0, 0, 0, 0.18);
+  --glass-blur: 0px;
+  --glass-blur-heavy: 0px;
 
   /* -- Compatibility aliases (components reference these) ---------------- */
   --border-subtle: var(--border);
@@ -122,162 +122,62 @@
   --accent-contrast: var(--accent-on);
 
   /* -- Metallic gradient (mercury/chrome) -------------------------------- */
-  --gradient-metallic: linear-gradient(135deg,
-    rgba(255,255,255,0.06) 0%,
-    rgba(255,255,255,0.02) 40%,
-    rgba(0,0,0,0.05) 60%,
-    rgba(255,255,255,0.03) 100%);
-  --gradient-accent: linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%);
-  --gradient-accent-soft: linear-gradient(135deg,
-    rgba(59,130,246,0.12) 0%,
-    rgba(6,182,212,0.08) 100%);
-  --gradient-depth: linear-gradient(180deg,
-    rgba(255,255,255,0.04) 0%,
-    transparent 50%,
-    rgba(0,0,0,0.08) 100%);
+  --gradient-metallic: none;
+  --gradient-accent: #1aa1da;
+  --gradient-accent-soft: rgba(26, 161, 218, 0.12);
+  --gradient-depth: none;
 
   /* -- Glow shadows ------------------------------------------------------ */
-  --glow-accent: 0 0 24px rgba(59, 130, 246, 0.25);
-  --glow-accent-strong: 0 0 40px rgba(59, 130, 246, 0.35);
-  --shadow-sm: 0 1px 2px rgba(0,0,0,0.3), 0 1px 3px rgba(0,0,0,0.2);
-  --shadow-md: 0 4px 12px rgba(0,0,0,0.3), 0 2px 4px rgba(0,0,0,0.2);
-  --shadow-lg: 0 12px 32px rgba(0,0,0,0.4), 0 4px 8px rgba(0,0,0,0.25);
-  --shadow-xl: 0 24px 64px rgba(0,0,0,0.5), 0 8px 16px rgba(0,0,0,0.3);
-  --shadow-glass: 0 4px 16px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.05);
-  --shadow-glass-hover: 0 8px 32px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.08);
+  --glow-accent: none;
+  --glow-accent-strong: none;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.06);
+  --shadow-md: 0 2px 8px rgba(0,0,0,0.08);
+  --shadow-lg: 0 4px 16px rgba(0,0,0,0.10);
+  --shadow-xl: 0 8px 32px rgba(0,0,0,0.12);
+  --shadow-glass: none;
+  --shadow-glass-hover: none;
 }
 
-/* -----------------------------------------------------------------------------
-   Theme tokens — DARK default (liquid metal); light via .light class.
-   --------------------------------------------------------------------------- */
 
 @custom-variant light (&:where(.light, .light *));
 
 :root,
 .dark {
-  color-scheme: dark;
-  --bg: var(--color-neutral-50);
-  --bg-1: rgba(15, 18, 24, 0.8);
-  --bg-2: rgba(21, 25, 34, 0.6);
-  --bg-3: rgba(28, 33, 41, 0.5);
-  --bg-solid-1: var(--color-neutral-100);
-  --bg-solid-2: var(--color-neutral-150);
-  --bg-solid-3: var(--color-neutral-200);
-  --bg-hover: rgba(36, 42, 53, 0.7);
-  --bg-active: rgba(45, 52, 65, 0.8);
-  --bg-grid: rgba(255, 255, 255, 0.02);
-  --border: rgba(255, 255, 255, 0.06);
-  --border-1: rgba(255, 255, 255, 0.1);
-  --border-2: rgba(255, 255, 255, 0.16);
-  --border-accent: rgba(59, 130, 246, 0.5);
-  --fg: #e8ebf2;
-  --fg-1: #ccd2dc;
-  --fg-2: #a5adbd;
-  --fg-3: #7e8798;
-  --fg-4: #5f6878;
-  --accent: var(--color-blue-400);
-  --accent-hover: var(--color-blue-300);
-  --accent-active: var(--color-blue-500);
-  --accent-soft: rgba(59, 130, 246, 0.12);
-  --accent-on: #ffffff;
-  --link: var(--color-blue-400);
-  --link-hover: var(--color-blue-300);
-  --selection-bg: var(--color-blue-600);
-  --selection-fg: #ffffff;
-  --ambient-1: rgba(59, 130, 246, 0.08);
-  --ambient-2: rgba(6, 182, 212, 0.06);
-  --ambient-3: rgba(139, 92, 246, 0.05);
-}
-
-@media (prefers-color-scheme: light) {
-  :root:not(.dark) {
-    color-scheme: light;
-    --bg: #f0f2f7;
-    --bg-1: rgba(255, 255, 255, 0.8);
-    --bg-2: rgba(255, 255, 255, 0.6);
-    --bg-3: rgba(240, 242, 247, 0.5);
-    --bg-solid-1: #ffffff;
-    --bg-solid-2: #f7f8fb;
-    --bg-solid-3: #eef0f5;
-    --bg-hover: rgba(240, 242, 247, 0.8);
-    --bg-active: rgba(230, 233, 240, 0.9);
-    --bg-grid: rgba(0, 0, 0, 0.02);
-    --border: rgba(0, 0, 0, 0.08);
-    --border-1: rgba(0, 0, 0, 0.12);
-    --border-2: rgba(0, 0, 0, 0.18);
-    --border-accent: rgba(37, 99, 235, 0.4);
-    --fg: #0c0e12;
-    --fg-1: #2d323e;
-    --fg-2: #424854;
-    --fg-3: #5c626f;
-    --fg-4: #7a8090;
-    --accent: var(--color-blue-600);
-    --accent-hover: var(--color-blue-500);
-    --accent-active: var(--color-blue-600);
-    --accent-soft: rgba(37, 99, 235, 0.08);
-    --accent-on: #ffffff;
-    --link: var(--color-blue-600);
-    --link-hover: var(--color-blue-500);
-    --selection-bg: var(--color-blue-600);
-    --selection-fg: #ffffff;
-    --ambient-1: rgba(37, 99, 235, 0.06);
-    --ambient-2: rgba(6, 182, 212, 0.04);
-    --ambient-3: rgba(139, 92, 246, 0.03);
-    --glass-bg: rgba(255, 255, 255, 0.7);
-    --glass-bg-hover: rgba(255, 255, 255, 0.85);
-    --glass-border: rgba(0, 0, 0, 0.08);
-    --glass-border-hover: rgba(0, 0, 0, 0.14);
-    --gradient-metallic: linear-gradient(135deg,
-      rgba(255,255,255,0.8) 0%,
-      rgba(255,255,255,0.4) 40%,
-      rgba(0,0,0,0.02) 60%,
-      rgba(255,255,255,0.6) 100%);
-  }
-}
-
-.light {
+  /* Original ituob.org palette (Jekyll assets/css/style.scss). */
   color-scheme: light;
-  --bg: #f0f2f7;
-  --bg-1: rgba(255, 255, 255, 0.8);
-  --bg-2: rgba(255, 255, 255, 0.6);
-  --bg-3: rgba(240, 242, 247, 0.5);
+  --bg: #ffffff;
+  --bg-1: #ffffff;
+  --bg-2: #fafafa;
+  --bg-3: #f5f5f5;
   --bg-solid-1: #ffffff;
-  --bg-solid-2: #f7f8fb;
-  --bg-solid-3: #eef0f5;
-  --bg-hover: rgba(240, 242, 247, 0.8);
-  --bg-active: rgba(230, 233, 240, 0.9);
-  --bg-grid: rgba(0, 0, 0, 0.02);
-  --border: rgba(0, 0, 0, 0.08);
-  --border-1: rgba(0, 0, 0, 0.12);
-  --border-2: rgba(0, 0, 0, 0.18);
-  --border-accent: rgba(37, 99, 235, 0.4);
-  --fg: #0c0e12;
-  --fg-1: #2d323e;
-  --fg-2: #424854;
-  --fg-3: #5c626f;
-  --fg-4: #7a8090;
-  --accent: var(--color-blue-600);
-  --accent-hover: var(--color-blue-500);
-  --accent-active: var(--color-blue-600);
-  --accent-soft: rgba(37, 99, 235, 0.08);
+  --bg-solid-2: #fafafa;
+  --bg-solid-3: #f5f5f5;
+  --bg-hover: #f5f5f5;
+  --bg-active: #eeeeee;
+  --bg-grid: rgba(0, 0, 0, 0.03);
+  --border: rgba(0, 0, 0, 0.12);
+  --border-1: rgba(0, 0, 0, 0.15);
+  --border-2: rgba(0, 0, 0, 0.22);
+  --border-accent: rgba(26, 161, 218, 0.5);
+  --fg: #000000;
+  --fg-1: #1a1a1a;
+  --fg-2: #333333;
+  --fg-3: #666666;
+  --fg-4: #999999;
+  --accent: #1aa1da;
+  --accent-hover: #178ec4;
+  --accent-active: #137aa8;
+  --accent-soft: rgba(26, 161, 218, 0.10);
   --accent-on: #ffffff;
-  --link: var(--color-blue-600);
-  --link-hover: var(--color-blue-500);
-  --selection-bg: var(--color-blue-600);
+  --link: #178ec4;
+  --link-hover: #137aa8;
+  --selection-bg: #1aa1da;
   --selection-fg: #ffffff;
-  --ambient-1: rgba(37, 99, 235, 0.06);
-  --ambient-2: rgba(6, 182, 212, 0.04);
-  --ambient-3: rgba(139, 92, 246, 0.03);
-  --glass-bg: rgba(255, 255, 255, 0.7);
-  --glass-bg-hover: rgba(255, 255, 255, 0.85);
-  --glass-border: rgba(0, 0, 0, 0.08);
-  --glass-border-hover: rgba(0, 0, 0, 0.14);
-  --gradient-metallic: linear-gradient(135deg,
-    rgba(255,255,255,0.8) 0%,
-    rgba(255,255,255,0.4) 40%,
-    rgba(0,0,0,0.02) 60%,
-    rgba(255,255,255,0.6) 100%);
+  --ambient-1: transparent;
+  --ambient-2: transparent;
+  --ambient-3: transparent;
 }
+
 
 /* -----------------------------------------------------------------------------
    Base element styling.
@@ -1209,4 +1109,201 @@
     word-break: break-all;
   }
   a[href^="/"]:after, a[href^="#"]:after { content: none; }
+}
+
+/* -----------------------------------------------------------------------------
+   Original ituob.org chrome — Jekyll _layouts/default.html + _sass/main.scss.
+   Colors and typography are copied from the certified build's style.css.
+   --------------------------------------------------------------------------- */
+
+body {
+  font-family: Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  min-height: 100vh;
+  display: flex;
+  flex-flow: column nowrap;
+}
+
+@media screen and (min-width: 800px) {
+  body {
+    min-width: 900px;
+    padding: 0 5vw;
+  }
+  body > header,
+  body > footer {
+    margin: 0 -5vw;
+  }
+}
+
+body > header {
+  flex-shrink: 0;
+  background: #1aa1da;
+  color: #ffffff;
+  font-size: 80%;
+  padding-left: 3rem;
+}
+
+@media screen and (min-width: 800px) {
+  body > header {
+    padding-left: 5vw;
+  }
+}
+
+body > header > span {
+  margin-left: -40px;
+  display: flex;
+  flex-flow: row nowrap;
+  align-items: center;
+}
+
+body > header a:link,
+body > header a:hover,
+body > header a:visited {
+  color: inherit;
+}
+
+body > header h1 {
+  font-size: 100%;
+  text-transform: uppercase;
+  letter-spacing: -0.025em;
+}
+
+body > header h2 {
+  font-size: 110%;
+  font-weight: normal;
+  padding-left: 2em;
+  position: relative;
+  overflow: hidden;
+}
+
+body > header h2:before {
+  display: block;
+  position: absolute;
+  content: " ";
+  border: 1px solid #ffffff;
+  left: 0;
+  top: 50%;
+  width: 20px;
+  height: 20px;
+  transform: translateX(-50%) translateY(-50%) scaleY(2) rotate(45deg);
+}
+
+/* Header logos: present in the DOM, hidden by CSS exactly as the original
+   site does since 2023 (Ribose issue #59). */
+body > header .logo,
+body > header .logo-inverse {
+  display: none;
+  width: 40px;
+  height: 40px;
+  margin-right: 0;
+}
+
+body > header .breadcrumbs {
+  white-space: nowrap;
+}
+
+body > header .crumb {
+  color: inherit;
+}
+
+body > header .crumb-sep {
+  margin: 0 0.6em;
+  opacity: 0.75;
+}
+
+body > footer {
+  flex-shrink: 0;
+  margin-top: 1rem;
+  padding: 2rem;
+  text-align: right;
+  color: #333333;
+  background: whitesmoke;
+  display: flex;
+  flex-flow: row wrap;
+  align-items: center;
+  justify-content: space-between;
+}
+
+@media screen and (min-width: 800px) {
+  body > footer {
+    padding-left: 5vw;
+    padding-right: 5vw;
+    flex-flow: row nowrap;
+  }
+}
+
+body > footer .footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1.4rem;
+  font-family: Helvetica, Arial, sans-serif;
+  font-size: 85%;
+}
+
+body > footer .footer-link {
+  color: #666666;
+}
+
+body > footer .footer-link:hover {
+  color: #1aa1da;
+}
+
+body > footer .footer-pill {
+  white-space: nowrap;
+  height: 24px;
+  display: flex;
+  flex-flow: row nowrap;
+  align-items: center;
+  padding: 1rem 2rem;
+  margin: 0 1rem 0 0;
+  background: whitesmoke;
+  border-radius: 2rem;
+  color: #a6a6a6;
+}
+
+body > footer .footer-pill .icon {
+  margin: -1rem 0.5rem -1rem -2rem;
+  padding-left: 2rem;
+  width: 1rem;
+}
+
+body > footer .footer-pill.interactive {
+  transition: color 0.2s linear, background 0.2s linear;
+}
+
+body > footer .footer-pill.interactive:hover {
+  background: #a6a6a6;
+  color: #ffffff;
+}
+
+body > footer .powered-by {
+  padding-right: 1rem;
+  background: transparent;
+}
+
+body > footer .powered-by .icon {
+  padding-left: 0.5rem;
+  margin-right: 2rem;
+}
+
+body > footer .powered-by .icon img.logo {
+  filter: grayscale(100%);
+  opacity: 0.35;
+  transition: opacity 0.2s linear;
+  width: 2.5rem;
+  height: 2.5rem;
+  display: block;
+}
+
+body > footer .powered-by.interactive:hover {
+  color: unset;
+  background: transparent;
+}
+
+body > footer .powered-by.interactive:hover .logo {
+  opacity: 1;
+}
+
+body > main {
+  flex: 1;
 }

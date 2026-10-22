@@ -37,6 +37,8 @@ import {
   TEXTUAL_GENERAL_TYPES,
   MESSAGE_TYPE_METADATA,
   generalTypesForRec,
+  registerForDataset,
+  DATASET_GENERAL_TYPES,
   type GeneralMessageType,
 } from "./catalogs";
 
@@ -582,14 +584,29 @@ export const issuesWithGeneralType = memoize(
 
 /** All issues that contain amendments to a given dataset slug. */
 export const issuesWithDataset = memoize((slug: string): number[] => {
+  // Alias datasets (e.g. icc → 1060-M.1400) share the target's history.
+  const aliasOf = loadDatasetMetadata(slug)?.alias_of;
+  if (aliasOf && aliasOf !== slug) return issuesWithDataset(aliasOf);
   const out: number[] = [];
+  // The amendments are grouped by the ob-issues directory slug, which
+  // differs from the dataset directory slug for the schema datasets
+  // (1060-M.1400 feeds register m1400-icc).
+  const registerSlug = registerForDataset(slug)?.slug;
+  const generalType = DATASET_GENERAL_TYPES[slug];
+  const generalIssues = generalType ? issuesWithGeneralType(generalType) : [];
+  const generalSet = new Set(generalIssues);
   for (const id of listIssueIds()) {
     const issue = loadIssue(id);
     if (!issue) continue;
     if (
       issue.amendments.structured[slug] ||
       issue.amendments.textual[slug] ||
-      issue.amendments.placeholder[slug]
+      issue.amendments.placeholder[slug] ||
+      (registerSlug &&
+        (issue.amendments.structured[registerSlug] ||
+          issue.amendments.textual[registerSlug] ||
+          issue.amendments.placeholder[registerSlug])) ||
+      generalSet.has(id)
     ) {
       out.push(id);
     }

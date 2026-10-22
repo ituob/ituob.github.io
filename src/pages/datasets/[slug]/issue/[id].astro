@@ -5,11 +5,20 @@ import {
   loadDatasetMetadata,
   loadIssue,
   listIssueIds,
+  issuesWithGeneralType,
 } from "~/lib/loaders";
-import { PUBLICATION_BY_SLUG, type Language } from "~/lib/catalogs";
+import {
+  PUBLICATION_BY_SLUG,
+  registerForDataset,
+  DATASET_GENERAL_TYPES,
+  type Language,
+} from "~/lib/catalogs";
 import { formatSwissDate } from "~/lib/format";
 import StructuredAmendment from "~/components/StructuredAmendment.astro";
 import TextualAmendment from "~/components/TextualAmendment.astro";
+import TextualMessage from "~/components/TextualMessage.astro";
+import ServiceRestrictions from "~/components/ServiceRestrictions.astro";
+import type { TextualGeneralMessage } from "~/lib/types";
 
 export function getStaticPaths() {
   const datasetSlugs = listDatasetSlugs();
@@ -24,26 +33,67 @@ export function getStaticPaths() {
     for (const s of Object.keys(iss.amendments.placeholder)) amdSlugs.add(s);
   }
   const allSlugs = new Set<string>([...datasetSlugs, ...amdSlugs]);
+  // Dataset pages link here by dataset slug, but amendments are keyed by the
+  // ob-issues directory slug (1060-M.1400 vs m1400-icc) — accept both.
+  const slugsForIssue = (issue: NonNullable<ReturnType<typeof loadIssue>>) => {
+    const keys = new Set([
+      ...Object.keys(issue.amendments.structured),
+      ...Object.keys(issue.amendments.textual),
+      ...Object.keys(issue.amendments.placeholder),
+    ]);
+    const out = new Set<string>(keys);
+    for (const k of keys) {
+      for (const ds of datasetSlugs) {
+        if (registerForDataset(ds)?.slug === k) out.add(ds);
+      }
+    }
+    return out;
+  };
   const paths: { params: { slug: string; id: string } }[] = [];
-  for (const slug of allSlugs) {
-    for (const id of listIssueIds()) {
-      const issue = loadIssue(id);
-      if (!issue) continue;
-      if (
-        issue.amendments.structured[slug] ||
-        issue.amendments.textual[slug] ||
-        issue.amendments.placeholder[slug]
-      ) {
+  for (const id of listIssueIds()) {
+    const issue = loadIssue(id);
+    if (!issue) continue;
+    for (const slug of slugsForIssue(issue)) {
+      if (allSlugs.has(slug)) {
         paths.push({ params: { slug, id: String(id) } });
       }
+    }
+  }
+  // General-message-fed datasets (SR.1, PP.RES.21): their updates are
+  // per-issue general messages rather than register amendments.
+  for (const [dsSlug, type] of Object.entries(DATASET_GENERAL_TYPES)) {
+    for (const id of issuesWithGeneralType(type)) {
+      paths.push({ params: { slug: dsSlug, id: String(id) } });
     }
   }
   return paths;
 }
 
-const { slug, id: idStr } = Astro.params;
+const { slug: paramSlug, id: idStr } = Astro.params;
 const id = Number.parseInt(idStr!, 10);
 const issue = loadIssue(id);
+// Amendments are keyed by the ob-issues directory slug; dataset-slug URLs
+// resolve through the register bridge (1060-M.1400 → m1400-icc).
+const slug = registerForDataset(paramSlug!)?.slug ?? paramSlug!;
+// General-message-fed updates: service_restrictions messages carry a
+// items-table (rendered like the issue page); other types are ProseMirror
+// content rendered by TextualMessage.
+interface ItemsMessage extends TextualGeneralMessage {
+  items?: Array<{
+    country?: Record<string, string>;
+    ob?: number | string;
+    page?: number | string;
+    note?: Record<string, string>;
+  }>;
+}
+const generalType = DATASET_GENERAL_TYPES[paramSlug!];
+const generalMessages: ItemsMessage[] = (
+  generalType && issue
+    ? issue.general.textual.filter((m) => m.type === generalType)
+    : []
+).map((m) => m as ItemsMessage);
+const generalItems = generalMessages.flatMap((m) => m.items ?? []);
+const generalText = generalMessages.filter((m) => m.items === undefined);
 // Look up metadata from the dataset directory if it exists, else use the
 // publication registry label.
 const meta = loadDatasetMetadata(slug!);
@@ -67,13 +117,15 @@ const lang: Language = "en";
     </p>
   </header>
 
-  {issue?.amendments.structured[slug!] && issue.amendments.structured[slug!]!.length > 0 && (
-    <StructuredAmendment amendments={issue.amendments.structured[slug!]!} lang={lang} />
+  {issue?.amendments.structured[slug] && issue.amendments.structured[slug]!.length > 0 && (
+    <StructuredAmendment amendments={issue.amendments.structured[slug]!} lang={lang} />
   )}
-  {issue?.amendments.textual[slug!] && (
-    <TextualAmendment amendment={issue.amendments.textual[slug!]!} lang={lang} />
+  {issue?.amendments.textual[slug] && (
+    <TextualAmendment amendment={issue.amendments.textual[slug]!} lang={lang} />
   )}
-  {issue?.amendments.placeholder[slug!] && (
-    <TextualAmendment placeholder={issue.amendments.placeholder[slug!]!} />
+  {issue?.amendments.placeholder[slug] && (
+    <TextualAmendment placeholder={issue.amendments.placeholder[slug]!} />
   )}
+  {generalItems.length > 0 && <ServiceRestrictions items={generalItems} lang={lang} />}
+  {generalText.map((m) => <TextualMessage message={m} lang={lang} />)}
 </Base>

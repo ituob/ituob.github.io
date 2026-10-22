@@ -1,11 +1,24 @@
 /**
- * Typed schemas for OB data. Plain TypeScript interfaces (Zod-equivalent).
- * We avoid `any` — every shape is documented.
+ * Typed schemas for OB data — the VIEW layer consumed by pages.
  *
- * These shapes match the YAML output of the ituob normalization pipeline.
- * See service-publications-docs/CONTEXT.md for the domain vocabulary.
+ * Shared wire shapes are derived from schema.generated.ts, which is
+ * generated from the LML ontology (ituob/lib/ituob/ontology/messages.lml,
+ * scripts/generate_ts_types.rb) and regenerated in CI before every build.
+ * Anything declared here that also exists on the wire imports the generated
+ * interface instead of restating it, so `npm run check` fails when the site
+ * drifts from the ontology.
+ *
+ * Not covered by the ontology (and therefore hand-written here): the
+ * ob-issues file envelope (type/identifier/data framing), ProseMirror
+ * documents, and view-level indexes derived from filenames.
  */
 import type { ActionType, GeneralMessageType, Language } from "./catalogs";
+import type {
+  IdentifierWire,
+  IssueAuthorWire,
+  IssueContactWire,
+  MultilingualStringWire,
+} from "./schema.generated";
 
 /* -- ProseMirror document tree ---------------------------------------------- */
 
@@ -46,15 +59,12 @@ export type LocalizedContent = Partial<Record<Language, ProseMirrorDoc>>;
 
 /* -- Issue metadata --------------------------------------------------------- */
 
-export interface ContactEntry {
+export interface ContactEntry extends IssueContactWire {
   type: "phone" | "fax" | "email" | "web" | "telex" | "other" | string;
   data: string;
-  recommended?: boolean;
 }
 
-export interface AuthorEntity {
-  name?: string;
-  address?: string;
+export interface AuthorEntity extends IssueAuthorWire {
   contacts?: ContactEntry[];
 }
 
@@ -108,9 +118,7 @@ export interface TextualGeneralMessage {
 
 /* -- Amendments (structured ChangeObjects) ---------------------------------- */
 
-export interface AmendmentIdentifier {
-  code?: string;
-}
+export interface AmendmentIdentifier extends IdentifierWire {}
 
 export interface AmendmentChangeEntry {
   _class?: string;
@@ -165,11 +173,11 @@ export interface PlaceholderAmendment {
 /* -- Dataset metadata ------------------------------------------------------- */
 
 export interface DatasetMetadata {
-  title: Partial<Record<Language, string>>;
+  title: MultilingualStringWire;
   url?: string;
   source?: string;
   alias_of?: string;
-  note?: Partial<Record<Language, string>>;
+  note?: MultilingualStringWire;
   locale?: Array<{
     key: string;
   } & Partial<Record<Language, string>>>;
