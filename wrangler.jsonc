@@ -12,7 +12,10 @@
   "main": "worker/index.ts",
   "compatibility_date": "2026-10-01",
   "workers_dev": false,
-  "routes": [{ "pattern": "www.ituob.org", "custom_domain": true }],
+  "routes": [
+    { "pattern": "www.ituob.org", "custom_domain": true },
+    { "pattern": "ituob.org", "custom_domain": true }
+  ],
   "run_worker_first": true,
   "assets": {
     "directory": "./dist",
