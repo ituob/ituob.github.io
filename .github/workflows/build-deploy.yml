@@ -54,13 +54,6 @@ jobs:
     - name: Run TypeScript check
       run: npm run check
 
-    # GitHub Pages (production today) + a plain artifact for the
-    # Cloudflare deploys below.
-    - name: Upload GitHub Pages artifact
-      uses: actions/upload-pages-artifact@v3
-      with:
-        path: dist
-
     - name: Upload dist for Cloudflare deploys
       uses: actions/upload-artifact@v4
       with:
@@ -109,18 +102,6 @@ jobs:
         wranglerVersion: '4'
         command: deploy
 
-  deploy-production-github-pages:
-    needs: build
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    runs-on: ubuntu-latest
-    environment:
-      name: production
-      url: https://www.ituob.org
-    steps:
-    - name: Deploy to GitHub Pages (production)
-      uses: actions/deploy-pages@v4
-      with:
-        token: ${{ secrets.GITHUB_TOKEN }}
 
   content-parity-audit:
     needs: build
