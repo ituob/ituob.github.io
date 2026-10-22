@@ -17,7 +17,8 @@ const { slug } = Astro.params;
 const meta = loadDatasetMetadata(slug!);
 const known = PUBLICATION_BY_SLUG.get(slug!);
 const title = meta?.title?.en ?? known?.label ?? slug;
-const issueIds = issuesWithDataset(slug!).sort((a, b) => b - a);
+const resolvedSlug = meta?.alias_of ?? slug!;
+const issueIds = issuesWithDataset(resolvedSlug).sort((a, b) => b - a);
 ---
 <Base title={`${title} — history`} description={`Chronological change history of ${title}.`}>
   <header class="mb-8">
@@ -38,7 +39,7 @@ const issueIds = issuesWithDataset(slug!).sort((a, b) => b - a);
       return (
         <li>
           <a
-            href={`/datasets/${slug}/issue/${id}/`}
+            href={`/datasets/${resolvedSlug}/issue/${id}/`}
             class="flex items-baseline justify-between gap-3 panel px-4 py-3 no-underline hover:border-[var(--accent)]"
           >
             <span class="font-semibold">

@@ -8,7 +8,7 @@ import {
   issuesWithDataset,
   loadIssue,
 } from "~/lib/loaders";
-import { PUBLICATION_BY_SLUG, type Language } from "~/lib/catalogs";
+import { PUBLICATION_BY_SLUG, registerForDataset, type Language } from "~/lib/catalogs";
 import { formatSwissDate } from "~/lib/format";
 import { loadManifest, loadCurrentState } from "~/lib/snapshots";
 
@@ -28,12 +28,17 @@ const resolvedData = meta?.alias_of ? loadDatasetData(meta.alias_of) : data;
 const resolvedSchema = meta?.alias_of ? loadDatasetSchema(meta.alias_of) : schema;
 
 const title = resolvedMeta?.title?.en ?? known?.label ?? slug;
-const issueIds = issuesWithDataset(slug!).sort((a, b) => b - a);
+// Alias pages link history/issues to the resolved dataset (all data and
+// history are maintained there).
+const resolvedSlug = meta?.alias_of ?? slug!;
+const issueIds = issuesWithDataset(resolvedSlug).sort((a, b) => b - a);
 const lang: Language = "en";
 
-// Check if a register snapshot exists for this slug.
-const registerManifest = loadManifest(slug!);
-const registerState = registerManifest ? loadCurrentState(slug!) : null;
+// Register snapshots live under the register slug, which differs from the
+// dataset directory slug (1060-M.1400 → m1400-icc).
+const registerSlug = registerForDataset(slug!)?.slug ?? slug!;
+const registerManifest = loadManifest(registerSlug);
+const registerState = registerManifest ? loadCurrentState(registerSlug) : null;
 const hasRegister = !!(registerManifest && registerState);
 
 // Determine columns from schema or first row.
@@ -85,10 +90,10 @@ function formatValue(v: unknown): string {
           → This register has a live replay view with {registerState!.entry_count} active entries.
         </p>
         <div class="mt-2 flex gap-3 text-[var(--step--1)]" style="font-family: var(--font-sans);">
-          <a href={`/registers/${slug}/`} class="no-underline hover:underline font-semibold" style="color: var(--accent);">
+          <a href={`/registers/${registerSlug}/`} class="no-underline hover:underline font-semibold" style="color: var(--accent);">
             View current register state →
           </a>
-          <a href={`/registers/${slug}/history/`} class="no-underline hover:underline" style="color: var(--accent);">
+          <a href={`/registers/${registerSlug}/history/`} class="no-underline hover:underline" style="color: var(--accent);">
             View change history →
           </a>
         </div>
@@ -122,7 +127,7 @@ function formatValue(v: unknown): string {
 
   <nav class="no-print mb-8" aria-label="Dataset sections" style="font-family: var(--font-sans);">
     <a href="#snapshot" class="chip mr-1.5 no-underline">Current snapshot</a>
-    <a href="/datasets/{slug}/history/" class="chip mr-1.5 no-underline">Change history</a>
+    <a href={`/datasets/${resolvedSlug}/history/`} class="chip mr-1.5 no-underline">Change history</a>
   </nav>
 
   <section id="snapshot" class="scroll-mt-24">
@@ -182,7 +187,7 @@ function formatValue(v: unknown): string {
           const issue = loadIssue(id);
           return (
             <li>
-              <a href={`/datasets/${slug}/issue/${id}/`} class="flex items-baseline justify-between panel px-3 py-2 no-underline hover:border-[var(--accent)]">
+              <a href={`/datasets/${resolvedSlug}/issue/${id}/`} class="flex items-baseline justify-between panel px-3 py-2 no-underline hover:border-[var(--accent)]">
                 <span class="font-semibold">No. <span class="num">{id}</span></span>
                 <span class="text-[var(--step--1)]" style="color: var(--fg-muted);">
                   {issue ? formatSwissDate(issue.meta.publication_date) : ""}
@@ -194,7 +199,7 @@ function formatValue(v: unknown): string {
       </ul>
       {issueIds.length > 9 && (
         <p class="mt-4">
-          <a href={`/datasets/${slug}/history/`} class="font-semibold uppercase tracking-wider text-[var(--step--1)] hover:text-[var(--accent)]" style="font-family: var(--font-sans); letter-spacing: 0.08em;">
+          <a href={`/datasets/${resolvedSlug}/history/`} class="font-semibold uppercase tracking-wider text-[var(--step--1)] hover:text-[var(--accent)]" style="font-family: var(--font-sans); letter-spacing: 0.08em;">
             Full history ({issueIds.length} issues) →
           </a>
         </p>

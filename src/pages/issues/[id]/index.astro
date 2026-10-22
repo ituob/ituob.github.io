@@ -79,9 +79,10 @@ for (const m of issue.general.textual) {
 for (const t of Object.values(issue.amendments.textual)) {
   for (const l of availableLanguages(t.contents)) langAvail.add(l);
 }
+// English lives at /issues/{id}/; only non-English get a /{lang}/ route.
 const langLinks = SUPPORTED_LANGUAGES.filter((l) => langAvail.has(l)).map((l) => ({
   label: l,
-  href: "/issues/" + id + "/" + l + "/",
+  href: l === "en" ? "/issues/" + id + "/" : "/issues/" + id + "/" + l + "/",
 }));
 
 function sectionId(label: string): string {
