@@ -49,10 +49,12 @@ const isExternal = !manifest || !state;
 const errorSummary = (() => {
   if (!state || state.error_count === 0) return null;
   const errs = (state.errors as string[]) ?? [];
-  const lirSkips = errs.filter((e) => e.startsWith("skip LIR")).length;
-  const other = state.error_count - lirSkips;
+  const lir = errs.filter((e) => e.startsWith("skip LIR")).length;
+  const dup = errs.filter((e) => e.includes("already exists")).length;
+  const other = state.error_count - lir - dup;
   const parts: string[] = [];
-  if (lirSkips > 0) parts.push(`${lirSkips} unmatched LIR repeats`);
+  if (lir > 0) parts.push(`${lir} unmatched LIR repeats`);
+  if (dup > 0) parts.push(`${dup} skipped duplicate entries`);
   if (other > 0) parts.push(`${other} replay errors`);
   return parts.join(" + ");
 })();
