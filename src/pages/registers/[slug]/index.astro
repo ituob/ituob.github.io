@@ -41,6 +41,21 @@ const state = loadCurrentState(slug!);
 const catalogEntry = loadRegisterCatalog().find((r) => r.slug === slug);
 
 const isExternal = !manifest || !state;
+
+// Replay skips are almost all "skip LIR <position>": LIR amendment
+// patches record a printed-table position rather than an entry key, so
+// the replay cannot match them. The current list is unaffected — report
+// them plainly instead of alarming readers with "errors".
+const errorSummary = (() => {
+  if (!state || state.error_count === 0) return null;
+  const errs = (state.errors as string[]) ?? [];
+  const lirSkips = errs.filter((e) => e.startsWith("skip LIR")).length;
+  const other = state.error_count - lirSkips;
+  const parts: string[] = [];
+  if (lirSkips > 0) parts.push(`${lirSkips} unmatched LIR repeats`);
+  if (other > 0) parts.push(`${other} replay errors`);
+  return parts.join(" + ");
+})();
 const title = isExternal
   ? (catalogEntry?.title?.en ?? catalogEntry?.register_id ?? slug)
   : (manifest.title.en ?? manifest.slug);
@@ -163,7 +178,7 @@ if (isExternal) {
         {state.entry_count} active entries
         {state.lapsed_count > 0 && ` · ${state.lapsed_count} lapsed`}
         {state.deleted_count > 0 && ` · ${state.deleted_count} deleted`}
-        {state.error_count > 0 && ` · ${state.error_count} replay errors`}
+        {errorSummary && ` · ${errorSummary}`}
         · current state (latest OB)
         {state.history.filter(p => p.type !== "SEED").length > 0 && (
           <> · Amended {state.history.filter(p => p.type !== "SEED").length} time{state.history.filter(p => p.type !== "SEED").length !== 1 ? "s" : ""} in subsequent editions</>
@@ -298,6 +313,15 @@ if (isExternal) {
       {/* Issue cross-reference archive for parity */}
       <IssueArchive />
 
+      <section>
+        <header class="rule-thin pt-4 mb-5">
+          <h3 class="text-[var(--step-3)]" style="font-family: var(--font-display); font-weight: 600;">
+            Current entries
+          </h3>
+        </header>
+        {state && <RegisterTable state={state} keyField={manifest?.key_field ?? ""} />}
+      </section>
+
       {manifest && state && state.history.length > 0 && (
         <RegisterHistory
           slug={slug!}
@@ -307,14 +331,6 @@ if (isExternal) {
         />
       )}
 
-      <section>
-        <header class="rule-thin pt-4 mb-5">
-          <h3 class="text-[var(--step-3)]" style="font-family: var(--font-display); font-weight: 600;">
-            Current entries
-          </h3>
-        </header>
-        {state && <RegisterTable state={state} keyField={manifest?.key_field ?? ""} />}
-      </section>
     </>
   )}
 </Base>
