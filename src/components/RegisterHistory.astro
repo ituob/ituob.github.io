@@ -81,15 +81,16 @@ for (const [index, obIssue] of issueOrder.entries()) {
 const orderedCards = cards.slice().reverse();
 ---
 
-<section class="mb-8">
-  <header class="rule-thin pt-4 mb-4">
-    <h3 class="text-[var(--step-2)]" style="font-family: var(--font-display); font-weight: 600;">
+<details class="mb-8">
+  <summary class="cursor-pointer">
+    <h3 class="text-[var(--step-2)] inline" style="font-family: var(--font-display); font-weight: 600; color: var(--accent);">
       Amendment history ({history.filter(p => p.type !== "SEED").length})
     </h3>
-  </header>
+    <span class="text-[var(--step--1)]" style="color: var(--fg-muted); font-family: var(--font-sans);">— select to expand</span>
+  </summary>
   <div class="space-y-3" style="font-family: var(--font-sans);">
     {orderedCards.map((card) => (
-      <article class="border-l-2 border-[var(--rule)] pl-4">
+      <article class="border-l-2 border-[var(--rule)] pl-4" style="content-visibility: auto; contain-intrinsic-size: auto 600px;">
         {card.yearChanged && card.issueYear && (
           <h4 id={`year-${card.issueYear}`} class="text-[var(--step--2)] mb-2 mt-4" style="font-family: var(--font-sans); color: var(--fg-muted);">
             <a href={`#year-${card.issueYear}`} class="no-underline">{card.issueYear}</a>
@@ -135,6 +136,21 @@ const orderedCards = cards.slice().reverse();
             </summary>
             <ul class="mt-2 ml-2 space-y-1 text-[var(--step--1)]">
               {card.patches.map((patch) => {
+                // LIR patches repeat entries from the previous edition; their
+                // recorded identifier is a printed-table position, not an
+                // entry key, so a key lookup would be meaningless.
+                if (patch.type === "LIR") {
+                  return (
+                    <li>
+                      <span class="font-mono font-semibold uppercase" style="color: var(--accent);">
+                        LIR
+                      </span>
+                      <span class="ml-2" style="color: var(--fg-muted);">
+                        entries repeated unchanged from the previous edition
+                      </span>
+                    </li>
+                  );
+                }
                 const entryState = loadStateAtIssue(slug, patch.ob_issue ?? 0);
                 const entryData = entryState
                   ? (entryState.active_entries as any[]).find(
@@ -167,7 +183,7 @@ const orderedCards = cards.slice().reverse();
                     )}
                     {!entryData && (
                       <span class="ml-2 italic" style="color: var(--fg-muted);">
-                        (entry not present at this OB — removed by a later amendment)
+                        (key {patch.identifier.code} not matched in the register state at this OB)
                       </span>
                     )}
                   </li>
@@ -179,4 +195,4 @@ const orderedCards = cards.slice().reverse();
       </article>
     ))}
   </div>
-</section>
+</details>
