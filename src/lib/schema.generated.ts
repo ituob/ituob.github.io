@@ -36,6 +36,11 @@ export interface DPAmendmentWire {
   position_on?: string;
   notes?: string[];
   actions?: DPActionWire[];
+  position?: string;
+  entries?: DPEntryWire[];
+  description?: string;
+  caption?: string;
+  country?: string;
 }
 
 export interface DPEntryWire {
@@ -60,6 +65,11 @@ export interface E118AmendmentWire {
   position_on?: string;
   notes?: string[];
   actions?: E118ActionWire[];
+  position?: string;
+  entries?: E118EntryWire[];
+  description?: string;
+  caption?: string;
+  country?: string;
 }
 
 export interface E118EntryWire {
@@ -95,6 +105,11 @@ export interface E164ACNAmendmentWire {
   position_on?: string;
   notes?: string[];
   actions?: E164ACNActionWire[];
+  position?: string;
+  entries?: E164ACNEntryWire[];
+  description?: string;
+  caption?: string;
+  country?: string;
 }
 
 export interface E164ACNEntryWire {
@@ -125,6 +140,11 @@ export interface E164CCAmendmentWire {
   position_on?: string;
   notes?: string[];
   actions?: E164CCActionWire[];
+  position?: string;
+  entries?: E164CCEntryWire[];
+  description?: string;
+  caption?: string;
+  country?: string;
 }
 
 export interface E164CCEntryWire {
@@ -183,6 +203,11 @@ export interface E212MNCAmendmentWire {
   position_on?: string;
   notes?: string[];
   actions?: E212MNCActionWire[];
+  position?: string;
+  entries?: E212MNCEntryWire[];
+  description?: string;
+  caption?: string;
+  country?: string;
 }
 
 export interface E212MNCEntryWire {
@@ -207,6 +232,11 @@ export interface E218TRCCAmendmentWire {
   position_on?: string;
   notes?: string[];
   actions?: E218TRCCActionWire[];
+  position?: string;
+  entries?: E218TRCCEntryWire[];
+  description?: string;
+  caption?: string;
+  country?: string;
 }
 
 export interface E218TRCCEntryWire {
@@ -233,6 +263,11 @@ export interface F32TDIAmendmentWire {
   position_on?: string;
   notes?: string[];
   actions?: F32TDIActionWire[];
+  position?: string;
+  entries?: F32TDIEntryWire[];
+  description?: string;
+  caption?: string;
+  country?: string;
 }
 
 export interface F32TDIEntryWire {
@@ -262,6 +297,11 @@ export interface F400AmendmentWire {
   position_on?: string;
   notes?: string[];
   actions?: F400ActionWire[];
+  position?: string;
+  entries?: F400EntryWire[];
+  description?: string;
+  caption?: string;
+  country?: string;
 }
 
 export interface F400EntryWire {
@@ -416,6 +456,11 @@ export interface ListVIIIAmendmentWire {
   position_on?: string;
   notes?: string[];
   actions?: ListVIIIActionWire[];
+  position?: string;
+  entries?: ListVIIIStationWire[];
+  description?: string;
+  caption?: string;
+  country?: string;
 }
 
 export interface ListVIIICentralizingOfficeWire {
@@ -460,6 +505,11 @@ export interface M1400AmendmentWire {
   position_on?: string;
   notes?: string[];
   actions?: M1400ActionWire[];
+  position?: string;
+  entries?: M1400EntryWire[];
+  description?: string;
+  caption?: string;
+  country?: string;
 }
 
 export interface M1400EntryWire {
@@ -498,6 +548,11 @@ export interface NNPAmendmentWire {
   position_on?: string;
   notes?: string[];
   actions?: NNPActionWire[];
+  position?: string;
+  entries?: NumberingPlanEntryWire[];
+  description?: string;
+  caption?: string;
+  country?: string;
 }
 
 export interface NumberingPlanEntryWire {
@@ -529,6 +584,11 @@ export interface Q708ISPCAmendmentWire {
   position_on?: string;
   notes?: string[];
   actions?: Q708ISPCActionWire[];
+  position?: string;
+  entries?: Q708ISPCEntryWire[];
+  description?: string;
+  caption?: string;
+  country?: string;
 }
 
 export interface Q708ISPCEntryWire {
@@ -553,6 +613,11 @@ export interface Q708SANCAmendmentWire {
   position_on?: string;
   notes?: string[];
   actions?: Q708SANCActionWire[];
+  position?: string;
+  entries?: Q708SANCEntryWire[];
+  description?: string;
+  caption?: string;
+  country?: string;
 }
 
 export interface Q708SANCEntryWire {
@@ -574,6 +639,11 @@ export interface RR251AmendmentWire {
   position_on?: string;
   notes?: string[];
   actions?: RR251ActionWire[];
+  position?: string;
+  entries?: RR251EntryWire[];
+  description?: string;
+  caption?: string;
+  country?: string;
 }
 
 export interface RR251EntryWire {
@@ -631,6 +701,11 @@ export interface T35NAAmendmentWire {
   position_on?: string;
   notes?: string[];
   actions?: T35NAActionWire[];
+  position?: string;
+  entries?: T35NAEntryWire[];
+  description?: string;
+  caption?: string;
+  country?: string;
 }
 
 export interface T35NAEntryWire {
@@ -671,6 +746,11 @@ export interface X121DNICAmendmentWire {
   position_on?: string;
   notes?: string[];
   actions?: X121DNICActionWire[];
+  position?: string;
+  entries?: X121DNICEntryWire[];
+  description?: string;
+  caption?: string;
+  country?: string;
 }
 
 export interface X121DNICEntryWire {
