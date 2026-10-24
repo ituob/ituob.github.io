@@ -330,15 +330,22 @@ export interface GeneralApprovedRecommendationsWire {
   items?: GeneralApprovedRecommendationWire[];
   by?: string;
   procedures?: string;
+  ob_issue_no?: string;
+  payload?: Record<string, unknown>;
+  contents?: Record<string, unknown>;
 }
 
 export interface GeneralCallbackProceduresWire {
   type?: string;
+  ob_issue_no?: string;
+  contents?: Record<string, unknown>;
 }
 
 export interface GeneralCustomWire {
   type?: string;
   text?: string;
+  ob_issue_no?: string;
+  contents?: Record<string, unknown>;
 }
 
 export interface GeneralIpnsWire {
@@ -347,6 +354,8 @@ export interface GeneralIpnsWire {
   mcc_mnc?: string;
   date_of_assignment?: string;
   notes?: string;
+  ob_issue_no?: string;
+  contents?: Record<string, unknown>;
 }
 
 export interface GeneralIptnWire {
@@ -354,25 +363,42 @@ export interface GeneralIptnWire {
   entries?: IptnEntryWire[];
   notes?: string;
   manual?: boolean;
+  ob_issue_no?: string;
+  contents?: Record<string, unknown>;
 }
 
 export interface GeneralMessageWire {
   type?: string;
+  ob_issue_no?: string;
+  contents?: Record<string, unknown>;
+}
+
+export interface GeneralMidWire {
+  type?: string;
+  ob_issue_no?: string;
+  contents?: Record<string, unknown>;
 }
 
 export interface GeneralMiscCommunicationsWire {
   type?: string;
   text?: string;
+  ob_issue_no?: string;
+  contents?: Record<string, unknown>;
 }
 
 export interface GeneralOrgChangesWire {
   type?: string;
   text?: string;
+  ob_issue_no?: string;
+  contents?: Record<string, unknown>;
 }
 
 export interface GeneralRunningAnnexesWire {
   type?: string;
   extra_links?: string[];
+  ob_issue_no?: string;
+  payload?: Record<string, unknown>;
+  contents?: Record<string, unknown>;
 }
 
 export interface GeneralSancWire {
@@ -384,20 +410,48 @@ export interface GeneralSancsWire {
   type?: string;
   items?: GeneralSancWire[];
   notes?: string;
+  ob_issue_no?: string;
+  contents?: Record<string, unknown>;
+}
+
+export interface GeneralServiceRestrictionWire {
+  country?: MultilingualStringWire;
+  ob?: string;
+  page?: string;
 }
 
 export interface GeneralServiceRestrictionsWire {
   type?: string;
+  ob_issue_no?: string;
+  items?: GeneralServiceRestrictionWire[];
+  contents?: Record<string, unknown>;
+}
+
+export interface GeneralTelephoneCommunicationWire {
+  date?: string;
+  contents?: MultilingualStringWire;
+}
+
+export interface GeneralTelephoneSectionWire {
+  type?: string;
+  country_name?: MultilingualStringWire;
+  phone_code?: string;
+  contact?: MultilingualStringWire;
+  communications?: GeneralTelephoneCommunicationWire[];
 }
 
 export interface GeneralTelephoneServiceWire {
   type?: string;
   text?: string;
+  ob_issue_no?: string;
+  contents?: GeneralTelephoneSectionWire[];
 }
 
 export interface GeneralTelephoneServicesWire {
   type?: string;
   items?: GeneralTelephoneServiceWire[];
+  ob_issue_no?: string;
+  contents?: Record<string, unknown>;
 }
 
 export interface IdentifierWire {
