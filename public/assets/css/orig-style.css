@@ -1,0 +1,1628 @@
+@charset "UTF-8";
+/*! normalize.css v3.0.2 | MIT License | git.io/normalize */
+/**
+ * 1. Set default font family to sans-serif.
+ * 2. Prevent iOS text size adjust after orientation change, without disabling
+ *    user zoom.
+ */
+html {
+  font-family: sans-serif; /* 1 */
+  -ms-text-size-adjust: 100%; /* 2 */
+  -webkit-text-size-adjust: 100%; /* 2 */
+}
+
+/**
+ * Remove default margin.
+ */
+body {
+  margin: 0;
+}
+
+/* HTML5 display definitions
+   ========================================================================== */
+/**
+ * Correct `block` display not defined for any HTML5 element in IE 8/9.
+ * Correct `block` display not defined for `details` or `summary` in IE 10/11
+ * and Firefox.
+ * Correct `block` display not defined for `main` in IE 11.
+ */
+article,
+aside,
+details,
+figcaption,
+figure,
+footer,
+header,
+body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul li,
+hgroup,
+main,
+menu,
+nav,
+section,
+summary {
+  display: block;
+}
+
+/**
+ * 1. Correct `inline-block` display not defined in IE 8/9.
+ * 2. Normalize vertical alignment of `progress` in Chrome, Firefox, and Opera.
+ */
+audio,
+canvas,
+progress,
+video {
+  display: inline-block; /* 1 */
+  vertical-align: baseline; /* 2 */
+}
+
+/**
+ * Prevent modern browsers from displaying `audio` without controls.
+ * Remove excess height in iOS 5 devices.
+ */
+audio:not([controls]) {
+  display: none;
+  height: 0;
+}
+
+/**
+ * Address `[hidden]` styling not present in IE 8/9/10.
+ * Hide the `template` element in IE 8/9/11, Safari, and Firefox < 22.
+ */
+[hidden],
+template {
+  display: none;
+}
+
+/* Links
+   ========================================================================== */
+/**
+ * Remove the gray background color from active links in IE 10.
+ */
+a {
+  background-color: transparent;
+}
+
+/**
+ * Improve readability when focused and also mouse hovered in all browsers.
+ */
+a:active,
+a:hover {
+  outline: 0;
+}
+
+/* Text-level semantics
+   ========================================================================== */
+/**
+ * Address styling not present in IE 8/9/10/11, Safari, and Chrome.
+ */
+abbr[title] {
+  border-bottom: 1px dotted;
+}
+
+/**
+ * Address style set to `bolder` in Firefox 4+, Safari, and Chrome.
+ */
+b,
+strong {
+  font-weight: bold;
+}
+
+/**
+ * Address styling not present in Safari and Chrome.
+ */
+dfn {
+  font-style: italic;
+}
+
+/**
+ * Address variable `h1` font-size and margin within `section` and `article`
+ * contexts in Firefox 4+, Safari, and Chrome.
+ */
+h1 {
+  font-size: 2em;
+  margin: 0.67em 0;
+}
+
+/**
+ * Address styling not present in IE 8/9.
+ */
+mark {
+  background: #ff0;
+  color: #000;
+}
+
+/**
+ * Address inconsistent and variable font size in all browsers.
+ */
+small {
+  font-size: 80%;
+}
+
+/**
+ * Prevent `sub` and `sup` affecting `line-height` in all browsers.
+ */
+sub,
+sup {
+  font-size: 75%;
+  line-height: 0;
+  position: relative;
+  vertical-align: baseline;
+}
+
+sup {
+  top: -0.5em;
+}
+
+sub {
+  bottom: -0.25em;
+}
+
+/* Embedded content
+   ========================================================================== */
+/**
+ * Remove border when inside `a` element in IE 8/9/10.
+ */
+img {
+  border: 0;
+}
+
+/**
+ * Correct overflow not hidden in IE 9/10/11.
+ */
+svg:not(:root) {
+  overflow: hidden;
+}
+
+/* Grouping content
+   ========================================================================== */
+/**
+ * Address margin not present in IE 8/9 and Safari.
+ */
+figure {
+  margin: 1em 40px;
+}
+
+/**
+ * Address differences between Firefox and other browsers.
+ */
+hr {
+  box-sizing: content-box;
+  height: 0;
+}
+
+/**
+ * Contain overflow in all browsers.
+ */
+pre {
+  overflow: auto;
+}
+
+/**
+ * Address odd `em`-unit font size rendering in all browsers.
+ */
+code,
+kbd,
+pre,
+samp {
+  font-family: monospace, monospace;
+  font-size: 1em;
+}
+
+/* Forms
+   ========================================================================== */
+/**
+ * Known limitation: by default, Chrome and Safari on OS X allow very limited
+ * styling of `select`, unless a `border` property is set.
+ */
+/**
+ * 1. Correct color not being inherited.
+ *    Known issue: affects color of disabled elements.
+ * 2. Correct font properties not being inherited.
+ * 3. Address margins set differently in Firefox 4+, Safari, and Chrome.
+ */
+button,
+input,
+optgroup,
+select,
+textarea {
+  color: inherit; /* 1 */
+  font: inherit; /* 2 */
+  margin: 0; /* 3 */
+}
+
+/**
+ * Address `overflow` set to `hidden` in IE 8/9/10/11.
+ */
+button {
+  overflow: visible;
+}
+
+/**
+ * Address inconsistent `text-transform` inheritance for `button` and `select`.
+ * All other form control elements do not inherit `text-transform` values.
+ * Correct `button` style inheritance in Firefox, IE 8/9/10/11, and Opera.
+ * Correct `select` style inheritance in Firefox.
+ */
+button,
+select {
+  text-transform: none;
+}
+
+/**
+ * 1. Avoid the WebKit bug in Android 4.0.* where (2) destroys native `audio`
+ *    and `video` controls.
+ * 2. Correct inability to style clickable `input` types in iOS.
+ * 3. Improve usability and consistency of cursor style between image-type
+ *    `input` and others.
+ */
+button,
+html input[type=button],
+input[type=reset],
+input[type=submit] {
+  -webkit-appearance: button; /* 2 */
+  cursor: pointer; /* 3 */
+}
+
+/**
+ * Re-set default cursor for disabled elements.
+ */
+button[disabled],
+html input[disabled] {
+  cursor: default;
+}
+
+/**
+ * Remove inner padding and border in Firefox 4+.
+ */
+button::-moz-focus-inner,
+input::-moz-focus-inner {
+  border: 0;
+  padding: 0;
+}
+
+/**
+ * Address Firefox 4+ setting `line-height` on `input` using `!important` in
+ * the UA stylesheet.
+ */
+input {
+  line-height: normal;
+}
+
+/**
+ * It's recommended that you don't attempt to style these elements.
+ * Firefox's implementation doesn't respect box-sizing, padding, or width.
+ *
+ * 1. Address box sizing set to `content-box` in IE 8/9/10.
+ * 2. Remove excess padding in IE 8/9/10.
+ */
+input[type=checkbox],
+input[type=radio] {
+  box-sizing: border-box; /* 1 */
+  padding: 0; /* 2 */
+}
+
+/**
+ * Fix the cursor style for Chrome's increment/decrement buttons. For certain
+ * `font-size` values of the `input`, it causes the cursor style of the
+ * decrement button to change from `default` to `text`.
+ */
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+  height: auto;
+}
+
+/**
+ * 1. Address `appearance` set to `searchfield` in Safari and Chrome.
+ * 2. Address `box-sizing` set to `border-box` in Safari and Chrome
+ *    (include `-moz` to future-proof).
+ */
+input[type=search] {
+  -webkit-appearance: textfield; /* 1 */ /* 2 */
+  box-sizing: content-box;
+}
+
+/**
+ * Remove inner padding and search cancel button in Safari and Chrome on OS X.
+ * Safari (but not Chrome) clips the cancel button when the search input has
+ * padding (and `textfield` appearance).
+ */
+input[type=search]::-webkit-search-cancel-button,
+input[type=search]::-webkit-search-decoration {
+  -webkit-appearance: none;
+}
+
+/**
+ * Define consistent border, margin, and padding.
+ */
+fieldset {
+  border: 1px solid #c0c0c0;
+  margin: 0 2px;
+  padding: 0.35em 0.625em 0.75em;
+}
+
+/**
+ * 1. Correct `color` not being inherited in IE 8/9/10/11.
+ * 2. Remove padding so people aren't caught out if they zero out fieldsets.
+ */
+legend {
+  border: 0; /* 1 */
+  padding: 0; /* 2 */
+}
+
+/**
+ * Remove default vertical scrollbar in IE 8/9/10/11.
+ */
+textarea {
+  overflow: auto;
+}
+
+/**
+ * Don't inherit the `font-weight` (applied by a rule above).
+ * NOTE: the default cannot safely be changed in Chrome and Safari on OS X.
+ */
+optgroup {
+  font-weight: bold;
+}
+
+/* Tables
+   ========================================================================== */
+/**
+ * Remove most spacing between table cells.
+ */
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+td,
+th {
+  padding: 0;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+table th, table td {
+  text-align: left;
+  vertical-align: top;
+}
+table tr:last-child {
+  border-bottom-width: 0;
+}
+
+dl.inline-dl dd, dl.inline-dl dt {
+  display: inline-block;
+  margin: 0;
+}
+dl.inline-dl dt:after {
+  content: ": ";
+}
+dl.inline-dl dd {
+  margin-right: 1.5rem;
+}
+
+dl dt {
+  font-weight: bold;
+}
+dl dd {
+  margin-left: 1.25em;
+}
+
+.section-title, body.message_index > main > header .index-type, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul body.message_index > main > li .index-type {
+  color: #DF314E;
+  font-weight: bold;
+  text-transform: uppercase;
+  font-size: 80%;
+}
+
+.message-card, article.message {
+  box-shadow: 2px 2px 20px -8px rgba(0, 0, 0, 0.4);
+  border-radius: 6px;
+  margin-left: -6px;
+  padding: 0 1rem;
+  padding-top: 0.01em;
+}
+.message-card.active, article.active.message {
+  box-shadow: 0 0 1px 1px rgba(26, 161, 218, 0.8), 2px 2px 20px -8px rgba(0, 0, 0, 0.4);
+}
+.message-card > header > .title, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul .message-card > li > .title, article.message > header > .title, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul article.message > li > .title {
+  font-weight: normal;
+  display: flex;
+  flex-flow: row nowrap;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+.message-card > header > .title .label, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul .message-card > li > .title .label, article.message > header > .title .label, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul article.message > li > .title .label {
+  white-space: nowrap;
+  margin: 0.35rem 1rem 0 0;
+  font-size: 70%;
+}
+.message-card > header > .title .text, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul .message-card > li > .title .text, article.message > header > .title .text, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul article.message > li > .title .text {
+  flex: 1;
+}
+.message-card > header > .title .anchor, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul .message-card > li > .title .anchor, article.message > header > .title .anchor, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul article.message > li > .title .anchor {
+  margin: -2.35rem 0 0 1rem;
+  padding-top: 2.35rem;
+}
+.message-card > header > .title .anchor .fa-link, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul .message-card > li > .title .anchor .fa-link, article.message > header > .title .anchor .fa-link, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul article.message > li > .title .anchor .fa-link {
+  margin-right: 0.5rem;
+}
+.message-card > header > .title .anchor .ob-id, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul .message-card > li > .title .anchor .ob-id, article.message > header > .title .anchor .ob-id, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul article.message > li > .title .anchor .ob-id {
+  font-size: 1rem;
+}
+.message-card > header .recommendation, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul .message-card > li .recommendation, article.message > header .recommendation, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul article.message > li .recommendation, .message-card > header .annex-to-ob, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul .message-card > li .annex-to-ob, article.message > header .annex-to-ob, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul article.message > li .annex-to-ob, .message-card > header .online-link, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul .message-card > li .online-link, article.message > header .online-link, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul article.message > li .online-link, .message-card > header .label, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul .message-card > li .label, article.message > header .label, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul article.message > li .label {
+  margin-bottom: 0.5em;
+  margin-top: 0.5em;
+  letter-spacing: -0.02em;
+}
+.message-card > header .recommendation, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul .message-card > li .recommendation, article.message > header .recommendation, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul article.message > li .recommendation, .message-card > header .annex-to-ob, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul .message-card > li .annex-to-ob, article.message > header .annex-to-ob, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul article.message > li .annex-to-ob, .message-card > header .online-link, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul .message-card > li .online-link, article.message > header .online-link, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul article.message > li .online-link, .message-card > header .toggle, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul .message-card > li .toggle, article.message > header .toggle, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul article.message > li .toggle {
+  font-size: 90%;
+}
+.message-card header .fas, .message-card body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul li .fas, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul .message-card li .fas, article.message header .fas, article.message body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul li .fas, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul article.message li .fas, .message-card header .far, .message-card body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul li .far, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul .message-card li .far, article.message header .far, article.message body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul li .far, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul article.message li .far, .message-card .toggle .fas, article.message .toggle .fas, .message-card .toggle .far, article.message .toggle .far {
+  width: 1rem;
+  font-size: 0.8rem;
+  text-align: center;
+}
+.message-card .included-contents, article.message .included-contents {
+  margin-left: -1rem;
+  margin-right: -1rem;
+  font-size: 80%;
+  line-height: 1.2;
+  padding: 0 1rem;
+  overflow: hidden;
+  background: whiteSmoke;
+}
+.message-card .included-contents table colgroup, article.message .included-contents table colgroup {
+  display: none;
+}
+.message-card .included-contents table thead, article.message .included-contents table thead {
+  position: sticky;
+}
+.message-card .included-contents table caption, article.message .included-contents table caption, .message-card .included-contents table th, article.message .included-contents table th {
+  font-weight: bold;
+}
+.message-card .included-contents table th, article.message .included-contents table th, .message-card .included-contents table td, article.message .included-contents table td, .message-card .included-contents table caption, article.message .included-contents table caption {
+  text-overflow: ellipsis;
+  overflow: hidden;
+  padding: 0.5em 0.5em;
+  background: rgb(91.0784313725%, 91.0784313725%, 91.0784313725%);
+  border: 1px solid whiteSmoke;
+  border-bottom: 0;
+}
+.message-card .included-contents table th p, article.message .included-contents table th p, .message-card .included-contents table td p, article.message .included-contents table td p, .message-card .included-contents table caption p, article.message .included-contents table caption p {
+  margin: 0;
+}
+.message-card .included-contents table td:empty, article.message .included-contents table td:empty, .message-card .included-contents table th:empty, article.message .included-contents table th:empty {
+  background: whiteSmoke;
+}
+.message-card .included-contents .sect2, article.message .included-contents .sect2, .message-card .included-contents .sect3, article.message .included-contents .sect3, .message-card .included-contents .sect4, article.message .included-contents .sect4, .message-card .included-contents .sect5, article.message .included-contents .sect5 {
+  padding-left: 0.5rem;
+  margin-left: -0.5rem;
+  border-left: 0.5rem solid rgb(93.0784313725%, 93.0784313725%, 93.0784313725%);
+}
+.message-card .included-contents h3, article.message .included-contents h3, .message-card .included-contents h4, article.message .included-contents h4, .message-card .included-contents h5, article.message .included-contents h5, .message-card .included-contents h6, article.message .included-contents h6 {
+  font-size: 110%;
+  margin: 1em 0;
+}
+.message-card.with-js .toggle, article.with-js.message .toggle, .message-card.with-js .included-contents, article.with-js.message .included-contents {
+  border-radius: 0 0 6px 6px;
+}
+.message-card.with-js .included-contents, article.with-js.message .included-contents {
+  display: none;
+}
+.message-card.with-js > .toggle, article.with-js.message > .toggle {
+  color: white;
+  height: 1rem;
+  margin: 1em -1rem 0 -1rem;
+  background: repeating-linear-gradient(135deg, whiteSmoke, whiteSmoke 10px, white 10px, white 20px);
+  cursor: pointer;
+}
+.message-card.with-js > .toggle .indicator, article.with-js.message > .toggle .indicator {
+  display: inline-block;
+  margin: 0 1rem 0 1.05rem;
+}
+.message-card.with-js > .toggle:hover, article.with-js.message > .toggle:hover {
+  background: whiteSmoke;
+}
+.message-card.with-js > .toggle .indicator, article.with-js.message > .toggle .indicator {
+  transition: transform 0.1s ease-in-out, text-shadow 0.1s ease-in-out;
+  color: #1aa1da;
+  cursor: pointer;
+  transform: scale(1.2);
+}
+.message-card.with-js > .toggle:hover .indicator, article.with-js.message > .toggle:hover .indicator {
+  transform: scale(1);
+  text-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
+}
+.message-card.with-js.expanded .included-contents, article.with-js.expanded.message .included-contents {
+  display: block;
+}
+.message-card.with-js.expanded > .toggle, article.with-js.expanded.message > .toggle {
+  border-radius: 0;
+}
+.message-card.with-js.expanded > .toggle .indicator, article.with-js.expanded.message > .toggle .indicator {
+  transform: scale(1, 0) rotate(180deg);
+}
+.message-card.with-js.expanded > .toggle:hover .indicator, article.with-js.expanded.message > .toggle:hover .indicator {
+  transform: scale(1) rotate(180deg);
+}
+
+.std-label {
+  font-weight: bold;
+  color: #DF314E;
+}
+
+article.message.message--amendment .amendment-seq-no {
+  font-size: 90%;
+}
+article.message.message--service_restrictions table colgroup {
+  display: none;
+}
+article.message.message--service_restrictions table thead {
+  position: sticky;
+}
+article.message.message--service_restrictions table caption, article.message.message--service_restrictions table th {
+  font-weight: bold;
+}
+article.message.message--service_restrictions table th, article.message.message--service_restrictions table td, article.message.message--service_restrictions table caption {
+  text-overflow: ellipsis;
+  overflow: hidden;
+  padding: 0.5em 0.5em;
+  background: rgb(95%, 95%, 95%);
+  border: 1px solid white;
+  border-bottom: 0;
+}
+article.message.message--service_restrictions table th p, article.message.message--service_restrictions table td p, article.message.message--service_restrictions table caption p {
+  margin: 0;
+}
+article.message.message--service_restrictions table td:empty, article.message.message--service_restrictions table th:empty {
+  background: white;
+}
+article.message.message--service_restrictions table {
+  font-size: 80%;
+}
+article.message.message--running_annexes table td:first-child, article.message.message--running_annexes table th:first-child {
+  white-space: nowrap;
+  font-weight: bold;
+}
+article.message.message--approved_recommendations ul {
+  font-size: 80%;
+}
+
+body {
+  font-family: Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  min-height: 100vh;
+  overflow-y: auto;
+  display: flex;
+  flex-flow: column nowrap;
+}
+@media screen and (min-width: 800px) {
+  body {
+    min-width: 900px;
+    padding: 0 5vw;
+  }
+  body > header, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul body > li, body > footer {
+    margin: 0 -5vw;
+  }
+}
+body > header, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul body > li {
+  flex-shrink: 0;
+  flex-grow: 0;
+}
+body > main {
+  flex: 1;
+}
+body > footer {
+  flex-shrink: 0;
+}
+
+body > header, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul body > li {
+  background: #1aa1da;
+  color: white;
+  font-size: 80%;
+  padding-left: 3rem;
+}
+@media screen and (min-width: 800px) {
+  body > header, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul body > li {
+    padding-left: 5vw;
+  }
+}
+body > header > :first-child, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul body > li > :first-child {
+  margin-left: -40px;
+  display: flex;
+  flex-flow: row nowrap;
+  align-items: center;
+}
+body > header a:link, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul body > li a:link, body > header a:hover, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul body > li a:hover, body > header a:visited, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul body > li a:visited {
+  color: inherit;
+}
+body > header h1, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul body > li h1 {
+  font-size: 100%;
+  text-transform: uppercase;
+  letter-spacing: -0.025em;
+}
+body > header h2, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul body > li h2 {
+  font-size: 110%;
+  font-weight: normal;
+  padding-left: 2em;
+  position: relative;
+  overflow: hidden;
+}
+body > header h2:before, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul body > li h2:before {
+  display: block;
+  position: absolute;
+  content: " ";
+  border: 1px solid white;
+  left: 0;
+  top: 50%;
+  width: 20px;
+  height: 20px;
+  transform: translateX(-50%) translateY(-50%) scaleY(2) rotate(45deg);
+}
+body > header .logo, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul body > li .logo, body > header .logo-inverse, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul body > li .logo-inverse {
+  display: none;
+  width: 40px;
+  height: 40px;
+  margin-right: 0;
+}
+body > header .logo, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul body > li .logo {
+  display: none;
+}
+
+body > main {
+  padding: 0 2rem;
+  display: flex;
+  flex-flow: column nowrap;
+  align-items: flex-start;
+}
+@media screen and (min-width: 800px) {
+  body > main {
+    padding-left: 0;
+    padding-right: 0;
+  }
+}
+
+body > footer {
+  margin-top: 1rem;
+  padding: 2rem 2rem;
+  text-align: right;
+  color: #333;
+  background: whiteSmoke;
+  display: flex;
+  flex-flow: row wrap;
+  align-items: center;
+  justify-content: space-between;
+}
+@media screen and (min-width: 800px) {
+  body > footer {
+    padding-left: 5vw;
+    padding-right: 5vw;
+    flex-flow: row nowrap;
+  }
+}
+body > footer .footer-pill {
+  white-space: nowrap;
+  height: 24px;
+  display: flex;
+  flex-flow: row nowrap;
+  align-items: center;
+  padding: 1rem 2rem;
+  margin: 0 1rem 0 0;
+  background: whiteSmoke;
+  border-radius: 2rem;
+  color: #a6a6a6;
+}
+body > footer .footer-pill .icon {
+  margin: -1rem 0.5rem -1rem -2rem;
+  padding-left: 2rem;
+  width: 1rem;
+}
+body > footer .footer-pill.interactive {
+  transition: color 0.2s linear, background 0.2s linear;
+}
+body > footer .footer-pill.interactive:hover {
+  background: #a6a6a6;
+  color: white;
+}
+body > footer .powered-by {
+  padding-right: 1rem;
+  background: transparent;
+}
+body > footer .powered-by .icon {
+  padding-left: 0.5rem;
+  margin-right: 2rem;
+}
+body > footer .powered-by .icon img.logo {
+  filter: grayscale(100%);
+  opacity: 0.35;
+  transition: opacity 0.2s linear;
+  width: 2.5rem;
+  height: 2.5rem;
+  display: block;
+}
+body > footer .powered-by.interactive:hover {
+  color: unset;
+  background: transparent;
+}
+body > footer .powered-by.interactive:hover .logo {
+  opacity: 1;
+}
+
+a:link, a:visited, a:hover {
+  color: rgb(9.1305046609%, 56.5388942462%, 76.5557698489%);
+  text-decoration: none;
+}
+
+article.service-publication .title {
+  margin-bottom: 0.3em;
+  font-weight: normal;
+}
+
+body.home {
+  font-size: 100%;
+}
+body.home > header, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul body.home > li {
+  padding-top: 6vh;
+  padding-left: 3.5rem;
+  margin: 0;
+  margin-bottom: 1em;
+  background: transparent;
+  color: black;
+}
+@media screen and (min-width: 800px) {
+  body.home > header, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul body.home > li {
+    padding-left: 2rem;
+  }
+}
+body.home > header h1 .publication-name, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul body.home > li h1 .publication-name {
+  color: #1aa1da;
+  font-weight: bold;
+  font-size: 140%;
+  margin-right: 0.5rem;
+}
+body.home > header .logo-inverse, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul body.home > li .logo-inverse {
+  display: none;
+}
+body.home > header .logo, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul body.home > li .logo {
+  display: none;
+  width: 60px;
+  height: 60px;
+  margin: 0;
+}
+@media screen and (min-width: 800px) {
+  body.home > main {
+    padding-left: 12px;
+  }
+}
+body.home > main .actionable-row {
+  max-width: 70vw;
+  display: flex;
+  flex-flow: row wrap;
+  margin: 0.5rem 0 1rem 0;
+}
+@media screen and (min-width: 800px) {
+  body.home > main .actionable-row {
+    margin: 1em 0;
+    flex-flow: row nowrap;
+  }
+}
+body.home > main .actionable-row > * {
+  margin: 0;
+  margin-right: 1rem;
+  white-space: nowrap;
+}
+body.home > main .actionable {
+  font-size: 90%;
+  line-height: 1.2;
+  padding-left: 2rem;
+}
+body.home > main .actionable .far, body.home > main .actionable .fas {
+  width: 2rem;
+  margin-left: -2rem;
+  text-align: center;
+}
+body.home > main .actionable.annex-info a {
+  white-space: nowrap;
+}
+body.home > main .actionable.online-link {
+  white-space: nowrap;
+}
+body.home > main .ob-issue > header .issue-title, body.home > main body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul .ob-issue > li .issue-title, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul body.home > main .ob-issue > li .issue-title, body.home > main .ob-issue > header .cutoff-date, body.home > main body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul .ob-issue > li .cutoff-date, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul body.home > main .ob-issue > li .cutoff-date {
+  display: inline-block;
+  vertical-align: middle;
+  margin: 0;
+}
+body.home > main .ob-issue > header .cutoff-date, body.home > main body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul .ob-issue > li .cutoff-date, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul body.home > main .ob-issue > li .cutoff-date {
+  margin-left: 1em;
+}
+body.home > main .ob-issue .lang-links .lang:after {
+  content: ", ";
+}
+body.home > main .ob-issue .lang-links .lang:last-child:after {
+  content: "";
+}
+body.home > main > section.about {
+  background: whiteSmoke;
+  padding: 1rem 1rem 0 1rem;
+  margin: 1rem 0 1.5rem -6px;
+  border-radius: 6px;
+}
+body.home > main > section.about .toggle, body.home > main > section.about .included-contents {
+  border-radius: 0 0 6px 6px;
+}
+body.home > main > section.about .included-contents {
+  display: none;
+}
+body.home > main > section.about > .toggle {
+  color: white;
+  height: 1rem;
+  margin: 1em -1rem 0 -1rem;
+  background: repeating-linear-gradient(135deg, whiteSmoke, whiteSmoke 10px, white 10px, white 20px);
+  cursor: pointer;
+}
+body.home > main > section.about > .toggle .indicator {
+  display: inline-block;
+  margin: 0 1rem 0 1.05rem;
+}
+body.home > main > section.about > .toggle:hover {
+  background: whiteSmoke;
+}
+body.home > main > section.about > .toggle .indicator {
+  transition: transform 0.1s ease-in-out, text-shadow 0.1s ease-in-out;
+  color: #1aa1da;
+  cursor: pointer;
+  transform: scale(1.2);
+}
+body.home > main > section.about > .toggle:hover .indicator {
+  transform: scale(1);
+  text-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
+}
+body.home > main > section.about.expanded .included-contents {
+  display: block;
+}
+body.home > main > section.about.expanded > .toggle {
+  border-radius: 0;
+}
+body.home > main > section.about.expanded > .toggle .indicator {
+  transform: scale(1, 0) rotate(180deg);
+}
+body.home > main > section.about.expanded > .toggle:hover .indicator {
+  transform: scale(1) rotate(180deg);
+}
+body.home > main > section.about .included-contents {
+  padding-top: 1rem;
+}
+body.home > main > section.about.expanded > .toggle:hover .indicator {
+  transform: scale(1, 0) rotate(0deg);
+}
+body.home > main > section.about p {
+  margin: 0 0 1rem 0;
+}
+body.home > main > section.browse-by-recommendation > .items > .recommendation {
+  display: inline-block;
+  margin-right: 1em;
+}
+body.home > main > section.browse-by-recommendation > .items > .recommendation .title {
+  margin-top: 0;
+  font-weight: normal;
+}
+body.home > footer {
+  background: transparent;
+}
+
+body.layout--message_index-by-pub-amended article.message > header > .title .label, body.layout--message_index-by-pub-amended body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul article.message > li > .title .label, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul body.layout--message_index-by-pub-amended article.message > li > .title .label {
+  font-size: 90%;
+  margin-top: 0;
+}
+body.layout--message_index-by-pub-amended article.message > header > .title .label .fas, body.layout--message_index-by-pub-amended body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul article.message > li > .title .label .fas, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul body.layout--message_index-by-pub-amended article.message > li > .title .label .fas {
+  font-size: 100%;
+  margin-right: 0.5rem;
+}
+body.layout--message_index-by-pub-amended article.message > header > .title .anchor, body.layout--message_index-by-pub-amended body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul article.message > li > .title .anchor, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul body.layout--message_index-by-pub-amended article.message > li > .title .anchor {
+  font-size: 90%;
+  margin-top: 0;
+  padding-top: 0;
+}
+
+body.message_index > main > header, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul body.message_index > main > li {
+  margin: 0 -2rem;
+  padding: 0 2rem;
+  align-self: stretch;
+  margin-bottom: 1rem;
+  background: whiteSmoke;
+}
+@media screen and (min-width: 800px) {
+  body.message_index > main > header, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul body.message_index > main > li {
+    padding-left: 5vw;
+    padding-right: 5vw;
+    margin-left: -5vw;
+    margin-right: -5vw;
+  }
+}
+body.message_index > main > header .meta .far, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul body.message_index > main > li .meta .far, body.message_index > main > header .meta .fas, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul body.message_index > main > li .meta .fas, body.message_index > main > header .yearly-archive .far, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul body.message_index > main > li .yearly-archive .far, body.message_index > main > header .yearly-archive .fas, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul body.message_index > main > li .yearly-archive .fas {
+  width: 2rem;
+  margin-left: -2rem;
+  text-align: center;
+  display: inline-block;
+}
+body.message_index > main > header .meta-row, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul body.message_index > main > li .meta-row {
+  display: flex;
+  flex-flow: row wrap;
+  margin: 1em 0;
+}
+body.message_index > main > header .meta-row > *, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul body.message_index > main > li .meta-row > * {
+  margin: 0;
+  margin-right: 3rem;
+}
+body.message_index > main > table > tbody > td, body.message_index > main > table > tbody > th, body.message_index > main > table > tbody > tr > td, body.message_index > main > table > tbody > tr > th, body.message_index > main > table > thead > td, body.message_index > main > table > thead > th, body.message_index > main > table > thead > tr > td, body.message_index > main > table > thead > tr > th {
+  padding: 0.5em 0;
+}
+body.message_index > main > table td.message {
+  width: 100%;
+}
+body.message_index > main > table td.date {
+  padding-right: 2rem;
+  padding-top: 1.8em;
+}
+body.message_index > main > table td.date .publication-date {
+  white-space: nowrap;
+}
+
+body.layout--issue > main > header, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul body.layout--issue > main > li, body.layout--issue > main nav.toc {
+  margin: 0 -2rem;
+}
+@media screen and (min-width: 800px) {
+  body.layout--issue > main > header, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul body.layout--issue > main > li, body.layout--issue > main nav.toc {
+    margin-left: -5vw;
+    margin-right: -5vw;
+  }
+}
+body.layout--issue > main > header, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul body.layout--issue > main > li {
+  padding: 0;
+  align-self: stretch;
+}
+body.layout--issue > main > header *, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul body.layout--issue > main > li * {
+  box-sizing: border-box;
+}
+body.layout--issue > main > header > .bulletin-title, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul body.layout--issue > main > li > .bulletin-title {
+  margin: 0;
+  background: #d9d9d9;
+  color: white;
+  text-align: center;
+  padding: 0.3em 1em;
+}
+body.layout--issue > main > header > .bulletin-title a, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul body.layout--issue > main > li > .bulletin-title a, body.layout--issue > main > header > .bulletin-title a:visited, body.layout--issue > main > header > .bulletin-title a:hover {
+  color: inherit;
+  text-decoration: none;
+}
+body.layout--issue > main > header > .bulletin-title a:after, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul body.layout--issue > main > li > .bulletin-title a:after, body.layout--issue > main > header > .bulletin-title a:visited:after, body.layout--issue > main > header > .bulletin-title a:hover:after {
+  display: block;
+  font-size: 50%;
+  font-weight: normal;
+  content: attr(href);
+}
+body.layout--issue > main > header > .meta-row, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul body.layout--issue > main > li > .meta-row {
+  display: flex;
+  flex-flow: row nowrap;
+}
+body.layout--issue > main > header > .meta-row > *, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul body.layout--issue > main > li > .meta-row > * {
+  padding: 0 0.7rem;
+}
+body.layout--issue > main > header > .meta-row.publication, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul body.layout--issue > main > li > .meta-row.publication {
+  align-items: center;
+  background: #a6a6a6;
+  color: white;
+}
+body.layout--issue > main > header > .meta-row.publication .seq-no, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul body.layout--issue > main > li > .meta-row.publication .seq-no {
+  width: 16.8%;
+  margin: 0;
+  background: #DF314E;
+  text-align: right;
+  white-space: nowrap;
+  overflow: hidden;
+  min-width: 10rem;
+}
+body.layout--issue > main > header > .meta-row.publication .seq-no .value, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul body.layout--issue > main > li > .meta-row.publication .seq-no .value {
+  font-weight: bold;
+  font-size: 140%;
+}
+body.layout--issue > main > header > .meta-row.publication .publication-date, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul body.layout--issue > main > li > .meta-row.publication .publication-date {
+  width: 16.8%;
+  white-space: nowrap;
+}
+body.layout--issue > main > header > .meta-row.publication .other, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul body.layout--issue > main > li > .meta-row.publication .other {
+  display: flex;
+  flex-flow: row wrap;
+  flex: 1;
+}
+body.layout--issue > main > header > .meta-row.publication .other .cutoff-date, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul body.layout--issue > main > li > .meta-row.publication .other .cutoff-date, body.layout--issue > main > header > .meta-row.publication .other .issn, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul body.layout--issue > main > li > .meta-row.publication .other .issn {
+  margin-right: 1em;
+}
+body.layout--issue > main > header > .meta-row.publication .other .cutoff-date, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul body.layout--issue > main > li > .meta-row.publication .other .cutoff-date {
+  white-space: unset;
+}
+body.layout--issue > main > header > .meta-row.authors, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul body.layout--issue > main > li > .meta-row.authors {
+  align-items: flex-start;
+  font-size: 80%;
+  background: whiteSmoke;
+}
+body.layout--issue > main > header > .meta-row.authors > .author, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul body.layout--issue > main > li > .meta-row.authors > .author {
+  padding: 1rem;
+  flex: 1;
+  display: flex;
+  flex-flow: column nowrap;
+}
+body.layout--issue > main > header > .meta-row.authors > .author .contact-data + .contact-data:before, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul body.layout--issue > main > li > .meta-row.authors > .author .contact-data + .contact-data:before {
+  content: "/ ";
+}
+body.layout--issue > main > nav.toc .fas, body.layout--issue > main > nav.toc .far, body.layout--issue > main > section .legend .fas, body.layout--issue > main > section .legend .far {
+  width: 1.2rem;
+  font-size: 1rem;
+  text-align: center;
+}
+body.layout--issue > main nav.toc {
+  background: whiteSmoke;
+  margin-top: 0.2rem;
+  margin-bottom: 0.2rem;
+  padding: 0 1rem;
+  align-self: stretch;
+}
+body.layout--issue > main nav.toc * {
+  box-sizing: border-box;
+}
+body.layout--issue > main nav.toc ul, body.layout--issue > main nav.toc li {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+body.layout--issue > main nav.toc > ul a, body.layout--issue > main nav.toc > ul a:visited {
+  color: inherit;
+}
+body.layout--issue > main nav.toc > ul > li {
+  display: flex;
+  flex-flow: row nowrap;
+  margin-bottom: 1em;
+}
+body.layout--issue > main nav.toc > ul > li > a {
+  width: 16.8%;
+  padding-right: 2rem;
+}
+body.layout--issue > main nav.toc > ul > li > ul {
+  flex: 1;
+}
+body.layout--issue > main nav.toc .languages .lang:after {
+  content: ", ";
+}
+body.layout--issue > main nav.toc .languages .lang:last-child:after {
+  content: "";
+}
+body.layout--issue > main nav.toc .global-expand-toggle {
+  cursor: pointer;
+  color: rgb(9.1305046609%, 56.5388942462%, 76.5557698489%);
+}
+body.layout--issue > main nav.toc .global-expand-toggle .indicator {
+  transition: transform 0.1s ease-in-out;
+}
+body.layout--issue > main nav.toc .global-expand-toggle.expanded .indicator {
+  transform: scale(1, 1) rotate(90deg);
+}
+body.layout--issue > main nav.with-js.fixable-bar {
+  position: fixed;
+  top: -4em;
+  left: 0;
+  right: 0;
+  z-index: 2;
+  display: flex;
+  flex-flow: row nowrap;
+  align-items: flex-start;
+  transition: top 0.2s linear;
+  box-shadow: 0 2px 9px rgba(0, 0, 0, 0.2);
+}
+body.layout--issue > main nav.with-js.fixable-bar .issue-id, body.layout--issue > main nav.with-js.fixable-bar .menu-wrapper > .trigger {
+  padding: 0.5rem 1rem;
+  font-size: 100%;
+  text-transform: uppercase;
+  background: #a6a6a6;
+  color: white;
+  margin: 0;
+  margin-bottom: 1.5rem;
+  margin: 0;
+  white-space: nowrap;
+}
+body.layout--issue > main nav.with-js.fixable-bar .issue-id {
+  background-color: #DF314E;
+  font-weight: bold;
+  text-transform: unset;
+}
+body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper {
+  overflow: visible;
+  position: relative;
+}
+body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper .trigger .fas {
+  margin-right: 0.5rem;
+}
+body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper .trigger, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul li {
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 1rem;
+  padding: 0.5rem 1rem;
+  margin: 0.2rem 0 0 0;
+  list-style: none;
+  box-shadow: 0 10px 15px -10px rgba(0, 0, 0, 0.3);
+}
+body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul li.selected {
+  font-weight: bold;
+}
+body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper.section-menu .trigger {
+  font-weight: bold;
+  position: relative;
+  padding-left: 2rem;
+}
+body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper.section-menu .trigger:before {
+  display: block;
+  position: absolute;
+  content: " ";
+  left: 0;
+  top: 50%;
+  background-color: #DF314E;
+  width: 20px;
+  height: 20px;
+  transform: translateX(-50%) translateY(-50%) scaleY(4) rotate(45deg);
+}
+body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper.section-menu .trigger, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper.section-menu ul {
+  background: #a6a6a6;
+  color: white;
+}
+body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper.message-menu {
+  flex: 1;
+}
+body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper.message-menu .trigger {
+  font-weight: normal;
+  text-transform: unset;
+  position: relative;
+  padding-left: 2rem;
+}
+body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper.message-menu .trigger:before {
+  display: block;
+  position: absolute;
+  content: " ";
+  left: 0;
+  top: 50%;
+  background-color: #a6a6a6;
+  width: 20px;
+  height: 20px;
+  transform: translateX(-50%) translateY(-50%) scaleY(4) rotate(45deg);
+}
+body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper.message-menu .trigger, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper.message-menu ul {
+  background: #1aa1da;
+  color: white;
+}
+body.layout--issue > main nav.with-js.fixable-bar.fixed {
+  top: 0;
+}
+body.layout--issue > main nav.with-js.fixable-bar.fixed div.menu-wrapper.expanded ul {
+  display: block;
+}
+body.layout--issue > main > section {
+  display: flex;
+  flex-flow: column nowrap;
+  align-items: stretch;
+}
+body.layout--issue > main > section .legend {
+  font-size: 90%;
+  margin-bottom: 1.5rem;
+}
+body.layout--issue > main > section .legend h4 {
+  display: inline-block;
+  font-size: 100%;
+  font-weight: normal;
+  margin-top: 0;
+  margin-right: 1.2rem;
+}
+body.layout--issue > main > section .legend dl {
+  margin: 0;
+}
+body.layout--issue > main > section > h3 {
+  padding: 0.5rem 1rem;
+  font-size: 100%;
+  text-transform: uppercase;
+  background: #a6a6a6;
+  color: white;
+  margin: 0;
+  margin-bottom: 1.5rem;
+  align-self: flex-start;
+}
+body.layout--issue > main > section article.message {
+  margin-bottom: 1.5rem;
+}
+body.layout--issue > main > section.planned-issues {
+  margin-bottom: 1.5rem;
+}
+body.layout--issue > main > section.planned-issues table colgroup {
+  display: none;
+}
+body.layout--issue > main > section.planned-issues table thead {
+  position: sticky;
+}
+body.layout--issue > main > section.planned-issues table caption, body.layout--issue > main > section.planned-issues table th {
+  font-weight: bold;
+}
+body.layout--issue > main > section.planned-issues table th, body.layout--issue > main > section.planned-issues table td, body.layout--issue > main > section.planned-issues table caption {
+  text-overflow: ellipsis;
+  overflow: hidden;
+  padding: 0.5em 0.5em;
+  background: rgb(95%, 95%, 95%);
+  border: 1px solid white;
+  border-bottom: 0;
+}
+body.layout--issue > main > section.planned-issues table th p, body.layout--issue > main > section.planned-issues table td p, body.layout--issue > main > section.planned-issues table caption p {
+  margin: 0;
+}
+body.layout--issue > main > section.planned-issues table td:empty, body.layout--issue > main > section.planned-issues table th:empty {
+  background: white;
+}
+body.layout--issue > main > section.planned-issues table {
+  font-size: 80%;
+}
+
+.docs-label, body.docs-page--home > main > aside > section.app .download-notes .label {
+  vertical-align: text-top;
+  display: inline-block;
+  padding: 0.1rem 0.5rem;
+  background: #a6a6a6;
+  color: white;
+  text-transform: uppercase;
+  font-weight: bold;
+  font-size: 50%;
+  margin-right: 1rem;
+}
+
+.docs-index-section, body.docs-page--home > main > section, body.docs-page--home > main > aside > section {
+  display: flex;
+  flex-flow: column nowrap;
+  align-items: flex-start;
+}
+.docs-index-section > h2, body.docs-page--home > main > section > h2, body.docs-page--home > main > aside > section > h2 {
+  font-size: 180%;
+  font-weight: normal;
+}
+.docs-index-section > h3, body.docs-page--home > main > section > h3, body.docs-page--home > main > aside > section > h3 {
+  font-size: 100%;
+  letter-spacing: 0.03em;
+  font-weight: normal;
+  text-transform: uppercase;
+}
+.docs-index-section > h2 + h3, body.docs-page--home > main > section > h2 + h3, body.docs-page--home > main > aside > section > h2 + h3 {
+  margin-top: 0;
+}
+
+body.docs-page {
+  padding: 0;
+}
+body.docs-page > main > header > h2, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul body.docs-page > main > li > h2 {
+  font-size: 180%;
+  font-weight: normal;
+}
+body.docs-page > main > header > h3, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul body.docs-page > main > li > h3 {
+  font-size: 100%;
+  letter-spacing: 0.03em;
+  font-weight: normal;
+  text-transform: uppercase;
+}
+body.docs-page > main > header > h2 + h3, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul body.docs-page > main > li > h2 + h3 {
+  margin-top: 0;
+}
+@media screen and (min-width: 800px) {
+  body.docs-page > header, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul body.docs-page > li, body.docs-page > main, body.docs-page > footer {
+    margin-left: 0;
+    margin-right: 0;
+    padding-left: 5vw;
+    padding-right: 5vw;
+  }
+  body.docs-page > header > :first-child, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul body.docs-page > li > :first-child {
+    margin-left: -10px;
+  }
+}
+body.docs-page > header, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul body.docs-page > li {
+  background: linear-gradient(160deg, #737373, #a6a6a6);
+}
+@media screen and (min-width: 800px) {
+  body.docs-page > header, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul body.docs-page > li {
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+  }
+}
+body.docs-page.in-app-help {
+  min-width: unset;
+  padding-bottom: 3rem;
+}
+body.docs-page.in-app-help > main > header, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul body.docs-page.in-app-help > main > li {
+  display: flex;
+  flex-flow: column nowrap;
+  align-items: flex-start;
+}
+body.docs-page.in-app-help > header, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul body.docs-page.in-app-help > li {
+  padding-top: 0;
+  padding-bottom: 0;
+}
+body.docs-page .breadcrumbs {
+  display: flex;
+  flex-flow: row wrap;
+  align-items: center;
+}
+body.docs-page .breadcrumbs > * {
+  white-space: nowrap;
+}
+
+body.docs-page--tutorial .intro {
+  font-size: 120%;
+  margin-bottom: 1rem;
+}
+body.docs-page--tutorial .tutorial .video {
+  margin-left: -2rem;
+  margin-bottom: 2rem;
+}
+body.docs-page--tutorial .tutorial .video, body.docs-page--tutorial .tutorial .video video-js {
+  width: 100vw;
+  height: 56.25vw;
+}
+body.docs-page--tutorial .tutorial .items {
+  margin-right: 1rem;
+}
+body.docs-page--tutorial .tutorial .items .items {
+  margin-top: 1rem;
+}
+body.docs-page--tutorial .tutorial .items .item p:first-of-type, body.docs-page--tutorial .tutorial .items .notes p:first-of-type {
+  margin-top: 0;
+}
+body.docs-page--tutorial .tutorial .items .item p:last-of-type, body.docs-page--tutorial .tutorial .items .notes p:last-of-type {
+  margin-bottom: 0;
+}
+body.docs-page--tutorial .tutorial .items .item {
+  margin-bottom: 1rem;
+}
+body.docs-page--tutorial .tutorial .items .item:last-child {
+  margin-bottom: 0;
+}
+body.docs-page--tutorial .tutorial .items .notes {
+  margin-top: 1rem;
+  padding-left: 2rem;
+}
+body.docs-page--tutorial .tutorial .items .note + .note {
+  margin-top: 1rem;
+}
+body.docs-page--tutorial .tutorial .items .note {
+  font-size: 90%;
+  display: flex;
+  flex-flow: row nowrap;
+  align-items: flex-start;
+}
+body.docs-page--tutorial .tutorial .items .note .note-body h4, body.docs-page--tutorial .tutorial .items .note .note-body h5, body.docs-page--tutorial .tutorial .items .note .note-body h6 {
+  font-size: 100%;
+}
+body.docs-page--tutorial .tutorial .items .note .note-body > h4:first-child, body.docs-page--tutorial .tutorial .items .note .note-body > h5:first-child, body.docs-page--tutorial .tutorial .items .note .note-body > h6:first-child, body.docs-page--tutorial .tutorial .items .note .note-body > ul:first-child, body.docs-page--tutorial .tutorial .items .note .note-body > p:first-child, body.docs-page--tutorial .tutorial .items .note .note-body > ol:first-child {
+  margin-top: 0;
+}
+body.docs-page--tutorial .tutorial .items .note .note-body > h4:last-child, body.docs-page--tutorial .tutorial .items .note .note-body > h5:last-child, body.docs-page--tutorial .tutorial .items .note .note-body > h6:last-child, body.docs-page--tutorial .tutorial .items .note .note-body > ul:last-child, body.docs-page--tutorial .tutorial .items .note .note-body > p:last-child, body.docs-page--tutorial .tutorial .items .note .note-body > ol:last-child {
+  margin-bottom: 0;
+}
+body.docs-page--tutorial .tutorial .items .note .note-body ul, body.docs-page--tutorial .tutorial .items .note .note-body ol {
+  padding-left: 1rem;
+}
+body.docs-page--tutorial .tutorial .items .note .icon {
+  width: 1.5rem;
+  height: 1.5rem;
+  font-size: 1.4rem;
+  margin-right: 0.5rem;
+  margin-left: -2rem;
+  color: grey;
+  transform: scale(0.8);
+  position: absolute;
+  text-align: center;
+}
+body.docs-page--tutorial .tutorial .items .note.intent-primary .icon, body.docs-page--tutorial .tutorial .items .note.intent-primary .title {
+  color: #1aa1da;
+}
+body.docs-page--tutorial .tutorial .items .note.intent-accent .icon, body.docs-page--tutorial .tutorial .items .note.intent-accent .title {
+  color: #DF314E;
+}
+@media screen and (min-width: 800px) {
+  body.docs-page--tutorial .tutorial {
+    display: flex;
+    flex-flow: row wrap;
+  }
+  body.docs-page--tutorial .tutorial ol.items {
+    margin-top: 0;
+    margin-right: 0;
+    flex: 1;
+    flex-shrink: 0;
+    min-width: 30%;
+  }
+  body.docs-page--tutorial .tutorial .video {
+    margin-left: 0;
+    margin-right: 2rem;
+    flex: 0;
+    flex-basis: 45.4545454545vw;
+    flex-shrink: 0;
+    flex-grow: 0;
+    width: unset;
+    height: unset;
+    min-width: 550px;
+  }
+  body.docs-page--tutorial .tutorial .video video-js {
+    width: 45.4545454545vw;
+    height: 25.5681818182vw;
+    min-width: 550px;
+    min-height: 309.375px;
+    background-color: unset;
+  }
+}
+
+body.docs-page--home > main > :first-child {
+  padding-right: 2rem;
+}
+body.docs-page--home > main > aside, body.docs-page--home > main > section.app-docs {
+  flex: 1;
+}
+body.docs-page--home > main > aside {
+  margin: 2rem -2rem 0 -2rem;
+  background: whiteSmoke;
+  padding: 0 2rem 1rem 2rem;
+}
+body.docs-page--home > main > aside ol {
+  margin-top: 0;
+}
+body.docs-page--home > main > section.app-docs ul {
+  margin-top: 0;
+  padding-left: 0;
+  list-style: none;
+  padding-bottom: 0.5rem;
+  box-shadow: -14px 0 14px -14px rgba(0, 0, 0, 0.2);
+}
+body.docs-page--home > main > section.app-docs ul > li > p {
+  font-size: 90%;
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+body.docs-page--home > main > section.app-docs ul > li > ul {
+  margin-top: 0.5rem;
+}
+body.docs-page--home > main > section.app-docs li {
+  position: relative;
+  padding-left: 2rem;
+}
+body.docs-page--home > main > section.app-docs li:last-child {
+  padding-bottom: 0.5rem;
+}
+body.docs-page--home > main > section.app-docs li::before {
+  background-color: black;
+  height: 0.025rem;
+  margin-top: 0.45rem;
+}
+body.docs-page--home > main > section.app-docs a {
+  position: relative;
+  padding: 0 0.2rem;
+  margin-top: 0.4rem;
+  margin-left: -0.2rem;
+  display: inline-block;
+  transition: color 0.2s linear;
+}
+body.docs-page--home > main > section.app-docs a::before {
+  display: block;
+  content: " ";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  transition: background-color 0.2s linear;
+}
+body.docs-page--home > main > section.app-docs a:hover {
+  color: white;
+}
+body.docs-page--home > main > section.app-docs a:hover::before {
+  background-color: rgba(9.1305046609%, 56.5388942462%, 76.5557698489%, 0.7);
+  z-index: -1;
+}
+body.docs-page--home > main > section.app-docs a[href=""] {
+  color: #bbb;
+  cursor: default;
+}
+body.docs-page--home > main > section.app-docs a[href=""]::before {
+  background-color: transparent;
+}
+body.docs-page--home > main > section.app-docs a[href=""]::after {
+  display: inline-block;
+  content: "coming soon";
+  margin-left: 0.5rem;
+  font-size: 60%;
+  color: rgba(223, 49, 78, 0.5);
+}
+body.docs-page--home > main > aside > section.app .body {
+  display: flex;
+  flex-flow: row nowrap;
+  align-items: flex-start;
+}
+body.docs-page--home > main > aside > section.app .body > * {
+  flex: 1;
+}
+body.docs-page--home > main > aside > section.app .summary {
+  margin-bottom: 2rem;
+}
+body.docs-page--home > main > aside > section.app .summary p:first-of-type {
+  margin-top: 0;
+}
+body.docs-page--home > main > aside > section.app .summary p:last-of-type {
+  margin-bottom: 0;
+}
+body.docs-page--home > main > aside > section.app .download-notes .label {
+  background-color: #DF314E;
+}
+body.docs-page--home > main > aside > section.app .distribution {
+  display: flex;
+  flex-flow: column nowrap;
+  align-items: center;
+}
+body.docs-page--home > main > aside > section.app .distribution .download-links {
+  display: flex;
+  flex-flow: row nowrap;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+body.docs-page--home > main > aside > section.app .distribution .download-links > :not(:last-child) {
+  margin-right: 1rem;
+}
+body.docs-page--home > main > aside > section.app .distribution .download-links .secondary {
+  color: #a6a6a6;
+}
+body.docs-page--home > main > aside > section.app .distribution .download-links .release {
+  color: black;
+}
+body.docs-page--home > main > aside > section.app .distribution .download-links > a.download-link {
+  padding: 0.8rem 2rem;
+  border-radius: 2rem;
+  flex-shrink: 0;
+  color: white;
+  white-space: nowrap;
+  max-width: 10rem;
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+}
+body.docs-page--home > main > aside > section.app .distribution .download-links > a.download-link::after {
+  transition: transform 0.2s linear;
+  z-index: -1;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 200%;
+  content: " ";
+  background: linear-gradient(160deg, #1aa1da, rgb(42.5393764063%, 78.1227900996%, 93.1468981035%));
+}
+body.docs-page--home > main > aside > section.app .distribution .download-links > a.download-link:hover::after {
+  transform: translateY(-50%);
+}
+body.docs-page--home > main > aside > section.app .distribution .download-links > a.download-link .icon {
+  margin-right: 0.5rem;
+}
+@media screen and (min-width: 800px) {
+  body.docs-page--home > main {
+    flex-flow: row nowrap;
+  }
+  body.docs-page--home > main > aside {
+    margin: -1rem 0 0 0;
+    border-radius: 1rem;
+  }
+}
+
+/*# sourceMappingURL=style.css.map */
