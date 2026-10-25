@@ -18,7 +18,7 @@ for (const id of reversed) {
 }
 const years = [...byYear.keys()].sort((a, b) => b - a);
 ---
-<Base title="Issue archive" description="All published issues of the ITU Operational Bulletin, in chronological order.">
+<Base breadcrumbs={[{ label: "Issues" }]} title="Issue archive" description="All published issues of the ITU Operational Bulletin, in chronological order.">
   <header class="mb-10">
     <p class="uppercase font-semibold" style="font-family: var(--font-sans); font-size: var(--step--1); letter-spacing: 0.1em; color: var(--accent);">
       Archive

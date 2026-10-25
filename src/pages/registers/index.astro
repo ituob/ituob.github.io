@@ -69,7 +69,7 @@ for (const s of summaries) {
 }
 const recommendations = [...byRecommendation.keys()].sort();
 ---
-<Base
+<Base breadcrumbs={[{ label: "Registers" }]}
   title="Registers"
   masthead
   description="ITU Operational Bulletin registers — datasets mandated by ITU-T Recommendations, maintained through OB amendments."
