@@ -106,4 +106,4 @@ export function listFiles(path: string): string[] {
   });
 }
 
-export { dirname, basename, join };
+export { dirname, basename, join, readFileSync };

@@ -8,7 +8,7 @@ import { formatCellValue } from "~/lib/values";
 
 export interface Props {
   state: RegisterState;
-  keyField: string;
+  keyField: string | string[];
   showLapsed?: boolean;
 }
 const { state, showLapsed = false } = Astro.props;

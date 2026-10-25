@@ -90,10 +90,20 @@ for (const year of years) {
       const regState = loadStateAtIssue(reg.slug, block.id);
       const entriesByKey = new Map<string, any>();
       if (regState) {
+        const kf = loadManifest(reg.slug)?.key_field ?? "code";
+        const fields = Array.isArray(kf) ? kf : [kf];
         for (const e of regState.active_entries as any[]) {
-          const manifest = loadManifest(reg.slug);
-          const kf = manifest?.key_field ?? "code";
-          if (e[kf]) entriesByKey.set(String(e[kf]), e);
+          const values = fields.map((f) => {
+            const v = e[f];
+            if (v == null) return "";
+            if (typeof v === "object") {
+              const obj = v as Record<string, unknown>;
+              const spoken = ["fr", "en", "es", "zh", "ru", "ar"].find((l) => typeof obj[l] === "string" && obj[l]);
+              return spoken ? String(obj[spoken]) : Object.values(obj).map(String).join(" ");
+            }
+            return String(v);
+          });
+          if (values.some((x) => x)) entriesByKey.set(values.join(" | "), e);
         }
       }
       const issue = loadIssue(block.id);

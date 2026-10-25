@@ -13,6 +13,7 @@ import {
   listsRoot,
   readYaml,
   readYamlOrNull,
+  readFileSync,
   listDirs,
   listFiles,
   memoize,
@@ -41,6 +42,19 @@ import {
   DATASET_GENERAL_TYPES,
   type GeneralMessageType,
 } from "./catalogs";
+
+/** Read an AsciiDoc asset referenced by a general message
+ *  (e.g. contents: "general/misc_comms.adoc"). Returns null when the
+ *  asset is absent — the corpus carries three of these (OB 1167-1170
+ *  misc_communications). */
+export const loadGeneralAdoc = memoize((issueId: number, ref: string): string | null => {
+  const path = join(obIssuesRoot(), String(issueId), ref);
+  try {
+    return readFileSync(path, "utf-8");
+  } catch {
+    return null;
+  }
+});
 
 /** Parse an int issue id from a directory name (drops leading zeros). */
 function parseIssueId(dir: string): number | null {

@@ -1,6 +1,15 @@
 ---
 import Base from "~/layouts/Base.astro";
-import { loadIssue, listIssueIds, loadDatasetMetadata, loadListMetadata, cumulativeAmendmentNumber, loadRegisterCatalog, lastAnnexBefore } from "~/lib/loaders";
+import {
+  loadIssue,
+  listIssueIds,
+  loadDatasetMetadata,
+  loadListMetadata,
+  cumulativeAmendmentNumber,
+  loadRegisterCatalog,
+  lastAnnexBefore,
+  loadGeneralAdoc,
+} from "~/lib/loaders";
 import { formatSwissDate } from "~/lib/format";
 import {
   MESSAGE_TYPE_ORDER,
@@ -20,6 +29,7 @@ import IssueArchive from "~/components/IssueArchive.astro";
 import PlannedIssues from "~/components/PlannedIssues.astro";
 import RecommendationHeader from "~/components/RecommendationHeader.astro";
 import TextualMessage from "~/components/TextualMessage.astro";
+import AdocText from "~/components/AdocText.astro";
 import TelephoneService from "~/components/TelephoneService.astro";
 import ServiceRestrictions from "~/components/ServiceRestrictions.astro";
 import StructuredAmendment from "~/components/StructuredAmendment.astro";
@@ -48,6 +58,15 @@ const presentGeneralTypes = MESSAGE_TYPE_ORDER.filter((t) => {
 });
 
 const textualByType = new Map<GeneralMessageType, TextualGeneralMessage[]>();
+
+// A few messages normalize as references to an AsciiDoc asset
+// (contents: "general/<file>.adoc"); their text is loaded from the
+// corpus at build time.
+const adocTextFor = (m: TextualGeneralMessage): string | null => {
+  const contents = m.contents as unknown;
+  if (typeof contents !== "string" || !contents.endsWith(".adoc")) return null;
+  return loadGeneralAdoc(id, contents);
+};
 for (const m of issue.general.textual) {
   const arr = textualByType.get(m.type) ?? [];
   arr.push(m);
@@ -238,6 +257,8 @@ const upcomingIssues = allIds
                             <TelephoneService contents={(m as any).contents as any} lang={lang} />
                           ) : t === "service_restrictions" && Array.isArray((m as any).items) ? (
                             <ServiceRestrictions items={(m as any).items as any} lang={lang} />
+                          ) : adocTextFor(m) ? (
+                            <AdocText text={adocTextFor(m)!} />
                           ) : (
                             <TextualMessage message={m} lang={lang} />
                           )}
