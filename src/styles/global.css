@@ -188,17 +188,11 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
-    scroll-behavior: smooth;
     background: var(--bg);
   }
 
   body {
     background: var(--bg);
-    background-image:
-      radial-gradient(ellipse 80% 50% at 20% 0%, var(--ambient-1), transparent 60%),
-      radial-gradient(ellipse 60% 40% at 80% 10%, var(--ambient-2), transparent 60%),
-      radial-gradient(ellipse 50% 30% at 50% 100%, var(--ambient-3), transparent 60%);
-    background-attachment: fixed;
     color: var(--fg);
     font-family: var(--font-sans);
     font-size: var(--step-0);
@@ -284,8 +278,6 @@
     top: 0;
     z-index: 50;
     background: var(--glass-bg);
-    backdrop-filter: blur(var(--glass-blur-heavy)) saturate(180%);
-    -webkit-backdrop-filter: blur(var(--glass-blur-heavy)) saturate(180%);
     border-bottom: 1px solid var(--glass-border);
     box-shadow: var(--shadow-md);
   }
@@ -296,17 +288,13 @@
     top: 3.5rem;
     z-index: 49;
     background: var(--glass-bg);
-    backdrop-filter: blur(var(--glass-blur)) saturate(160%);
-    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(160%);
     border-bottom: 1px solid var(--glass-border);
   }
 
   /* -- Glass surfaces (liquid metal panels) ------------------------------ */
   .surface {
     background: var(--glass-bg);
-    backdrop-filter: blur(var(--glass-blur)) saturate(150%);
-    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(150%);
-    border: 1px solid var(--glass-border);
+        border: 1px solid var(--glass-border);
     border-radius: var(--radius-md);
     box-shadow: var(--shadow-glass), var(--gradient-metallic);
     position: relative;
@@ -336,17 +324,13 @@
 
   .surface-flat {
     background: var(--bg-2);
-    backdrop-filter: blur(var(--glass-blur)) saturate(140%);
-    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(140%);
     border: 1px solid var(--glass-border);
     border-radius: var(--radius-md);
   }
 
   .surface-active {
     background: var(--gradient-accent-soft);
-    backdrop-filter: blur(var(--glass-blur)) saturate(150%);
-    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(150%);
-    border: 1px solid var(--border-accent);
+        border: 1px solid var(--border-accent);
     border-radius: var(--radius-md);
     box-shadow: var(--glow-accent);
   }
@@ -526,9 +510,7 @@
     color: var(--fg-2);
     border-bottom: 1px solid var(--border-2);
     background: var(--glass-bg);
-    backdrop-filter: blur(var(--glass-blur)) saturate(150%);
-    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(150%);
-    position: sticky;
+        position: sticky;
     top: 6.5rem;
     z-index: 2;
   }
@@ -711,9 +693,7 @@
     padding: 0.35rem 0.65rem;
     border-radius: var(--radius-sm);
     background: var(--glass-bg);
-    backdrop-filter: blur(var(--glass-blur)) saturate(150%);
-    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(150%);
-    border: 1px solid var(--glass-border);
+        border: 1px solid var(--glass-border);
     color: var(--fg-3);
     font-family: var(--font-sans);
     font-size: var(--step--2);
@@ -792,8 +772,6 @@
     gap: 0.45rem;
     padding: 0.45rem 0.95rem;
     background: var(--glass-bg);
-    backdrop-filter: blur(var(--glass-blur)) saturate(140%);
-    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(140%);
     color: var(--fg-1);
     border: 1px solid var(--glass-border);
     border-radius: var(--radius-sm);
@@ -843,8 +821,6 @@
     inset: 0;
     z-index: 100;
     background: rgba(0, 0, 0, 0.7);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
     display: flex;
     align-items: flex-start;
     justify-content: center;
@@ -862,8 +838,6 @@
     width: 100%;
     max-width: 640px;
     background: var(--glass-bg);
-    backdrop-filter: blur(var(--glass-blur-heavy)) saturate(180%);
-    -webkit-backdrop-filter: blur(var(--glass-blur-heavy)) saturate(180%);
     border: 1px solid var(--glass-border-hover);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-xl), var(--gradient-metallic);
@@ -932,9 +906,7 @@
   /* -- Compatibility aliases (other pages use these) -------------------- */
   .panel {
     background: var(--glass-bg);
-    backdrop-filter: blur(var(--glass-blur)) saturate(150%);
-    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(150%);
-    border: 1px solid var(--glass-border);
+        border: 1px solid var(--glass-border);
     border-radius: var(--radius-md);
     box-shadow: var(--shadow-glass);
   }
@@ -961,9 +933,7 @@
   }
   .panel-glow {
     background: var(--glass-bg);
-    backdrop-filter: blur(var(--glass-blur)) saturate(150%);
-    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(150%);
-    border: 1px solid var(--glass-border);
+        border: 1px solid var(--glass-border);
     border-radius: var(--radius-md);
     box-shadow: var(--shadow-glass), var(--glow-accent);
   }
@@ -995,8 +965,6 @@
   .hero {
     position: relative;
     background: var(--glass-bg);
-    backdrop-filter: blur(var(--glass-blur-heavy)) saturate(180%);
-    -webkit-backdrop-filter: blur(var(--glass-blur-heavy)) saturate(180%);
     border: 1px solid var(--glass-border);
     border-radius: var(--radius-lg);
     overflow: hidden;
@@ -1029,9 +997,7 @@
     display: inline-grid; grid-template-columns: auto auto; gap: 0.35rem 0.85rem;
     padding: 0.6rem 0.9rem; border: 1px solid var(--glass-border); border-radius: var(--radius-sm);
     background: var(--glass-bg);
-    backdrop-filter: blur(var(--glass-blur)) saturate(150%);
-    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(150%);
-    font-size: var(--step--2); color: var(--fg-2);
+        font-size: var(--step--2); color: var(--fg-2);
     box-shadow: var(--shadow-sm);
   }
   .edition-stamp dt {
@@ -1074,8 +1040,6 @@
   .no-print { display: none !important; }
 
   .surface, .panel, .hero {
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
     background: #fff !important;
     border: 1px solid #999 !important;
     box-shadow: none !important;
@@ -1135,80 +1099,132 @@ body {
   }
 }
 
+/* -- Fixed two-tone ITU header ---------------------------------------
+   Main bar: ITU blue, logo + masthead + section nav.
+   Crumb strip: darker ITU blue, visible only when a trail exists.
+   Sticky (compositor-only) — no blur, no fixed backgrounds. */
+
 body > header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
   flex-shrink: 0;
   background: #1aa1da;
   color: #ffffff;
-  font-size: 80%;
-  padding-left: 3rem;
+  box-shadow: 0 1px 0 rgba(12, 61, 82, 0.25);
 }
 
-@media screen and (min-width: 800px) {
-  body > header {
-    padding-left: 5vw;
-  }
-}
-
-body > header > span {
-  margin-left: -40px;
+body > header .bar {
   display: flex;
-  flex-flow: row nowrap;
   align-items: center;
+  gap: 1rem;
+  min-height: 52px;
+  padding: 0.45rem 1rem;
+  box-sizing: border-box;
 }
 
-body > header a:link,
-body > header a:hover,
-body > header a:visited {
-  color: inherit;
+body > header .brand {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  color: #ffffff;
+  text-decoration: none;
+  min-width: 0;
 }
 
-body > header h1 {
-  font-size: 100%;
-  text-transform: uppercase;
-  letter-spacing: -0.025em;
-}
-
-body > header h2 {
-  font-size: 110%;
-  font-weight: normal;
-  padding-left: 2em;
-  position: relative;
-  overflow: hidden;
-}
-
-body > header h2:before {
+body > header .brand img {
+  width: 34px;
+  height: 34px;
+  max-width: none;
   display: block;
-  position: absolute;
-  content: " ";
-  border: 1px solid #ffffff;
-  left: 0;
-  top: 50%;
-  width: 20px;
-  height: 20px;
-  transform: translateX(-50%) translateY(-50%) scaleY(2) rotate(45deg);
 }
 
-/* Header logos: present in the DOM, hidden by CSS exactly as the original
-   site does since 2023 (Ribose issue #59). */
-body > header .logo,
-body > header .logo-inverse {
-  display: none;
-  width: 40px;
-  height: 40px;
-  margin-right: 0;
-}
-
-body > header .breadcrumbs {
+body > header .masthead {
+  font-size: 1rem;
+  line-height: 1.15;
   white-space: nowrap;
 }
 
-body > header .crumb {
-  color: inherit;
+body > header .masthead .publication-name {
+  display: block;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  font-size: 0.86rem;
 }
 
-body > header .crumb-sep {
-  margin: 0 0.6em;
-  opacity: 0.75;
+body > header .masthead .online {
+  display: block;
+  font-style: italic;
+  font-size: 0.76rem;
+  opacity: 0.9;
+}
+
+body > header nav.sections {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 0.15rem;
+}
+
+body > header nav.sections a {
+  color: #ffffff;
+  text-decoration: none;
+  font-size: 0.84rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  padding: 0.42rem 0.65rem;
+  border-radius: 3px;
+}
+
+body > header nav.sections a:hover {
+  background: rgba(255, 255, 255, 0.16);
+}
+
+body > header nav.sections a[aria-current] {
+  background: rgba(255, 255, 255, 0.2);
+  box-shadow: inset 0 -2px 0 #ffffff;
+}
+
+body > header .crumbs-strip {
+  background: #1285b1;
+}
+
+body > header .crumbs-inner {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.1rem 0.55rem;
+  padding: 0.34rem 1rem;
+  font-size: 0.8rem;
+}
+
+body > header .crumbs-inner a {
+  color: #e3f4fb;
+  text-decoration: none;
+}
+
+body > header .crumbs-inner a:hover {
+  color: #ffffff;
+  text-decoration: underline;
+}
+
+body > header .crumbs-inner .current {
+  color: #ffffff;
+  font-weight: 600;
+}
+
+body > header .crumbs-inner .sep {
+  opacity: 0.6;
+}
+
+@media screen and (min-width: 800px) {
+  body > header .bar {
+    padding: 0.45rem 5vw;
+  }
+  body > header .crumbs-inner {
+    padding: 0.34rem 5vw;
+  }
 }
 
 body > footer {

@@ -161,7 +161,7 @@ const authoritativeHref =
   bodyClass="layout--issue"
   bareMain
   description={"ITU Operational Bulletin No. " + id + ", published " + formatSwissDate(issue.meta.publication_date) + "."}
-  extraStylesheets={["/assets/css/orig-style.css"]}
+  extraStylesheets={["/assets/css/issue.css"]}
   headScripts={["https://kit.fontawesome.com/3ebc4b9810.js"]}
 >
   {issue.incomplete && <IncompleteBanner />}
@@ -284,26 +284,6 @@ const authoritativeHref =
               </>
             ))}
           </div>
-          <script is:inline>
-            (function () {
-              if (document.currentScript) {
-                var card = document.currentScript.parentElement;
-                var expandableContents = card.querySelector('.included-contents');
-                var activeAnchor = window.location.hash || null;
-                var titleLink = card.querySelector('header > .title > a.anchor');
-                var cardAnchor = titleLink ? titleLink.hash : null;
-                if (expandableContents) {
-                  if (!activeAnchor || activeAnchor !== cardAnchor) {
-                    expandableContents.style.display = 'none';
-                  }
-                  if (activeAnchor && activeAnchor === cardAnchor) {
-                    card.classList.add('expanded');
-                    card.classList.add('active');
-                  }
-                }
-              }
-            }());
-          </script>
         </article>
       );
     })}
@@ -366,26 +346,6 @@ const authoritativeHref =
               <TextualAmendment placeholder={issue.amendments.placeholder[a.slug]} />
             )}
           </div>
-          <script is:inline>
-            (function () {
-              if (document.currentScript) {
-                var card = document.currentScript.parentElement;
-                var expandableContents = card.querySelector('.included-contents');
-                var activeAnchor = window.location.hash || null;
-                var titleLink = card.querySelector('header > .title > a.anchor');
-                var cardAnchor = titleLink ? titleLink.hash : null;
-                if (expandableContents) {
-                  if (!activeAnchor || activeAnchor !== cardAnchor) {
-                    expandableContents.style.display = 'none';
-                  }
-                  if (activeAnchor && activeAnchor === cardAnchor) {
-                    card.classList.add('expanded');
-                    card.classList.add('active');
-                  }
-                }
-              }
-            }());
-          </script>
         </article>
       ))}
     </section>

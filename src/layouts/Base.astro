@@ -30,6 +30,7 @@ export interface Props {
   extraStylesheets?: string[];
   headScripts?: string[];
   bareMain?: boolean;
+  sections?: { href: string; label: string }[];
 }
 
 const {
@@ -48,7 +49,16 @@ const {
   extraStylesheets = [],
   headScripts = [],
   bareMain = false,
+  sections = [
+    { href: "/issues/", label: "Issues" },
+    { href: "/datasets/", label: "Datasets" },
+    { href: "/registers/", label: "Registers" },
+    { href: "/recommendations/", label: "Recommendations" },
+  ],
 } = Astro.props;
+
+const isSection = (href: string) =>
+  Astro.url.pathname === href || Astro.url.pathname.startsWith(href);
 
 const siteName = "ITU Operational Bulletin online";
 const fullTitle = title === siteName ? title : `${title} — ${siteName}`;
@@ -112,28 +122,38 @@ const navItems = [
     </a>
 
     <header class="no-print">
-      <span>
-        <img class="logo" src="/assets/logo.png" alt="ITU " />
-        <img class="logo-inverse" src="/assets/logo-inverse.png" alt="ITU " />
-        <h1><a href="/"><span class="publication-name">Operational Bulletin</span> online</a></h1>
-
-        {breadcrumbs.length > 0 && (
-          <h2>
-            <nav class="breadcrumbs" aria-label="Breadcrumb">
-              {breadcrumbs.map((crumb, i) => (
-                <>
-                  {i > 0 && <span class="crumb-sep" aria-hidden="true">▸</span>}
-                  {crumb.href ? (
-                    <a href={crumb.href} class="crumb">{crumb.label}</a>
-                  ) : (
-                    <span class="crumb title">{crumb.label}</span>
-                  )}
-                </>
-              ))}
-            </nav>
-          </h2>
-        )}
-      </span>
+      <div class="bar">
+        <a href="/" class="brand" aria-label="ITU Operational Bulletin — home">
+          <img src="/assets/logo-inverse.png" alt="ITU" width="34" height="34" />
+          <span class="masthead">
+            <span class="publication-name">Operational Bulletin</span>
+            <span class="online">online</span>
+          </span>
+        </a>
+        <nav class="sections" aria-label="Primary">
+          {sections.map((item) => (
+            <a href={item.href} aria-current={isSection(item.href) ? "page" : undefined}>
+              {item.label}
+            </a>
+          ))}
+        </nav>
+      </div>
+      {breadcrumbs.length > 0 && (
+        <div class="crumbs-strip">
+          <div class="crumbs-inner">
+            {breadcrumbs.map((crumb, i) => (
+              <>
+                {i > 0 && <span class="sep" aria-hidden="true">▸</span>}
+                {crumb.href ? (
+                  <a href={crumb.href}>{crumb.label}</a>
+                ) : (
+                  <span class="current" aria-current="location">{crumb.label}</span>
+                )}
+              </>
+            ))}
+          </div>
+        </div>
+      )}
     </header>
 
     <main

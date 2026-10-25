@@ -1,0 +1,554 @@
+/* Scoped issue-page styles extracted from the certified original
+   stylesheet (main @ a95ab19 build). Layout--issue + message cards.
+   The site chrome (body > header/footer) is owned by global.css. */
+/* Scoped issue-page styles extracted from the certified original
+   stylesheet (main @ a95ab19 build). Layout--issue + message cards. */
+dl.inline-dl dd, dl.inline-dl dt {
+  display: inline-block;
+  margin: 0;
+}
+
+dl.inline-dl dt:after {
+  content: ": ";
+}
+
+dl.inline-dl dd {
+  margin-right: 1.5rem;
+}
+
+.message-card, article.message {
+  box-shadow: 2px 2px 20px -8px rgba(0, 0, 0, 0.4);
+  border-radius: 6px;
+  margin-left: -6px;
+  padding: 0 1rem;
+  padding-top: 0.01em;
+}
+
+.message-card > header > .title, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul .message-card > li > .title, article.message > header > .title, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul article.message > li > .title {
+  font-weight: normal;
+  display: flex;
+  flex-flow: row nowrap;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.message-card > header > .title .label, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul .message-card > li > .title .label, article.message > header > .title .label, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul article.message > li > .title .label {
+  white-space: nowrap;
+  margin: 0.35rem 1rem 0 0;
+  font-size: 70%;
+}
+
+.message-card > header > .title .text, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul .message-card > li > .title .text, article.message > header > .title .text, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul article.message > li > .title .text {
+  flex: 1;
+}
+
+.message-card > header > .title .anchor, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul .message-card > li > .title .anchor, article.message > header > .title .anchor, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul article.message > li > .title .anchor {
+  margin: -2.35rem 0 0 1rem;
+  padding-top: 2.35rem;
+}
+
+.message-card > header > .title .anchor .fa-link, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul .message-card > li > .title .anchor .fa-link, article.message > header > .title .anchor .fa-link, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul article.message > li > .title .anchor .fa-link {
+  margin-right: 0.5rem;
+}
+
+.message-card > header > .title .anchor .ob-id, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul .message-card > li > .title .anchor .ob-id, article.message > header > .title .anchor .ob-id, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul article.message > li > .title .anchor .ob-id {
+  font-size: 1rem;
+}
+
+.message-card > header .recommendation, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul .message-card > li .recommendation, article.message > header .recommendation, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul article.message > li .recommendation, .message-card > header .annex-to-ob, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul .message-card > li .annex-to-ob, article.message > header .annex-to-ob, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul article.message > li .annex-to-ob, .message-card > header .online-link, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul .message-card > li .online-link, article.message > header .online-link, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul article.message > li .online-link, .message-card > header .label, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul .message-card > li .label, article.message > header .label, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul article.message > li .label {
+  margin-bottom: 0.5em;
+  margin-top: 0.5em;
+  letter-spacing: -0.02em;
+}
+
+.message-card > header .recommendation, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul .message-card > li .recommendation, article.message > header .recommendation, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul article.message > li .recommendation, .message-card > header .annex-to-ob, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul .message-card > li .annex-to-ob, article.message > header .annex-to-ob, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul article.message > li .annex-to-ob, .message-card > header .online-link, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul .message-card > li .online-link, article.message > header .online-link, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul article.message > li .online-link, .message-card > header .toggle, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul .message-card > li .toggle, article.message > header .toggle, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul article.message > li .toggle {
+  font-size: 90%;
+}
+
+.message-card header .fas, .message-card body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul li .fas, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul .message-card li .fas, article.message header .fas, article.message body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul li .fas, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul article.message li .fas, .message-card header .far, .message-card body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul li .far, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul .message-card li .far, article.message header .far, article.message body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul li .far, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul article.message li .far, .message-card .toggle .fas, article.message .toggle .fas, .message-card .toggle .far, article.message .toggle .far {
+  width: 1rem;
+  font-size: 0.8rem;
+  text-align: center;
+}
+
+.message-card .included-contents, article.message .included-contents {
+  margin-left: -1rem;
+  margin-right: -1rem;
+  font-size: 80%;
+  line-height: 1.2;
+  padding: 0 1rem;
+  overflow: hidden;
+  background: whiteSmoke;
+}
+
+.message-card .included-contents table colgroup, article.message .included-contents table colgroup {
+  display: none;
+}
+
+.message-card .included-contents table thead, article.message .included-contents table thead {
+  position: sticky;
+}
+
+.message-card .included-contents table caption, article.message .included-contents table caption, .message-card .included-contents table th, article.message .included-contents table th {
+  font-weight: bold;
+}
+
+.message-card .included-contents table th, article.message .included-contents table th, .message-card .included-contents table td, article.message .included-contents table td, .message-card .included-contents table caption, article.message .included-contents table caption {
+  text-overflow: ellipsis;
+  overflow: hidden;
+  padding: 0.5em 0.5em;
+  background: rgb(91.0784313725%, 91.0784313725%, 91.0784313725%);
+  border: 1px solid whiteSmoke;
+  border-bottom: 0;
+}
+
+.message-card .included-contents table th p, article.message .included-contents table th p, .message-card .included-contents table td p, article.message .included-contents table td p, .message-card .included-contents table caption p, article.message .included-contents table caption p {
+  margin: 0;
+}
+
+.message-card .included-contents table td:empty, article.message .included-contents table td:empty, .message-card .included-contents table th:empty, article.message .included-contents table th:empty {
+  background: whiteSmoke;
+}
+
+.message-card .included-contents .sect2, article.message .included-contents .sect2, .message-card .included-contents .sect3, article.message .included-contents .sect3, .message-card .included-contents .sect4, article.message .included-contents .sect4, .message-card .included-contents .sect5, article.message .included-contents .sect5 {
+  padding-left: 0.5rem;
+  margin-left: -0.5rem;
+  border-left: 0.5rem solid rgb(93.0784313725%, 93.0784313725%, 93.0784313725%);
+}
+
+.message-card .included-contents h3, article.message .included-contents h3, .message-card .included-contents h4, article.message .included-contents h4, .message-card .included-contents h5, article.message .included-contents h5, .message-card .included-contents h6, article.message .included-contents h6 {
+  font-size: 110%;
+  margin: 1em 0;
+}
+
+.message-card.with-js .toggle, article.with-js.message .toggle, .message-card.with-js .included-contents, article.with-js.message .included-contents {
+  border-radius: 0 0 6px 6px;
+}
+
+.message-card.with-js .included-contents, article.with-js.message .included-contents {
+  display: none;
+}
+
+.message-card.with-js.expanded .included-contents, article.with-js.expanded.message .included-contents {
+  display: block;
+}
+
+.std-label {
+  font-weight: bold;
+  color: #DF314E;
+}
+
+article.message.message--amendment .amendment-seq-no {
+  font-size: 90%;
+}
+
+article.message.message--service_restrictions table colgroup {
+  display: none;
+}
+
+article.message.message--service_restrictions table thead {
+  position: sticky;
+}
+
+article.message.message--service_restrictions table caption, article.message.message--service_restrictions table th {
+  font-weight: bold;
+}
+
+article.message.message--service_restrictions table th, article.message.message--service_restrictions table td, article.message.message--service_restrictions table caption {
+  text-overflow: ellipsis;
+  overflow: hidden;
+  padding: 0.5em 0.5em;
+  background: rgb(95%, 95%, 95%);
+  border: 1px solid white;
+  border-bottom: 0;
+}
+
+article.message.message--service_restrictions table th p, article.message.message--service_restrictions table td p, article.message.message--service_restrictions table caption p {
+  margin: 0;
+}
+
+article.message.message--service_restrictions table td:empty, article.message.message--service_restrictions table th:empty {
+  background: white;
+}
+
+article.message.message--service_restrictions table {
+  font-size: 80%;
+}
+
+article.message.message--running_annexes table td:first-child, article.message.message--running_annexes table th:first-child {
+  white-space: nowrap;
+  font-weight: bold;
+}
+
+article.message.message--approved_recommendations ul {
+  font-size: 80%;
+}
+
+article.service-publication .title {
+  margin-bottom: 0.3em;
+  font-weight: normal;
+}
+
+body.layout--issue > main > header, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul body.layout--issue > main > li, body.layout--issue > main nav.toc {
+  margin: 0 -2rem;
+}
+
+body.layout--issue > main > header, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul body.layout--issue > main > li, body.layout--issue > main nav.toc {
+    margin-left: -5vw;
+    margin-right: -5vw;
+  }
+
+body.layout--issue > main > header, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul body.layout--issue > main > li {
+  padding: 0;
+  align-self: stretch;
+}
+
+body.layout--issue > main > header *, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul body.layout--issue > main > li * {
+  box-sizing: border-box;
+}
+
+body.layout--issue > main > header > .bulletin-title, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul body.layout--issue > main > li > .bulletin-title {
+  margin: 0;
+  background: #d9d9d9;
+  color: white;
+  text-align: center;
+  padding: 0.3em 1em;
+}
+
+body.layout--issue > main > header > .bulletin-title a, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul body.layout--issue > main > li > .bulletin-title a, body.layout--issue > main > header > .bulletin-title a:visited, body.layout--issue > main > header > .bulletin-title a:hover {
+  color: inherit;
+  text-decoration: none;
+}
+
+body.layout--issue > main > header > .bulletin-title a:after, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul body.layout--issue > main > li > .bulletin-title a:after, body.layout--issue > main > header > .bulletin-title a:visited:after, body.layout--issue > main > header > .bulletin-title a:hover:after {
+  display: block;
+  font-size: 50%;
+  font-weight: normal;
+  content: attr(href);
+}
+
+body.layout--issue > main > header > .meta-row, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul body.layout--issue > main > li > .meta-row {
+  display: flex;
+  flex-flow: row nowrap;
+}
+
+body.layout--issue > main > header > .meta-row > *, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul body.layout--issue > main > li > .meta-row > * {
+  padding: 0 0.7rem;
+}
+
+body.layout--issue > main > header > .meta-row.publication, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul body.layout--issue > main > li > .meta-row.publication {
+  align-items: center;
+  background: #a6a6a6;
+  color: white;
+}
+
+body.layout--issue > main > header > .meta-row.publication .seq-no, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul body.layout--issue > main > li > .meta-row.publication .seq-no {
+  width: 16.8%;
+  margin: 0;
+  background: #DF314E;
+  text-align: right;
+  white-space: nowrap;
+  overflow: hidden;
+  min-width: 10rem;
+}
+
+body.layout--issue > main > header > .meta-row.publication .seq-no .value, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul body.layout--issue > main > li > .meta-row.publication .seq-no .value {
+  font-weight: bold;
+  font-size: 140%;
+}
+
+body.layout--issue > main > header > .meta-row.publication .publication-date, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul body.layout--issue > main > li > .meta-row.publication .publication-date {
+  width: 16.8%;
+  white-space: nowrap;
+}
+
+body.layout--issue > main > header > .meta-row.publication .other, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul body.layout--issue > main > li > .meta-row.publication .other {
+  display: flex;
+  flex-flow: row wrap;
+  flex: 1;
+}
+
+body.layout--issue > main > header > .meta-row.publication .other .cutoff-date, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul body.layout--issue > main > li > .meta-row.publication .other .cutoff-date, body.layout--issue > main > header > .meta-row.publication .other .issn, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul body.layout--issue > main > li > .meta-row.publication .other .issn {
+  margin-right: 1em;
+}
+
+body.layout--issue > main > header > .meta-row.publication .other .cutoff-date, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul body.layout--issue > main > li > .meta-row.publication .other .cutoff-date {
+  white-space: unset;
+}
+
+body.layout--issue > main > header > .meta-row.authors, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul body.layout--issue > main > li > .meta-row.authors {
+  align-items: flex-start;
+  font-size: 80%;
+  background: whiteSmoke;
+}
+
+body.layout--issue > main > header > .meta-row.authors > .author, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul body.layout--issue > main > li > .meta-row.authors > .author {
+  padding: 1rem;
+  flex: 1;
+  display: flex;
+  flex-flow: column nowrap;
+}
+
+body.layout--issue > main > header > .meta-row.authors > .author .contact-data + .contact-data:before, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul body.layout--issue > main > li > .meta-row.authors > .author .contact-data + .contact-data:before {
+  content: "/ ";
+}
+
+body.layout--issue > main > nav.toc .fas, body.layout--issue > main > nav.toc .far, body.layout--issue > main > section .legend .fas, body.layout--issue > main > section .legend .far {
+  width: 1.2rem;
+  font-size: 1rem;
+  text-align: center;
+}
+
+body.layout--issue > main nav.toc {
+  background: whiteSmoke;
+  margin-top: 0.2rem;
+  margin-bottom: 0.2rem;
+  padding: 0 1rem;
+  align-self: stretch;
+}
+
+body.layout--issue > main nav.toc * {
+  box-sizing: border-box;
+}
+
+body.layout--issue > main nav.toc ul, body.layout--issue > main nav.toc li {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+body.layout--issue > main nav.toc > ul a, body.layout--issue > main nav.toc > ul a:visited {
+  color: inherit;
+}
+
+body.layout--issue > main nav.toc > ul > li {
+  display: flex;
+  flex-flow: row nowrap;
+  margin-bottom: 1em;
+}
+
+body.layout--issue > main nav.toc > ul > li > a {
+  width: 16.8%;
+  padding-right: 2rem;
+}
+
+body.layout--issue > main nav.toc > ul > li > ul {
+  flex: 1;
+}
+
+body.layout--issue > main nav.toc .languages .lang:after {
+  content: ", ";
+}
+
+body.layout--issue > main nav.toc .languages .lang:last-child:after {
+  content: "";
+}
+
+body.layout--issue > main nav.toc .global-expand-toggle {
+  cursor: pointer;
+  color: rgb(9.1305046609%, 56.5388942462%, 76.5557698489%);
+}
+
+body.layout--issue > main nav.toc .global-expand-toggle .indicator {
+  transition: transform 0.1s ease-in-out;
+}
+
+body.layout--issue > main nav.toc .global-expand-toggle.expanded .indicator {
+  transform: scale(1, 1) rotate(90deg);
+}
+
+body.layout--issue > main nav.with-js.fixable-bar {
+  position: fixed;
+  top: -4em;
+  left: 0;
+  right: 0;
+  z-index: 2;
+  display: flex;
+  flex-flow: row nowrap;
+  align-items: flex-start;
+  transition: top 0.2s linear;
+  box-shadow: 0 2px 9px rgba(0, 0, 0, 0.2);
+}
+
+body.layout--issue > main nav.with-js.fixable-bar .issue-id, body.layout--issue > main nav.with-js.fixable-bar .menu-wrapper > .trigger {
+  padding: 0.5rem 1rem;
+  font-size: 100%;
+  text-transform: uppercase;
+  background: #a6a6a6;
+  color: white;
+  margin: 0;
+  margin-bottom: 1.5rem;
+  margin: 0;
+  white-space: nowrap;
+}
+
+body.layout--issue > main nav.with-js.fixable-bar .issue-id {
+  background-color: #DF314E;
+  font-weight: bold;
+  text-transform: unset;
+}
+
+body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper {
+  overflow: visible;
+  position: relative;
+}
+
+body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper .trigger .fas {
+  margin-right: 0.5rem;
+}
+
+body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper .trigger, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul li {
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 1rem;
+  padding: 0.5rem 1rem;
+  margin: 0.2rem 0 0 0;
+  list-style: none;
+  box-shadow: 0 10px 15px -10px rgba(0, 0, 0, 0.3);
+}
+
+body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul li.selected {
+  font-weight: bold;
+}
+
+body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper.section-menu .trigger {
+  font-weight: bold;
+  position: relative;
+  padding-left: 2rem;
+}
+
+body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper.section-menu .trigger:before {
+  display: block;
+  position: absolute;
+  content: " ";
+  left: 0;
+  top: 50%;
+  background-color: #DF314E;
+  width: 20px;
+  height: 20px;
+  transform: translateX(-50%) translateY(-50%) scaleY(4) rotate(45deg);
+}
+
+body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper.section-menu .trigger, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper.section-menu ul {
+  background: #a6a6a6;
+  color: white;
+}
+
+body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper.message-menu {
+  flex: 1;
+}
+
+body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper.message-menu .trigger {
+  font-weight: normal;
+  text-transform: unset;
+  position: relative;
+  padding-left: 2rem;
+}
+
+body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper.message-menu .trigger:before {
+  display: block;
+  position: absolute;
+  content: " ";
+  left: 0;
+  top: 50%;
+  background-color: #a6a6a6;
+  width: 20px;
+  height: 20px;
+  transform: translateX(-50%) translateY(-50%) scaleY(4) rotate(45deg);
+}
+
+body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper.message-menu .trigger, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper.message-menu ul {
+  background: #1aa1da;
+  color: white;
+}
+
+body.layout--issue > main nav.with-js.fixable-bar.fixed {
+  top: 0;
+}
+
+body.layout--issue > main nav.with-js.fixable-bar.fixed div.menu-wrapper.expanded ul {
+  display: block;
+}
+
+body.layout--issue > main > section {
+  display: flex;
+  flex-flow: column nowrap;
+  align-items: stretch;
+}
+
+body.layout--issue > main > section .legend {
+  font-size: 90%;
+  margin-bottom: 1.5rem;
+}
+
+body.layout--issue > main > section .legend h4 {
+  display: inline-block;
+  font-size: 100%;
+  font-weight: normal;
+  margin-top: 0;
+  margin-right: 1.2rem;
+}
+
+body.layout--issue > main > section .legend dl {
+  margin: 0;
+}
+
+body.layout--issue > main > section > h3 {
+  padding: 0.5rem 1rem;
+  font-size: 100%;
+  text-transform: uppercase;
+  background: #a6a6a6;
+  color: white;
+  margin: 0;
+  margin-bottom: 1.5rem;
+  align-self: flex-start;
+}
+
+body.layout--issue > main > section article.message {
+  margin-bottom: 1.5rem;
+}
+
+body.layout--issue > main > section.planned-issues {
+  margin-bottom: 1.5rem;
+}
+
+body.layout--issue > main > section.planned-issues table colgroup {
+  display: none;
+}
+
+body.layout--issue > main > section.planned-issues table thead {
+  position: sticky;
+}
+
+body.layout--issue > main > section.planned-issues table caption, body.layout--issue > main > section.planned-issues table th {
+  font-weight: bold;
+}
+
+body.layout--issue > main > section.planned-issues table th, body.layout--issue > main > section.planned-issues table td, body.layout--issue > main > section.planned-issues table caption {
+  text-overflow: ellipsis;
+  overflow: hidden;
+  padding: 0.5em 0.5em;
+  background: rgb(95%, 95%, 95%);
+  border: 1px solid white;
+  border-bottom: 0;
+}
+
+body.layout--issue > main > section.planned-issues table th p, body.layout--issue > main > section.planned-issues table td p, body.layout--issue > main > section.planned-issues table caption p {
+  margin: 0;
+}
+
+body.layout--issue > main > section.planned-issues table td:empty, body.layout--issue > main > section.planned-issues table th:empty {
+  background: white;
+}
+
+body.layout--issue > main > section.planned-issues table {
+  font-size: 80%;
+}
