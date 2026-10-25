@@ -13,12 +13,29 @@ import TextualAmendment from "~/components/TextualAmendment.astro";
 
 interface Props {
   slug: string;
-  keyField: string;
+  keyField: string | string[];
   seedIssue: number | null;
   history: RegisterState["history"];
 }
 
 const { slug, keyField, seedIssue, history } = Astro.props;
+
+// The register's key field(s); composite keys join their values.
+const keyFields = Array.isArray(keyField) ? keyField : [keyField];
+function entryKey(entry: Record<string, unknown>): string {
+  return keyFields
+    .map((f) => {
+      const v = entry[f];
+      if (v == null) return "";
+      if (typeof v === "object") {
+        const obj = v as Record<string, unknown>;
+        const spoken = ["fr", "en", "es", "zh", "ru", "ar"].find((l) => typeof obj[l] === "string" && obj[l]);
+        return spoken ? String(obj[spoken]) : Object.values(obj).map(String).join(" ");
+      }
+      return String(v);
+    })
+    .join(" | ");
+}
 
 // Group changes by OB issue — the deployed Jekyll site numbers
 // amendments per-issue (one H3 per OB), not per-change. Include the
@@ -154,12 +171,12 @@ const orderedCards = cards.slice().reverse();
                 const entryState = loadStateAtIssue(slug, patch.ob_issue ?? 0);
                 const entryData = entryState
                   ? (entryState.active_entries as any[]).find(
-                      (e: any) => e[keyField] === patch.identifier.code,
+                      (e: any) => entryKey(e) === patch.identifier.code,
                     )
                   : null;
                 const fieldValues = entryData
                   ? Object.entries(entryData)
-                      .filter(([k]) => k !== keyField)
+                      .filter(([k]) => !keyFields.includes(k))
                       .slice(0, 4)
                   : null;
                 return (

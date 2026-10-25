@@ -1,0 +1,69 @@
+---
+/**
+ * AsciiDoc asset rendering for general messages whose content was
+ * normalized as a file reference (e.g. "general/misc_comms.adoc").
+ * Minimal line-oriented conversion: =/=-headings, paragraphs, lists.
+ * All text is HTML-escaped before inline markup is applied.
+ */
+interface Props {
+  text: string;
+}
+const { text } = Astro.props;
+
+function esc(s: string): string {
+  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+function inline(s: string): string {
+  return esc(s)
+    .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
+    .replace(/\*([^*]+)\*/g, "<strong>$1</strong>")
+    .replace(/_([^_]+)_/g, "<em>$1</em>")
+    .replace(/\^\^([^^]+)\^\^/g, "<sup>$1</sup>")
+    .replace(/`([^`]+)`/g, "<code>$1</code>");
+}
+
+const lines = text.split("\n");
+const blocks: string[] = [];
+let para: string[] = [];
+let list: string[] = [];
+
+function flushPara() {
+  if (para.length) {
+    blocks.push(`<p>${inline(para.join(" "))}</p>`);
+    para = [];
+  }
+}
+function flushList() {
+  if (list.length) {
+    blocks.push(`<ul>${list.map((i) => `<li>${inline(i)}</li>`).join("")}</ul>`);
+    list = [];
+  }
+}
+
+for (const raw of lines) {
+  const line = raw.trimEnd();
+  const heading = line.match(/^(={2,5})\s+(.+)$/);
+  const bullet = line.match(/^\*\s+(.+)$/);
+  const headingText = heading?.[2];
+  const bulletText = bullet?.[1];
+  if (!line.trim()) {
+    flushPara();
+    flushList();
+  } else if (headingText) {
+    flushPara();
+    flushList();
+    const level = Math.min((heading?.[1]?.length ?? 2) + 1, 6);
+    blocks.push(`<h${level}>${inline(headingText)}</h${level}>`);
+  } else if (bulletText) {
+    flushPara();
+    list.push(bulletText);
+  } else {
+    flushList();
+    para.push(line.trim());
+  }
+}
+flushPara();
+flushList();
+---
+<div class="prose-bulletin" set:html={blocks.join("\n")} />

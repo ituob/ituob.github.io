@@ -41,7 +41,7 @@ export interface RegisterManifest {
   register_id: string;
   recommendation?: string;
   title: { en?: string; fr?: string; es?: string };
-  key_field: string;
+  key_field: string | string[];
   seed_issue: number | null;
   touched_issues: number[];
 }
