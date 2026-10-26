@@ -1,0 +1,488 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ITU OB — Register Ledger · IA mockup</title>
+<style>
+  :root{
+    --itu:#1AA1DA; --itu-deep:#1285B1; --ink:#0C3D52; --paper:#FFFFFF;
+    --mist:#F2F7F9; --line:#D8E4EA; --mut:#5B7285;
+    --add:#18855C; --sup:#DF314E; --rep:#B7791F; --lir:#5B7285; --mod:#6B46C1;
+    --mono:"SF Mono",Consolas,"Liberation Mono",Menlo,monospace;
+  }
+  *{box-sizing:border-box; margin:0}
+  body{background:var(--paper); color:var(--ink);
+       font:15px/1.5 "Helvetica Neue",Helvetica,Arial,sans-serif;
+       font-variant-numeric:tabular-nums; min-height:100vh;
+       display:flex; flex-flow:column nowrap}
+  a{color:var(--itu); text-decoration:none}
+  a:hover{text-decoration:underline}
+  code,.mono{font-family:var(--mono); font-size:.92em}
+
+  /* ---- header (two-tone ITU) ---- */
+  header{position:sticky; top:0; z-index:20; flex-shrink:0;
+         box-shadow:0 1px 0 rgba(12,61,82,.25)}
+  .bar{display:flex; align-items:center; gap:1rem; min-height:52px;
+       padding:.45rem 5vw; background:var(--itu); color:#fff}
+  .brand{text-decoration:none; color:#fff; display:flex; align-items:baseline; gap:.45rem}
+  .brand .pub{font-weight:700; text-transform:uppercase; letter-spacing:.07em; font-size:.95rem}
+  .brand .on{font-style:italic; font-weight:400; opacity:.9; font-size:.85rem}
+  nav.sections{margin-left:auto; display:flex; gap:.15rem}
+  nav.sections a{color:#fff; font-size:.84rem; font-weight:600; letter-spacing:.03em;
+                 padding:.42rem .65rem; border-radius:3px; text-decoration:none}
+  nav.sections a:hover{background:rgba(255,255,255,.16)}
+  nav.sections a[aria-current]{background:rgba(255,255,255,.2); box-shadow:inset 0 -2px 0 #fff}
+  .crumbs{background:var(--itu-deep); font-size:.8rem}
+  .crumbs div{display:flex; gap:.55rem; padding:.34rem 5vw; align-items:center}
+  .crumbs a{color:#E3F4FB} .crumbs a:hover{color:#fff; text-decoration:underline}
+  .crumbs .cur{color:#fff; font-weight:600}
+  .crumbs .sep{opacity:.6}
+
+  /* ---- IA strip ---- */
+  .ia{background:var(--ink); color:#DDEBF2; font-size:.82rem}
+  .ia div{padding:.4rem 5vw}
+  .ia b{color:#fff; font-weight:600}
+  .ia .k{font-family:var(--mono); font-size:.78rem; color:#9CC8DC}
+
+  main{flex:1; padding:1.4rem 5vw 3rem}
+
+  /* ---- shared ---- */
+  .tabs{display:flex; gap:.3rem; margin:.2rem 0 1.1rem; flex-wrap:wrap}
+  .tabs button{font:600 .82rem/1 "Helvetica Neue",Helvetica,Arial,sans-serif;
+    letter-spacing:.05em; text-transform:uppercase; color:var(--ink);
+    background:var(--mist); border:1px solid var(--line); border-radius:3px;
+    padding:.5rem .9rem; cursor:pointer}
+  .tabs button[aria-selected="true"]{background:var(--itu); border-color:var(--itu); color:#fff}
+  .view{display:none} .view.on{display:block}
+
+  h2{font-size:1.25rem; letter-spacing:-.01em; margin:0 0 .15rem}
+  h3{font-size:.95rem; margin:1.4rem 0 .5rem}
+  .sub{color:var(--mut); font-size:.85rem; margin-bottom:1rem}
+  .eyebrow{font-size:.7rem; font-weight:700; letter-spacing:.14em; text-transform:uppercase;
+           color:var(--itu-deep); margin-bottom:.3rem}
+  .panel{background:var(--mist); border:1px solid var(--line); border-radius:6px; padding:1rem 1.1rem}
+  .num{font-variant-numeric:tabular-nums}
+
+  /* ---- badges ---- */
+  .b{display:inline-block; font:700 .68rem/1 var(--mono); letter-spacing:.04em;
+     padding:.22rem .42rem; border-radius:3px; color:#fff}
+  .b.add{background:var(--add)} .b.sup{background:var(--sup)}
+  .b.rep{background:var(--rep)} .b.lir{background:var(--lir)} .b.mod{background:var(--mod)}
+
+  /* ---- tables ---- */
+  table{border-collapse:collapse; width:100%; background:#fff}
+  th{font-size:.72rem; font-weight:700; letter-spacing:.06em; text-transform:uppercase;
+     color:var(--mut); text-align:left; padding:.45rem .6rem; border-bottom:2px solid var(--ink)}
+  td{padding:.5rem .6rem; border-bottom:1px solid var(--line); vertical-align:top; font-size:.88rem}
+  tr:hover td{background:#F7FBFD}
+  .r{text-align:right} .mono{font-family:var(--mono); font-size:.85em}
+
+  .kpis{display:flex; gap:2.2rem; flex-wrap:wrap; margin:.2rem 0 1.2rem}
+  .kpi b{display:block; font-size:1.6rem; font-weight:700; letter-spacing:-.02em}
+  .kpi span{font-size:.72rem; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--mut)}
+
+  /* register matrix chips */
+  .chips{display:flex; gap:.25rem; flex-wrap:wrap}
+  .chips .b{min-width:2.6rem; text-align:center}
+  .chips .z{background:transparent; color:#B9C6CE; border:1px dashed var(--line)}
+
+  /* register detail */
+  .split{display:grid; grid-template-columns:minmax(0,1.9fr) minmax(260px,1fr); gap:1.4rem}
+  @media (max-width:900px){.split{grid-template-columns:1fr}}
+  .tl{list-style:none; padding:0; margin:0; position:relative}
+  .tl::before{content:""; position:absolute; left:.47rem; top:.3rem; bottom:.3rem; width:1px; background:var(--line)}
+  .tl li{position:relative; padding:.32rem 0 .32rem 1.5rem; font-size:.86rem}
+  .tl li::before{content:""; position:absolute; left:.17rem; top:.62rem; width:.62rem; height:.62rem;
+                 border-radius:50%; background:var(--itu); box-shadow:0 0 0 2px #fff}
+  .tl li.add::before{background:var(--add)} .tl li.sup::before{background:var(--sup)}
+  .tl li.rep::before{background:var(--rep)} .tl li.lir::before{background:var(--lir)}
+  .tl .when{color:var(--mut); font-size:.78rem}
+  .scrub{display:flex; align-items:center; gap:.5rem; background:#fff; border:1px solid var(--line);
+         border-radius:6px; padding:.55rem .8rem; margin-bottom:1rem; font-size:.85rem}
+  .scrub input[type=range]{flex:1; accent-color:var(--itu)}
+  .scrub .at{font-weight:700}
+  tr.hl td{background:#EDF9F3}
+  .newchip{display:inline-block; margin-left:.4rem; font:700 .62rem/1 var(--mono); color:var(--add);
+           border:1px solid var(--add); border-radius:3px; padding:.14rem .3rem; vertical-align:1px}
+
+  /* patch cards */
+  .patch{border:1px solid var(--line); border-radius:6px; background:#fff; margin-bottom:.9rem; overflow:hidden}
+  .patch .ph{display:flex; align-items:center; gap:.6rem; padding:.5rem .8rem; background:var(--mist);
+             border-bottom:1px solid var(--line)}
+  .patch .ph .reg{font-weight:700; font-size:.85rem}
+  .patch .ph .ob{margin-left:auto; color:var(--mut); font-size:.78rem}
+  .patch .pc{padding:.7rem .8rem; font-size:.88rem}
+  .diff{font-family:var(--mono); font-size:.8rem; background:#FBFDFC; border:1px solid var(--line);
+        border-radius:4px; padding:.5rem .7rem; margin-top:.5rem; overflow-x:auto}
+  .diff .minus{color:var(--sup)} .diff .plus{color:var(--add)}
+
+  /* composer */
+  .comp{display:grid; grid-template-columns:200px minmax(0,1fr) 280px; gap:1rem}
+  @media (max-width:1000px){.comp{grid-template-columns:1fr}}
+  .picker button{display:block; width:100%; text-align:left; background:none; border:0;
+                 border-bottom:1px solid var(--line); padding:.5rem .6rem; font:inherit;
+                 font-size:.85rem; cursor:pointer; color:var(--ink)}
+  .picker button:hover{background:var(--mist)}
+  .picker button[aria-current]{background:var(--itu); color:#fff; border-color:var(--itu)}
+  .picker .cnt{float:right; color:var(--mut); font-size:.75rem}
+  label{display:block; font-size:.72rem; font-weight:700; letter-spacing:.08em;
+        text-transform:uppercase; color:var(--mut); margin:.8rem 0 .25rem}
+  input[type=text],select{width:100%; font:inherit; font-size:.88rem; padding:.42rem .55rem;
+        border:1px solid var(--line); border-radius:4px; background:#fff; color:var(--ink)}
+  .mltabs{display:flex; gap:.2rem; margin-top:.3rem}
+  .mltabs span{font:600 .7rem/1 var(--mono); border:1px solid var(--line); border-bottom:0;
+        padding:.28rem .5rem; border-radius:3px 3px 0 0; color:var(--mut); cursor:pointer}
+  .mltabs span.on{background:#fff; color:var(--ink)}
+  .mlbox{border:1px solid var(--line); border-radius:0 4px 4px 4px; background:#fff;
+         min-height:4.6rem; padding:.5rem .6rem; font-size:.85rem}
+  .queue li{display:flex; align-items:center; gap:.5rem; padding:.45rem .2rem;
+            border-bottom:1px solid var(--line); font-size:.84rem; list-style:none}
+  .queue{padding:0}
+  .ok{color:var(--add); font-weight:700}
+  .note{font-size:.78rem; color:var(--mut); margin-top:.7rem; line-height:1.45}
+  .foot{padding:1.2rem 5vw 2rem; color:var(--mut); font-size:.78rem}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="bar">
+    <a class="brand" href="#ledger">
+      <span class="pub">Operational Bulletin</span><span class="on">online</span>
+    </a>
+    <nav class="sections" aria-label="Primary">
+      <a href="#" aria-current="page">Ledger</a>
+      <a href="#">Editions</a>
+      <a href="#">Schemas</a>
+      <a href="#">Composer</a>
+      <a href="#">About</a>
+    </nav>
+  </div>
+  <div class="crumbs"><div>
+    <a href="#">Home</a><span class="sep">▸</span><span class="cur">Register ledger</span>
+  </div></div>
+</header>
+
+<div class="ia"><div>
+  <b>One system, three views.</b> Registers hold the data <span class="k">(schemas defined by Recommendations)</span> ·
+  Editions are dated batches of actions <span class="k">(issues, № 955–1343, biweekly)</span> ·
+  every message is an action on a register <span class="k">(ADD · SUP · REP · LIR · MOD)</span>
+</div></div>
+
+<main>
+  <div class="tabs" role="tablist">
+    <button role="tab" aria-selected="true"  data-v="ledger">Register ledger</button>
+    <button role="tab" aria-selected="false" data-v="register">Register · E.118 IIN</button>
+    <button role="tab" aria-selected="false" data-v="edition">Edition № 1342</button>
+    <button role="tab" aria-selected="false" data-v="schema">Schema · Rec. E.118</button>
+    <button role="tab" aria-selected="false" data-v="composer">Composer</button>
+  </div>
+
+  <!-- ================= LEDGER ================= -->
+  <section class="view on" id="v-ledger">
+    <p class="eyebrow">Register ledger</p>
+    <h2>Every register, its governing schema, and the actions that shaped it</h2>
+    <p class="sub">Current state as of edition № 1343 · 15.X.2026. Action counts cover the normalized
+       corpus, editions № 955–1343.</p>
+    <div class="kpis">
+      <div class="kpi"><b>17</b><span>registers</span></div>
+      <div class="kpi"><b>15,894</b><span>active entries</span></div>
+      <div class="kpi"><b>4,239</b><span>tracked actions</span></div>
+      <div class="kpi"><b>389</b><span>editions online</span></div>
+    </div>
+    <table>
+      <thead><tr>
+        <th>Register</th><th>Schema</th><th class="r">Entries</th>
+        <th>ADD</th><th>SUP</th><th>REP</th><th>LIR</th><th>Last action</th><th></th>
+      </tr></thead>
+      <tbody>
+        <tr><td><a href="#" onclick="show('register');return false">Issuer Identifier Numbers</a></td>
+            <td><a href="#" onclick="show('schema');return false">E.118</a></td>
+            <td class="r num">940</td>
+            <td><span class="b add">395</span></td><td><span class="b sup">79</span></td>
+            <td><span class="b z">—</span></td><td><span class="b lir">429</span></td>
+            <td class="num">№ 1342</td>
+            <td><a href="#" onclick="show('register');return false">Open →</a></td></tr>
+        <tr><td>ITU Carrier Codes</td><td>M.1400</td><td class="r num">1,939</td>
+            <td><span class="b add">816</span></td><td><span class="b sup">24</span></td>
+            <td><span class="b z">—</span></td><td><span class="b lir">68</span></td>
+            <td class="num">№ 1342</td><td><a href="#">Open →</a></td></tr>
+        <tr><td>International Signalling Point Codes</td><td>Q.708</td><td class="r num">6,228</td>
+            <td><span class="b add">771</span></td><td><span class="b sup">375</span></td>
+            <td><span class="b rep">2</span></td><td><span class="b lir">253</span></td>
+            <td class="num">№ 1342</td><td><a href="#">Open →</a></td></tr>
+        <tr><td>Mobile Network Codes</td><td>E.212</td><td class="r num">2,656</td>
+            <td><span class="b add">344</span></td><td><span class="b sup">15</span></td>
+            <td><span class="b z">—</span></td><td><span class="b lir">10</span></td>
+            <td class="num">№ 1343</td><td><a href="#">Open →</a></td></tr>
+        <tr><td>Assigned Country Codes</td><td>E.164</td><td class="r num">455</td>
+            <td><span class="b add">159</span></td><td><span class="b sup">7</span></td>
+            <td><span class="b z">—</span></td><td><span class="b lir">14</span></td>
+            <td class="num">№ 1341</td><td><a href="#">Open →</a></td></tr>
+        <tr><td>Signalling Area/Network Codes</td><td>Q.708</td><td class="r num">1,082</td>
+            <td><span class="b add">328</span></td><td><span class="b z">—</span></td>
+            <td><span class="b z">—</span></td><td><span class="b lir">2</span></td>
+            <td class="num">№ 1342</td><td><a href="#">Open →</a></td></tr>
+        <tr><td>Telegraph Destination Indicators</td><td>F.32</td><td class="r num">1,214</td>
+            <td><span class="b add">1</span></td><td><span class="b sup">5</span></td>
+            <td><span class="b rep">7</span></td><td><span class="b lir">2</span></td>
+            <td class="num">№ 1148</td><td><a href="#">Open →</a></td></tr>
+        <tr><td>Access Codes for Mobile Networks</td><td>E.164</td><td class="r num">227</td>
+            <td><span class="b add">4</span></td><td><span class="b z">—</span></td>
+            <td><span class="b z">—</span></td><td><span class="b lir">83</span></td>
+            <td class="num">№ 1014</td><td><a href="#">Open →</a></td></tr>
+        <tr><td>Dialling Procedures</td><td>E.164</td><td class="r num">217</td>
+            <td><span class="b add">1</span></td><td><span class="b z">—</span></td>
+            <td><span class="b z">—</span></td><td><span class="b lir">17</span></td>
+            <td class="num">№ 1014</td><td><a href="#">Open →</a></td></tr>
+        <tr><td>Data Network Identification Codes</td><td>X.121</td><td class="r num">477</td>
+            <td><span class="b add">3</span></td><td><span class="b sup">8</span></td>
+            <td><span class="b rep">1</span></td><td><span class="b lir">2</span></td>
+            <td class="num">№ 1321</td><td><a href="#">Open →</a></td></tr>
+        <tr><td>ADMD Names</td><td>F.400</td><td class="r num">188</td>
+            <td><span class="b add">7</span></td><td><span class="b sup">2</span></td>
+            <td><span class="b z">—</span></td><td><span class="b lir">2</span></td>
+            <td class="num">№ 1193</td><td><a href="#">Open →</a></td></tr>
+        <tr><td>Terrestrial Trunk Radio Codes</td><td>E.218</td><td class="r num">245</td>
+            <td><span class="b add">4</span></td><td><span class="b z">—</span></td>
+            <td><span class="b z">—</span></td><td><span class="b z">—</span></td>
+            <td class="num">№ 1190</td><td><a href="#">Open →</a></td></tr>
+        <tr><td>T.35 Assigned Authorities</td><td>T.35</td><td class="r num">26</td>
+            <td><span class="b add">2</span></td><td><span class="b z">—</span></td>
+            <td><span class="b z">—</span></td><td><span class="b lir">1</span></td>
+            <td class="num">№ 1005</td><td><a href="#">Open →</a></td></tr>
+      </tbody>
+    </table>
+    <p class="note" style="margin-top:.8rem">Registers without an amendment stream (Service Restrictions,
+    Call-back, List V/VIII, Country names) are textual publications — carried in the ledger as documents,
+    not as keyed rows.</p>
+  </section>
+
+  <!-- ================= REGISTER ================= -->
+  <section class="view" id="v-register">
+    <p class="eyebrow">Register · Rec. ITU-T E.118 (2006-05)</p>
+    <h2>Issuer Identifier Numbers (IIN)</h2>
+    <p class="sub">The international telecommunication charge card register. Schema fields defined by
+       Recommendation ITU-T E.118; entries amended through the Bulletin since № 1161.</p>
+    <div class="scrub">
+      <span>State at</span>
+      <input type="range" min="1161" max="1343" value="1343" aria-label="Time travel by edition">
+      <span class="at">edition <span class="num">№ 1343</span> · current</span>
+      <span class="mono" style="color:var(--mut)">940 entries</span>
+    </div>
+    <div class="split">
+      <div>
+        <input type="text" placeholder="Filter 940 entries — country, company, IIN…"
+               oninput="const q=this.value.toLowerCase();document.querySelectorAll('#iin-tb tr').forEach(r=>r.style.display=r.textContent.toLowerCase().includes(q)?'':'none')">
+        <table style="margin-top:.6rem">
+          <thead><tr>
+            <th>IIN</th><th>Country / area</th><th>Company</th><th>Contact</th>
+          </tr></thead>
+          <tbody id="iin-tb">
+            <tr class="hl"><td class="mono">89 420 06</td><td>Canada</td>
+                <td>SSi Micro Ltd.<span class="newchip">NEW № 1342</span></td>
+                <td>Dean Proctor / Jeff Phillip</td></tr>
+            <tr><td class="mono">89 93 01</td><td>Afghanistan</td>
+                <td>Afghan Wireless Communication Company (AWCC)</td>
+                <td>AWCC</td></tr>
+            <tr><td class="mono">89 98 03</td><td>Georgia</td>
+                <td>Silknet</td><td>Nodar Khukhunaishvili</td></tr>
+            <tr><td class="mono">89 356 110</td><td>Greece</td>
+                <td>OTE SA</td><td>Network Management Centre</td></tr>
+            <tr><td class="mono">89 395 01</td><td>Italy</td>
+                <td>Telecom Italia SpA</td><td>NOC Roma</td></tr>
+          </tbody>
+        </table>
+        <p class="note">Showing 5 of 940 entries — the full table renders server-side with
+        pagination; search runs client-side over the snapshot payload.</p>
+      </div>
+      <aside>
+        <div class="panel">
+          <p class="eyebrow" style="color:var(--mut)">Action timeline</p>
+          <ul class="tl">
+            <li class="add"><span class="b add">ADD</span> <span class="mono">89 420 06</span><br>
+                <span style="color:var(--mut)">SSi Micro Ltd. · Canada</span><br>
+                <span class="when">edition № 1342 · 15.I.2026</span></li>
+            <li class="lir"><span class="b lir">LIR</span> <span class="mono">89 93 01</span> Afghanistan AWCC — unchanged<br>
+                <span class="when">edition № 1321</span></li>
+            <li class="add"><span class="b add">ADD</span> <span class="mono">89 98 03</span> Georgia Silknet<br>
+                <span class="when">edition № 1318</span></li>
+            <li class="sup"><span class="b sup">SUP</span> <span class="mono">89 40 08</span> withdrawn at operator request<br>
+                <span class="when">edition № 1290</span></li>
+          </ul>
+          <p class="note">Every row is the fold of its actions. The timeline is the changelog —
+          each entry links to the edition that carried it.</p>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- ================= EDITION ================= -->
+  <section class="view" id="v-edition">
+    <p class="eyebrow">Edition — dated batch of actions</p>
+    <h2>№ 1342 <span style="font-weight:400;color:var(--mut)">· 15.I.2026</span></h2>
+    <p class="sub">Information received by 17.XII.2025 · ISSN 0040-6066 ·
+       6 actions across 4 registers · General information: 3 messages.</p>
+    <div class="kpis">
+      <div class="kpi"><b class="num" style="color:var(--add)">3</b><span>add</span></div>
+      <div class="kpi"><b class="num">1</b><span>lir</span></div>
+      <div class="kpi"><b class="num">2</b><span>general messages</span></div>
+      <div class="kpi"><b class="num">4</b><span>registers touched</span></div>
+    </div>
+
+    <div class="patch">
+      <div class="ph"><span class="b add">ADD</span><span class="reg">Issuer Identifier Numbers · E.118</span>
+        <span class="mono">89 420 06</span><span class="ob">annex to OB № 1161 position, amended</span></div>
+      <div class="pc">
+        <b>SSi Micro Ltd.</b> — Canada<br>
+        356B Old Airport Road, Yellowknife · contact D. Proctor / J. Phillip ·
+        <span class="mono">+1 867 669 9500</span>
+        <div class="diff">+ issue_id_number: <span class="plus">89 420 06</span><br>
+            + company_name: <span class="plus">SSi Micro Ltd.</span><br>
+            + country: <span class="plus">Canada</span></div>
+      </div>
+    </div>
+
+    <div class="patch">
+      <div class="ph"><span class="b lir">LIR</span><span class="reg">ITU Carrier Codes · M.1400</span>
+        <span class="mono">DE · MULTIC</span><span class="ob">read from last issue</span></div>
+      <div class="pc">spusu Deutschland GmbH — repeated unchanged from edition № 1341.</div>
+    </div>
+
+    <div class="patch">
+      <div class="ph"><span class="b add">ADD</span><span class="reg">Signalling Point Codes · Q.708</span>
+        <span class="mono">7-255-1</span><span class="ob">First Mobile Vaduz 01</span></div>
+      <div class="pc">Liechtenstein — point code 7-255-1, DEC 16377, operator First Mobile AG.</div>
+    </div>
+
+    <div class="patch">
+      <div class="ph"><span class="b sup">SUP</span><span class="reg">Signalling Point Codes · Q.708</span>
+        <span class="mono">3-124-3</span><span class="ob">withdrawn</span></div>
+      <div class="pc">Curaçao/ANM — Antillean Network Management. Point code returned to the free pool.</div>
+    </div>
+
+    <p class="note">Each card is one message. In the source corpus the same card is
+    <code>ob-issues/1342/e118-iin/001-ADD.yaml</code> — an action with a type, a key and
+    schema-typed rows. The ledger folds these cards; the edition reports them.</p>
+  </section>
+
+  <!-- ================= SCHEMA ================= -->
+  <section class="view" id="v-schema">
+    <p class="eyebrow">Schema · defined by a Recommendation</p>
+    <h2>ITU-T E.118 (2006-05)</h2>
+    <p class="sub">“Issuer Identifier Number” — field dictionary for the IIN register.
+       This page replaces the link-farm recommendation pages: a schema page exists when a
+       recommendation defines data the Bulletin maintains, and it links to the registers it governs.</p>
+    <div class="kpis">
+      <div class="kpi"><b>10</b><span>fields</span></div>
+      <div class="kpi"><b>1</b><span>register governed</span></div>
+      <div class="kpi"><b>940</b><span>entries under schema</span></div>
+      <div class="kpi"><b>2006-05</b><span>current version</span></div>
+    </div>
+    <h3>Field dictionary</h3>
+    <table>
+      <thead><tr><th>Field</th><th>Type</th><th>Required</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">issue_id_number</td><td>string</td><td class="ok">✓ key</td><td>Six-digit IIN, the register key</td></tr>
+        <tr><td class="mono">country_or_area</td><td>multilingual</td><td class="ok">✓</td><td>fr / en / es, as printed</td></tr>
+        <tr><td class="mono">company_name</td><td>string</td><td class="ok">✓</td><td></td></tr>
+        <tr><td class="mono">company_address_1…3</td><td>string ×3</td><td>—</td><td>Printed address lines</td></tr>
+        <tr><td class="mono">contact</td><td>string</td><td>—</td><td></td></tr>
+        <tr><td class="mono">contact_address_1…3</td><td>string ×3</td><td>—</td><td></td></tr>
+        <tr><td class="mono">tel[]</td><td>string list</td><td>—</td><td>Printed as first digits after country code</td></tr>
+        <tr><td class="mono">email[]</td><td>string list</td><td>—</td><td></td></tr>
+        <tr><td class="mono">effective_date</td><td>date</td><td>—</td><td>OB Roman format on print</td></tr>
+      </tbody>
+    </table>
+    <h3>Version history</h3>
+    <table>
+      <thead><tr><th>Version</th><th>Status</th><th>Editions under it</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">E.118 (2006-05)</td><td>current</td><td class="num">№ 1161 – 1343</td></tr>
+        <tr><td class="mono">E.118 (2003)</td><td>superseded</td><td class="num">№ 955 – 1000</td></tr>
+      </tbody>
+    </table>
+    <h3>Registers governed</h3>
+    <p style="font-size:.9rem"><a href="#" onclick="show('register');return false">Issuer Identifier Numbers (IIN)</a> —
+       the only register whose schema this recommendation defines. Its actions:
+       <span class="b add">ADD 395</span> <span class="b sup">SUP 79</span> <span class="b lir">LIR 429</span>.</p>
+  </section>
+
+  <!-- ================= COMPOSER ================= -->
+  <section class="view" id="v-composer">
+    <p class="eyebrow">Composer · for the coming edition № 1344</p>
+    <h2>Compose actions against the registers</h2>
+    <p class="sub">The web editor is the Electron editor’s domain model — datasets, issues,
+       publications, recommendations — rebuilt on the same normalization the ledger reads.
+       Freeform prose keeps a rich-text surface; keyed registers get schema-driven forms.</p>
+    <div class="comp">
+      <div class="panel picker" style="padding:.4rem .2rem">
+        <p class="eyebrow" style="padding:0 .6rem">Register</p>
+        <button aria-current="true">Issuer Identifier Numbers <span class="cnt mono">940</span></button>
+        <button>ITU Carrier Codes <span class="cnt mono">1,939</span></button>
+        <button>Signalling Point Codes <span class="cnt mono">6,228</span></button>
+        <button>Mobile Network Codes <span class="cnt mono">2,656</span></button>
+        <button>Assigned Country Codes <span class="cnt mono">455</span></button>
+      </div>
+      <div>
+        <label>Action</label>
+        <div class="chips" style="gap:.3rem">
+          <span class="b add" style="font-size:.75rem;padding:.4rem .7rem;cursor:pointer">ADD</span>
+          <span class="b" style="background:var(--sup);font-size:.75rem;padding:.4rem .7rem;cursor:pointer">SUP</span>
+          <span class="b" style="background:var(--rep);font-size:.75rem;padding:.4rem .7rem;cursor:pointer">REP</span>
+          <span class="b" style="background:var(--lir);font-size:.75rem;padding:.4rem .7rem;cursor:pointer">LIR</span>
+          <span class="b" style="background:var(--mod);font-size:.75rem;padding:.4rem .7rem;cursor:pointer">MOD</span>
+        </div>
+        <label>Issuer Identifier Number — register key</label>
+        <input type="text" value="89 420 07" class="mono">
+        <label>Country / area <span style="text-transform:none;font-weight:400">— multilingual, as printed</span></label>
+        <div class="mltabs"><span class="on">en</span><span>fr</span><span>es</span><span>ru</span><span>zh</span><span>ar</span></div>
+        <div class="mlbox" contenteditable="true">Canada</div>
+        <label>Company name</label>
+        <input type="text" value="Northwestel Inc.">
+        <label>Address line 1</label>
+        <input type="text" value="5120 49th Street, Yellowknife">
+        <label>Tel (first digits after country code)</label>
+        <input type="text" value="683 4xx" class="mono">
+        <label style="margin-top:1rem">Validation</label>
+        <div class="panel" style="font-size:.84rem">
+          <span class="ok">✓</span> key <span class="mono">89 420 07</span> free in current state<br>
+          <span class="ok">✓</span> required fields present<br>
+          <span style="color:var(--rep)">⚠</span> tel format differs from printed convention — confirm
+        </div>
+      </div>
+      <div class="panel">
+        <p class="eyebrow" style="color:var(--mut)">Batch · edition № 1344</p>
+        <ul class="queue">
+          <li><span class="b add">ADD</span> <span class="mono">89 420 07</span> Northwestel Inc.</li>
+          <li><span class="b lir">LIR</span> <span class="mono">89 93 01</span> AWCC</li>
+          <li><span class="b sup">SUP</span> <span class="mono">89 68 02</span> withdrawn</li>
+        </ul>
+        <p class="note">3 actions · 1 register · validated against Rec. E.118 (2006-05).
+        Committing publishes the batch as edition № 1344.</p>
+        <p style="margin-top:.8rem"><button style="font:inherit;font-weight:700;background:var(--itu);
+          color:#fff;border:0;border-radius:4px;padding:.55rem .9rem;cursor:pointer">Commit batch →</button></p>
+        <p class="note">Migration path: the Electron editor’s models (datasets · issues ·
+        publications · recommendations) map one-to-one; keyed registers move from
+        table-editing to action-composition, freeform messages keep their rich-text surface.</p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div class="foot">IA mockup · ITU Operational Bulletin — register ledger · data from the normalized
+corpus (editions № 955–1343) · counts are real; detail rows are sampled real entries ·
+ITU Operational Bulletin online</div>
+
+<script>
+  const tabs = document.querySelectorAll('.tabs [role=tab]');
+  function show(v){
+    tabs.forEach(b => b.setAttribute('aria-selected', String(b.dataset.v === v)));
+    document.querySelectorAll('.view').forEach(s => s.classList.toggle('on', s.id === 'v-' + v));
+    window.scrollTo({top: 0});
+  }
+  tabs.forEach(b => b.addEventListener('click', () => show(b.dataset.v)));
+</script>
+</body>
+</html>
