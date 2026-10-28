@@ -126,11 +126,8 @@ const speculationJson = JSON.stringify({
       breadcrumbs={[{ label: "Registers", href: "/registers/" }, { label: title }]}>
   <style>
     .reg { --pg-paper: #fff; --pg-ink: #0C3D52; --pg-muted: #5B7285; --pg-subtle: #6E8899;
-      --pg-line: #D8E4EA; --pg-mist: #F2F7F9; --pg-accent: #1285B1; color: var(--pg-ink); }
-    @media (prefers-color-scheme: dark) {
-      .reg { --pg-paper: #0E1D26; --pg-ink: #E8F2F7; --pg-muted: #9FB8C6; --pg-subtle: #6E8899;
-        --pg-line: #23404E; --pg-mist: #132530; --pg-accent: #35B4E4; }
-    }
+      --pg-line: #D8E4EA; --pg-mist: #F2F7F9; --pg-accent: #1285B1; color: var(--pg-ink);
+      background: var(--pg-paper); }
     .reg-head { position: relative; padding: 1.7rem 0 1.1rem; border-bottom: 1px solid var(--pg-line); }
     .reg-eyebrow { font-family: var(--font-sans); font-size: var(--step--1); font-weight: 600;
       letter-spacing: 0.1em; text-transform: uppercase; color: var(--pg-accent); }

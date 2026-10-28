@@ -3,17 +3,51 @@ import Base from "~/layouts/Base.astro";
 import { buildRecommendationIndex } from "~/lib/loaders";
 
 const idx = buildRecommendationIndex();
-const recs = [...idx.values()].sort((a, b) => {
-  // Sort by Recommendation series then number.
-  const pa = a.code.match(/^([A-Z])(?:\.(\d+))?/);
-  const pb = b.code.match(/^([A-Z])(?:\.(\d+))?/);
-  if (!pa || !pb) return a.code.localeCompare(b.code);
-  if (pa[1] !== pb[1]) return pa[1]!.localeCompare(pb[1]!);
-  return Number.parseFloat(pa[2] ?? "0") - Number.parseFloat(pb[2] ?? "0");
-});
+
+// ITU-T series letters and their standard subjects.
+const SERIES_LABELS: Record<string, string> = {
+  A: "Work of the ITU-T",
+  D: "Tariff and accounting principles",
+  E: "Network operations, numbering and quality of service",
+  F: "Non-telephone telecommunication services",
+  G: "Transmission systems and media",
+  H: "Audiovisual and multimedia systems",
+  I: "Integrated services digital network",
+  J: "Cable networks and transmission of television",
+  L: "Environment and ICTs, climate change",
+  M: "Network management",
+  N: "Maintenance",
+  O: "Measurement equipment specifications",
+  P: "Transmission performance of telephone networks",
+  Q: "Switching and signalling",
+  R: "Telegraph transmission",
+  S: "Telegraph apparatus terminal equipment",
+  T: "Terminals for telematic services",
+  U: "Telegraph operation",
+  V: "Data communication over the telephone network",
+  X: "Data networks and open system communications",
+  Z: "Languages and general software aspects",
+};
+
+interface Rec {
+  code: string;
+  count: number;
+}
+const bySeries = new Map<string, Rec[]>();
+for (const r of idx.values()) {
+  const series = r.code.match(/^([A-Z])/)?.[1] ?? "?";
+  const arr = bySeries.get(series) ?? [];
+  arr.push({ code: r.code, count: r.issueIds.length });
+  bySeries.set(series, arr);
+}
+const seriesList = [...bySeries.keys()]
+  .filter((s) => s !== "?")
+  .sort((a, b) => (bySeries.get(b)!.length - bySeries.get(a)!.length) || a.localeCompare(b));
+const unknown = bySeries.get("?") ?? [];
+const totalCount = idx.size;
 ---
-<Base breadcrumbs={[{ label: "Recommendations" }]} title="ITU-T Recommendations" description="All ITU-T Recommendations referenced by the ITU Operational Bulletin.">
-  <header class="mb-10">
+<Base breadcrumbs={[{ label: "Recommendations" }]} title="ITU-T Recommendations" description="All ITU-T Recommendations referenced by the ITU Operational Bulletin, grouped by series.">
+  <header class="mb-8">
     <p class="uppercase font-semibold" style="font-family: var(--font-sans); font-size: var(--step--1); letter-spacing: 0.1em; color: var(--accent);">
       References
     </p>
@@ -21,30 +55,79 @@ const recs = [...idx.values()].sort((a, b) => {
       ITU-T Recommendations
     </h1>
     <p class="mt-2 text-[var(--step-0)]" style="color: var(--fg-muted);">
-      {recs.length} Recommendations referenced across all issues of the Bulletin.
+      {totalCount} Recommendations referenced across all issues of the Bulletin,
+      grouped into {seriesList.length} series. Within a series, the Recommendations
+      referenced by the most issues come first.
     </p>
+    <div class="mt-4" style="max-width: 32rem;">
+      <input id="rec-find" type="search" autocomplete="off" aria-label="Find a Recommendation"
+             placeholder={`Find a Recommendation — code or fragment`}
+             style="width: 100%; font: inherit; font-size: var(--step-0); padding: 0.5rem 0.9rem;
+                    border: 1px solid var(--line); border-radius: 999px; background: var(--bg, #fff);" />
+    </div>
   </header>
 
-  <div class="overflow-x-auto">
-    <table class="table-bulletin">
-      <thead>
-        <tr>
-          <th>Recommendation</th>
-          <th class="num">Issues</th>
-        </tr>
-      </thead>
-      <tbody>
-        {recs.map((r) => (
-          <tr>
-            <td>
-              <a href={`/recommendations/${encodeURIComponent(r.code)}/`} class="no-underline hover:underline font-semibold num">
-                ITU-T {r.code}
-              </a>
-            </td>
-            <td class="num">{r.issueIds.length}</td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
+  <div class="space-y-3" id="rec-series">
+    {seriesList.map((series) => {
+      const recs = (bySeries.get(series) ?? [])
+        .slice()
+        .sort((a, b) => (b.count - a.count) || a.code.localeCompare(b.code));
+      const label = SERIES_LABELS[series] ?? "";
+      return (
+        <details class="panel p-4" data-series={series} open={recs.length <= 40}>
+          <summary class="cursor-pointer flex items-baseline gap-3 flex-wrap" style="font-family: var(--font-display);">
+            <span class="num font-semibold text-[var(--step-1)]" style="color: var(--accent);">Series {series}</span>
+            {label && <span class="text-[var(--step--1)]" style="color: var(--fg-muted);">{label}</span>}
+            <span class="text-[var(--step--1)] num" style="color: var(--fg-subtle);">{recs.length}</span>
+          </summary>
+          <ul class="mt-3 divide-y" style="list-style: none; padding: 0; font-family: var(--font-sans);">
+            {recs.map((r) => (
+              <li class="flex items-baseline justify-between gap-3 py-1.5" data-rec={r.code.toLowerCase()}>
+                <a href={`/recommendations/${encodeURIComponent(r.code)}/`}
+                   class="no-underline hover:underline num">
+                  ITU-T {r.code}
+                </a>
+                <span class="text-[var(--step--1)] num" style="color: var(--fg-muted);">
+                  {r.count === 1 ? "1 issue" : `${r.count} issues`}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </details>
+      );
+    })}
+    {unknown.length > 0 && (
+      <details class="panel p-4">
+        <summary class="cursor-pointer" style="font-family: var(--font-sans);">
+          Other referenced documents ({unknown.length})
+        </summary>
+        <ul class="mt-3" style="list-style: none; padding: 0; font-family: var(--font-sans);">
+          {unknown.map((r) => (
+            <li class="py-1"><a href={`/recommendations/${encodeURIComponent(r.code)}/`}>{r.code}</a></li>
+          ))}
+        </ul>
+      </details>
+    )}
   </div>
+
+  <script is:inline>
+    (function () {
+      var find = document.getElementById("rec-find");
+      if (!find) return;
+      find.addEventListener("input", function () {
+        var q = find.value.trim().toLowerCase();
+        var sections = document.querySelectorAll("#rec-series details");
+        for (var i = 0; i < sections.length; i++) {
+          var rows = sections[i].querySelectorAll("li[data-rec]");
+          var any = false;
+          for (var j = 0; j < rows.length; j++) {
+            var hit = !q || rows[j].getAttribute("data-rec").indexOf(q) !== -1;
+            rows[j].style.display = hit ? "" : "none";
+            if (hit) any = true;
+          }
+          if (q) sections[i].open = any;
+        }
+      });
+    })();
+  </script>
 </Base>
