@@ -30,8 +30,8 @@ const titleJson = JSON.stringify(title);
       Entry
     </p>
     <h2 class="text-[var(--step-4)] mt-1"
-        style="font-family: var(--font-display); font-weight: 700; line-height: 1.1;">
-      <span class="font-mono" id="entry-key-heading">{title}</span>
+        style="font-family: var(--font-display); font-weight: 700; line-height: 1.1; min-height: 1.3em;">
+      <span class="font-mono" id="entry-key-heading">Entry</span>
     </h2>
     <p class="mt-2 text-[var(--step--1)]" style="color: var(--fg-muted); font-family: var(--font-sans);">
       One entry of <a href={`/registers/${slug}/`}>{title}</a>, with the changes the
@@ -71,6 +71,7 @@ const titleJson = JSON.stringify(title);
           var heading = document.getElementById("entry-key-heading");
           heading.textContent = key;
           document.title = key + " · " + title + " — ITU Operational Bulletin online";
+          document.getElementById("entry-key-heading").textContent = key;
           var html = "";
           if (!found) {
             html += '<p class="panel p-4" style="font-family: var(--font-sans);">The register carries no entry under this key in its current edition. ' +

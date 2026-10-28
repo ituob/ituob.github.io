@@ -1,26 +1,20 @@
 ---
 /**
- * Register detail page — shows the replayed register current state
- * with timeline scrubber and change-history link.
+ * Register page — the current edition of a register.
  *
- * Registers without snapshots (external publications like NNP, List V,
- * List VIII) show a list of OB issues that contain amendments
- * referencing this register, plus a link to the authoritative source.
+ * 2026 redesign: the reader's verbs are "find an entry" and "see what
+ * changed when". The page leads with a find bar over a compact,
+ * citable entries table (the first 50 rows server-rendered, the rest
+ * expand client-side from entries.json), a glass Edition Dock that
+ * links every edition of the register, and a summarized change rail.
+ * The full amendment log lives on the history page, not inline here.
  */
 import Base from "~/layouts/Base.astro";
-import {
-  listSnapshotSlugs,
-  loadManifest,
-  loadCurrentState,
-} from "~/lib/snapshots";
+import { listSnapshotSlugs, loadManifest, loadCurrentState } from "~/lib/snapshots";
 import { loadRegisterCatalog, listIssueIds, loadIssue, loadListMetadata, lastAnnexBefore } from "~/lib/loaders";
 import { obIssuesRoot, readYamlOrNull, join } from "~/lib/fs";
-import { formatSwissDate } from "~/lib/format";
-import TimelineScrubber from "~/components/TimelineScrubber.astro";
-import RegisterYearArchive from "~/components/RegisterYearArchive.astro";
-import RegisterHistory from "~/components/RegisterHistory.astro";
-import IssueArchive from "~/components/IssueArchive.astro";
-import RegisterTable from "~/components/RegisterTable.astro";
+import { formatShortDate } from "~/lib/format";
+import { formatCellValue } from "~/lib/values";
 import TextualAmendment from "~/components/TextualAmendment.astro";
 import StructuredAmendment from "~/components/StructuredAmendment.astro";
 import type { TextAmendment, PlaceholderAmendment, SequencedAmendment } from "~/lib/types";
@@ -42,10 +36,6 @@ const catalogEntry = loadRegisterCatalog().find((r) => r.slug === slug);
 
 const isExternal = !manifest || !state;
 
-// Replay skips are almost all "skip LIR <position>": LIR amendment
-// patches record a printed-table position rather than an entry key, so
-// the replay cannot match them. The current list is unaffected — report
-// them plainly instead of alarming readers with "errors".
 const errorSummary = (() => {
   if (!state || state.error_count === 0) return null;
   const errs = (state.errors as string[]) ?? [];
@@ -53,19 +43,19 @@ const errorSummary = (() => {
   const dup = errs.filter((e) => e.includes("already exists")).length;
   const other = state.error_count - lir - dup;
   const parts: string[] = [];
-  if (lir > 0) parts.push(`${lir} unmatched LIR repeats`);
-  if (dup > 0) parts.push(`${dup} skipped duplicate entries`);
-  if (other > 0) parts.push(`${other} replay errors`);
+  const n = (count: number, singular: string, plural: string) => `${count} ${count === 1 ? singular : plural}`;
+  if (lir > 0) parts.push(n(lir, "unmatched repetition", "unmatched repetitions"));
+  if (dup > 0) parts.push(n(dup, "skipped duplicate entry", "skipped duplicate entries"));
+  if (other > 0) parts.push(n(other, "unapplied change", "unapplied changes"));
   return parts.join(" + ");
 })();
+
 const title = isExternal
   ? (catalogEntry?.title?.en ?? catalogEntry?.register_id ?? slug)
   : (manifest.title.en ?? manifest.slug);
 const recommendation = isExternal
   ? (catalogEntry?.recommendation ?? "")
   : (manifest.recommendation ?? manifest.register_id.replace(/_.*$/, ""));
-// Printed recommendation version ("F.32 (1995-10)") from the per-list
-// metadata, mirroring the deployed "In accordance with" line.
 const recommendationVersion = (() => {
   const pubId = catalogEntry?.register_id ?? manifest?.register_id ?? slug;
   return loadListMetadata(pubId)?.recommendation?.version ?? "";
@@ -74,265 +64,436 @@ const description = isExternal
   ? `${title} — external register.`
   : `${title} register — the current edition. ${state.entry_count} active entries.`;
 
-// For external/textual registers, find issues that contain amendments
-// referencing this register's publication ID.
+const keyField = manifest?.key_field ?? "";
+const keyOf = (entry: Record<string, unknown>): string => {
+  if (Array.isArray(keyField)) {
+    return keyField.map((f) => (entry[f] == null ? "" : String(entry[f]))).join(" | ");
+  }
+  const v = entry[keyField];
+  return v == null ? "" : String(v);
+};
+
+const entryCount = state?.entry_count ?? 0;
+const changeCount = state ? state.history.filter((h) => h.type !== "SEED").length : 0;
+const touched = manifest?.touched_issues ?? [];
+const latestIssue = touched.length ? Math.max(...touched) : null;
+const INITIAL_ROWS = 50;
+const visibleEntries = state ? state.active_entries.slice(0, INITIAL_ROWS) : [];
+
+const chipData = touched
+  .slice()
+  .sort((a, b) => a - b)
+  .map((n) => {
+    const issue = loadIssue(n);
+    const date = issue?.meta?.publication_date;
+    return { n, date: date ? formatShortDate(date) : "" };
+  });
+
+const latestDate = (() => {
+  if (!latestIssue) return "";
+  const issue = loadIssue(latestIssue);
+  return issue?.meta?.publication_date ? formatShortDate(issue.meta.publication_date) : "";
+})();
+
+const lastChanges = state
+  ? state.history
+      .filter((h) => h.type !== "SEED")
+      .slice(-10)
+      .reverse()
+  : [];
+
+// For external/textual registers: issues that amend this publication.
 interface AmendingIssue {
   id: number;
   date: string | null;
-  preview: string;
   textualAmendment: TextAmendment | null;
   placeholderAmendment: PlaceholderAmendment | null;
   structuredAmendments: SequencedAmendment[];
 }
 const amendingIssues: AmendingIssue[] = [];
 if (isExternal) {
-  const pubIdBySlug = new Map<string, string>();
-  for (const r of loadRegisterCatalog()) {
-    pubIdBySlug.set(r.slug, r.register_id);
-  }
-
   for (const id of listIssueIds()) {
     const issue = loadIssue(id);
-    const issueDate = issue?.meta?.publication_date ?? null;
     if (!issue) continue;
-
-    // Prefer the issue loader's parsed amendment; fall back to direct
-    // text.yaml read for registers where the loader's slug mapping
-    // misses.
     const textual = issue.amendments.textual[slug!] ?? null;
     const placeholder = issue.amendments.placeholder[slug!] ?? null;
     const structured = issue.amendments.structured[slug!] ?? [];
-
     let textAmendment = textual;
     if (!textAmendment) {
       const textPath = join(obIssuesRoot(), String(id), slug!, "text.yaml");
       const textData = readYamlOrNull<TextAmendment>(textPath);
       if (textData && textData.contents) textAmendment = textData;
     }
-
     if (textAmendment || placeholder || structured.length > 0) {
-      let preview = "";
-      if (textAmendment?.contents) {
-        const doc = (textAmendment.contents as any).en ?? textAmendment.contents;
-        const parts: string[] = [];
-        const walk = (node: any) => {
-          if (!node) return;
-          if (node.type === "text" && typeof node.text === "string") {
-            parts.push(node.text);
-          }
-          if (Array.isArray(node.content)) {
-            node.content.forEach((c: any) => walk(c));
-          }
-        };
-        walk(doc);
-        preview = parts.join(" ").trim().slice(0, 300);
-      }
-      amendingIssues.push({
-        id,
-        date: issueDate,
-        preview,
-        textualAmendment: textAmendment,
-        placeholderAmendment: placeholder,
-        structuredAmendments: structured,
-      });
+      amendingIssues.push({ id, date: issue?.meta?.publication_date ?? null, textualAmendment: textAmendment, placeholderAmendment: placeholder, structuredAmendments: structured });
     }
   }
 }
+
+const unionKeys = new Set<string>();
+if (state) for (const e of state.active_entries) for (const k of Object.keys(e)) { if (k !== "_class" && k !== "source_contents") unionKeys.add(k); }
+const keyCols = Array.isArray(keyField) ? keyField : [keyField];
+const DISPLAY_PRIORITY = ["country_or_area", "company_name", "applicant", "network", "operator", "signal_point_name", "station", "description", "contact"];
+const displayCols: string[] = [];
+for (const c of DISPLAY_PRIORITY) if (unionKeys.has(c) && !keyCols.includes(c) && displayCols.length < 3) displayCols.push(c);
+for (const c of [...unionKeys].sort()) { if (displayCols.length >= 3) break; if (!keyCols.includes(c) && !displayCols.includes(c)) displayCols.push(c); }
+const searchOf = (entry: Record<string, unknown>): string =>
+  [keyOf(entry), ...displayCols.map((c) => entry[c])]
+    .map((v) => (v && typeof v === "object" ? Object.values(v as Record<string, unknown>).map(String).join(" ") : String(v ?? "")))
+    .join(" ")
+    .toLowerCase();
+
+const seedIssue = manifest?.seed_issue ?? null;
+const slugJson = JSON.stringify(slug);
+const keyFieldJson = JSON.stringify(keyField);
+const displayColsJson = JSON.stringify(displayCols);
+const searchJson = JSON.stringify(visibleEntries.map(searchOf));
+const initialRowsJson = JSON.stringify(INITIAL_ROWS);
+const entryCountJson = JSON.stringify(entryCount);
+
 ---
-<Base title={`Register: ${title}`} masthead wide description={description}>
-  <section class="rule-thin pt-6 pb-6">
-    <p class="uppercase font-semibold text-[var(--step--1)]"
-       style="font-family: var(--font-sans); letter-spacing: 0.1em; color: var(--accent);">
+<Base title={`Register: ${title}`} description={description} masthead wide
+      breadcrumbs={[{ label: "Registers", href: "/registers/" }, { label: title }]}>
+  <style>
+    .reg-head { padding: 1.5rem 0 1rem; border-bottom: 1px solid var(--line); }
+    .reg-eyebrow { font-family: var(--font-sans); font-size: var(--step--1); font-weight: 600;
+      letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); }
+    .reg-title { font-family: var(--font-display); font-weight: 700; font-size: var(--step-4);
+      line-height: 1.12; margin: 0.2rem 0 0.4rem; text-wrap: balance; }
+    .reg-meta { font-family: var(--font-sans); font-size: var(--step--1); color: var(--fg-muted); margin: 0.15rem 0; }
+    .reg-grid { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 1.5rem; margin-top: 1.25rem; }
+    @media (max-width: 900px) { .reg-grid { grid-template-columns: 1fr; } }
+
+    /* Edition Dock — the one glass surface on the page */
+    .dock { position: sticky; top: 4.6rem; z-index: 30;
+      display: flex; align-items: center; gap: 0.6rem;
+      padding: 0.5rem 0.7rem; margin: 1rem 0 1.1rem;
+      border-radius: 1.15rem;
+      background: color-mix(in oklab, #ffffff 62%, var(--mist));
+      -webkit-backdrop-filter: blur(18px) saturate(1.6);
+      backdrop-filter: blur(18px) saturate(1.6);
+      border: 1px solid color-mix(in oklab, #ffffff 60%, var(--line));
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.7), inset 0 -1px 0 rgba(12,61,82,.07), 0 10px 26px rgba(12,61,82,.12); }
+    .dock-label { font-family: var(--font-sans); font-size: var(--step--2); font-weight: 700;
+      letter-spacing: 0.09em; text-transform: uppercase; color: var(--fg-muted); flex-shrink: 0; }
+    .dock-chips { display: flex; gap: 0.3rem; overflow-x: auto; scroll-snap-type: x proximity;
+      scrollbar-width: thin; padding: 0.1rem; margin: 0; list-style: none; }
+    .dock-chip { scroll-snap-align: end; flex-shrink: 0; display: inline-flex; flex-direction: column;
+      align-items: flex-start; line-height: 1.15; padding: 0.22rem 0.55rem; border-radius: 0.65rem;
+      border: 1px solid var(--line); background: var(--paper); text-decoration: none;
+      font-family: var(--font-mono); font-size: var(--step--2); }
+    .dock-chip:hover { border-color: var(--accent); }
+    .dock-chip .d { font-family: var(--font-sans); font-size: 0.62rem; color: var(--fg-subtle); }
+    .dock-chip[aria-current="true"] { border-color: var(--accent); background: var(--accent);
+      box-shadow: 0 2px 10px rgba(26,161,218,.35); }
+    .dock-chip[aria-current="true"] .d { color: rgba(255,255,255,.85); }
+    .dock-now { margin-left: auto; flex-shrink: 0; text-align: right; font-family: var(--font-sans);
+      font-size: var(--step--2); color: var(--fg-muted); }
+    .dock-now b { display: block; color: var(--ink); font-size: var(--step--1); }
+    @media (prefers-reduced-transparency: reduce), (prefers-reduced-motion: reduce) {
+      .dock { background: var(--mist); -webkit-backdrop-filter: none; backdrop-filter: none; }
+    }
+    @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+      .dock { background: var(--mist); }
+    }
+
+    .find { display: flex; align-items: center; gap: 0.6rem; margin: 0 0 0.7rem; flex-wrap: wrap; }
+    .find input { flex: 1; min-width: 16rem; font: inherit; font-size: var(--step-0);
+      padding: 0.5rem 0.8rem; border: 1px solid var(--line); border-radius: 999px; background: var(--paper); }
+    .find input:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+    .find .count { font-family: var(--font-sans); font-size: var(--step--1); color: var(--fg-muted); }
+    .btn-all { font: inherit; font-size: var(--step--1); font-weight: 600; cursor: pointer;
+      border: 1px solid var(--accent); color: var(--accent); background: var(--paper);
+      border-radius: 999px; padding: 0.35rem 0.8rem; }
+    .btn-all:hover { background: var(--accent); color: #fff; }
+
+    table.entries { font-family: var(--font-sans); }
+    table.entries th, table.entries td { padding: 0.4rem 0.6rem; text-align: left; vertical-align: top; }
+    table.entries thead th { border-bottom: 2px solid var(--ink); font-size: var(--step--2);
+      text-transform: uppercase; letter-spacing: 0.06em; color: var(--fg-muted);
+      cursor: pointer; user-select: none; white-space: nowrap; }
+    table.entries thead th:hover { color: var(--accent); }
+    table.entries tbody tr { content-visibility: auto; contain-intrinsic-size: auto 2.6rem; }
+    table.entries tbody tr:hover td { background: color-mix(in oklab, var(--accent) 5%, var(--paper)); }
+    td.num, th.num { font-family: var(--font-mono); white-space: nowrap; }
+
+    .change-rail { font-family: var(--font-sans); font-size: var(--step--1); }
+    .change-rail ul { list-style: none; margin: 0.4rem 0 0; padding: 0; }
+    .change-rail li { display: flex; gap: 0.5rem; align-items: baseline; padding: 0.32rem 0;
+      border-bottom: 1px solid var(--line); }
+    .badge { font-family: var(--font-mono); font-weight: 700; font-size: var(--step--2);
+      padding: 0.12rem 0.35rem; border-radius: 0.3rem; color: #fff; flex-shrink: 0; }
+    .badge.ADD { background: #18855C; } .badge.SUP { background: #DF314E; }
+    .badge.REP { background: #B7791F; } .badge.LIR { background: #5B7285; }
+    .badge.MOD { background: #6B46C1; } .badge.DEL { background: #5B7285; }
+    .panel { background: var(--mist); border: 1px solid var(--line); border-radius: 0.9rem;
+      padding: 1rem 1.1rem; }
+    @media print { .dock, .find { display: none !important; } }
+  </style>
+
+  <section class="reg-head">
+    <p class="reg-eyebrow">
       Register
-      {recommendation && ` · Recommendation ITU-T ${recommendation}`}
+      {recommendation && (
+        <> · <a href={`/recommendations/${recommendation}/`}>Recommendation ITU-T {recommendation}{recommendationVersion && ` (${recommendationVersion})`}</a></>
+      )}
     </p>
-    <p class="text-[var(--step--1)] mt-1" style="font-family: var(--font-sans); color: var(--fg-muted);">
-      In accordance with ITU-T Recommendation {recommendation}
-      {recommendationVersion && ` (${recommendationVersion})`}
-    </p>
-    <h2 class="text-[var(--step-4)] mt-1"
-        style="font-family: var(--font-display); font-weight: 700; line-height: 1.1;">
-      {title}
-    </h2>
+    <h2 class="reg-title">{title}</h2>
     {!isExternal && manifest?.seed_issue && (
-      <p class="text-[var(--step--1)] mt-1" style="font-family: var(--font-sans); color: var(--fg-muted);">
-        Annexed to{" "}
-        <a href={`/issues/${manifest.seed_issue}/`} class="no-underline hover:underline">
-          ITU OB No. {manifest.seed_issue}
-        </a>
+      <p class="reg-meta">
+        Annexed to <a href={`/issues/${manifest.seed_issue}/`}>ITU OB No. {manifest.seed_issue}</a>
         {(() => {
-          // Most-recent position_on date up to the latest issue.
-          // Mirrors the deployed "Position on X" line.
           const ids = listIssueIds();
           const latest = ids.length > 0 ? ids[ids.length - 1]! : 0;
           const pubId = (catalogEntry as any)?.register_id ?? slug;
           const ref = lastAnnexBefore(latest, pubId);
-          return ref?.positionOn ? (
-            <>
-              {" "}· Position on {formatSwissDate(ref.positionOn)}
-            </>
-          ) : null;
+          return ref?.positionOn ? <> · Position on {formatShortDate(ref.positionOn)}</> : null;
         })()}
       </p>
     )}
     {!isExternal && (
-      <p class="mt-2 text-[var(--step--1)]" style="color: var(--fg-muted); font-family: var(--font-sans);">
-        {state.entry_count} active entries
-        {state.lapsed_count > 0 && ` · ${state.lapsed_count} lapsed`}
-        {state.deleted_count > 0 && ` · ${state.deleted_count} deleted`}
-        {errorSummary && ` · ${errorSummary}`}
-        · the current edition of this register, after the latest issue
-        {state.history.filter(p => p.type !== "SEED").length > 0 && (
-          <> · Amended {state.history.filter(p => p.type !== "SEED").length} time{state.history.filter(p => p.type !== "SEED").length !== 1 ? "s" : ""} in subsequent issues</>
-        )}
+      <p class="reg-meta">
+        The current edition of this register — <strong class="num">{entryCount}</strong> entries —
+        follows <a href={`/issues/${latestIssue}/`}>issue № {latestIssue}</a>
+        {latestDate && <> ({latestDate})</>}, with {changeCount} changes across {touched.length} issues.
+        {errorSummary && <> Unapplied at replay: {errorSummary}.</>}
       </p>
     )}
-    {isExternal && (
-      (() => {
-        const pubId = (catalogEntry as any)?.register_id ?? slug;
-        const ids = listIssueIds();
-        const latest = ids.length > 0 ? ids[ids.length - 1]! : 0;
-        const ref = lastAnnexBefore(latest, pubId);
-        const annexIssue: number | null = ref?.issueId ?? null;
-        const lastPos: string | null = ref?.positionOn ?? null;
-        return (annexIssue || amendingIssues.length > 0) ? (
-          <p class="mt-2 text-[var(--step--1)]" style="color: var(--fg-muted); font-family: var(--font-sans);">
-            {annexIssue && (
-              <>
-                Annexed to <a href={`/issues/${annexIssue}/`} class="no-underline hover:underline">ITU OB No. {annexIssue}</a>
-              </>
-            )}
-            {lastPos && ` · Position on ${formatSwissDate(lastPos)}`}
-            {amendingIssues.length > 0 && (
-              <>
-                {" "}· Amended {amendingIssues.length} time{amendingIssues.length !== 1 ? "s" : ""} in subsequent editions
-                {" "}· Referenced in {amendingIssues.length} issue{amendingIssues.length !== 1 ? "s" : ""} of the Bulletin.
-              </>
-            )}
-          </p>
-        ) : null;
-      })()
-    )}
-    {/* Authoritative resource link from the per-list meta.yaml. */}
     {(() => {
       const pubId = (catalogEntry as any)?.register_id ?? slug;
       const listMeta = loadListMetadata(pubId);
       const url = (catalogEntry as any)?.url ?? (listMeta as any)?.url;
       return url ? (
-        <p class="mt-2 text-[var(--step--1)]" style="font-family: var(--font-sans);">
-          <a href={url} class="tint" rel="noopener noreferrer">Authoritative resource ↗</a>
-        </p>
+        <p class="reg-meta"><a href={url} rel="noopener noreferrer">Authoritative resource ↗</a></p>
       ) : null;
     })()}
   </section>
-
-  {/* Year-archive navigation — mirrors the deployed Jekyll layout:
-      "Showing data for X. Browse previous years: 2022 2021 ..." */}
-<RegisterYearArchive
-    slug={slug!}
-    isExternal={isExternal}
-    touchedIssues={manifest?.touched_issues ?? []}
-    amendingIssueIds={amendingIssues.map((a) => a.id)}
-  />
 
   {isExternal ? (
     <>
       {amendingIssues.length > 0 ? (
         <section>
-          <header class="section-header" style="margin-bottom: 1.5rem;">
-            <h3 style="font-size: var(--step-3); font-weight: 800; margin: 0;">
-              Issues amending this register
-            </h3>
-          </header>
-          <div class="sr-only">Date / Amendment</div>
-          <ul class="space-y-3" style="font-family: var(--font-sans); list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.75rem;">
+          <h3 class="text-[var(--step-2)] mb-3" style="font-family: var(--font-display); font-weight: 600;">
+            Issues amending this register
+          </h3>
+          <ul class="space-y-3" style="font-family: var(--font-sans); list-style: none; padding: 0;">
             {amendingIssues.sort((a, b) => b.id - a.id).map((item) => (
-              <li class="panel surface-hover" style="padding: 1rem 1.25rem;">
-                <h3 class="text-[var(--step-0)] flex items-baseline gap-3 flex-wrap m-0">
-                  <span style="font-family: var(--font-display); font-weight: 600;">
-                    Amd.
-                  </span>
-                  <a href={`/issues/${item.id}/`} class="no-underline hover:underline">
-                    OB no. <span class="num">{item.id}</span>
-                  </a>
+              <li class="panel" style="padding: 1rem 1.25rem;">
+                <h3 class="text-[var(--step-0)] m-0">
+                  <a href={`/issues/${item.id}/`}>OB no. <span class="num">{item.id}</span></a>
+                  {item.date && <span class="ml-2" style="color: var(--fg-muted);">{formatShortDate(item.date)}</span>}
                 </h3>
-                {item.date && (
-                  <p class="mt-1 text-[var(--step--1)]" style="color: var(--fg-muted);">
-                    {formatSwissDate(item.date)}
-                  </p>
-                )}
-                {/* Render full amendment content from the issue payload,
-                    matching the deployed Jekyll layout. */}
-                {item.textualAmendment && (
-                  <div class="mt-3 prose-bulletin measure">
-                    <TextualAmendment amendment={item.textualAmendment} />
-                  </div>
-                )}
-                {item.placeholderAmendment && (
-                  <div class="mt-3">
-                    <TextualAmendment placeholder={item.placeholderAmendment} />
-                  </div>
-                )}
-                {item.structuredAmendments.length > 0 && (
-                  <div class="mt-3">
-                    <StructuredAmendment amendments={item.structuredAmendments} />
-                  </div>
-                )}
+                {item.textualAmendment && <div class="mt-3 prose-bulletin measure"><TextualAmendment amendment={item.textualAmendment} /></div>}
+                {item.placeholderAmendment && <div class="mt-3"><TextualAmendment placeholder={item.placeholderAmendment} /></div>}
+                {item.structuredAmendments.length > 0 && <div class="mt-3"><StructuredAmendment amendments={item.structuredAmendments} /></div>}
               </li>
             ))}
           </ul>
         </section>
       ) : (
         <section class="panel p-6">
-          <p style="font-family: var(--font-sans); color: var(--fg);">
-            This register has not been referenced in any Operational Bulletin issue in our records.
-          </p>
+          <p style="font-family: var(--font-sans);">This register is a textual publication. It has no keyed
+          entries; the complete document renders from the corpus.</p>
         </section>
       )}
       {recommendation && (
         <p class="mt-4" style="font-family: var(--font-sans);">
-          <a href={`/recommendations/${recommendation}/`} class="tint">
-            → See Recommendation ITU-T {recommendation}
-          </a>
+          <a href={`/recommendations/${recommendation}/`}>→ Recommendation ITU-T {recommendation}</a>
         </p>
       )}
     </>
   ) : (
     <>
-      <TimelineScrubber
-        slug={slug!}
-        touchedIssues={manifest.touched_issues}
-        currentIssue={Math.max(...manifest.touched_issues)}
-        seedIssue={manifest.seed_issue}
-      />
+      <nav class="dock" aria-label="Editions of this register">
+        <span class="dock-label">Editions</span>
+        <ol class="dock-chips" id="dock-chips">
+          {chipData.map(({ n, date }) => (
+            <li>
+              <a class="dock-chip" href={`/registers/${slug}/at/${n}/`}
+                 aria-current={n === latestIssue ? "true" : undefined}
+                 title={n === seedIssue ? `Founded by issue № ${n}` : `As of issue № ${n}`}>
+                № {n}{date && <span class="d">{date}</span>}
+              </a>
+            </li>
+          ))}
+        </ol>
+        <span class="dock-now"><b>№ {latestIssue}</b>current edition</span>
+      </nav>
 
-      <p class="mb-4 text-[var(--step--1)]">
-        <a href={`/registers/${slug}/history/`} class="no-underline hover:underline" style="color: var(--accent);">
-          → View full change history ({state.history.length} patches)
-        </a>
-      </p>
+      <div class="reg-grid">
+        <section>
+          <div class="find">
+            <input id="find" type="text" aria-label="Find an entry"
+                   placeholder={`Find in ${entryCount} entries — number, country, company…`} />
+            <span class="count num" id="find-count" aria-live="polite">{entryCount} entries</span>
+            <button class="btn-all" id="show-all" hidden>Show all {entryCount}</button>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="entries">
+              <thead><tr>
+                <th class="num" data-sort="text">Number</th>
+                {displayCols.map((c) => <th data-sort="text">{c.replace(/_/g, " ")}</th>)}
+              </tr></thead>
+              <tbody id="entries-body">
+                {visibleEntries.map((entry, i) => (
+                  <tr data-search={searchJson[i]}>
+                    <td class="num">
+                      <a href={`/registers/${slug}/entries/${encodeURIComponent(keyOf(entry))}/`}
+                         class="no-underline hover:underline">{formatCellValue(entry[keyCols[0]])}</a>
+                    </td>
+                    {displayCols.map((c) => <td>{formatCellValue(entry[c])}</td>)}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <p class="note" style="font-family: var(--font-sans); font-size: var(--step--1); color: var(--fg-muted);">
+            Every number links to its own page, so an entry can be cited.
+            {latestIssue && <> The current edition follows issue № {latestIssue}; earlier editions are in the dock above.</>}
+          </p>
+        </section>
 
-      {/* Issue cross-reference archive for parity */}
-      <IssueArchive />
+        <aside class="change-rail">
+          <div class="panel">
+            <h3 class="m-0" style="font-family: var(--font-display); font-size: var(--step-1); font-weight: 600;">
+              Latest changes
+            </h3>
+            <ul>
+              {lastChanges.map((h) => (
+                <li>
+                  <span class={`badge ${h.type}`}>{h.type}</span>
+                  <span>
+                    {h.ob_issue
+                      ? <a href={`/issues/${h.ob_issue}/`}>issue № {h.ob_issue}</a>
+                      : "seed publication"}
+                    {h.identifier?.code != null && <span class="font-mono"> · {String(h.identifier.code).slice(0, 24)}</span>}
+                  </span>
+                </li>
+              ))}
+            </ul>
+            <p style="margin: 0.6rem 0 0;">
+              <a href={`/registers/${slug}/history/`}>All {changeCount} changes →</a>
+            </p>
+          </div>
+        </aside>
+      </div>
 
-      <section>
-        <header class="rule-thin pt-4 mb-5">
-          <h3 class="text-[var(--step-3)]" style="font-family: var(--font-display); font-weight: 600;">
-            Current entries
-          </h3>
-        </header>
-        {state && <RegisterTable state={state} keyField={manifest?.key_field ?? ""} slug={slug} />}
-      </section>
+      <script type="speculationrules" is:inline>
+        {"prefetch":[{"source":"document","where":{"href_matches":"/registers/" + slugJson.slice(1, -1) + "/entries/*"},"eagerness":"moderate"}]}
+      </script>
+      <script is:inline>
+        (function () {
+          var slug = {slugJson};
+          var keyField = {keyFieldJson};
+          var displayCols = {displayColsJson};
+          var entryCount = {entryCountJson};
+          var initialRows = {initialRowsJson};
+          var keyCols = Array.isArray(keyField) ? keyField : [keyField];
+          var LANGS = ["fr", "en", "es", "ru", "zh", "ar"];
+          var body = document.getElementById("entries-body");
+          var find = document.getElementById("find");
+          var count = document.getElementById("find-count");
+          var showAll = document.getElementById("show-all");
+          var loaded = false, loading = false, expanded = initialRows >= entryCount;
+          if (expanded && showAll) showAll.hidden = true;
 
-      {manifest && state && state.history.length > 0 && (
-        <RegisterHistory
-          slug={slug!}
-          keyField={manifest.key_field}
-          seedIssue={manifest.seed_issue}
-          history={state.history}
-        />
-      )}
-
+          function fmtCell(v) {
+            if (v == null) return "";
+            if (Array.isArray(v)) return v.map(fmtCell).join("; ");
+            if (typeof v === "object") {
+              for (var i = 0; i < LANGS.length; i++) {
+                var s = v[LANGS[i]];
+                if (typeof s === "string" && s.trim()) return s;
+              }
+              return Object.values(v).map(fmtCell).filter(Boolean).join(" · ");
+            }
+            return String(v);
+          }
+          function keyOf(e) {
+            return keyCols.map(function (f) { return e[f] == null ? "" : String(e[f]); }).join(" | ");
+          }
+          function makeRow(entry, search) {
+            var tr = document.createElement("tr");
+            tr.setAttribute("data-search", search);
+            var td0 = document.createElement("td");
+            td0.className = "num";
+            var a = document.createElement("a");
+            a.href = "/registers/" + slug + "/entries/" + encodeURIComponent(keyOf(entry)) + "/";
+            a.textContent = fmtCell(entry[keyCols[0]]);
+            td0.appendChild(a);
+            tr.appendChild(td0);
+            displayCols.forEach(function (c) {
+              var td = document.createElement("td");
+              td.textContent = fmtCell(entry[c]);
+              tr.appendChild(td);
+            });
+            return tr;
+          }
+          var pending = null;
+          function ensureLoaded(cb) {
+            if (loaded) { cb(); return; }
+            if (loading) { pending = cb; return; }
+            loading = true;
+            fetch("/registers/" + slug + "/entries.json")
+              .then(function (r) { return r.json(); })
+              .then(function (data) {
+                body.textContent = "";
+                data.entries.forEach(function (e) { body.appendChild(makeRow(e.entry, e.key.toLowerCase())); });
+                loaded = true; expanded = true;
+                if (showAll) showAll.hidden = true;
+                loading = false;
+                if (pending) { var p = pending; pending = null; p(); }
+                cb();
+              })
+              .catch(function () { loading = false; showAll.hidden = false; showAll.textContent = "Show all " + entryCount; });
+          }
+          function applyFilter() {
+            var q = find.value.trim().toLowerCase();
+            var rows = body.rows, shown = 0;
+            for (var i = 0; i < rows.length; i++) {
+              var hit = !q || rows[i].getAttribute("data-search").indexOf(q) !== -1;
+              rows[i].style.display = hit ? "" : "none";
+              if (hit) shown++;
+            }
+            count.textContent = q ? shown + " of " + entryCount + " entries" : entryCount + " entries";
+          }
+          find.addEventListener("input", function () {
+            if (!loaded && find.value.trim()) { ensureLoaded(applyFilter); return; }
+            applyFilter();
+          });
+          if (showAll) showAll.addEventListener("click", function () {
+            showAll.textContent = "Loading…";
+            ensureLoaded(function () {
+              var run = function () { applyFilter(); };
+              if (document.startViewTransition && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
+                document.startViewTransition(run);
+              } else { run(); }
+            });
+          });
+          body.addEventListener("click", function (e) {
+            var th = e.target.closest("th[data-sort]");
+            if (!th) return;
+            var dir = th.dataset.dir === "asc" ? "desc" : "asc";
+            var all = th.parentNode.children;
+            for (var i = 0; i < all.length; i++) {
+              if (all[i] !== th) { all[i].dataset.dir = ""; all[i].removeAttribute("data-dir"); }
+            }
+            th.dataset.dir = dir;
+            var idx = Array.prototype.indexOf.call(th.parentNode.children, th);
+            Array.prototype.slice.call(body.rows)
+              .sort(function (a, b) {
+                var av = a.cells[idx].textContent.trim(), bv = b.cells[idx].textContent.trim();
+                var cmp = dir === "asc" ? av.localeCompare(bv) : bv.localeCompare(av);
+                return cmp;
+              })
+              .forEach(function (row) { body.appendChild(row); });
+          });
+          var chips = document.getElementById("dock-chips");
+          if (chips && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
+            chips.scrollLeft = chips.scrollWidth;
+          }
+        })();
+      </script>
     </>
   )}
 </Base>

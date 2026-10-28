@@ -225,3 +225,12 @@ modified clicks (open in a new tab) and no longer push a duplicate
 history entry for the current path; the state count announces itself
 politely; tables scroll horizontally on narrow screens; and a noscript
 notice explains that the mockup renders with JavaScript.
+
+== Live implementation (2026-10-28)
+
+The register page on the site implements this audit: the page leads
+with the entries table (50 rows rendered, the rest expand from the
+register's entry index), a glass Edition Dock links every edition of
+the register with its issue and date, the change rail summarizes the
+latest changes and links to the full history, and the page weighs
+about 65 kilobytes where it weighed two megabytes.
