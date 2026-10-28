@@ -3,7 +3,7 @@
  * Timeline scrubber for register snapshots.
  *
  * Shows every OB issue that touched the register, with the current
- * view highlighted. Hyperlinks to /datasets/{slug}/at/{ob_issue}/.
+ * view highlighted. Hyperlinks to /registers/{slug}/at/{ob_issue}/.
  */
 export interface Props {
   slug: string;
@@ -26,7 +26,7 @@ const sorted = [...touchedIssues].sort((a, b) => a - b);
         return (
           <li>
             <a
-              href={`/datasets/${slug}/at/${n}/`}
+              href={`/registers/${slug}/at/${n}/`}
               class:list={["chip no-underline", { "chip-active": isCurrent }]}
               title={isSeed ? "Initial publication (seed)" : `As of issue № ${n}`}
               aria-current={isCurrent ? "location" : undefined}
