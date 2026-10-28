@@ -148,6 +148,12 @@ const slugJson = JSON.stringify(slug);
 const keyFieldJson = JSON.stringify(keyField);
 const displayColsJson = JSON.stringify(displayCols);
 const searchJson = JSON.stringify(visibleEntries.map(searchOf));
+const rows = visibleEntries.map((entry) => ({
+  key: keyOf(entry),
+  keyText: formatCellValue(entry[keyCols[0]!]),
+  search: searchOf(entry),
+  cells: displayCols.map((c) => formatCellValue(entry[c])),
+}));
 const initialRowsJson = JSON.stringify(INITIAL_ROWS);
 const entryCountJson = JSON.stringify(entryCount);
 
@@ -335,13 +341,13 @@ const entryCountJson = JSON.stringify(entryCount);
                 {displayCols.map((c) => <th data-sort="text">{c.replace(/_/g, " ")}</th>)}
               </tr></thead>
               <tbody id="entries-body">
-                {visibleEntries.map((entry, i) => (
-                  <tr data-search={searchJson[i]}>
+                {rows.map((row) => (
+                  <tr data-search={row.search}>
                     <td class="num">
-                      <a href={`/registers/${slug}/entries/${encodeURIComponent(keyOf(entry))}/`}
-                         class="no-underline hover:underline">{formatCellValue(entry[keyCols[0]])}</a>
+                      <a href={`/registers/${slug}/entries/${encodeURIComponent(row.key)}/`}
+                         class="no-underline hover:underline">{row.keyText}</a>
                     </td>
-                    {displayCols.map((c) => <td>{formatCellValue(entry[c])}</td>)}
+                    {row.cells.map((text) => <td>{text}</td>)}
                   </tr>
                 ))}
               </tbody>
