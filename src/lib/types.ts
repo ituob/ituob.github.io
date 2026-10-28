@@ -187,7 +187,7 @@ export interface DatasetMetadata {
 /* -- Aggregated issue view (what the page consumes) ------------------------ */
 
 export interface LoadedIssue {
-  /** True when the issue carries no general messages or amendments (edition not fully populated). */
+  /** True when the issue carries no general messages or amendments (issue not fully populated). */
   incomplete?: boolean;
   id: number;
   meta: IssueMeta;

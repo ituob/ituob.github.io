@@ -2,12 +2,12 @@
 /**
  * IssueArchive — the compact "View older issues / Issue archive" year
  * navigation (one row per year, every issue id linked). Shared by the
- * issue page (highlights the current edition) and register pages.
+ * issue page (highlights the current issue) and register pages.
  */
 import { loadIssue, listIssueIds } from "~/lib/loaders";
 
 interface Props {
-  /** Highlight this issue id (the edition currently being viewed). */
+  /** Highlight this issue id (the issue currently being viewed). */
   currentId?: number;
   /** Restrict the archive to these issues (defaults to every issue). */
   issueIds?: number[];

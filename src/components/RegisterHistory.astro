@@ -153,7 +153,7 @@ const orderedCards = cards.slice().reverse();
             </summary>
             <ul class="mt-2 ml-2 space-y-1 text-[var(--step--1)]">
               {card.patches.map((patch) => {
-                // LIR patches repeat entries from the previous edition; their
+                // LIR patches repeat entries from the previous issue; their
                 // recorded identifier is a printed-table position, not an
                 // entry key, so a key lookup would be meaningless.
                 if (patch.type === "LIR") {
@@ -163,7 +163,7 @@ const orderedCards = cards.slice().reverse();
                         LIR
                       </span>
                       <span class="ml-2" style="color: var(--fg-muted);">
-                        entries repeated unchanged from the previous edition
+                        entries repeated unchanged from the previous issue
                       </span>
                     </li>
                   );

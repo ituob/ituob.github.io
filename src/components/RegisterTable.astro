@@ -10,8 +10,21 @@ export interface Props {
   state: RegisterState;
   keyField: string | string[];
   showLapsed?: boolean;
+  slug?: string;
 }
-const { state, showLapsed = false } = Astro.props;
+const { state, showLapsed = false, slug, keyField } = Astro.props;
+
+// The replay key of an entry: the key field, or the composite key
+// fields joined the way the replay joins them. With a slug, the key
+// cell links to the citable entry page.
+const keyOf = (entry: Record<string, unknown>): string => {
+  if (Array.isArray(keyField)) {
+    return keyField.map((f) => (entry[f] == null ? "" : String(entry[f]))).join(" | ");
+  }
+  const v = entry[keyField];
+  return v == null ? "" : String(v);
+};
+const keyCols = Array.isArray(keyField) ? keyField : [keyField];
 
 // Compute columns as the union of ALL field keys across every
 // active entry, so entries with different field sets all show.
@@ -39,7 +52,18 @@ const cols = [...colSet].sort();
         {state.active_entries.map((entry) => (
           <tr>
             {cols.map((c) => (
-              <td>{formatCellValue(entry[c])}</td>
+              <td>
+                {slug && keyCols.includes(c) && entry[c] != null ? (
+                  <a
+                    href={`/registers/${slug}/entries/${encodeURIComponent(keyOf(entry))}/`}
+                    class="no-underline hover:underline"
+                  >
+                    {formatCellValue(entry[c])}
+                  </a>
+                ) : (
+                  formatCellValue(entry[c])
+                )}
+              </td>
             ))}
           </tr>
         ))}

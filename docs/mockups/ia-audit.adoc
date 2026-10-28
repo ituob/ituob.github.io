@@ -1,0 +1,227 @@
+= IA audit of the registers mockup
+
+This document records the information-architecture problems found in the
+registers mockup on 2026-10-26, the decision taken for each, and the
+implementation status. The problems were found by auditing
+`ob-registers.html` against information-architecture best practice; the
+audit is repeated here so that the reasoning survives alongside the
+artifact. The mockup is at `ob-registers.html` in this directory; a
+catch-all development server is at `serve.py`.
+
+== Decisions that precede the audit
+
+Two decisions constrain everything below. First, the composer is
+admin-only: it is an editorial workspace for the Bureau's staff, it does
+not belong to the public information architecture, and it was removed
+from this mockup. Second, the unit of action in this domain is a
+*change*; the word "patch" is not used, which matches the data layer
+(`datasets/*/changes/`, `schema-change.yaml`, `Registers::Change`).
+
+== Problems and resolutions
+
+=== 1. No addressable location
+
+The tab switcher changed the visible view without changing the URL. A
+gazette of record is a citation corpus: its value lies in stable
+reference, and the page offered no address for any entity, so nothing
+could be linked, bookmarked or cited.
+
+*Resolution:* every entity has a real path served by the History API.
+The route table below lists them. A catch-all server (`serve.py`) serves
+the document for any path so that a deep link resolves on a fresh load.
+
+=== 2. One tab row conflated collection, instance and tool
+
+A tab row promises siblings of one kind. The tabs mixed a collection
+(the registers index), single instances (a register, an issue, a
+schema) and an administrative tool, so the reader could not infer that
+issue № 1342 is one of 389 issues.
+
+*Resolution:* the tab row is gone. The header carries the four public
+sections (Registers, Issues, Schemas, About); instances are reached by
+selection and addressed by their own paths.
+
+=== 3. Missing collection levels
+
+The header named Issues and Schemas, but the document contained no
+index view for either. There was no way to arrive at issue № 1342 or
+at Recommendation ITU-T E.118 by browsing.
+
+*Resolution:* `/issues` lists the chronology with the change count of
+each issue, and `/schemas` lists the Recommendation schemas with the
+registers each one governs.
+
+=== 4. Unresolved entity mentions
+
+The document contained 29 dead links (`href="#"`): the register chips of
+an issue, the breadcrumb root, the previous- and next-issue links,
+the schema version rows and header items. Every mention of an entity is
+a promise of navigation; in a record of truth an unresolvable reference
+undermines the artifact itself.
+
+*Resolution:* every mention resolves to a route. Where the mockup
+carries no instance content for a route, the page says so plainly and
+offers the collection, rather than faking content.
+
+=== 5. Static breadcrumbs
+
+The breadcrumb strip always read "Home ▸ Registers" regardless of the
+view, so location was wrong on three of the five views.
+
+*Resolution:* the router computes the breadcrumb trail from the route on
+every navigation.
+
+=== 6. One-way relationship edges
+
+Schema-to-register and register-to-schema links existed, but the issue
+chips were dead and the entry keys (`89 420 06`) were not links at all,
+so the edges of the model — an issue contains changes and a change
+targets an entry — were not traversable.
+
+*Resolution:* keys are links to entry paths
+(`/registers/e118-iin/entries/89-420-06`), every change names its
+register as a link, and each entry page carries the history of that
+entry, which is the natural first question a reader asks of a register
+gazette.
+
+=== 7. A state control that misrepresented the page
+
+The state-at-issue control updated its label and entry count while the
+table beneath it never changed, so the control claimed to show issue
+№ 1161 while displaying the current state.
+
+*Resolution:* the control is now the edition control. It states that
+the current edition of the register is shown, reports the entry count
+of the selected edition, and links to the issue whose changes produced
+that edition, instead of pretending to re-render the table.
+
+=== 8. Two timescales without labels
+
+The register page showed the current state (the table) and the change
+history (the side rail) without naming the distinction.
+
+*Resolution:* the two areas carry the headings "Current entries" and
+"Changes".
+
+=== 9. Two navigation systems with divergent labels
+
+The header and the tab row duplicated the same concepts with different
+labels at different levels ("Issues" beside "Issue № 1342").
+
+*Resolution:* one system remains — the header for sections, the
+breadcrumb for location, links for relations.
+
+=== 10. Repetition of the model explanation
+
+The explanatory band about registers, issues and changes repeated on
+every view, and the About item in the header was dead.
+
+*Resolution:* the explanation lives once, on `/about`, and the band was
+removed from the other views.
+
+=== 11. Undefined status vocabulary
+
+The registers index used the states Active, Quiet and Dormant without a
+stated rule.
+
+*Resolution:* the states are defined on the index itself: a register is
+*active* when a change within the last 25 issues touches it, *quiet*
+when the last such change lies within 200 issues, and *dormant*
+otherwise.
+
+=== 12. Incomplete tab semantics
+
+The tabs carried `role="tab"` without `aria-controls`, panels, or
+keyboard support, and header items carried `aria-current="page"` while
+pointing nowhere.
+
+*Resolution:* with routes in place the views are pages, `aria-current`
+follows the active section, and the tab semantics are no longer needed.
+
+== Route table
+
+[options="header"]
+|===
+|Path |View
+
+|`/` and `/issues`
+|The chronology of issues — the highest-priority section
+
+|`/registers`
+|The registers index with counts, status and totals
+
+|`/registers/{slug}`
+|One register: current entries, changes, state control
+
+|`/registers/{slug}/entries/{key}`
+|One entry: its fields and the history of its changes
+
+|`/issues`
+|The chronology of issues
+
+|`/issues/{number}`
+|One issue: its changes grouped by register
+
+|`/schemas`
+|The Recommendation schemas
+
+|`/schemas/{code}`
+|One schema: field dictionary, versions, registers governed
+
+|`/about`
+|The model of the publication in plain sentences
+
+|any other path
+|A not-found view that returns to the collections
+|===
+
+== Scope notes
+
+The mockup carries the full report of issue № 1342, the full field
+dictionary of Recommendation ITU-T E.118, and sampled entries and
+changes for the E.118 register. Every other route renders from the same
+index data and states plainly what it does not carry. The data comes
+from the normalised corpus of issues № 955–1343.
+
+== Second pass (2026-10-26)
+
+A further pass closed the gaps that the route conversion left open.
+
+=== 13. Change cards did not link their entries
+
+The change report of an issue named the key of each entry as plain
+text, so the strongest citation grain — from an issue to the entry it
+changed — remained untraversable.
+
+*Resolution:* the key of a sampled entry links to its entry path; keys
+without sampled content stay plain text rather than promising a page
+that would say nothing.
+
+=== 14. The issue was shown as changes only
+
+The model states that an issue is a dated set of messages, yet the
+issue page showed only the register changes and omitted the general
+messages that the same page counted.
+
+*Resolution:* the issue page carries a General messages section and
+states that their full text renders from the corpus.
+
+=== 15. The textual publications had no pages
+
+The registers index stated that the textual publications are carried as
+documents, and then linked nowhere for them.
+
+*Resolution:* each textual publication (Service Restrictions, Call-back
+Procedures, List V, List VIII, Country Names) has a register page that
+states what it is, and the index note links to all of them.
+
+=== 16. Usability and accessibility hardening
+
+The entry page now names the Recommendation that defines the entry's
+fields; the register heading carries the status of the register; the
+registers index gained a filter; navigation moved focus to the heading
+of each view for keyboard and screen-reader orientation; links respect
+modified clicks (open in a new tab) and no longer push a duplicate
+history entry for the current path; the state count announces itself
+politely; tables scroll horizontally on narrow screens; and a noscript
+notice explains that the mockup renders with JavaScript.

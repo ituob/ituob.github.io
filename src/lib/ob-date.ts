@@ -5,7 +5,7 @@
  *   15.V.2016  →  15 May 2016
  *   1.IX.2010  →  1 September 2010
  *
- * This is the format used in every printed OB edition and on the
+ * This is the format used in every printed OB issue and on the
  * authoritative ITU website. The new site must render dates in this
  * same format for parity.
  */

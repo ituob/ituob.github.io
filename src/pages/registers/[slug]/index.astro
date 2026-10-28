@@ -72,7 +72,7 @@ const recommendationVersion = (() => {
 })();
 const description = isExternal
   ? `${title} — external register.`
-  : `${title} register — current state. ${state.entry_count} active entries.`;
+  : `${title} register — the current edition. ${state.entry_count} active entries.`;
 
 // For external/textual registers, find issues that contain amendments
 // referencing this register's publication ID.
@@ -181,9 +181,9 @@ if (isExternal) {
         {state.lapsed_count > 0 && ` · ${state.lapsed_count} lapsed`}
         {state.deleted_count > 0 && ` · ${state.deleted_count} deleted`}
         {errorSummary && ` · ${errorSummary}`}
-        · current state (latest OB)
+        · the current edition of this register, after the latest issue
         {state.history.filter(p => p.type !== "SEED").length > 0 && (
-          <> · Amended {state.history.filter(p => p.type !== "SEED").length} time{state.history.filter(p => p.type !== "SEED").length !== 1 ? "s" : ""} in subsequent editions</>
+          <> · Amended {state.history.filter(p => p.type !== "SEED").length} time{state.history.filter(p => p.type !== "SEED").length !== 1 ? "s" : ""} in subsequent issues</>
         )}
       </p>
     )}
@@ -321,7 +321,7 @@ if (isExternal) {
             Current entries
           </h3>
         </header>
-        {state && <RegisterTable state={state} keyField={manifest?.key_field ?? ""} />}
+        {state && <RegisterTable state={state} keyField={manifest?.key_field ?? ""} slug={slug} />}
       </section>
 
       {manifest && state && state.history.length > 0 && (

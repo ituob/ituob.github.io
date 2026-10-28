@@ -1,0 +1,107 @@
+---
+/**
+ * Entry shell — one page per register, rendered for every
+ * /registers/{slug}/entries/{key}/ route.
+ *
+ * The worker routes deep entry paths to this directory; the inline
+ * script reads the key from the real pathname and renders the entry
+ * from entries.json, so entries stay citable without emitting one
+ * static page per entry (which would break the Workers asset limit).
+ */
+import Base from "~/layouts/Base.astro";
+import { listSnapshotSlugs, loadManifest } from "~/lib/snapshots";
+
+export function getStaticPaths() {
+  return listSnapshotSlugs().map((slug) => ({ params: { slug } }));
+}
+const { slug } = Astro.params;
+const manifest = loadManifest(slug!);
+const title = manifest?.title?.en ?? slug!;
+// The compiler rejects optional chaining inside template expressions,
+// so the injected values are computed here.
+const slugJson = JSON.stringify(slug);
+const keyFieldJson = JSON.stringify(manifest?.key_field ?? "");
+const titleJson = JSON.stringify(title);
+---
+<Base title={`Entry · ${title}`} description={`${title} — one entry, addressed by its own path so it can be cited.`}>
+  <section class="rule-thin pt-6 pb-6">
+    <p class="uppercase font-semibold text-[var(--step--1)]"
+       style="font-family: var(--font-sans); letter-spacing: 0.1em; color: var(--accent);">
+      Entry
+    </p>
+    <h2 class="text-[var(--step-4)] mt-1"
+        style="font-family: var(--font-display); font-weight: 700; line-height: 1.1;">
+      <span class="font-mono" id="entry-key-heading">{title}</span>
+    </h2>
+    <p class="mt-2 text-[var(--step--1)]" style="color: var(--fg-muted); font-family: var(--font-sans);">
+      One entry of <a href={`/registers/${slug}/`}>{title}</a>, with the changes the
+      Bulletin has recorded for it. The entry is addressed by this path, so it can be cited.
+    </p>
+  </section>
+
+  <div id="entry-view">
+    <p class="text-[var(--step--1)]" style="color: var(--fg-muted); font-family: var(--font-sans);">
+      Loading the entry…
+    </p>
+  </div>
+
+  <noscript>
+    <p class="panel p-4" style="font-family: var(--font-sans);">
+      This view renders the entry with JavaScript, which is currently disabled.
+      <a href={`/registers/${slug}/`}>Back to the register</a>.
+    </p>
+  </noscript>
+
+  <script is:inline>
+    (function () {
+      var slug = {slugJson};
+      var keyField = {keyFieldJson};
+      var title = {titleJson};
+      var m = location.pathname.match(/^\/registers\/[a-z0-9-]+\/entries\/(.+?)\/?$/);
+      var view = document.getElementById("entry-view");
+      if (!m) { view.textContent = "No entry key in this path."; return; }
+      var key = decodeURIComponent(m[1]);
+      fetch("/registers/" + slug + "/entries.json")
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+          var found = null;
+          for (var i = 0; i < data.entries.length; i++) {
+            if (data.entries[i].key === key) { found = data.entries[i].entry; break; }
+          }
+          var heading = document.getElementById("entry-key-heading");
+          heading.textContent = key;
+          document.title = key + " · " + title + " — ITU Operational Bulletin online";
+          var html = "";
+          if (!found) {
+            html += '<p class="panel p-4" style="font-family: var(--font-sans);">The register carries no entry under this key in its current edition. ' +
+                    '<a href="/registers/' + slug + '/">Back to the register</a>.</p>';
+          } else {
+            var fields = Object.keys(found).filter(function (k) { return k !== "_class" && k !== "source_contents"; });
+            html += '<div class="overflow-x-auto"><table class="table-bulletin">';
+            for (var j = 0; j < fields.length; j++) {
+              html += '<tr><th style="text-align:left;width:12rem">' + fields[j].replace(/_/g, " ") +
+                      '</th><td>' + (found[fields[j]] == null ? "" : String(found[fields[j]])) + '</td></tr>';
+            }
+            html += '</table></div>';
+          }
+          var changes = data.history[key] || [];
+          html += '<h3 class="text-[var(--step-2)] mt-6 mb-2" style="font-family: var(--font-display); font-weight:600;">Changes to this entry</h3>';
+          if (changes.length === 0) {
+            html += '<p class="text-[var(--step--1)]" style="color: var(--fg-muted); font-family: var(--font-sans);">The change log records no keyed change for this entry.</p>';
+          } else {
+            html += '<ul class="space-y-1" style="font-family: var(--font-sans); list-style:none; padding:0;">';
+            for (var k = 0; k < changes.length; k++) {
+              var c = changes[k];
+              html += '<li><span class="font-mono font-semibold">' + c.type + '</span> · ' +
+                      (c.ob_issue ? '<a href="/issues/' + c.ob_issue + '/">issue № ' + c.ob_issue + "</a>" : "seed publication") + "</li>";
+            }
+            html += "</ul>";
+          }
+          view.innerHTML = html;
+        })
+        .catch(function () {
+          view.textContent = "The entry index could not be loaded.";
+        });
+    })();
+  </script>
+</Base>

@@ -39,7 +39,7 @@ function firstIssueOfYear(year: number): number | undefined {
       Showing data for <span class="num">{currentYear}</span>.
       {sortedYears.length > 1 && (
         <>
-          {" "}Browse previous years (subsequent editions):{" "}
+          {" "}Browse previous years (subsequent issues):{" "}
           {sortedYears.slice(1).map((y, i) => {
             const target = firstIssueOfYear(y);
             return (

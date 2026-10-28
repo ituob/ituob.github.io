@@ -34,6 +34,16 @@ export default {
       return Response.json({ error: "not found" }, { status: 404 });
     }
 
+    // Citable entry pages: one shell per register renders any
+    // /registers/{slug}/entries/{key}/ from the register's
+    // entries.json, so entries never need one static file each.
+    const entryMatch = url.pathname.match(/^\/registers\/([a-z0-9-]+)\/entries\/([^/]+)\/?$/);
+    if (entryMatch) {
+      return env.ASSETS.fetch(
+        new Request(new URL(`/registers/${entryMatch[1]}/entries/`, url.origin), request),
+      );
+    }
+
     return env.ASSETS.fetch(request);
   },
 };
