@@ -17,7 +17,7 @@ const sorted = [...touchedIssues].sort((a, b) => a - b);
 {sorted.length > 0 && (
   <nav class="timeline-scrubber no-print panel p-4 mb-6" aria-label="Register timeline">
     <p class="text-[var(--step--1)] uppercase tracking-wider mb-2" style="font-family: var(--font-sans); color: var(--fg-muted);">
-      Timeline — point in time
+      Editions of this register — its content as of each issue
     </p>
     <ol class="flex flex-wrap gap-1.5" style="font-family: var(--font-sans);">
       {sorted.map((n) => {
@@ -28,7 +28,7 @@ const sorted = [...touchedIssues].sort((a, b) => a - b);
             <a
               href={`/datasets/${slug}/at/${n}/`}
               class:list={["chip no-underline", { "chip-active": isCurrent }]}
-              title={isSeed ? "Initial publication (seed)" : `OB No. ${n}`}
+              title={isSeed ? "Initial publication (seed)" : `As of issue № ${n}`}
               aria-current={isCurrent ? "location" : undefined}
             >
               {isSeed ? "★ " : ""}{n}

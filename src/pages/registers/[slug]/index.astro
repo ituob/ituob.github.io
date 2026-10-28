@@ -302,7 +302,7 @@ if (isExternal) {
       <TimelineScrubber
         slug={slug!}
         touchedIssues={manifest.touched_issues}
-        currentIssue={null}
+        currentIssue={Math.max(...manifest.touched_issues)}
         seedIssue={manifest.seed_issue}
       />
 
