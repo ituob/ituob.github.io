@@ -1,0 +1,565 @@
+---
+/**
+ * The current edition of a keyed register — entries first, changes
+ * beside, editions in the dock. Rendered by /registers/[slug] for
+ * registers with snapshots.
+ */
+import Base from "~/layouts/Base.astro";
+import { listIssueIds, loadIssue, loadListMetadata, lastAnnexBefore } from "~/lib/loaders";
+import { formatShortDate } from "~/lib/format";
+import { formatCellValue } from "~/lib/values";
+import { loadStateAtIssue } from "~/lib/snapshots";
+import type { RegisterManifest, RegisterState } from "~/lib/snapshots";
+
+export interface Props {
+  slug: string;
+  manifest: RegisterManifest;
+  state: RegisterState;
+  recommendation: string;
+  recommendationVersion: string;
+  errorSummary: string | null;
+}
+const { slug, manifest, state, recommendation, recommendationVersion, errorSummary } = Astro.props;
+
+const title = manifest.title.en ?? manifest.slug;
+const keyField = manifest.key_field;
+const keyOf = (entry: Record<string, unknown>): string => {
+  if (Array.isArray(keyField)) {
+    return keyField.map((f) => (entry[f] == null ? "" : String(entry[f]))).join(" | ");
+  }
+  const v = entry[keyField];
+  return v == null ? "" : String(v);
+};
+
+const entryCount = state.entry_count;
+const changeCount = state.history.filter((h) => h.type !== "SEED").length;
+const touched = manifest.touched_issues;
+const latestIssue = touched.length ? Math.max(...touched) : null;
+const seedIssue = manifest.seed_issue ?? null;
+const INITIAL_ROWS = 50;
+const visibleEntries = state.active_entries.slice(0, INITIAL_ROWS);
+
+const unionKeys = new Set<string>();
+for (const e of state.active_entries) {
+  for (const k of Object.keys(e)) {
+    if (k !== "_class" && k !== "source_contents") unionKeys.add(k);
+  }
+}
+const keyCols = Array.isArray(keyField) ? keyField : [keyField];
+const DISPLAY_PRIORITY = ["country_or_area", "company_name", "applicant", "network", "operator", "signal_point_name", "station", "description", "contact"];
+const displayCols: string[] = [];
+for (const c of DISPLAY_PRIORITY) {
+  if (unionKeys.has(c) && !keyCols.includes(c) && displayCols.length < 3) displayCols.push(c);
+}
+for (const c of [...unionKeys].sort()) {
+  if (displayCols.length >= 3) break;
+  if (!keyCols.includes(c) && !displayCols.includes(c)) displayCols.push(c);
+}
+const searchOf = (entry: Record<string, unknown>): string =>
+  [keyOf(entry), ...displayCols.map((c) => entry[c])]
+    .map((v) => (v && typeof v === "object" ? Object.values(v as Record<string, unknown>).map(String).join(" ") : String(v ?? "")))
+    .join(" ")
+    .toLowerCase();
+const canonicalOf = (v: unknown): string => {
+  if (v == null || typeof v !== "object") return formatCellValue(v);
+  const obj = v as Record<string, unknown>;
+  for (const l of ["fr", "en", "es", "zh", "ru", "ar"]) {
+    if (typeof obj[l] === "string" && obj[l] !== "") return String(obj[l]);
+  }
+  return formatCellValue(v);
+};
+const countryCol = displayCols.includes("country_or_area") ? "country_or_area" : null;
+const rows = visibleEntries.map((entry) => ({
+  key: keyOf(entry),
+  keyText: formatCellValue(entry[keyCols[0]!]),
+  search: searchOf(entry),
+  cells: displayCols.map((c) => (c === countryCol ? canonicalOf(entry[c]) : formatCellValue(entry[c]))),
+}));
+
+const chipData = touched
+  .slice()
+  .sort((a, b) => a - b)
+  .map((n) => {
+    const issue = loadIssue(n);
+    const date = issue?.meta?.publication_date;
+    const st = loadStateAtIssue(slug, n);
+    return { n, date: date ? formatShortDate(date) : "", count: st ? st.entry_count : null };
+  });
+
+const latestDate = (() => {
+  if (!latestIssue) return "";
+  const issue = loadIssue(latestIssue);
+  return issue?.meta?.publication_date ? formatShortDate(issue.meta.publication_date) : "";
+})();
+
+const lastChanges = state.history
+  .filter((h) => h.type !== "SEED")
+  .slice(-10)
+  .reverse();
+const positionOnDate = (() => {
+  const ids = listIssueIds();
+  const latest = ids.length > 0 ? ids[ids.length - 1]! : 0;
+  const ref = lastAnnexBefore(latest, manifest.register_id ?? slug);
+  return ref?.positionOn ?? null;
+})();
+const authoritativeUrl = loadListMetadata(manifest.register_id ?? slug)?.url ?? null;
+const railChanges = lastChanges.map((h) => {
+  const code = h.identifier ? (h.identifier as { code?: unknown }).code : null;
+  return { type: h.type, ob_issue: h.ob_issue, code: code == null ? null : String(code) };
+});
+
+const slugJson = JSON.stringify(slug);
+const keyFieldJson = JSON.stringify(keyField);
+const displayColsJson = JSON.stringify(displayCols);
+const searchJson = JSON.stringify(visibleEntries.map(searchOf));
+const initialRowsJson = JSON.stringify(INITIAL_ROWS);
+const entryCountJson = JSON.stringify(entryCount);
+const speculationJson = JSON.stringify({
+  prefetch: [{
+    source: "document",
+    where: { href_matches: `/registers/${slug}/entries/*` },
+    eagerness: "moderate",
+  }],
+});
+---
+<Base title={`Register: ${title}`} masthead wide
+      breadcrumbs={[{ label: "Registers", href: "/registers/" }, { label: title }]}>
+  <style>
+    .reg { --pg-paper: #fff; --pg-ink: #0C3D52; --pg-muted: #5B7285; --pg-subtle: #6E8899;
+      --pg-line: #D8E4EA; --pg-mist: #F2F7F9; --pg-accent: #1285B1; color: var(--pg-ink); }
+    @media (prefers-color-scheme: dark) {
+      .reg { --pg-paper: #0E1D26; --pg-ink: #E8F2F7; --pg-muted: #9FB8C6; --pg-subtle: #6E8899;
+        --pg-line: #23404E; --pg-mist: #132530; --pg-accent: #35B4E4; }
+    }
+    .reg-head { position: relative; padding: 1.7rem 0 1.1rem; border-bottom: 1px solid var(--pg-line); }
+    .reg-eyebrow { font-family: var(--font-sans); font-size: var(--step--1); font-weight: 600;
+      letter-spacing: 0.1em; text-transform: uppercase; color: var(--pg-accent); }
+    .reg-eyebrow a { color: inherit; }
+    .reg-title { font-family: var(--font-display); font-weight: 700; font-size: var(--step-4);
+      line-height: 1.12; margin: 0.25rem 0 0.5rem; text-wrap: balance; color: var(--pg-ink); }
+    .reg-meta { font-family: var(--font-sans); font-size: var(--step--1); color: var(--pg-muted); margin: 0.15rem 0; }
+    .hero-stats { display: flex; gap: 2.2rem; margin: 0.7rem 0 0.3rem; flex-wrap: wrap; }
+    .hero-stats .stat b { display: block; font-family: var(--font-display); font-size: var(--step-4);
+      font-weight: 700; letter-spacing: -0.02em; line-height: 1.05; font-variant-numeric: tabular-nums; }
+    .hero-stats .stat span { font-family: var(--font-sans); font-size: var(--step--2); font-weight: 700;
+      letter-spacing: 0.1em; text-transform: uppercase; color: var(--pg-muted); }
+    .errs summary { cursor: pointer; }
+    .errs p { margin: 0.4rem 0 0; }
+    .reg-grid { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 1.5rem; margin-top: 1.4rem; }
+    @media (max-width: 900px) { .reg-grid { grid-template-columns: 1fr; } }
+
+    .dock { position: sticky; top: 5.3rem; z-index: 30;
+      display: flex; align-items: center; gap: 0.6rem;
+      padding: 0.55rem 0.75rem; margin: 1.1rem 0 1.15rem;
+      border-radius: 1.15rem; overflow: hidden;
+      border: 1px solid color-mix(in oklab, #ffffff 55%, var(--pg-line));
+      background: color-mix(in oklab, var(--pg-paper) 58%, transparent);
+      -webkit-backdrop-filter: blur(20px) saturate(1.7);
+      backdrop-filter: blur(20px) saturate(1.7);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.65), inset 0 -1px 0 rgba(12,61,82,.08), 0 10px 28px rgba(12,61,82,.13);
+      transition: opacity .4s ease, transform .4s ease; }
+    @starting-style { .dock { opacity: 0; transform: translateY(8px); } }
+    .dock-label { font-family: var(--font-sans); font-size: var(--step--2); font-weight: 700;
+      letter-spacing: 0.09em; text-transform: uppercase; color: var(--pg-muted); flex-shrink: 0; }
+    .dock-chips { display: flex; align-items: center; gap: 0.3rem; overflow-x: auto;
+      scroll-snap-type: x proximity; scrollbar-width: thin; padding: 0.1rem; margin: 0; list-style: none; }
+    .dock-chip { scroll-snap-align: end; flex-shrink: 0; display: inline-flex; flex-direction: column;
+      align-items: flex-start; line-height: 1.15; padding: 0.24rem 0.55rem; border-radius: 0.65rem;
+      border: 1px solid var(--pg-line); background: var(--pg-paper); text-decoration: none;
+      font-family: var(--font-mono); font-size: var(--step--2);
+      transition: transform .18s ease, border-color .18s ease, background-color .18s ease; }
+    .dock-chip:hover { border-color: var(--pg-accent); transform: translateY(-1px); }
+    .dock-chip .d { font-family: var(--font-sans); font-size: 0.62rem; color: var(--pg-subtle); }
+    .dock-chip[aria-current="true"] { border-color: var(--pg-accent); background: var(--pg-accent);
+      box-shadow: 0 2px 10px rgba(26,161,218,.35); }
+    .dock-chip[aria-current="true"] .d { color: rgba(255,255,255,.85); }
+    .dock-year { font-family: var(--font-sans); font-size: 0.62rem; font-weight: 700; flex-shrink: 0;
+      color: var(--pg-muted); padding: 0 0.25rem; border-left: 1px solid var(--pg-line); }
+    .dock-now { margin-left: auto; flex-shrink: 0; text-align: right; font-family: var(--font-sans);
+      font-size: var(--step--2); color: var(--pg-muted); }
+    .dock-now b { display: block; color: var(--pg-ink); font-size: var(--step--1); }
+    @media (prefers-reduced-transparency: reduce), (prefers-reduced-motion: reduce) {
+      .dock { background: var(--pg-mist); -webkit-backdrop-filter: none; backdrop-filter: none;
+        transition: none; }
+    }
+    @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+      .dock { background: var(--pg-mist); }
+    }
+
+    .find { display: flex; align-items: center; gap: 0.6rem; margin: 0 0 0.8rem; flex-wrap: wrap; }
+    .find-glass { display: flex; align-items: center; gap: 0.5rem; flex: 1; min-width: 16rem;
+      padding: 0.3rem 0.8rem; border-radius: 999px;
+      border: 1px solid var(--pg-line); background: var(--pg-paper);
+      box-shadow: inset 0 1px 2px rgba(12,61,82,.06);
+      transition: border-color .18s ease, box-shadow .18s ease; }
+    .find-glass:focus-within { border-color: var(--pg-accent);
+      box-shadow: 0 0 0 3px color-mix(in oklab, var(--pg-accent) 22%, transparent); }
+    .find-icon { color: var(--pg-muted); flex-shrink: 0; }
+    .find-glass input { flex: 1; min-width: 0; font: inherit; font-size: var(--step-0);
+      padding: 0.28rem 0; border: 0; background: transparent; color: var(--pg-ink); }
+    .find-glass input:focus { outline: none; }
+    .find-glass input::placeholder { color: var(--pg-subtle); }
+    .find-clear { border: 0; background: var(--pg-mist); color: var(--pg-muted); cursor: pointer;
+      width: 1.3rem; height: 1.3rem; border-radius: 50%; line-height: 1; font-size: 0.85rem; }
+    .find-kbd { font-family: var(--font-mono); font-size: var(--step--2); color: var(--pg-muted);
+      border: 1px solid var(--pg-line); border-radius: 0.3rem; padding: 0 0.35rem; background: var(--pg-mist); }
+    .find .count { font-family: var(--font-sans); font-size: var(--step--1); color: var(--pg-muted); }
+    .btn-all { font: inherit; font-size: var(--step--1); font-weight: 600; cursor: pointer;
+      border: 1px solid var(--pg-accent); color: var(--pg-accent); background: var(--pg-paper);
+      border-radius: 999px; padding: 0.35rem 0.8rem; }
+
+    table.entries { font-family: var(--font-sans); }
+    table.entries th, table.entries td { padding: 0.42rem 0.6rem; text-align: left; vertical-align: top; }
+    table.entries thead th { border-bottom: 2px solid var(--pg-ink); font-size: var(--step--2);
+      text-transform: uppercase; letter-spacing: 0.06em; color: var(--pg-muted);
+      cursor: pointer; user-select: none; white-space: nowrap; }
+    table.entries thead th:hover { color: var(--pg-accent); }
+    table.entries tbody tr { content-visibility: auto; contain-intrinsic-size: auto 2.6rem; }
+    table.entries tbody tr:hover td { background: color-mix(in oklab, var(--pg-accent) 6%, var(--pg-paper)); }
+    td.num, th.num { font-family: var(--font-mono); white-space: nowrap; }
+
+    .change-rail { font-family: var(--font-sans); font-size: var(--step--1); }
+    .change-rail ul { list-style: none; margin: 0.4rem 0 0; padding: 0; }
+    .change-rail li { display: flex; gap: 0.5rem; align-items: baseline; padding: 0.32rem 0;
+      border-bottom: 1px solid var(--pg-line); }
+    .badge { font-family: var(--font-mono); font-weight: 700; font-size: var(--step--2);
+      padding: 0.12rem 0.35rem; border-radius: 0.3rem; color: #fff; flex-shrink: 0; }
+    .badge.ADD { background: #18855C; } .badge.SUP { background: #DF314E; }
+    .badge.REP { background: #B7791F; } .badge.LIR { background: #5B7285; }
+    .badge.MOD { background: #6B46C1; } .badge.DEL { background: #5B7285; }
+    .panel { background: var(--pg-mist); border: 1px solid var(--pg-line); border-radius: 0.9rem;
+      padding: 1rem 1.1rem; }
+
+    .preview { position: fixed; z-index: 60; width: 20rem; padding: 0.7rem 0.9rem;
+      border-radius: 0.9rem; font-family: var(--font-sans); font-size: var(--step--1);
+      border: 1px solid color-mix(in oklab, #ffffff 55%, var(--pg-line));
+      background: color-mix(in oklab, var(--pg-paper) 72%, transparent);
+      -webkit-backdrop-filter: blur(18px) saturate(1.6); backdrop-filter: blur(18px) saturate(1.6);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.6), 0 14px 34px rgba(12,61,82,.22); }
+    .preview .pk { font-family: var(--font-mono); font-weight: 700; display: block; margin-bottom: 0.25rem; }
+    .preview .pl { color: var(--pg-muted); display: block; }
+    @media (pointer: coarse) { .preview { display: none !important; } }
+    @media (prefers-reduced-transparency: reduce) {
+      .preview { background: var(--pg-paper); -webkit-backdrop-filter: none; backdrop-filter: none; }
+    }
+    @media print { .dock, .find, .preview { display: none !important; } }
+  </style>
+
+  <div class="reg">
+  <section class="reg-head">
+    <p class="reg-eyebrow">
+      Register
+      {recommendation && (
+        <> · <a href={`/recommendations/${recommendation}/`}>Recommendation ITU-T {recommendation}{recommendationVersion && ` (${recommendationVersion})`}</a></>
+      )}
+    </p>
+    <h2 class="reg-title">{title}</h2>
+    {seedIssue && (
+      <p class="reg-meta">
+        Annexed to <a href={`/issues/${seedIssue}/`}>ITU OB No. {seedIssue}</a>
+        {positionOnDate && <> · Position on {formatShortDate(positionOnDate)}</>}
+      </p>
+    )}
+    <div class="hero-stats">
+      <div class="stat"><b class="num">{entryCount}</b><span>entries</span></div>
+      <div class="stat"><b class="num">{changeCount}</b><span>changes</span></div>
+      <div class="stat"><b class="num">{touched.length}</b><span>issues</span></div>
+    </div>
+    <p class="reg-meta">
+      The current edition of this register follows
+      <a href={`/issues/${latestIssue}/`}>issue № {latestIssue}</a>
+      {latestDate && <> ({latestDate})</>}.
+      {errorSummary && (
+        <details class="errs">
+          <summary>Unapplied at replay: {errorSummary}</summary>
+          <p>These changes could not be applied to the replayed list; the printed
+          Bulletin remains the authoritative record for them.</p>
+        </details>
+      )}
+    </p>
+    {authoritativeUrl && (
+      <p class="reg-meta"><a href={authoritativeUrl} rel="noopener noreferrer">Authoritative resource ↗</a></p>
+    )}
+  </section>
+
+  <nav class="dock" aria-label="Editions of this register">
+    <span class="dock-label">Editions</span>
+    <ol class="dock-chips" id="dock-chips">
+      {chipData.map(({ n, date, count }, i) => {
+        const year = date ? date.split(".").pop() : "";
+        const prev = i > 0 ? chipData[i - 1] : null;
+        const prevYear = prev && prev.date ? prev.date.split(".").pop() : "";
+        return (
+          <>
+            {year && year !== prevYear && <li class="dock-year" aria-hidden="true">{year}</li>}
+            <li>
+              <a class="dock-chip" href={`/registers/${slug}/at/${n}/`}
+                 aria-current={n === latestIssue ? "true" : undefined}
+                 title={n === seedIssue ? `Founded by issue № ${n}` : `As of issue № ${n}`}>
+                № {n}
+                <span class="d">{date}{count != null && ` · ${count}`}</span>
+              </a>
+            </li>
+          </>
+        );
+      })}
+    </ol>
+    <span class="dock-now"><b>№ {latestIssue}</b>current edition</span>
+  </nav>
+
+  <div class="reg-grid">
+    <section>
+      <div class="find">
+        <span class="find-glass">
+          <svg class="find-icon" width="15" height="15" viewBox="0 0 15 15" fill="none" aria-hidden="true">
+            <circle cx="6.5" cy="6.5" r="4.75" stroke="currentColor" stroke-width="1.5"/>
+            <path d="M10.5 10.5L13.25 13.25" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+          <input id="find" type="search" autocomplete="off" aria-label="Find an entry"
+                 placeholder={`Search ${entryCount} entries`} />
+          <button id="find-clear" class="find-clear" aria-label="Clear the search" hidden>×</button>
+          <kbd class="find-kbd" aria-hidden="true">/</kbd>
+        </span>
+        <span class="count num" id="find-count" aria-live="polite">{entryCount} entries</span>
+        <button class="btn-all" id="show-all" hidden>Show all {entryCount}</button>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="entries">
+          <thead><tr>
+            <th class="num" data-sort="text">Number</th>
+            {displayCols.map((c) => <th data-sort="text">{c.replace(/_/g, " ")}</th>)}
+          </tr></thead>
+          <tbody id="entries-body">
+            {rows.map((row) => (
+              <tr data-search={row.search}>
+                <td class="num">
+                  <a href={`/registers/${slug}/entries/${encodeURIComponent(row.key)}/`}
+                     class="no-underline hover:underline entry-link" data-key={row.key}>{row.keyText}</a>
+                </td>
+                {row.cells.map((text) => <td>{text}</td>)}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <p class="reg-meta">
+        Every number links to its own page, so an entry can be cited.
+        {latestIssue && <> The current edition follows issue № {latestIssue}; earlier editions are in the dock above.</>}
+      </p>
+    </section>
+
+    <aside class="change-rail">
+      <div class="panel">
+        <h3 class="m-0" style="font-family: var(--font-display); font-size: var(--step-1); font-weight: 600;">
+          Latest changes
+        </h3>
+        <ul>
+          {railChanges.map((c) => (
+            <li>
+              <span class={`badge ${c.type}`}>{c.type}</span>
+              <span>
+                {c.ob_issue
+                  ? <a href={`/issues/${c.ob_issue}/`}>issue № {c.ob_issue}</a>
+                  : "seed publication"}
+                {c.code && <span class="font-mono"> · {c.code.slice(0, 24)}</span>}
+              </span>
+            </li>
+          ))}
+        </ul>
+        <p style="margin: 0.6rem 0 0;">
+          <a href={`/registers/${slug}/history/`}>All {changeCount} changes</a>
+        </p>
+      </div>
+    </aside>
+  </div>
+
+  <div id="preview" class="preview" role="presentation" hidden></div>
+  </div>
+
+  <script type="speculationrules" is:inline>
+    {speculationJson}
+  </script>
+  <script is:inline>
+    (function () {
+      var slug = {slugJson};
+      var keyField = {keyFieldJson};
+      var displayCols = {displayColsJson};
+      var entryCount = {entryCountJson};
+      var initialRows = {initialRowsJson};
+      var searches = {searchJson};
+      var keyCols = Array.isArray(keyField) ? keyField : [keyField];
+      var LANGS = ["fr", "en", "es", "ru", "zh", "ar"];
+      var body = document.getElementById("entries-body");
+      var find = document.getElementById("find");
+      var count = document.getElementById("find-count");
+      var showAll = document.getElementById("show-all");
+      var loaded = false, loading = false, expanded = initialRows >= entryCount;
+      if (expanded && showAll) showAll.hidden = true;
+
+      function fmtCell(v) {
+        if (v == null) return "";
+        if (Array.isArray(v)) return v.map(fmtCell).join("; ");
+        if (typeof v === "object") {
+          for (var i = 0; i < LANGS.length; i++) {
+            var s = v[LANGS[i]];
+            if (typeof s === "string" && s.trim()) return s;
+          }
+          return Object.values(v).map(fmtCell).filter(Boolean).join(" ");
+        }
+        return String(v);
+      }
+      function keyOf(e) {
+        return keyCols.map(function (f) { return e[f] == null ? "" : String(e[f]); }).join(" | ");
+      }
+      function makeRow(entry, search) {
+        var tr = document.createElement("tr");
+        tr.setAttribute("data-search", search);
+        var td0 = document.createElement("td");
+        td0.className = "num";
+        var a = document.createElement("a");
+        a.href = "/registers/" + slug + "/entries/" + encodeURIComponent(keyOf(entry)) + "/";
+        a.className = "no-underline hover:underline entry-link";
+        a.setAttribute("data-key", keyOf(entry));
+        a.textContent = fmtCell(entry[keyCols[0]]);
+        td0.appendChild(a);
+        tr.appendChild(td0);
+        displayCols.forEach(function (c) {
+          var td = document.createElement("td");
+          td.textContent = fmtCell(entry[c]);
+          tr.appendChild(td);
+        });
+        return tr;
+      }
+      var pending = null;
+      function ensureLoaded(cb) {
+        if (loaded) { cb(); return; }
+        if (loading) { pending = cb; return; }
+        loading = true;
+        fetch("/registers/" + slug + "/entries.json")
+          .then(function (r) { return r.json(); })
+          .then(function (data) {
+            body.textContent = "";
+            data.entries.forEach(function (e) { body.appendChild(makeRow(e.entry, e.key.toLowerCase())); });
+            loaded = true; expanded = true;
+            if (showAll) showAll.hidden = true;
+            loading = false;
+            if (pending) { var p = pending; pending = null; p(); }
+            cb();
+          })
+          .catch(function () {
+            loading = false;
+            if (showAll) { showAll.hidden = false; showAll.textContent = "Show all " + entryCount; }
+          });
+      }
+      function applyFilter() {
+        var q = find.value.trim().toLowerCase();
+        var rows = body.rows, shown = 0;
+        for (var i = 0; i < rows.length; i++) {
+          var hit = !q || rows[i].getAttribute("data-search").indexOf(q) !== -1;
+          rows[i].style.display = hit ? "" : "none";
+          if (hit) shown++;
+        }
+        count.textContent = q ? shown + " of " + entryCount + " entries" : entryCount + " entries";
+      }
+      var clearBtn = document.getElementById("find-clear");
+      function syncClear() { clearBtn.hidden = !find.value; }
+      find.addEventListener("input", function () {
+        syncClear();
+        if (!loaded && find.value.trim()) { ensureLoaded(applyFilter); return; }
+        applyFilter();
+      });
+      clearBtn.addEventListener("click", function () {
+        find.value = ""; syncClear(); applyFilter(); find.focus();
+      });
+      document.addEventListener("keydown", function (e) {
+        var tag = (document.activeElement && document.activeElement.tagName) || "";
+        if (e.key === "/" && tag !== "INPUT" && tag !== "TEXTAREA") {
+          e.preventDefault(); find.focus();
+        } else if (e.key === "Escape" && document.activeElement === find) {
+          find.value = ""; syncClear(); applyFilter(); find.blur();
+        }
+      });
+
+      if (showAll) showAll.addEventListener("click", function () {
+        showAll.textContent = "Loading";
+        ensureLoaded(function () {
+          var run = function () { applyFilter(); };
+          if (document.startViewTransition && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
+            document.startViewTransition(run);
+          } else { run(); }
+        });
+      });
+      body.addEventListener("click", function (e) {
+        var th = e.target.closest("th[data-sort]");
+        if (!th) return;
+        var dir = th.dataset.dir === "asc" ? "desc" : "asc";
+        var all = th.parentNode.children;
+        for (var i = 0; i < all.length; i++) {
+          if (all[i] !== th) { delete all[i].dataset.dir; }
+        }
+        th.dataset.dir = dir;
+        var idx = Array.prototype.indexOf.call(th.parentNode.children, th);
+        Array.prototype.slice.call(body.rows)
+          .sort(function (a, b) {
+            var av = a.cells[idx].textContent.trim(), bv = b.cells[idx].textContent.trim();
+            return dir === "asc" ? av.localeCompare(bv) : bv.localeCompare(av);
+          })
+          .forEach(function (row) { body.appendChild(row); });
+      });
+
+      var INDEX = null;
+      var preview = document.getElementById("preview");
+      document.addEventListener("mouseover", function (e) {
+        var a = e.target.closest ? e.target.closest("a.entry-link") : null;
+        if (!a || !INDEX) return;
+        var key = a.getAttribute("data-key");
+        var found = null;
+        for (var i = 0; i < INDEX.entries.length; i++) {
+          if (INDEX.entries[i].key === key) { found = INDEX.entries[i].entry; break; }
+        }
+        if (!found) return;
+        preview.textContent = "";
+        var pk = document.createElement("span");
+        pk.className = "pk"; pk.textContent = key;
+        preview.appendChild(pk);
+        var fields = ["company_name", "applicant", "network", "country_or_area"];
+        for (var j = 0; j < fields.length; j++) {
+          if (found[fields[j]] != null) {
+            var pl = document.createElement("span");
+            pl.className = "pl";
+            pl.textContent = String(fmtCell(found[fields[j]])).slice(0, 90);
+            preview.appendChild(pl);
+          }
+        }
+        var hist = INDEX.history[key] || [];
+        var last = hist[hist.length - 1];
+        if (last) {
+          var pl = document.createElement("span");
+          pl.className = "pl";
+          pl.textContent = "Last change: " + last.type + (last.ob_issue ? ", issue " + last.ob_issue : "");
+          preview.appendChild(pl);
+        }
+        preview.hidden = false;
+        var r = a.getBoundingClientRect();
+        preview.style.left = Math.min(r.left, window.innerWidth - 340) + "px";
+        preview.style.top = Math.min(r.bottom + 8, window.innerHeight - 160) + "px";
+      });
+      document.addEventListener("mouseout", function (e) {
+        if (e.target.closest && e.target.closest("a.entry-link")) preview.hidden = true;
+      });
+      document.addEventListener("focusin", function (e) {
+        if (e.target.closest && e.target.closest("a.entry-link") && !INDEX) {
+          fetch("/registers/" + slug + "/entries.json").then(function (r) { return r.json(); })
+            .then(function (d) { INDEX = d; });
+        }
+      });
+
+      var chips = document.getElementById("dock-chips");
+      if (chips) {
+        var scrollTo = function () { chips.scrollLeft = chips.scrollWidth; };
+        if (document.readyState === "complete") scrollTo();
+        else document.addEventListener("DOMContentLoaded", scrollTo);
+      }
+    })();
+  </script>
+</Base>

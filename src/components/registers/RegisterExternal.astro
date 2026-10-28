@@ -1,0 +1,117 @@
+---
+/**
+ * A textual publication — a register without keyed entries. Lists the
+ * issues whose amendments touch it, with the full amendment content.
+ */
+import Base from "~/layouts/Base.astro";
+import { listIssueIds, loadIssue, loadListMetadata, lastAnnexBefore } from "~/lib/loaders";
+import { obIssuesRoot, readYamlOrNull, join } from "~/lib/fs";
+import { formatShortDate } from "~/lib/format";
+import TextualAmendment from "~/components/TextualAmendment.astro";
+import StructuredAmendment from "~/components/StructuredAmendment.astro";
+import type { TextAmendment, PlaceholderAmendment, SequencedAmendment } from "~/lib/types";
+
+export interface Props {
+  slug: string;
+  title: string;
+  recommendation: string;
+  recommendationVersion: string;
+  registerId: string;
+}
+const { slug, title, recommendation, recommendationVersion, registerId } = Astro.props;
+
+interface AmendingIssue {
+  id: number;
+  date: string | null;
+  textualAmendment: TextAmendment | null;
+  placeholderAmendment: PlaceholderAmendment | null;
+  structuredAmendments: SequencedAmendment[];
+}
+const amendingIssues: AmendingIssue[] = [];
+for (const id of listIssueIds()) {
+  const issue = loadIssue(id);
+  if (!issue) continue;
+  const textual = issue.amendments.textual[slug] ?? null;
+  const placeholder = issue.amendments.placeholder[slug] ?? null;
+  const structured = issue.amendments.structured[slug] ?? [];
+  let textAmendment = textual;
+  if (!textAmendment) {
+    const textPath = join(obIssuesRoot(), String(id), slug, "text.yaml");
+    const textData = readYamlOrNull<TextAmendment>(textPath);
+    if (textData && textData.contents) textAmendment = textData;
+  }
+  if (textAmendment || placeholder || structured.length > 0) {
+    amendingIssues.push({ id, date: issue?.meta?.publication_date ?? null, textualAmendment: textAmendment, placeholderAmendment: placeholder, structuredAmendments: structured });
+  }
+}
+const annexRef = (() => {
+  const ids = listIssueIds();
+  const latest = ids.length > 0 ? ids[ids.length - 1]! : 0;
+  return lastAnnexBefore(latest, registerId);
+})();
+const listMeta = loadListMetadata(registerId);
+const url = listMeta?.url ?? null;
+---
+<Base title={`Register: ${title}`} description={`${title} — external register.`} masthead wide
+      breadcrumbs={[{ label: "Registers", href: "/registers/" }, { label: title }]}>
+  <section class="rule-thin pt-6 pb-6">
+    <p class="uppercase font-semibold text-[var(--step--1)]"
+       style="font-family: var(--font-sans); letter-spacing: 0.1em; color: var(--accent);">
+      Register
+      {recommendation && ` · Recommendation ITU-T ${recommendation}`}
+    </p>
+    <p class="text-[var(--step--1)] mt-1" style="font-family: var(--font-sans); color: var(--fg-muted);">
+      In accordance with ITU-T Recommendation {recommendation}
+      {recommendationVersion && ` (${recommendationVersion})`}
+    </p>
+    <h2 class="text-[var(--step-4)] mt-1"
+        style="font-family: var(--font-display); font-weight: 700; line-height: 1.1;">
+      {title}
+    </h2>
+    <p class="mt-2 text-[var(--step--1)]" style="color: var(--fg-muted); font-family: var(--font-sans);">
+      This register is a textual publication. It has no keyed entries; the Bulletin amends it
+      through published issues.
+      {annexRef?.issueId && (
+        <> Annexed to <a href={`/issues/${annexRef.issueId}/`}>ITU OB No. {annexRef.issueId}</a>.</>
+      )}
+      {annexRef?.positionOn && <> Position on {formatShortDate(annexRef.positionOn)}.</>}
+    </p>
+    {url && (
+      <p class="mt-2 text-[var(--step--1)]" style="font-family: var(--font-sans);">
+        <a href={url} rel="noopener noreferrer">Authoritative resource ↗</a>
+      </p>
+    )}
+  </section>
+
+  {amendingIssues.length > 0 ? (
+    <section>
+      <h3 class="text-[var(--step-2)] mb-3" style="font-family: var(--font-display); font-weight: 600;">
+        Issues amending this register
+      </h3>
+      <ul class="space-y-3" style="font-family: var(--font-sans); list-style: none; padding: 0;">
+        {amendingIssues.sort((a, b) => b.id - a.id).map((item) => (
+          <li class="panel" style="padding: 1rem 1.25rem;">
+            <h3 class="text-[var(--step-0)] m-0">
+              <a href={`/issues/${item.id}/`}>OB no. <span class="num">{item.id}</span></a>
+              {item.date && <span class="ml-2" style="color: var(--fg-muted);">{formatShortDate(item.date)}</span>}
+            </h3>
+            {item.textualAmendment && <div class="mt-3 prose-bulletin measure"><TextualAmendment amendment={item.textualAmendment} /></div>}
+            {item.placeholderAmendment && <div class="mt-3"><TextualAmendment placeholder={item.placeholderAmendment} /></div>}
+            {item.structuredAmendments.length > 0 && <div class="mt-3"><StructuredAmendment amendments={item.structuredAmendments} /></div>}
+          </li>
+        ))}
+      </ul>
+    </section>
+  ) : (
+    <section class="panel p-6">
+      <p style="font-family: var(--font-sans);">
+        This register has not been referenced in any Operational Bulletin issue in our records.
+      </p>
+    </section>
+  )}
+  {recommendation && (
+    <p class="mt-4" style="font-family: var(--font-sans);">
+      <a href={`/recommendations/${recommendation}/`}>→ Recommendation ITU-T {recommendation}</a>
+    </p>
+  )}
+</Base>

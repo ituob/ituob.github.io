@@ -17,10 +17,9 @@ export function getStaticPaths() {
 const { slug } = Astro.params;
 const manifest = loadManifest(slug!);
 const title = manifest?.title?.en ?? slug!;
-// The compiler rejects optional chaining inside template expressions,
-// so the injected values are computed here.
+// Member access in template expressions is unparseable by the
+// compiler, so injected values are computed here.
 const slugJson = JSON.stringify(slug);
-const keyFieldJson = JSON.stringify(manifest?.key_field ?? "");
 const titleJson = JSON.stringify(title);
 ---
 <Base title={`Entry · ${title}`} description={`${title} — one entry, addressed by its own path so it can be cited.`}>
@@ -55,7 +54,6 @@ const titleJson = JSON.stringify(title);
   <script is:inline>
     (function () {
       var slug = {slugJson};
-      var keyField = {keyFieldJson};
       var title = {titleJson};
       var m = location.pathname.match(/^\/registers\/[a-z0-9-]+\/entries\/(.+?)\/?$/);
       var view = document.getElementById("entry-view");
