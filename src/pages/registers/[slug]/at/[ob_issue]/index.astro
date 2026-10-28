@@ -42,14 +42,15 @@ const title = manifest.title.en ?? manifest.slug;
   <section class="rule-thin pt-6 pb-6">
     <p class="uppercase font-semibold text-[var(--step--1)]"
        style="font-family: var(--font-sans); letter-spacing: 0.1em; color: var(--accent);">
-      Register · Point in time
+      Register
     </p>
     <h2 class="text-[var(--step-4)] mt-1"
         style="font-family: var(--font-display); font-weight: 700; line-height: 1.1;">
       {title}
     </h2>
     <p class="mt-2 text-[var(--step--1)]" style="color: var(--fg-muted); font-family: var(--font-sans);">
-      State as of OB No. {obIssue} · {state.entry_count} active entries
+      This edition records the register as it stood after issue № {obIssue}.
+      It lists {state.entry_count} entries that were active then.
     </p>
   </section>
 
@@ -63,7 +64,7 @@ const title = manifest.title.en ?? manifest.slug;
   <section>
     <header class="rule-thin pt-4 mb-5">
       <h3 class="text-[var(--step-3)]" style="font-family: var(--font-display); font-weight: 600;">
-        Entries as of OB No. {obIssue}
+        Entries in this edition
       </h3>
     </header>
     <RegisterTable state={state} keyField={manifest.key_field} />

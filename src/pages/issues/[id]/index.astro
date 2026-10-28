@@ -227,6 +227,9 @@ const authoritativeHref =
         </li>
       )}
     </ul>
+    <p class="toc-expand">
+      <button type="button" id="expand-all" aria-pressed="false">Expand all messages</button>
+    </p>
   </nav>
 
   {upcomingIssues.length > 0 && (
@@ -258,13 +261,14 @@ const authoritativeHref =
     {generalList.map((g) => {
       const t = g.type;
       return (
-        <article class={`message message--${t}`}>
-          <header>
+        <details class={`message message--${t}`} id={g.anchorId}>
+          <summary class="msg-summary">
             <h3 class="title">
               <span class="text">{g.title}</span>
-              <a id={g.anchorId} class="anchor" title="Link to this message" href={`/issues/${id}/#${g.anchorId}`}>#</a>
+              <a class="anchor" title="Link to this message"
+                 href={`/issues/${id}/#${g.anchorId}`}>#</a>
             </h3>
-          </header>
+          </summary>
           <div class="included-contents">
             {t === "running_annexes" && issue.general.runningAnnexes && <RunningAnnexes issue={issue} />}
             {t === "approved_recommendations" && issue.general.approvedRecommendations && (
@@ -284,7 +288,7 @@ const authoritativeHref =
               </>
             ))}
           </div>
-        </article>
+        </details>
       );
     })}
   </section>
@@ -306,8 +310,8 @@ const authoritativeHref =
       </section>
 
       {amendmentsList.map((a) => (
-        <article class="message message--amendment">
-          <header>
+        <details class="message message--amendment" id={a.anchorId}>
+          <summary class="msg-summary">
             <h3 class="title">
               <span class="label" title="Amendment">
                 Amd.
@@ -315,26 +319,27 @@ const authoritativeHref =
                 {" "}to
               </span>
               <a class="text" href={a.datasetHref}>{a.title}</a>
-              <a id={a.anchorId} class="anchor" title="Link to this message" href={`/issues/${id}/#${a.anchorId}`}>#</a>
+              <a class="anchor" title="Link to this message"
+                 href={`/issues/${id}/#${a.anchorId}`}>#</a>
             </h3>
             {a.recCode && (
-              <p class="recommendation">
+              <span class="recommendation">
                 In accordance with{" "}
                 <span class="std-label">
-                  <span class="std-body">ITU-T</span>
-                  <span class="std-type">Recommendation</span>
+                  <span class="std-body">ITU-T</span>{" "}
+                  <span class="std-type">Recommendation</span>{" "}
                   <span class="std-id">{a.recCode}{a.recVersion ? ` (${a.recVersion})` : ""}</span>
                 </span>
-              </p>
+              </span>
             )}
             {a.annexIssueId && (
-              <p class="annex-to-ob">
+              <span class="annex-to-ob">
                 Position originally published as annex to{" "}
                 <a href={`/issues/${a.annexIssueId}/`}>ITU Operational Bulletin No. {a.annexIssueId}</a>
                 {a.annexDate && <span> — {a.annexDate}</span>}
-              </p>
+              </span>
             )}
-          </header>
+          </summary>
           <div class="included-contents">
             {a.hasStructured && issue.amendments.structured[a.slug] && (
               <StructuredAmendment amendments={issue.amendments.structured[a.slug]!} lang={lang} />
@@ -346,11 +351,48 @@ const authoritativeHref =
               <TextualAmendment placeholder={issue.amendments.placeholder[a.slug]} />
             )}
           </div>
-        </article>
+        </details>
       ))}
     </section>
   )}
 
   <script is:inline src="/assets/js/issue-nav.js"></script>
-  <script is:inline src="/assets/js/expandable-message.js"></script>
+  <script is:inline>
+    (function () {
+      var button = document.getElementById("expand-all");
+      var cards = Array.prototype.slice.call(document.querySelectorAll("details.message"));
+      if (!button || cards.length === 0) return;
+
+      function setLabel() {
+        var allOpen = cards.every(function (card) { return card.open; });
+        button.textContent = allOpen ? "Collapse all messages" : "Expand all messages";
+        button.setAttribute("aria-pressed", allOpen ? "true" : "false");
+      }
+
+      button.addEventListener("click", function () {
+        var open = !cards.every(function (card) { return card.open; });
+        cards.forEach(function (card) { card.open = open; });
+        setLabel();
+      });
+      cards.forEach(function (card) { card.addEventListener("toggle", setLabel); });
+      setLabel();
+
+      cards.forEach(function (card) {
+        card.querySelectorAll("summary a").forEach(function (link) {
+          link.addEventListener("click", function (event) { event.stopPropagation(); });
+        });
+      });
+
+      function openTarget() {
+        if (!location.hash) return;
+        var el = document.getElementById(decodeURIComponent(location.hash.slice(1)));
+        if (el && el.tagName === "DETAILS") {
+          el.open = true;
+          el.scrollIntoView({ block: "start" });
+        }
+      }
+      window.addEventListener("hashchange", openTarget);
+      openTarget();
+    })();
+  </script>
 </Base>

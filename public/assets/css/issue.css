@@ -552,3 +552,112 @@ body.layout--issue > main > section.planned-issues table td:empty, body.layout--
 body.layout--issue > main > section.planned-issues table {
   font-size: 80%;
 }
+
+/* Expandable messages: native details, so every message opens on its
+   own without a script or an icon font. */
+details.message {
+  display: block;
+  box-shadow: 2px 2px 20px -8px rgba(0, 0, 0, 0.4);
+  border-radius: 6px;
+  margin: 0.9rem 0 0.9rem -6px;
+  padding: 0 1rem;
+  padding-top: 0.01em;
+}
+
+details.message > summary.msg-summary {
+  position: relative;
+  display: block;
+  cursor: pointer;
+  list-style: none;
+  padding: 0.55rem 1.6rem 0.55rem 0;
+}
+
+details.message > summary.msg-summary::-webkit-details-marker {
+  display: none;
+}
+
+details.message > summary.msg-summary::marker {
+  content: "";
+}
+
+details.message > summary.msg-summary:hover .title .text {
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
+details.message > summary.msg-summary::after {
+  content: "";
+  position: absolute;
+  right: 0.4rem;
+  top: 1rem;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-right: 2px solid #1285B1;
+  border-bottom: 2px solid #1285B1;
+  transform: rotate(45deg);
+  transition: transform 0.15s ease;
+}
+
+details.message[open] > summary.msg-summary::after {
+  transform: rotate(-135deg);
+}
+
+details.message .msg-summary .title {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin: 0;
+  font-weight: normal;
+}
+
+details.message .msg-summary .title .text {
+  flex: 1;
+}
+
+details.message .msg-summary .title .label {
+  white-space: nowrap;
+  margin: 0.35rem 1rem 0 0;
+  font-size: 70%;
+}
+
+details.message .msg-summary .title .anchor {
+  margin-left: auto;
+}
+
+details.message .msg-summary .recommendation,
+details.message .msg-summary .annex-to-ob {
+  display: block;
+  margin: 0.4rem 0 0;
+  font-size: 90%;
+}
+
+details.message[open] > summary.msg-summary {
+  border-bottom: 1px solid #D8E4EA;
+}
+
+details.message .included-contents {
+  margin-left: -1rem;
+  margin-right: -1rem;
+  padding: 0.75rem 1rem;
+  font-size: 80%;
+  line-height: 1.2;
+  overflow: hidden;
+  background: whiteSmoke;
+  border-radius: 0 0 6px 6px;
+}
+
+.toc-expand button {
+  margin-top: 0.75rem;
+  padding: 0.3rem 0.8rem;
+  border: 1px solid #D8E4EA;
+  border-radius: 999px;
+  background: #F2F7F9;
+  color: #0C3D52;
+  font: inherit;
+  font-size: 85%;
+  cursor: pointer;
+}
+
+.toc-expand button:hover {
+  border-color: #1285B1;
+}

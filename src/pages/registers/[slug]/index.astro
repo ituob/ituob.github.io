@@ -36,19 +36,33 @@ const recommendationVersion = (() => {
 const title = isExternal
   ? (catalogEntry?.title?.en ?? catalogEntry?.register_id ?? slug)
   : (manifest.title.en ?? manifest.slug);
-const errorSummary = (() => {
-  if (!state || state.error_count === 0) return null;
-  const errs = (state.errors as string[]) ?? [];
-  const lir = errs.filter((e) => e.startsWith("skip LIR")).length;
-  const dup = errs.filter((e) => e.includes("already exists")).length;
-  const other = state.error_count - lir - dup;
-  const n = (count: number, singular: string, plural: string) => `${count} ${count === 1 ? singular : plural}`;
-  const parts: string[] = [];
-  if (lir > 0) parts.push(n(lir, "unmatched repetition", "unmatched repetitions"));
-  if (dup > 0) parts.push(n(dup, "skipped duplicate entry", "skipped duplicate entries"));
-  if (other > 0) parts.push(n(other, "unapplied change", "unapplied changes"));
-  return parts.join(" + ");
-})();
+const errorSummary = state && state.error_count > 0
+  ? `${state.error_count} ${state.error_count === 1 ? "amendment" : "amendments"} could not be applied`
+  : null;
+interface ReplayIssue {
+  action: string;
+  key: string;
+  issue: string;
+}
+const ACTION_LABELS: Record<string, string> = {
+  ADD: "Addition",
+  SUP: "Withdrawal",
+  MOD: "Modification",
+  DEL: "Deletion",
+  REP: "Replacement",
+  LIR: "Repetition",
+};
+const replayIssues: ReplayIssue[] = (state?.errors ?? []).map((raw): ReplayIssue => {
+  const keyMatch = raw.match(/"code" => "([^"]*)"/);
+  const issueMatch = raw.match(/at OB (\d+)/);
+  const actionMatch = raw.match(/^skip (\w+)/);
+  const code = actionMatch?.[1]?.toUpperCase() ?? "";
+  return {
+    action: ACTION_LABELS[code] ?? "Change",
+    key: keyMatch?.[1] ?? "",
+    issue: issueMatch?.[1] ?? "",
+  };
+});
 ---
 <Base title={`Register: ${title}`}
       description={isExternal ? `${title} — external register.` : `${title} register — the current edition. ${state.entry_count} active entries.`}
@@ -70,6 +84,7 @@ const errorSummary = (() => {
       recommendation={recommendation}
       recommendationVersion={recommendationVersion}
       errorSummary={errorSummary}
+      replayIssues={replayIssues}
     />
   )}
 </Base>

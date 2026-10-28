@@ -4,10 +4,10 @@
  * beside, editions in the dock. Rendered by /registers/[slug] for
  * registers with snapshots.
  */
-import Base from "~/layouts/Base.astro";
 import { listIssueIds, loadIssue, loadListMetadata, lastAnnexBefore } from "~/lib/loaders";
 import { formatShortDate } from "~/lib/format";
 import { formatCellValue } from "~/lib/values";
+import { fieldLabel, orderFields } from "~/lib/columns";
 import { loadStateAtIssue } from "~/lib/snapshots";
 import type { RegisterManifest, RegisterState } from "~/lib/snapshots";
 
@@ -18,8 +18,9 @@ export interface Props {
   recommendation: string;
   recommendationVersion: string;
   errorSummary: string | null;
+  replayIssues: { action: string; key: string; issue: string }[];
 }
-const { slug, manifest, state, recommendation, recommendationVersion, errorSummary } = Astro.props;
+const { slug, manifest, state, recommendation, recommendationVersion, errorSummary, replayIssues } = Astro.props;
 
 const title = manifest.title.en ?? manifest.slug;
 const keyField = manifest.key_field;
@@ -69,11 +70,16 @@ const canonicalOf = (v: unknown): string => {
   return formatCellValue(v);
 };
 const countryCol = displayCols.includes("country_or_area") ? "country_or_area" : null;
+const keyLabel = keyCols.length > 1 ? "Key" : fieldLabel(keyCols[0]!);
+const KEY_COL = "__key__";
+const tableCols = orderFields([KEY_COL, ...displayCols], [KEY_COL]);
 const rows = visibleEntries.map((entry) => ({
   key: keyOf(entry),
-  keyText: formatCellValue(entry[keyCols[0]!]),
+  keyText: keyCols.length > 1 ? keyOf(entry) : formatCellValue(entry[keyCols[0]!]),
   search: searchOf(entry),
-  cells: displayCols.map((c) => (c === countryCol ? canonicalOf(entry[c]) : formatCellValue(entry[c]))),
+  cells: tableCols.map((c) =>
+    c === KEY_COL ? "" : c === countryCol ? canonicalOf(entry[c]) : formatCellValue(entry[c]),
+  ),
 }));
 
 const chipData = touched
@@ -108,12 +114,6 @@ const railChanges = lastChanges.map((h) => {
   return { type: h.type, ob_issue: h.ob_issue, code: code == null ? null : String(code) };
 });
 
-const slugJson = JSON.stringify(slug);
-const keyFieldJson = JSON.stringify(keyField);
-const displayColsJson = JSON.stringify(displayCols);
-const searchJson = JSON.stringify(visibleEntries.map(searchOf));
-const initialRowsJson = JSON.stringify(INITIAL_ROWS);
-const entryCountJson = JSON.stringify(entryCount);
 const speculationJson = JSON.stringify({
   prefetch: [{
     source: "document",
@@ -122,8 +122,6 @@ const speculationJson = JSON.stringify({
   }],
 });
 ---
-<Base title={`Register: ${title}`} masthead wide
-      breadcrumbs={[{ label: "Registers", href: "/registers/" }, { label: title }]}>
   <style>
     .reg { --pg-paper: #fff; --pg-ink: #0C3D52; --pg-muted: #5B7285; --pg-subtle: #6E8899;
       --pg-line: #D8E4EA; --pg-mist: #F2F7F9; --pg-accent: #1285B1; color: var(--pg-ink);
@@ -142,6 +140,7 @@ const speculationJson = JSON.stringify({
       letter-spacing: 0.1em; text-transform: uppercase; color: var(--pg-muted); }
     .errs summary { cursor: pointer; }
     .errs p { margin: 0.4rem 0 0; }
+    .errs ul { margin: 0.4rem 0 0; padding-left: 1.1rem; font-family: var(--font-sans); overflow-wrap: anywhere; }
     .reg-grid { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 1.5rem; margin-top: 1.4rem; }
     @media (max-width: 900px) { .reg-grid { grid-template-columns: 1fr; } }
 
@@ -266,14 +265,24 @@ const speculationJson = JSON.stringify({
       The current edition of this register follows
       <a href={`/issues/${latestIssue}/`}>issue № {latestIssue}</a>
       {latestDate && <> ({latestDate})</>}.
-      {errorSummary && (
-        <details class="errs">
-          <summary>Unapplied at replay: {errorSummary}</summary>
-          <p>These changes could not be applied to the replayed list; the printed
-          Bulletin remains the authoritative record for them.</p>
-        </details>
-      )}
     </p>
+    {errorSummary && (
+      <details class="errs">
+        <summary>{errorSummary}</summary>
+        <p>These amendments name entries that this register does not contain. The printed Bulletin remains the authoritative record for them.</p>
+        {replayIssues.length > 0 && (
+          <ul>
+            {replayIssues.map((issue) => (
+              <li>
+                {issue.action}
+                {issue.key && <> of <span class="font-mono">{issue.key}</span></>}
+                {issue.issue && <> in <a href={`/issues/${issue.issue}/`}>issue № {issue.issue}</a></>}
+              </li>
+            ))}
+          </ul>
+        )}
+      </details>
+    )}
     {authoritativeUrl && (
       <p class="reg-meta"><a href={authoritativeUrl} rel="noopener noreferrer">Authoritative resource ↗</a></p>
     )}
@@ -318,22 +327,30 @@ const speculationJson = JSON.stringify({
           <kbd class="find-kbd" aria-hidden="true">/</kbd>
         </span>
         <span class="count num" id="find-count" aria-live="polite">{entryCount} entries</span>
-        <button class="btn-all" id="show-all" hidden>Show all {entryCount}</button>
+        <button class="btn-all" id="show-all">Show all {entryCount}</button>
       </div>
       <div class="overflow-x-auto">
         <table class="entries">
           <thead><tr>
-            <th class="num" data-sort="text">Number</th>
-            {displayCols.map((c) => <th data-sort="text">{c.replace(/_/g, " ")}</th>)}
+            {tableCols.map((c) =>
+              c === KEY_COL
+                ? <th class="num" data-sort="text">{keyLabel}</th>
+                : <th data-sort="text">{fieldLabel(c)}</th>
+            )}
           </tr></thead>
           <tbody id="entries-body">
             {rows.map((row) => (
               <tr data-search={row.search}>
-                <td class="num">
-                  <a href={`/registers/${slug}/entries/${encodeURIComponent(row.key)}/`}
-                     class="no-underline hover:underline entry-link" data-key={row.key}>{row.keyText}</a>
-                </td>
-                {row.cells.map((text) => <td>{text}</td>)}
+                {tableCols.map((c, i) =>
+                  c === KEY_COL ? (
+                    <td class="num">
+                      <a href={`/registers/${slug}/entries/${encodeURIComponent(row.key)}/`}
+                         class="no-underline hover:underline entry-link" data-key={row.key}>{row.keyText}</a>
+                    </td>
+                  ) : (
+                    <td>{row.cells[i]}</td>
+                  )
+                )}
               </tr>
             ))}
           </tbody>
@@ -373,17 +390,10 @@ const speculationJson = JSON.stringify({
   <div id="preview" class="preview" role="presentation" hidden></div>
   </div>
 
-  <script type="speculationrules" is:inline>
-    {speculationJson}
-  </script>
-  <script is:inline>
+  <script type="speculationrules" is:inline set:html={speculationJson} />
+  <script is:inline define:vars={{ slug, keyField, tableCols, entryCount, initialRows: INITIAL_ROWS }}>
     (function () {
-      var slug = {slugJson};
-      var keyField = {keyFieldJson};
-      var displayCols = {displayColsJson};
-      var entryCount = {entryCountJson};
-      var initialRows = {initialRowsJson};
-      var searches = {searchJson};
+      var KEY_COL = "__key__";
       var keyCols = Array.isArray(keyField) ? keyField : [keyField];
       var LANGS = ["fr", "en", "es", "ru", "zh", "ar"];
       var body = document.getElementById("entries-body");
@@ -411,18 +421,19 @@ const speculationJson = JSON.stringify({
       function makeRow(entry, search) {
         var tr = document.createElement("tr");
         tr.setAttribute("data-search", search);
-        var td0 = document.createElement("td");
-        td0.className = "num";
-        var a = document.createElement("a");
-        a.href = "/registers/" + slug + "/entries/" + encodeURIComponent(keyOf(entry)) + "/";
-        a.className = "no-underline hover:underline entry-link";
-        a.setAttribute("data-key", keyOf(entry));
-        a.textContent = fmtCell(entry[keyCols[0]]);
-        td0.appendChild(a);
-        tr.appendChild(td0);
-        displayCols.forEach(function (c) {
+        tableCols.forEach(function (c) {
           var td = document.createElement("td");
-          td.textContent = fmtCell(entry[c]);
+          if (c === KEY_COL) {
+            td.className = "num";
+            var a = document.createElement("a");
+            a.href = "/registers/" + slug + "/entries/" + encodeURIComponent(keyOf(entry)) + "/";
+            a.className = "no-underline hover:underline entry-link";
+            a.setAttribute("data-key", keyOf(entry));
+            a.textContent = fmtCell(entry[keyCols[0]]);
+            td.appendChild(a);
+          } else {
+            td.textContent = fmtCell(entry[c]);
+          }
           tr.appendChild(td);
         });
         return tr;
@@ -559,4 +570,3 @@ const speculationJson = JSON.stringify({
       }
     })();
   </script>
-</Base>

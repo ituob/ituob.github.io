@@ -17,10 +17,6 @@ export function getStaticPaths() {
 const { slug } = Astro.params;
 const manifest = loadManifest(slug!);
 const title = manifest?.title?.en ?? slug!;
-// Member access in template expressions is unparseable by the
-// compiler, so injected values are computed here.
-const slugJson = JSON.stringify(slug);
-const titleJson = JSON.stringify(title);
 ---
 <Base title={`Entry · ${title}`} description={`${title} — one entry, addressed by its own path so it can be cited.`}>
   <section class="rule-thin pt-6 pb-6">
@@ -51,10 +47,8 @@ const titleJson = JSON.stringify(title);
     </p>
   </noscript>
 
-  <script is:inline>
+  <script is:inline define:vars={{ slug, title }}>
     (function () {
-      var slug = {slugJson};
-      var title = {titleJson};
       var m = location.pathname.match(/^\/registers\/[a-z0-9-]+\/entries\/(.+?)\/?$/);
       var view = document.getElementById("entry-view");
       if (!m) { view.textContent = "No entry key in this path."; return; }

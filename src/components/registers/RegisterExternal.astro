@@ -3,7 +3,6 @@
  * A textual publication — a register without keyed entries. Lists the
  * issues whose amendments touch it, with the full amendment content.
  */
-import Base from "~/layouts/Base.astro";
 import { listIssueIds, loadIssue, loadListMetadata, lastAnnexBefore } from "~/lib/loaders";
 import { obIssuesRoot, readYamlOrNull, join } from "~/lib/fs";
 import { formatShortDate } from "~/lib/format";
@@ -52,8 +51,6 @@ const annexRef = (() => {
 const listMeta = loadListMetadata(registerId);
 const url = listMeta?.url ?? null;
 ---
-<Base title={`Register: ${title}`} description={`${title} — external register.`} masthead wide
-      breadcrumbs={[{ label: "Registers", href: "/registers/" }, { label: title }]}>
   <section class="rule-thin pt-6 pb-6">
     <p class="uppercase font-semibold text-[var(--step--1)]"
        style="font-family: var(--font-sans); letter-spacing: 0.1em; color: var(--accent);">
@@ -114,4 +111,3 @@ const url = listMeta?.url ?? null;
       <a href={`/recommendations/${recommendation}/`}>→ Recommendation ITU-T {recommendation}</a>
     </p>
   )}
-</Base>

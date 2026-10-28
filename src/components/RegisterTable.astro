@@ -5,6 +5,7 @@
  */
 import type { RegisterState } from "~/lib/snapshots";
 import { formatCellValue } from "~/lib/values";
+import { fieldLabel, hasValue, orderFields } from "~/lib/columns";
 
 export interface Props {
   state: RegisterState;
@@ -27,14 +28,17 @@ const keyOf = (entry: Record<string, unknown>): string => {
 const keyCols = Array.isArray(keyField) ? keyField : [keyField];
 
 // Compute columns as the union of ALL field keys across every
-// active entry, so entries with different field sets all show.
+// active entry, so entries with different field sets all show. A
+// column that is empty for every entry is dropped, and the remaining
+// columns follow the printed order — country first.
 const colSet = new Set<string>();
 for (const entry of state.active_entries) {
   for (const key of Object.keys(entry)) {
-    if (key !== "_class" && key !== "source_contents") colSet.add(key);
+    if (key !== "_class" && key !== "source_contents" && hasValue(entry[key])) colSet.add(key);
   }
 }
-const cols = [...colSet].sort();
+for (const key of keyCols) colSet.add(key);
+const cols = orderFields([...colSet], keyCols);
 
 
 ---
@@ -44,7 +48,7 @@ const cols = [...colSet].sort();
       <thead>
         <tr>
           {cols.map((c) => (
-            <th>{c.replace(/_/g, " ")}</th>
+            <th>{fieldLabel(c)}</th>
           ))}
         </tr>
       </thead>
