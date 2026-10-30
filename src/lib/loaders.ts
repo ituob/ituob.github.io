@@ -33,6 +33,7 @@ import type {
   DatasetMetadata,
   ProseMirrorNode,
 } from "./types";
+import { slugifyRecCode } from "./format";
 import {
   STRUCTURED_GENERAL_TYPES,
   TEXTUAL_GENERAL_TYPES,
@@ -315,6 +316,45 @@ export function loadListMetadata(pubId: string): ListMeta | null {
 
 export const listDatasetSlugs = memoize((): string[] => {
   return listDirs(datasetsRoot()).sort((a, b) => a.localeCompare(b));
+});
+
+/** Minimal issue-page href, only for issues this site builds; the corpus
+ *  starts at 669, so references to older issues stay plain text. */
+export const issuePageHref = memoize((id: number): string | null => {
+  return listIssueIds().includes(id) ? `/issues/${id}/` : null;
+});
+
+/** Dataset page for a register or publication slug. The amendment and
+ *  annex identifiers use register slugs (e212-mnc), while dataset pages
+ *  live under the seed-dataset directory slugs (1162-E.212); null when
+ *  nothing to link. */
+export const datasetPageHref = memoize((slug: string): string | null => {
+  const dirs = listDatasetSlugs();
+  if (dirs.includes(slug)) return `/datasets/${slug}/`;
+  const reg = loadRegisterCatalog().find((r) => r.slug === slug);
+  const seed = reg?.seed_path?.replace(/^datasets\//, "");
+  if (seed && dirs.includes(seed)) return `/datasets/${seed}/`;
+  return null;
+});
+
+/** Recommendation page href for a code as printed in the Bulletin.
+ *  Falls back from "H.222.0 (2014) Amd 1, Cor 2" to the page of the base
+ *  code; null when no recommendation page exists at all. */
+export const recommendationHref = memoize((code: string): string | null => {
+  const idx = buildRecommendationIndex();
+  if (idx.has(code)) return `/recommendations/${slugifyRecCode(code)}/`;
+  let c = code.trim();
+  for (;;) {
+    const m =
+      c.match(/,\s*Cor\s*\d+\s*$/) ??
+      c.match(/\s+Cor\s*\d+\s*$/) ??
+      c.match(/\s+Amd\s*[\d,\s]+\s*$/) ??
+      c.match(/\s*\(\d{4}\)\s*[^()]*$/) ??
+      c.match(/\s*\(\d{4}\)\s*$/);
+    if (!m || m.index === undefined || m.index <= 0) return null;
+    c = c.slice(0, m.index).trim();
+    if (idx.has(c)) return `/recommendations/${slugifyRecCode(c)}/`;
+  }
 });
 
 export const loadDatasetMetadata = memoize(

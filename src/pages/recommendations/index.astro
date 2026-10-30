@@ -1,6 +1,7 @@
 ---
 import Base from "~/layouts/Base.astro";
 import { buildRecommendationIndex } from "~/lib/loaders";
+import { slugifyRecCode } from "~/lib/format";
 
 const idx = buildRecommendationIndex();
 
@@ -83,7 +84,7 @@ const totalCount = idx.size;
           <ul class="mt-3 divide-y" style="list-style: none; padding: 0; font-family: var(--font-sans);">
             {recs.map((r) => (
               <li class="flex items-baseline justify-between gap-3 py-1.5" data-rec={r.code.toLowerCase()}>
-                <a href={`/recommendations/${encodeURIComponent(r.code)}/`}
+                <a href={`/recommendations/${slugifyRecCode(r.code)}/`}
                    class="no-underline hover:underline num">
                   ITU-T {r.code}
                 </a>
@@ -103,7 +104,7 @@ const totalCount = idx.size;
         </summary>
         <ul class="mt-3" style="list-style: none; padding: 0; font-family: var(--font-sans);">
           {unknown.map((r) => (
-            <li class="py-1"><a href={`/recommendations/${encodeURIComponent(r.code)}/`}>{r.code}</a></li>
+            <li class="py-1"><a href={`/recommendations/${slugifyRecCode(r.code)}/`}>{r.code}</a></li>
           ))}
         </ul>
       </details>

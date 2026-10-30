@@ -6,7 +6,7 @@
  * the source issue and point-in-time snapshot. All computation is
  * hoisted into this frontmatter so the template stays type-checkable.
  */
-import { loadIssue, cumulativeAmendmentNumber } from "~/lib/loaders";
+import { loadIssue, cumulativeAmendmentNumber, issuePageHref } from "~/lib/loaders";
 import { loadStateAtIssue, loadManifest, type ChangeHistoryEntry } from "~/lib/snapshots";
 import { formatSwissDate } from "~/lib/format";
 import { GENERAL_TYPE_LABELS, type GeneralMessageType, type Language } from "~/lib/catalogs";
@@ -50,6 +50,7 @@ interface Card {
   regSlug?: string;
   regTitle?: string;
   amdNo?: number;
+  hasSnapshot?: boolean;
   codeEntries?: [string, string[]][];
   entriesByKey?: Map<string, any>;
   structured?: any;
@@ -118,6 +119,7 @@ for (const year of years) {
         regSlug: reg.slug,
         regTitle: reg.title,
         amdNo: cumulativeAmendmentNumber(block.id, reg.slug),
+        hasSnapshot: Boolean(regState),
         codeEntries: [...codesByType.entries()],
         entriesByKey,
         structured: issue?.amendments.structured[reg.slug],
@@ -211,9 +213,13 @@ function entryFields(entry: any): string[] | null {
               {card.positionOn && card.positionOnIssue && card.positionOnIssue !== card.blockId && (
                 <p class="mt-1 text-[var(--step--1)]" style="color: var(--fg-muted); font-family: var(--font-sans);">
                   Position amended originally published as annex to{" "}
-                  <a href={`/issues/${card.positionOnIssue}/`} class="no-underline hover:underline">
-                    ITU Operational Bulletin No. {card.positionOnIssue}
-                  </a>
+                  {issuePageHref(card.positionOnIssue) ? (
+                    <a href={issuePageHref(card.positionOnIssue)!} class="no-underline hover:underline">
+                      ITU Operational Bulletin No. {card.positionOnIssue}
+                    </a>
+                  ) : (
+                    <span>ITU Operational Bulletin No. {card.positionOnIssue}</span>
+                  )}
                   {" "}— {formatSwissDate(card.positionOn)}
                 </p>
               )}
@@ -270,10 +276,14 @@ function entryFields(entry: any): string[] | null {
                 </details>
               )}
               <p class="mt-3 text-[var(--step--1)]">
-                <a href={`/registers/${card.regSlug}/at/${card.blockId}/`} class="no-underline hover:underline tint">
-                  Point-in-time snapshot →
-                </a>
-                <span class="mx-2" style="color: var(--fg-muted);">·</span>
+                {card.hasSnapshot && (
+                  <>
+                    <a href={`/registers/${card.regSlug}/at/${card.blockId}/`} class="no-underline hover:underline tint">
+                      Point-in-time snapshot →
+                    </a>
+                    <span class="mx-2" style="color: var(--fg-muted);">·</span>
+                  </>
+                )}
                 <a href={`/issues/${card.blockId}/`} class="no-underline hover:underline tint">
                   View source issue →
                 </a>

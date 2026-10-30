@@ -1,0 +1,44 @@
+# ITU Operational Bulletin online — https://www.ituob.org
+# An independent, unofficial reader for the ITU Operational Bulletin.
+
+User-agent: *
+Allow: /
+Disallow: /api/
+
+# Search engines
+User-agent: Googlebot
+Allow: /
+User-agent: Bingbot
+Allow: /
+User-agent: DuckDuckBot
+Allow: /
+User-agent: Applebot
+Allow: /
+
+# AI answer engines and assistants that cite their sources
+User-agent: OAI-SearchBot
+Allow: /
+User-agent: ChatGPT-User
+Allow: /
+User-agent: ClaudeBot
+Allow: /
+User-agent: Claude-User
+Allow: /
+User-agent: Claude-Search
+Allow: /
+User-agent: PerplexityBot
+Allow: /
+User-agent: Perplexity-User
+Allow: /
+User-agent: Google-Extended
+Allow: /
+User-agent: Applebot-Extended
+Allow: /
+User-agent: YouBot
+Allow: /
+
+# Machine-readable policies for AI systems
+# https://www.ituob.org/llms.txt  — site map for assistants
+# https://www.ituob.org/ai.txt    — attribution and usage policy
+
+Sitemap: https://www.ituob.org/sitemap-index.xml

@@ -5,6 +5,7 @@
 import Base from "~/layouts/Base.astro";
 import {
   listSnapshotSlugs,
+  listStateIssues,
   loadManifest,
   loadStateAtIssue,
 } from "~/lib/snapshots";
@@ -14,9 +15,9 @@ import RegisterTable from "~/components/RegisterTable.astro";
 export function getStaticPaths() {
   const paths: { params: { slug: string; ob_issue: string } }[] = [];
   for (const slug of listSnapshotSlugs()) {
-    const manifest = loadManifest(slug);
-    if (!manifest) continue;
-    for (const issue of manifest.touched_issues) {
+    // One page per snapshot file: registers reach before their seed
+    // annex, so the file list is a superset of touched_issues.
+    for (const issue of listStateIssues(slug)) {
       paths.push({ params: { slug, ob_issue: String(issue) } });
     }
   }
@@ -33,6 +34,7 @@ if (!manifest || !state) {
 }
 
 const title = manifest.title.en ?? manifest.slug;
+const stateIssues = listStateIssues(slug!);
 ---
 <Base
   title={`${title} — OB No. ${obIssue}`}
@@ -56,7 +58,7 @@ const title = manifest.title.en ?? manifest.slug;
 
   <TimelineScrubber
     slug={slug!}
-    touchedIssues={manifest.touched_issues}
+    touchedIssues={stateIssues}
     currentIssue={obIssue}
     seedIssue={manifest.seed_issue}
   />

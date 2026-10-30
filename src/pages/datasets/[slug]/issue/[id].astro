@@ -14,6 +14,7 @@ import {
   type Language,
 } from "~/lib/catalogs";
 import { formatSwissDate } from "~/lib/format";
+import { loadManifest } from "~/lib/snapshots";
 import StructuredAmendment from "~/components/StructuredAmendment.astro";
 import TextualAmendment from "~/components/TextualAmendment.astro";
 import TextualMessage from "~/components/TextualMessage.astro";
@@ -75,6 +76,7 @@ const issue = loadIssue(id);
 // Amendments are keyed by the ob-issues directory slug; dataset-slug URLs
 // resolve through the register bridge (1060-M.1400 → m1400-icc).
 const slug = registerForDataset(paramSlug!)?.slug ?? paramSlug!;
+const registerManifest = loadManifest(slug);
 // General-message-fed updates: service_restrictions messages carry a
 // items-table (rendered like the issue page); other types are ProseMirror
 // content rendered by TextualMessage.
@@ -104,10 +106,18 @@ const lang: Language = "en";
 <Base title={`No. ${id} — ${title}`} description={`Amendments to ${title} in OB No. ${id}.`}>
   <header class="mb-8">
     <p class="text-[var(--step--1)]" style="font-family: var(--font-sans);">
-      {meta && <a href={`/datasets/${slug}/`} class="hover:underline">{title}</a>}
+      {meta && <a href={`/datasets/${paramSlug}/`} class="hover:underline">{title}</a>}
       {!meta && title}
       {" "}<span style="color: var(--fg-subtle);">·</span>{" "}
       <a href={`/issues/${id}/`} class="hover:underline">No. {id}</a>
+      {registerManifest && (
+        <>
+          {" "}<span style="color: var(--fg-subtle);">·</span>{" "}
+          <a href={`/registers/${registerManifest.slug}/`} class="hover:underline">
+            Current register state
+          </a>
+        </>
+      )}
     </p>
     <h1 class="mt-1" style="font-family: var(--font-display); font-size: var(--step-3); font-weight: 700;">
       {title}

@@ -1,8 +1,7 @@
 ---
 import Base from "~/layouts/Base.astro";
-import { listDatasetSlugs, loadDatasetMetadata, issuesWithDataset } from "~/lib/loaders";
+import { listDatasetSlugs, loadDatasetMetadata, issuesWithDataset, recommendationHref } from "~/lib/loaders";
 import { PUBLICATION_BY_SLUG } from "~/lib/catalogs";
-import { slugifyRecCode } from "~/lib/format";
 
 const slugs = listDatasetSlugs();
 ---
@@ -35,6 +34,7 @@ const slugs = listDatasetSlugs();
           const known = PUBLICATION_BY_SLUG.get(slug);
           const title = meta?.title?.en ?? known?.label ?? slug;
           const issueCount = issuesWithDataset(slug).length;
+          const recHref = known?.recommendation ? recommendationHref(known.recommendation) : null;
           return (
             <tr>
               <td>
@@ -49,9 +49,7 @@ const slugs = listDatasetSlugs();
               </td>
               <td><code class="num text-[var(--step--1)]">{slug}</code></td>
               <td>
-                {known?.recommendation && (
-                  <a href={`/recommendations/${slugifyRecCode(known.recommendation)}/`}>ITU-T {known.recommendation}</a>
-                )}
+                {recHref && <a href={recHref}>ITU-T {known!.recommendation}</a>}
               </td>
               <td class="num">{issueCount}</td>
             </tr>

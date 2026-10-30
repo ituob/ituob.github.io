@@ -54,7 +54,24 @@ const MEDIA_RANK = new Map(CONTACT_MEDIA.map((field, i) => [field, i]));
 
 const TRAILING_FIELDS = ["status", "effective_date", "note", "notes"];
 
-const LABELS: Record<string, string> = {
+/** Fields that act as an entry's printed identifier in some register;
+ *  used when no explicit key is known so amendment and dataset tables
+ *  still lead with it. */
+const KEY_LIKE_FIELDS = new Set([
+  "issue_id_number",
+  "dnic_number",
+  "carrier_code",
+  "cc_ic",
+  "ipsc",
+  "tmcc_code",
+  "bureaufax_number",
+  "office_code",
+  "network_code",
+  "code",
+  "code_bit",
+]);
+
+export const LABELS: Record<string, string> = {
   country_or_area: "Country or area",
   country_code: "Country code",
   country_area_or_service: "Country, area or service",
@@ -128,6 +145,13 @@ export function orderFields(fields: string[], keyFields: string[]): string[] {
     }
     return fieldLabel(a).localeCompare(fieldLabel(b));
   });
+}
+
+export function orderDatasetFields(fields: string[]): string[] {
+  return orderFields(
+    fields,
+    fields.filter((f) => KEY_LIKE_FIELDS.has(f)),
+  );
 }
 
 export function hasValue(value: unknown): boolean {

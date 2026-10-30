@@ -17,6 +17,7 @@ import type { ActionType } from "~/lib/catalogs";
 import { ACTION_TYPE_LABELS } from "~/lib/catalogs";
 import { formatObDate } from "~/lib/ob-date";
 import { formatCellValue } from "~/lib/values";
+import { fieldLabel, orderDatasetFields } from "~/lib/columns";
 
 export interface Props {
   amendments: SequencedAmendment[];
@@ -71,7 +72,7 @@ function entriesOf(amd: SequencedAmendment): Record<string, unknown>[] {
   {amendments.map((amd, amdIdx) => {
     const entries = entriesOf(amd);
     const code = (amd.identifier?.code ?? amd.data?.position ?? "—") as string;
-    const cols = columnsFor(entries);
+    const cols = orderDatasetFields(columnsFor(entries));
     const hasEntries = entries.length > 0 && cols.length > 0;
     const notes = (amd.data?.notes as string[] | undefined) ?? [];
     const showNotes = amdIdx === amendments.length - 1;
@@ -108,7 +109,7 @@ function entriesOf(amd: SequencedAmendment): Record<string, unknown>[] {
               <thead>
                 <tr>
                   {cols.map((c) => (
-                    <th>{c.replace(/_/g, " ")}</th>
+                    <th>{fieldLabel(c)}</th>
                   ))}
                 </tr>
               </thead>

@@ -31,6 +31,14 @@ import Base from "~/layouts/Base.astro";
           showImages: false,
           pageSize: 10,
         });
+        var q = new URLSearchParams(location.search).get("q");
+        if (q) {
+          var input = document.querySelector("#search-root input");
+          if (input) {
+            input.value = q;
+            input.dispatchEvent(new Event("input", { bubbles: true }));
+          }
+        }
       } catch (e) {
         if (el) {
           el.innerHTML = "<p style='color: var(--fg-muted); font-style: italic;'>Search index not yet generated. Run <code>npm run build</code> with Pagefind enabled.</p>";

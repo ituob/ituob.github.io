@@ -8,7 +8,8 @@ import { listIssueIds, loadIssue, loadListMetadata, lastAnnexBefore } from "~/li
 import { formatShortDate } from "~/lib/format";
 import { formatCellValue } from "~/lib/values";
 import { fieldLabel, orderFields } from "~/lib/columns";
-import { loadStateAtIssue } from "~/lib/snapshots";
+import { recommendationHref } from "~/lib/loaders";
+import { loadStateAtIssue, listStateIssues } from "~/lib/snapshots";
 import type { RegisterManifest, RegisterState } from "~/lib/snapshots";
 
 export interface Props {
@@ -23,6 +24,7 @@ export interface Props {
 const { slug, manifest, state, recommendation, recommendationVersion, errorSummary, replayIssues } = Astro.props;
 
 const title = manifest.title.en ?? manifest.slug;
+const recHref = recommendation ? recommendationHref(recommendation) : null;
 const keyField = manifest.key_field;
 const keyOf = (entry: Record<string, unknown>): string => {
   if (Array.isArray(keyField)) {
@@ -35,6 +37,7 @@ const keyOf = (entry: Record<string, unknown>): string => {
 const entryCount = state.entry_count;
 const changeCount = state.history.filter((h) => h.type !== "SEED").length;
 const touched = manifest.touched_issues;
+const editions = listStateIssues(slug);
 const latestIssue = touched.length ? Math.max(...touched) : null;
 const seedIssue = manifest.seed_issue ?? null;
 const INITIAL_ROWS = 50;
@@ -82,7 +85,7 @@ const rows = visibleEntries.map((entry) => ({
   ),
 }));
 
-const chipData = touched
+const chipData = editions
   .slice()
   .sort((a, b) => a - b)
   .map((n) => {
@@ -245,8 +248,8 @@ const speculationJson = JSON.stringify({
   <section class="reg-head">
     <p class="reg-eyebrow">
       Register
-      {recommendation && (
-        <> · <a href={`/recommendations/${recommendation}/`}>Recommendation ITU-T {recommendation}{recommendationVersion && ` (${recommendationVersion})`}</a></>
+      {recommendation && recHref && (
+        <> · <a href={recHref}>Recommendation ITU-T {recommendation}{recommendationVersion && ` (${recommendationVersion})`}</a></>
       )}
     </p>
     <h2 class="reg-title">{title}</h2>

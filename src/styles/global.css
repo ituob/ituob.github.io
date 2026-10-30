@@ -483,7 +483,10 @@
   /* -- Dense tables (liquid metal data grids) --------------------------- */
   .table-bulletin {
     width: 100%;
-    border-collapse: collapse;
+    /* Chrome detaches a sticky thead under collapsed borders; the
+       separate model keeps the sticky header on its own row. */
+    border-collapse: separate;
+    border-spacing: 0;
     font-size: var(--step--1);
     font-variant-numeric: tabular-nums;
     font-family: var(--font-sans);
@@ -510,9 +513,6 @@
     color: var(--fg-2);
     border-bottom: 1px solid var(--border-2);
     background: var(--glass-bg);
-        position: sticky;
-    top: 6.5rem;
-    z-index: 2;
   }
   .table-bulletin tbody tr {
     transition: background var(--dur-fast) var(--ease-out);

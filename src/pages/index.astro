@@ -117,6 +117,13 @@ for (const amd of Object.values(latest?.amendments.textual ?? {})) {
 const latestLangs = SUPPORTED_LANGUAGES.filter((l) => langsAvail.has(l));
 const langList: readonly string[] = latestLangs.length > 0 ? latestLangs : ["en"];
 
+// Quick access: the registers people look up most, in printed order.
+const QUICK_SLUGS = ["e118-iin", "e212-mnc", "e164-cc", "q708-ispc"] as const;
+const quickRegisters = QUICK_SLUGS
+  .map((s) => registers.find((r) => r.slug === s))
+  .filter((r): r is NonNullable<typeof r> => Boolean(r))
+  .map((r) => ({ slug: r.slug, title: r.title?.en ?? r.register_id }));
+
 // Issue archive: years (descending) with their issue ids.
 const byYear = new Map<number, number[]>();
 for (const id of ids) {
@@ -135,39 +142,35 @@ const years = [...byYear.keys()].sort((a, b) => b - a);
   full
   description="ITU Operational Bulletin — the cross-bureau biweekly publication of the International Telecommunication Union."
 >
-  {/* ABOUT — original Jekyll wording; the long text collapses like the original. */}
-  <section style="background: #f5f5f5; padding: 1rem 1rem 0; margin: 0 0 1.5rem; border-radius: 6px;">
-    <p style="margin: 0 0 1rem;">
-      <strong>WARNING:</strong> This website is not an official ITU resource. The data on this
-      website has not been validated. Users of the ITU Operational Bulletin are encouraged to
-      refer to the official ITU Operational Bulletin issues.
-    </p>
-    <details>
-      <summary
-        style="cursor: pointer; color: #1aa1da; font-weight: 600; margin-bottom: 1rem;"
+  {/* STATUS — one line; the full notice is under About at the end. */}
+  <p style="margin: 0 0 1.25rem; font-size: 0.85rem; color: #666;">
+    An unofficial, unvalidated reader for the ITU Operational Bulletin. For
+    authoritative use, refer to the{" "}
+    <a href="https://www.itu.int/pub/T-SP" rel="external">official ITU issues</a>.
+  </p>
+
+  {/* FIND — the first action on the page */}
+  <section style="margin-bottom: 2rem;">
+    <form action="/search/" method="get" role="search" style="display: flex; gap: 0.5rem; max-width: 34rem;">
+      <input
+        type="search"
+        name="q"
+        placeholder="Find a country, an operator, a number…"
+        aria-label="Search the Bulletin"
+        style="flex: 1; padding: 0.55rem 0.8rem; font-size: 1rem; border: 1px solid #bbb; border-radius: 6px; font-family: var(--font-sans);"
+      />
+      <button
+        type="submit"
+        style="padding: 0.55rem 1.1rem; font-size: 1rem; background: #1aa1da; color: #fff; border: 0; border-radius: 6px; cursor: pointer; font-weight: 600; font-family: var(--font-sans);"
       >
-        About ITU OB Online
-      </summary>
-      <div style="padding-bottom: 1rem;">
-        <p style="margin: 0 0 1rem;">
-          ITU Operational Bulletin is the medium for the exchange of information on changes in
-          international telecommunication networks and services. Each issue includes
-          informational notices and amendments to ITU Service Publications. (Read more about{" "}
-          <a href="https://www.itu.int/pub/T-SP" rel="external">ITU OB</a>.)
-        </p>
-        <p style="margin: 0 0 1rem;">
-          <em>ITU OB Online</em> is an effort to make the ITU Operational Bulletin messages and
-          associated Service Publications easier to view &amp; navigate via fully-featured Web
-          interface and machine-readable APIs.
-        </p>
-        <p style="margin: 0 0 1rem;">
-          While the information is being filled in, some issues of ITU OB and ITU Service
-          Publications may be missing here. In such cases please refer to{" "}
-          <a href="https://www.itu.int/pub/T-SP" rel="external">authoritative ITU OB resource</a>{" "}
-          on ITU website.
-        </p>
-      </div>
-    </details>
+        Search
+      </button>
+    </form>
+    <div style="display: flex; flex-wrap: wrap; gap: 0.4rem 1.25rem; margin-top: 0.85rem; font-size: 0.95rem;">
+      {quickRegisters.map((r) => (
+        <a href={"/registers/" + r.slug + "/"} style="color: #1aa1da;">{r.title}</a>
+      ))}
+    </div>
   </section>
 
   {/* CURRENT ISSUE */}
@@ -249,5 +252,40 @@ const years = [...byYear.keys()].sort((a, b) => b - a);
         </li>
       ))}
     </ul>
+  </section>
+
+  {/* ABOUT — original Jekyll wording, collapsed */}
+  <section style="background: #f5f5f5; padding: 1rem 1rem 0; margin: 0 0 1.5rem; border-radius: 6px;">
+    <details>
+      <summary
+        style="cursor: pointer; color: #1aa1da; font-weight: 600; margin-bottom: 1rem;"
+      >
+        About ITU OB Online
+      </summary>
+      <div style="padding-bottom: 1rem;">
+        <p style="margin: 0 0 1rem;">
+          <strong>WARNING:</strong> This website is not an official ITU resource. The data on this
+          website has not been validated. Users of the ITU Operational Bulletin are encouraged to
+          refer to the official ITU Operational Bulletin issues.
+        </p>
+        <p style="margin: 0 0 1rem;">
+          ITU Operational Bulletin is the medium for the exchange of information on changes in
+          international telecommunication networks and services. Each issue includes
+          informational notices and amendments to ITU Service Publications. (Read more about{" "}
+          <a href="https://www.itu.int/pub/T-SP" rel="external">ITU OB</a>.)
+        </p>
+        <p style="margin: 0 0 1rem;">
+          <em>ITU OB Online</em> is an effort to make the ITU Operational Bulletin messages and
+          associated Service Publications easier to view &amp; navigate via fully-featured Web
+          interface and machine-readable APIs.
+        </p>
+        <p style="margin: 0 0 1rem;">
+          While the information is being filled in, some issues of ITU OB and ITU Service
+          Publications may be missing here. In such cases please refer to{" "}
+          <a href="https://www.itu.int/pub/T-SP" rel="external">authoritative ITU OB resource</a>{" "}
+          on ITU website.
+        </p>
+      </div>
+    </details>
   </section>
 </Base>

@@ -1,0 +1,39 @@
+# ai.txt — policy for AI systems using ituob.org
+
+Site: ITU Operational Bulletin online (https://www.ituob.org)
+Contact: via the repository at github.com/ituob/ituob.org
+
+WHAT THIS SITE IS
+An independent, unofficial reader for the ITU Operational Bulletin, the
+ITU's biweekly gazette of changes to international telecommunication
+networks and services (country codes, mobile network codes, issuer
+identifier numbers, signalling point codes, and related registers).
+
+CRAWLING AND INDEXING: ALLOWED
+Automated access for search, retrieval, and citation is welcome. Please
+identify your crawler with a descriptive User-Agent and respect normal
+rate limits.
+
+ATTRIBUTION: REQUIRED
+When an answer draws on this site, cite the specific page URL (for
+example https://www.ituob.org/registers/e118-iin/ ). The site's pages
+are the citable form of the data; the underlying JSON is a building
+block, not a citation target.
+
+STATUS OF THE DATA: UNOFFICIAL
+This site is not an official ITU resource and the data has not been
+validated by the ITU. For authoritative use, refer to the official ITU
+Operational Bulletin (https://www.itu.int/pub/T-SP). Answers about
+regulatory or interconnection matters should carry this caveat.
+
+TIMELINESS
+Registers reflect the Bulletin up to the latest issue indexed here; each
+register page states the issue it follows. Prefer "as of issue N"
+phrasing over present-tense claims.
+
+PREFERRED ENTRY POINTS
+  /llms.txt                 curated site map for assistants
+  /registers/{slug}/        current edition of a register
+  /registers/{slug}/at/N/   register as of a past issue
+  /issues/{n}/              one Bulletin issue
+  /recommendations/{code}/  approval history of a Recommendation

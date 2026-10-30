@@ -10,6 +10,7 @@
  *       page: 13
  */
 import type { Language } from "~/lib/catalogs";
+import { issuePageHref } from "~/lib/loaders";
 
 type LocalizedString = Partial<Record<Language, string>>;
 
@@ -55,7 +56,7 @@ function pickNote(value: LocalizedString | undefined): string {
           const ob = item.ob ?? "";
           const page = item.page ?? "";
           const note = pickNote(item.note);
-          const obHref = ob ? `/issues/${ob}/` : undefined;
+          const obHref = ob && typeof ob === "number" ? issuePageHref(ob) : null;
           return (
             <tr>
               <td>{country}</td>

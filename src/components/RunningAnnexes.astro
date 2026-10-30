@@ -8,7 +8,13 @@
  */
 import type { LoadedIssue } from "~/lib/types";
 import { PUBLICATION_BY_ID, PUBLICATION_BY_SLUG } from "~/lib/catalogs";
-import { loadDatasetMetadata, loadListMetadata, computeRunningAnnexes } from "~/lib/loaders";
+import {
+  loadDatasetMetadata,
+  loadListMetadata,
+  computeRunningAnnexes,
+  datasetPageHref,
+  issuePageHref,
+} from "~/lib/loaders";
 import { formatSwissDate } from "~/lib/format";
 
 export interface Props {
@@ -42,21 +48,34 @@ const extraLinks = issue.general.runningAnnexes?.payload?.extra_links ?? [];
         const meta = loadDatasetMetadata(slug);
         const listMeta = loadListMetadata(entry.pubId);
         const title = meta?.title?.en ?? listMeta?.title?.en ?? knownBySlug?.label ?? known?.label ?? entry.pubId;
+        const datasetHref = datasetPageHref(slug);
+        const externalHref = listMeta?.url ?? meta?.url ?? null;
         const rec = listMeta?.recommendation ?? meta?.recommendation;
         const recInfo = rec
           ? `(according to ${rec.body ?? "ITU-T"} ${rec.code}${rec.version ? ` (${rec.version})` : ""})`
           : knownBySlug?.recommendation
             ? `(per ITU-T ${knownBySlug.recommendation})`
             : null;
+        const issueHref = issuePageHref(entry.annexed_in);
         return (
           <tr>
             <td>
-              <a href={`/issues/${entry.annexed_in}/`} class="num font-semibold no-underline hover:underline">
-                {entry.annexed_in}
-              </a>
+              {issueHref ? (
+                <a href={issueHref} class="num font-semibold no-underline hover:underline">
+                  {entry.annexed_in}
+                </a>
+              ) : (
+                <span class="num font-semibold">{entry.annexed_in}</span>
+              )}
             </td>
             <td>
-              <a href={`/datasets/${slug}/`} class="no-underline hover:underline">{title}</a>
+              {datasetHref ? (
+                <a href={datasetHref} class="no-underline hover:underline">{title}</a>
+              ) : externalHref ? (
+                <a href={externalHref} rel="external" class="no-underline hover:underline">{title}</a>
+              ) : (
+                <span>{title}</span>
+              )}
               {recInfo && (
                 <span class="ml-2 text-[var(--step--1)]" style="color: var(--fg-subtle);">
                   ({recInfo})

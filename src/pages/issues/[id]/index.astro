@@ -9,6 +9,8 @@ import {
   loadRegisterCatalog,
   lastAnnexBefore,
   loadGeneralAdoc,
+  datasetPageHref,
+  issuePageHref,
 } from "~/lib/loaders";
 import { formatSwissDate } from "~/lib/format";
 import {
@@ -111,10 +113,11 @@ interface AmendmentItem {
   slug: string;
   amdNo: number;
   title: string;
-  datasetHref: string;
+  datasetHref: string | null;
   recCode: string | null;
   recVersion: string | null;
   annexIssueId: number | null;
+  annexHref: string | null;
   annexDate: string | null;
   hasStructured: boolean;
   hasTextual: boolean;
@@ -140,10 +143,11 @@ const amendmentsList: AmendmentItem[] = [];
       slug,
       amdNo: cumulativeAmendmentNumber(id, slug),
       title,
-      datasetHref: "/datasets/" + slug + "/",
+      datasetHref: datasetPageHref(slug),
       recCode,
       recVersion,
       annexIssueId: annexRef ? annexRef.issueId : null,
+      annexHref: annexRef ? issuePageHref(annexRef.issueId) : null,
       annexDate: annexRef?.positionOn ? formatSwissDate(annexRef.positionOn) : null,
       hasStructured: Boolean(issue.amendments.structured[slug]),
       hasTextual: Boolean(issue.amendments.textual[slug]),
@@ -318,7 +322,11 @@ const authoritativeHref =
                 {a.amdNo > 0 && <span class="num"> {a.amdNo}</span>}
                 {" "}to
               </span>
-              <a class="text" href={a.datasetHref}>{a.title}</a>
+              {a.datasetHref ? (
+                <a class="text" href={a.datasetHref}>{a.title}</a>
+              ) : (
+                <span class="text">{a.title}</span>
+              )}
               <a class="anchor" title="Link to this message"
                  href={`/issues/${id}/#${a.anchorId}`}>#</a>
             </h3>
@@ -335,7 +343,11 @@ const authoritativeHref =
             {a.annexIssueId && (
               <span class="annex-to-ob">
                 Position originally published as annex to{" "}
-                <a href={`/issues/${a.annexIssueId}/`}>ITU Operational Bulletin No. {a.annexIssueId}</a>
+                {a.annexHref ? (
+                  <a href={a.annexHref}>ITU Operational Bulletin No. {a.annexIssueId}</a>
+                ) : (
+                  <span>ITU Operational Bulletin No. {a.annexIssueId}</span>
+                )}
                 {a.annexDate && <span> — {a.annexDate}</span>}
               </span>
             )}

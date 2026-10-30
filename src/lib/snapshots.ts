@@ -79,6 +79,21 @@ export function loadStateAtIssue(slug: string, obIssue: number): RegisterState |
   );
 }
 
+/** Every issue with a point-in-time snapshot file. Registers reach
+ *  before their seed annex, so this is a superset of the manifest's
+ *  touched_issues — and the file list, not the manifest, is what a
+ *  /registers/{slug}/at/{issue}/ route may promise. */
+export function listStateIssues(slug: string): number[] {
+  const dir = join(SNAPSHOT_ROOT, slug);
+  if (!existsSync(dir)) return [];
+  const out: number[] = [];
+  for (const name of readdirSync(dir)) {
+    const m = name.match(/^at-(\d+)\.json$/);
+    if (m) out.push(Number.parseInt(m[1]!, 10));
+  }
+  return out.sort((a, b) => a - b);
+}
+
 /**
  * Group the entries of `state.history` by `ob_issue`, returning a map
  * keyed by issue number whose value is the list of (type, code) pairs

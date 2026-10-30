@@ -9,7 +9,8 @@
  * static page per entry (which would break the Workers asset limit).
  */
 import Base from "~/layouts/Base.astro";
-import { listSnapshotSlugs, loadManifest } from "~/lib/snapshots";
+import { listSnapshotSlugs, loadManifest, loadCurrentState } from "~/lib/snapshots";
+import { LABELS, orderDatasetFields } from "~/lib/columns";
 
 export function getStaticPaths() {
   return listSnapshotSlugs().map((slug) => ({ params: { slug } }));
@@ -17,6 +18,16 @@ export function getStaticPaths() {
 const { slug } = Astro.params;
 const manifest = loadManifest(slug!);
 const title = manifest?.title?.en ?? slug!;
+// The client script labels and orders the entry's fields; compute the
+// register's field order here so the wire carries plain data only.
+const state = loadCurrentState(slug!);
+const unionKeys = new Set<string>();
+for (const e of state?.active_entries ?? []) {
+  for (const k of Object.keys(e)) {
+    if (k !== "_class" && k !== "source_contents") unionKeys.add(k);
+  }
+}
+const fieldOrder = orderDatasetFields([...unionKeys]);
 ---
 <Base title={`Entry · ${title}`} description={`${title} — one entry, addressed by its own path so it can be cited.`}>
   <section class="rule-thin pt-6 pb-6">
@@ -47,12 +58,21 @@ const title = manifest?.title?.en ?? slug!;
     </p>
   </noscript>
 
-  <script is:inline define:vars={{ slug, title }}>
+  <script is:inline define:vars={{ slug, title, fieldOrder, labels: LABELS }}>
     (function () {
       var m = location.pathname.match(/^\/registers\/[a-z0-9-]+\/entries\/(.+?)\/?$/);
       var view = document.getElementById("entry-view");
       if (!m) { view.textContent = "No entry key in this path."; return; }
       var key = decodeURIComponent(m[1]);
+      function label(f) {
+        if (labels[f]) return labels[f];
+        var w = f.replace(/_/g, " ");
+        return w.charAt(0).toUpperCase() + w.slice(1);
+      }
+      function rank(f) {
+        var i = fieldOrder.indexOf(f);
+        return i === -1 ? fieldOrder.length : i;
+      }
       fetch("/registers/" + slug + "/entries.json")
         .then(function (r) { return r.json(); })
         .then(function (data) {
@@ -69,10 +89,11 @@ const title = manifest?.title?.en ?? slug!;
             html += '<p class="panel p-4" style="font-family: var(--font-sans);">The register carries no entry under this key in its current edition. ' +
                     '<a href="/registers/' + slug + '/">Back to the register</a>.</p>';
           } else {
-            var fields = Object.keys(found).filter(function (k) { return k !== "_class" && k !== "source_contents"; });
+            var fields = Object.keys(found).filter(function (k) { return k !== "_class" && k !== "source_contents"; })
+              .sort(function (a, b) { return rank(a) - rank(b); });
             html += '<div class="overflow-x-auto"><table class="table-bulletin">';
             for (var j = 0; j < fields.length; j++) {
-              html += '<tr><th style="text-align:left;width:12rem">' + fields[j].replace(/_/g, " ") +
+              html += '<tr><th style="text-align:left;width:12rem">' + label(fields[j]) +
                       '</th><td>' + (found[fields[j]] == null ? "" : String(found[fields[j]])) + '</td></tr>';
             }
             html += '</table></div>';

@@ -11,6 +11,7 @@ import {
 import { PUBLICATION_BY_SLUG, registerForDataset, type Language } from "~/lib/catalogs";
 import { formatSwissDate } from "~/lib/format";
 import { loadManifest, loadCurrentState } from "~/lib/snapshots";
+import { fieldLabel, hasValue, orderDatasetFields } from "~/lib/columns";
 
 export function getStaticPaths() {
   return listDatasetSlugs().map((slug) => ({ params: { slug } }));
@@ -41,15 +42,23 @@ const registerManifest = loadManifest(registerSlug);
 const registerState = registerManifest ? loadCurrentState(registerSlug) : null;
 const hasRegister = !!(registerManifest && registerState);
 
-// Determine columns from schema or first row.
+// Determine columns from schema or first row; drop columns that are
+// empty for every entry and follow the printed order — country first.
 const cols: string[] = (() => {
+  let keys: string[];
   if (resolvedSchema?.items?.properties) {
-    return Object.keys(resolvedSchema.items.properties);
+    keys = Object.keys(resolvedSchema.items.properties);
+  } else if (resolvedData && resolvedData.length > 0) {
+    keys = Object.keys(resolvedData[0]!);
+  } else {
+    return [];
   }
-  if (resolvedData && resolvedData.length > 0) {
-    return Object.keys(resolvedData[0]!);
-  }
-  return [];
+  keys = keys.filter((k) => k !== "_class" && k !== "source_contents");
+  const nonEmpty = keys.filter((k) =>
+    (resolvedData ?? []).some((row) => hasValue(row[k])),
+  );
+  const kept = nonEmpty.length > 0 ? nonEmpty : keys;
+  return orderDatasetFields(kept);
 })();
 
 function formatValue(v: unknown): string {
@@ -149,7 +158,7 @@ function formatValue(v: unknown): string {
         <table class="table-bulletin">
           <thead>
             <tr>
-              {cols.map((c) => <th>{c.replace(/_/g, " ")}</th>)}
+              {cols.map((c) => <th>{fieldLabel(c)}</th>)}
             </tr>
           </thead>
           <tbody>

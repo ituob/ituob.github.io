@@ -1,0 +1,39 @@
+# ITU Operational Bulletin online
+
+> An independent, unofficial reader for the ITU Operational Bulletin — the ITU's
+> biweekly gazette recording every change to the international telecommunication
+> registers: country codes, mobile network codes, charge-card issuer identifier
+> numbers, signalling point codes, and more. The site replays each printed
+> amendment into the register it belongs to, so every register has a current
+> edition and a point-in-time edition for any issue that touched it.
+>
+> The data is unofficial and unvalidated; the authoritative record is the
+> printed ITU Operational Bulletin (https://www.itu.int/pub/T-SP).
+
+## How the site is organised
+
+- **Issues** — one page per Bulletin issue (currently No. 669 onward). Each issue
+  page lists its general messages and its amendments, each linking to the
+  publication it amends. Archive: /issues/
+- **Registers** — the living lists (E.118 charge cards, E.212 mobile network
+  codes, E.164 country codes and assignments, Q.708 signalling point codes,
+  X.121 DNICs, M.1400 carrier codes, F.400 ADMDs, T.35 assignments, E.218
+  transit counts, F.32 TDIs, F.1 IP terminal numbers, Bureaufax, DP dialled
+  digit plans, RR.25.1 reserved routing ranges, and more). Each register page
+  shows the current edition and links every past edition: /registers/{slug}/at/{issue}/
+- **Datasets** — the raw per-publication data and its amendment history:
+  /datasets/{slug}/
+- **Recommendations** — every ITU-T Recommendation referenced by the Bulletin,
+  with its approval and amendment history across issues: /recommendations/{code}/
+
+## Good entry points
+
+- [Registers index](https://www.ituob.org/registers/): every register with its entry count
+- [Issue archive](https://www.ituob.org/issues/): all issues, newest first
+- [Search](https://www.ituob.org/search/): full-text search across the site
+- [About](https://www.ituob.org/about/): what this site is and is not
+
+## Citation and attribution
+
+Cite the specific page URL; the site is unofficial — carry that caveat in
+regulatory or interconnection answers. Full policy: https://www.ituob.org/ai.txt

@@ -5,8 +5,8 @@
  * itu-ob-data/recommendations/{code}/meta.yaml catalog.
  */
 import type { ApprovedRecommendationsMessage } from "~/lib/types";
-import { loadRecommendationMetadata } from "~/lib/loaders";
-import { formatObDate, slugifyRecCode } from "~/lib/format";
+import { loadRecommendationMetadata, recommendationHref } from "~/lib/loaders";
+import { formatObDate } from "~/lib/format";
 
 export interface Props {
   message: ApprovedRecommendationsMessage;
@@ -32,11 +32,16 @@ const items = Object.entries(message.payload.items).map(([code, version]) => ({
     {items.map(({ code, version }) => {
       const meta = loadRecommendationMetadata(code);
       const title = meta?.title?.en;
+      const href = recommendationHref(code);
       return (
         <li>
-          <a href={`/recommendations/${encodeURIComponent(slugifyRecCode(code))}/`} class="no-underline hover:underline">
-            ITU-T {code}
-          </a>
+          {href ? (
+            <a href={href} class="no-underline hover:underline">
+              ITU-T {code}
+            </a>
+          ) : (
+            <span>ITU-T {code}</span>
+          )}
           {version && (
             <span class="text-[var(--step--1)]" style="color: var(--fg-subtle);">{" "}({formatObDate(version)})</span>
           )}

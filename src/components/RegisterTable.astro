@@ -92,8 +92,8 @@ const cols = orderFields([...colSet], keyCols);
 )}
 
 <p class="text-[var(--step--1)] mt-3" style="color: var(--fg-subtle); font-family: var(--font-sans);">
-  {state.entry_count} active
-  {state.lapsed_count > 0 && ` · ${state.lapsed_count} lapsed`}
-  {state.deleted_count > 0 && ` · ${state.deleted_count} deleted`}
-  {state.at_ob_issue && ` · as of OB No. ${state.at_ob_issue}`}
+  {state.entry_count} active entries
+  {state.lapsed_count > 0 && <>, {state.lapsed_count} lapsed</>}
+  {state.deleted_count > 0 && <>, {state.deleted_count} deleted</>}
+  {state.at_ob_issue && <>; as of issue № {state.at_ob_issue}</>}.
 </p>
