@@ -164,9 +164,9 @@ const authoritativeHref =
   title={"No. " + id}
   bodyClass="layout--issue"
   bareMain
+  progress
   description={"ITU Operational Bulletin No. " + id + ", published " + formatSwissDate(issue.meta.publication_date) + "."}
   extraStylesheets={["/assets/css/issue.css"]}
-  headScripts={["https://kit.fontawesome.com/3ebc4b9810.js"]}
 >
   {issue.incomplete && <IncompleteBanner />}
 
@@ -204,7 +204,11 @@ const authoritativeHref =
 
   <nav class="toc">
     <p class="authoritative-resource">
-      <i class="fas fa-home"></i>
+      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor"
+           stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"
+           style="vertical-align: -0.15em;">
+        <path d="M3 10.5 12 3l9 7.5"></path><path d="M5 9.5V21h14V9.5"></path>
+      </svg>
       {" "}See{" "}
       <a href={authoritativeHref}>the authoritative resource for this edition of ITU Operational Bulletin</a>
       {" "}on ITU website.

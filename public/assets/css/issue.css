@@ -661,3 +661,10 @@ details.message .included-contents {
 .toc-expand button:hover {
   border-color: #1285B1;
 }
+
+/* The global table scroll shadows assume a white surface; the Bulletin's
+   included contents sit on whiteSmoke, where the white fades would show. */
+body.layout--issue .scroll-x,
+body.layout--issue .overflow-x-auto {
+  background: none;
+}

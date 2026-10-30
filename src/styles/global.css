@@ -1323,3 +1323,72 @@ body > footer .powered-by.interactive:hover .logo {
 body > main {
   flex: 1;
 }
+
+/* ===========================================================================
+   2026 UX baseline. Unlayered on purpose: a few of these must out-rank
+   Tailwind utilities (.overflow-x-auto) and the layered components above.
+   =========================================================================== */
+
+/* Cross-document view transitions — the MPA feels continuous, with no
+   router JS. Disabled for reduced-motion users. */
+@media (prefers-reduced-motion: no-preference) {
+  @view-transition {
+    navigation: auto;
+  }
+}
+
+/* Anchored elements land below the fixed masthead instead of under it. */
+details.message,
+section[id],
+nav[id],
+h2[id],
+h3[id],
+[id^="year-"] {
+  scroll-margin-top: 5rem;
+}
+
+/* Reading progress, driven by the scroll position itself — no script.
+   Pages opt in by rendering .reading-progress; browsers without
+   scroll-driven animations leave the bar at scaleX(0), invisible. */
+@keyframes reading-progress-slide {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: scroll()) {
+    .reading-progress {
+      animation: reading-progress-slide linear both;
+      animation-timeline: scroll(root);
+      transition: none;
+    }
+  }
+}
+
+/* Smooth disclosures: the message accordions grow instead of snapping
+   open, where the engine supports animating to auto heights. */
+@media (prefers-reduced-motion: no-preference) {
+  @supports (interpolate-size: allow-keywords) {
+    :root {
+      interpolate-size: allow-keywords;
+    }
+    details.message::details-content {
+      block-size: 0;
+      overflow-y: clip;
+      transition: content-visibility 0.25s allow-discrete, block-size 0.25s ease;
+    }
+    details.message[open]::details-content {
+      block-size: auto;
+    }
+  }
+}
+
+/* Horizontal-scroll affordance: edge shadows show when a table
+   overflows, and the shadows track the scroll (local attachment). */
+.scroll-x,
+.overflow-x-auto {
+  background:
+    linear-gradient(to right, #fff 30%, rgba(255, 255, 255, 0)) local,
+    linear-gradient(to right, rgba(255, 255, 255, 0), #fff 70%) 100% / 51% no-repeat local,
+    radial-gradient(farthest-side at 0 50%, rgba(12, 61, 82, 0.16), transparent) 0 0 / 24px 100% no-repeat scroll,
+    radial-gradient(farthest-side at 100% 50%, rgba(12, 61, 82, 0.16), transparent) 100% 0 / 24px 100% no-repeat scroll;
+}

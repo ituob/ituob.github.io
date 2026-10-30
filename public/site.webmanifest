@@ -1,0 +1,14 @@
+{
+  "name": "ITU Operational Bulletin online",
+  "short_name": "ITU OB",
+  "description": "An unofficial reader for the ITU Operational Bulletin: registers, issues, datasets and recommendations.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "browser",
+  "background_color": "#ffffff",
+  "theme_color": "#1aa1da",
+  "icons": [
+    { "src": "/assets/favicon.png", "sizes": "32x32", "type": "image/png" },
+    { "src": "/assets/favicon-384x384.png", "sizes": "384x384", "type": "image/png" }
+  ]
+}

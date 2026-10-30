@@ -108,9 +108,13 @@
     trigger.classList.add('trigger');
     wrapper.appendChild(trigger);
 
-    var icon = document.createElement('i');
-    icon.classList.add('fas');
-    icon.classList.add('fa-list-ul');
+    var icon = document.createElement('span');
+    icon.setAttribute('aria-hidden', 'true');
+    icon.innerHTML =
+      '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor"' +
+      ' stroke-width="2" stroke-linecap="round" style="vertical-align: -0.15em;">' +
+      '<path d="M8 6h13M8 12h13M8 18h13"></path>' +
+      '<path d="M3 6h.01M3 12h.01M3 18h.01"></path></svg>';
     trigger.appendChild(icon);
 
     var triggerText = document.createElement('span');

@@ -6,6 +6,20 @@
 import Base from "~/layouts/Base.astro";
 ---
 <Base title="Search" description="Search the ITU Operational Bulletin.">
+  <style>
+    /* Pagefind UI, tuned to the site palette. */
+    :root {
+      --pagefind-ui-primary: #1285b1;
+      --pagefind-ui-text: #0c3d52;
+      --pagefind-ui-background: #ffffff;
+      --pagefind-ui-border: #d8e4ea;
+      --pagefind-ui-tag: #f2f7f9;
+      --pagefind-ui-border-width: 1px;
+      --pagefind-ui-border-radius: 6px;
+      --pagefind-ui-image-border-radius: 6px;
+      --pagefind-ui-font: Helvetica, Arial, sans-serif;
+    }
+  </style>
   <main id="main" class="mx-auto max-w-[var(--measure)] px-4 py-8">
     <h1 class="text-[var(--step-3)] mb-4" style="font-family: var(--font-display); font-weight: 700;">
       Search

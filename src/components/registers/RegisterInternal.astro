@@ -116,14 +116,6 @@ const railChanges = lastChanges.map((h) => {
   const code = h.identifier ? (h.identifier as { code?: unknown }).code : null;
   return { type: h.type, ob_issue: h.ob_issue, code: code == null ? null : String(code) };
 });
-
-const speculationJson = JSON.stringify({
-  prefetch: [{
-    source: "document",
-    where: { href_matches: `/registers/${slug}/entries/*` },
-    eagerness: "moderate",
-  }],
-});
 ---
   <style>
     .reg { --pg-paper: #fff; --pg-ink: #0C3D52; --pg-muted: #5B7285; --pg-subtle: #6E8899;
@@ -398,7 +390,6 @@ const speculationJson = JSON.stringify({
   <div id="preview" class="preview" role="presentation" hidden></div>
   </div>
 
-  <script type="speculationrules" is:inline set:html={speculationJson} />
   <script is:inline define:vars={{ slug, keyField, tableCols, entryCount, initialRows: INITIAL_ROWS }}>
     (function () {
       var KEY_COL = "__key__";
@@ -492,10 +483,12 @@ const speculationJson = JSON.stringify({
         var tag = (document.activeElement && document.activeElement.tagName) || "";
         if (e.key === "/" && tag !== "INPUT" && tag !== "TEXTAREA") {
           e.preventDefault(); find.focus();
+          e.stopImmediatePropagation();
         } else if (e.key === "Escape" && document.activeElement === find) {
           find.value = ""; syncClear(); applyFilter(); find.blur();
+          e.stopImmediatePropagation();
         }
-      });
+      }, true);
 
       if (showAll) showAll.addEventListener("click", function () {
         showAll.textContent = "Loading";

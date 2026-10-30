@@ -7,7 +7,6 @@
  */
 import "~/styles/global.css";
 import CommandPalette from "~/components/vue/CommandPalette.vue";
-import ReadingProgress from "~/components/vue/ReadingProgress.vue";
 
 export interface Breadcrumb {
   label: string;
@@ -63,6 +62,26 @@ const isSection = (href: string) =>
 const siteName = "ITU Operational Bulletin online";
 const fullTitle = title === siteName ? title : `${title} — ${siteName}`;
 const canon = canonical ?? new URL(Astro.url.pathname, Astro.site ?? "https://www.ituob.org").toString();
+const ogImageUrl = new URL(ogImage ?? "/og-default.png", Astro.site ?? "https://www.ituob.org").toString();
+
+// Speculative prefetch of internal pages: conservative (on pointer
+// down), so the heavy register tables are only fetched on real intent.
+const speculationRules = {
+  prefetch: [
+    {
+      source: "document",
+      where: {
+        href_matches: "/**",
+        not: [
+          { href_matches: "/assets/**" },
+          { href_matches: "/pagefind/**" },
+          { href_matches: "/api/**" },
+        ],
+      },
+      eagerness: "conservative",
+    },
+  ],
+};
 
 const isRtl = lang === "ar" || lang === "he" || lang === "fa";
 const dir = isRtl ? "rtl" : "ltr";
@@ -86,7 +105,10 @@ const navItems = [
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{fullTitle}</title>
     <meta name="description" content={description} />
+    <meta name="theme-color" content="#1aa1da" />
+    <meta name="color-scheme" content="light" />
     <link rel="canonical" href={canon} />
+    <link rel="manifest" href="/site.webmanifest" />
     <meta name="generator" content={Astro.generator} />
 
     <link href="/assets/favicon-384x384.png" rel="shortcut icon" sizes="384x384" type="image/x-icon" />
@@ -98,20 +120,23 @@ const navItems = [
     <meta property="og:url" content={canon} />
     <meta property="og:site_name" content={siteName} />
     <meta property="og:type" content="website" />
-    {ogImage && <meta property="og:image" content={ogImage} />}
+    <meta property="og:image" content={ogImageUrl} />
 
     <meta name="twitter:card" content="summary" />
     <meta name="twitter:title" content={fullTitle} />
     <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImageUrl} />
 
     {jsonLd && (
-      <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+      <script type="application/ld+json" is:inline set:html={JSON.stringify(jsonLd)} />
     )}
+
+    <script type="speculationrules" is:inline set:html={JSON.stringify(speculationRules)} />
 
     {extraStylesheets.map((href) => <link rel="stylesheet" href={href} />)}
     {headScripts.map((src) => <script is:inline src={src}></script>)}
 
-    {progress && <ReadingProgress client:idle />}
+    {progress && <div class="reading-progress no-print" aria-hidden="true"></div>}
   </head>
   <body class={[`lang--${lang}`, bodyClass].filter(Boolean).join(" ")}>
     <a

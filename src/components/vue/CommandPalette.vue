@@ -202,6 +202,12 @@ function onGlobalKeydown(e: KeyboardEvent) {
     e.preventDefault();
     if (open.value) close();
     else openPalette();
+  } else if (e.key === "/" && !open.value) {
+    const t = e.target as HTMLElement | null;
+    const tag = t?.tagName;
+    if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || t?.isContentEditable) return;
+    e.preventDefault();
+    openPalette();
   } else if (e.key === "Escape" && open.value) {
     close();
   }
