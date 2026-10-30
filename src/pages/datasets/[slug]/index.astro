@@ -166,6 +166,7 @@ function formatValue(v: unknown): string {
         </div>
         <div class="overflow-x-auto">
           <table class="table-bulletin">
+            <caption class="sr-only">{title} — current snapshot</caption>
             <thead>
               <tr>
                 {cols.map((c) => <th>{fieldLabel(c)}</th>)}

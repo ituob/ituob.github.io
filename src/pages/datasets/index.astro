@@ -18,10 +18,21 @@ const slugs = listDatasetSlugs();
     </p>
   </header>
 
-  <div class="overflow-x-auto">
-    <table class="table-bulletin">
-      <thead>
-        <tr>
+  <div class="regtable">
+    <div class="regtable-tools">
+      <input
+        type="search"
+        class="regtable-find"
+        placeholder="Filter the publications"
+        aria-label="Filter the publications"
+      />
+      <span class="regtable-count num" aria-live="polite"></span>
+    </div>
+    <div class="overflow-x-auto">
+      <table class="table-bulletin">
+        <caption class="sr-only">ITU Operational Bulletin publications</caption>
+        <thead>
+          <tr>
           <th style="width: 18rem;">Title</th>
           <th>Slug</th>
           <th>Recommendation</th>
@@ -56,6 +67,15 @@ const slugs = listDatasetSlugs();
           );
         })}
       </tbody>
-    </table>
+      </table>
+    </div>
   </div>
+
+  <style>
+    .regtable-tools { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; margin: 0 0 0.75rem; }
+    .regtable-find { flex: 0 1 20rem; padding: 0.45rem 0.7rem; font: inherit; font-size: var(--step--1);
+      border: 1px solid var(--border-2); border-radius: 6px; font-family: var(--font-sans); }
+    .regtable-count { font-size: var(--step--2); color: var(--fg-subtle); font-family: var(--font-sans); }
+  </style>
+  <script is:inline src="/assets/js/row-filter.js"></script>
 </Base>

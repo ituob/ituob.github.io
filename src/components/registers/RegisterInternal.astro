@@ -331,6 +331,7 @@ const railChanges = lastChanges.map((h) => {
       </div>
       <div class="overflow-x-auto">
         <table class="entries">
+          <caption class="sr-only">{title} — {entryCount} entries in the current edition</caption>
           <thead><tr>
             {tableCols.map((c) =>
               c === KEY_COL

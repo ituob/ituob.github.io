@@ -16,6 +16,9 @@ export interface Props {
   filterable?: boolean;
 }
 const { state, showLapsed = false, slug, keyField, filterable = false } = Astro.props;
+const caption = `Register ${state.slug ?? ""} — ${state.entry_count} entries${
+  state.at_ob_issue ? ` as of issue № ${state.at_ob_issue}` : " in the current edition"
+}`;
 
 // The replay key of an entry: the key field, or the composite key
 // fields joined the way the replay joins them. With a slug, the key
@@ -59,6 +62,7 @@ const cols = orderFields([...colSet], keyCols);
     )}
     <div class="overflow-x-auto">
       <table class="table-bulletin">
+        <caption class="sr-only">{caption}</caption>
       <thead>
         <tr>
           {cols.map((c) => (
@@ -118,6 +122,11 @@ const cols = orderFields([...colSet], keyCols);
   .regtable-find { flex: 0 1 20rem; padding: 0.45rem 0.7rem; font: inherit; font-size: var(--step--1);
     border: 1px solid var(--border-2); border-radius: 6px; font-family: var(--font-sans); }
   .regtable-count { font-size: var(--step--2); color: var(--fg-subtle); font-family: var(--font-sans); }
+  /* Skip rendering off-screen rows; the tables run to several hundred. */
+  .overflow-x-auto table tbody tr {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 2.6rem;
+  }
 </style>
 
 {filterable && <script is:inline src="/assets/js/row-filter.js"></script>}

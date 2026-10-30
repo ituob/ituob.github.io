@@ -86,9 +86,9 @@ const url = listMeta?.url ?? null;
       <h3 class="text-[var(--step-2)] mb-3" style="font-family: var(--font-display); font-weight: 600;">
         Issues amending this register
       </h3>
-      <ul class="space-y-3" style="font-family: var(--font-sans); list-style: none; padding: 0;">
+      <ul class="space-y-3 ext-list" style="font-family: var(--font-sans); list-style: none; padding: 0;">
         {amendingIssues.sort((a, b) => b.id - a.id).map((item) => (
-          <li class="panel" style="padding: 1rem 1.25rem;">
+          <li class="panel ext-card" style="padding: 1rem 1.25rem;">
             <h3 class="text-[var(--step-0)] m-0">
               <a href={`/issues/${item.id}/`}>OB no. <span class="num">{item.id}</span></a>
               {item.date && <span class="ml-2" style="color: var(--fg-muted);">{formatShortDate(item.date)}</span>}
@@ -99,6 +99,11 @@ const url = listMeta?.url ?? null;
           </li>
         ))}
       </ul>
+      {amendingIssues.length > 5 && (
+        <p class="ext-more">
+          <button type="button" class="ext-toggle" hidden>Show older issues</button>
+        </p>
+      )}
     </section>
   ) : (
     <section class="panel p-6">
@@ -112,3 +117,39 @@ const url = listMeta?.url ?? null;
       <a href={recHref}>→ Recommendation ITU-T {recommendation}</a>
     </p>
   )}
+
+  <style>
+    .ext-more { margin: 0.9rem 0 0; }
+    .ext-toggle { padding: 0.35rem 0.9rem; border: 1px solid var(--border-2); border-radius: 999px;
+      background: #F2F7F9; color: #0C3D52; font: inherit; font-size: 85%; font-family: var(--font-sans); cursor: pointer; }
+    .ext-toggle:hover { border-color: #1285B1; }
+    /* Script-free users and paper see every issue card. */
+    @media print {
+      .ext-card[hidden] { display: block; }
+      .ext-more { display: none; }
+    }
+  </style>
+
+  <script is:inline>
+    // Progressive collapse: with script, only the five most recent issue
+    // cards stay open; the button reveals the rest. Without script (or on
+    // paper) every card is rendered.
+    (function () {
+      var cards = Array.prototype.slice.call(document.querySelectorAll("li.ext-card"));
+      if (cards.length <= 5) return;
+      var btn = document.querySelector(".ext-toggle");
+      if (!btn) return;
+      var collapsed = true;
+      function apply() {
+        for (var i = 0; i < cards.length; i++) {
+          cards[i].hidden = collapsed && i >= 5;
+        }
+        btn.textContent = collapsed
+          ? "Show all " + cards.length + " issues"
+          : "Show the five most recent only";
+        btn.hidden = false;
+      }
+      btn.addEventListener("click", function () { collapsed = !collapsed; apply(); });
+      apply();
+    })();
+  </script>
