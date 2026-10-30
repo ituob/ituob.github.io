@@ -16,4 +16,19 @@ import Base from "~/layouts/Base.astro";
     <a href="/datasets/">list of datasets</a>, or return to the
     <a href="/">home page</a>.
   </p>
+  <form action="/search/" method="get" role="search" class="mt-6 flex gap-2" style="max-width: 30rem;">
+    <input
+      type="search"
+      name="q"
+      placeholder="Search the Bulletin"
+      aria-label="Search the Bulletin"
+      style="flex: 1; padding: 0.55rem 0.8rem; font-size: 1rem; border: 1px solid #bbb; border-radius: 6px; font-family: var(--font-sans);"
+    />
+    <button
+      type="submit"
+      style="padding: 0.55rem 1.1rem; font-size: 1rem; background: #1aa1da; color: #fff; border: 0; border-radius: 6px; cursor: pointer; font-weight: 600; font-family: var(--font-sans);"
+    >
+      Search
+    </button>
+  </form>
 </Base>

@@ -32,12 +32,12 @@ import Base from "~/layouts/Base.astro";
           pageSize: 10,
         });
         var q = new URLSearchParams(location.search).get("q");
-        if (q) {
-          var input = document.querySelector("#search-root input");
-          if (input) {
-            input.value = q;
-            input.dispatchEvent(new Event("input", { bubbles: true }));
-          }
+        var input = document.querySelector("#search-root input");
+        if (q && input) {
+          input.value = q;
+          input.dispatchEvent(new Event("input", { bubbles: true }));
+        } else if (input) {
+          input.focus();
         }
       } catch (e) {
         if (el) {

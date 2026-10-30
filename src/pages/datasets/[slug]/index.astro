@@ -154,28 +154,39 @@ function formatValue(v: unknown): string {
     )}
 
     {resolvedData && resolvedData.length > 0 && cols.length > 0 && (
-      <div class="overflow-x-auto">
-        <table class="table-bulletin">
-          <thead>
-            <tr>
-              {cols.map((c) => <th>{fieldLabel(c)}</th>)}
-            </tr>
-          </thead>
-          <tbody>
-            {resolvedData.slice(0, 500).map((row) => (
+      <div class="regtable">
+        <div class="regtable-tools">
+          <input
+            type="search"
+            class="regtable-find"
+            placeholder="Filter the entries"
+            aria-label="Filter the entries"
+          />
+          <span class="regtable-count num" aria-live="polite"></span>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="table-bulletin">
+            <thead>
               <tr>
-                {cols.map((c) => (
-                  <td>{formatValue(row[c])}</td>
-                ))}
+                {cols.map((c) => <th>{fieldLabel(c)}</th>)}
               </tr>
-            ))}
-          </tbody>
-        </table>
-        {resolvedData.length > 500 && (
-          <p class="mt-3 text-[var(--step--1)] italic" style="font-family: var(--font-sans); color: var(--fg-muted);">
-            Showing first 500 of <span class="num">{resolvedData.length}</span> entries.
-          </p>
-        )}
+            </thead>
+            <tbody>
+              {resolvedData.slice(0, 500).map((row) => (
+                <tr>
+                  {cols.map((c) => (
+                    <td>{formatValue(row[c])}</td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          {resolvedData.length > 500 && (
+            <p class="mt-3 text-[var(--step--1)] italic" style="font-family: var(--font-sans); color: var(--fg-muted);">
+              Showing first 500 of <span class="num">{resolvedData.length}</span> entries.
+            </p>
+          )}
+        </div>
       </div>
     )}
 
@@ -215,4 +226,12 @@ function formatValue(v: unknown): string {
       )}
     </section>
   )}
+
+  <style>
+    .regtable-tools { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; margin: 0 0 0.75rem; }
+    .regtable-find { flex: 0 1 20rem; padding: 0.45rem 0.7rem; font: inherit; font-size: var(--step--1);
+      border: 1px solid var(--border-2); border-radius: 6px; font-family: var(--font-sans); }
+    .regtable-count { font-size: var(--step--2); color: var(--fg-subtle); font-family: var(--font-sans); }
+  </style>
+  <script is:inline src="/assets/js/row-filter.js"></script>
 </Base>

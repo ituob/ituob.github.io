@@ -213,6 +213,11 @@ const speculationJson = JSON.stringify({
       text-transform: uppercase; letter-spacing: 0.06em; color: var(--pg-muted);
       cursor: pointer; user-select: none; white-space: nowrap; }
     table.entries thead th:hover { color: var(--pg-accent); }
+    table.entries thead th[data-sort]::after { content: ""; display: inline-block;
+      margin-left: 0.35em; vertical-align: 0.1em;
+      border-left: 0.3em solid transparent; border-right: 0.3em solid transparent; opacity: 0; }
+    table.entries thead th[data-dir="asc"]::after { border-bottom: 0.35em solid currentColor; opacity: 1; }
+    table.entries thead th[data-dir="desc"]::after { border-top: 0.35em solid currentColor; opacity: 1; }
     table.entries tbody tr { content-visibility: auto; contain-intrinsic-size: auto 2.6rem; }
     table.entries tbody tr:hover td { background: color-mix(in oklab, var(--pg-accent) 6%, var(--pg-paper)); }
     td.num, th.num { font-family: var(--font-mono); white-space: nowrap; }
@@ -454,6 +459,7 @@ const speculationJson = JSON.stringify({
             loaded = true; expanded = true;
             if (showAll) showAll.hidden = true;
             loading = false;
+            applySort();
             if (pending) { var p = pending; pending = null; p(); }
             cb();
           })
@@ -500,22 +506,31 @@ const speculationJson = JSON.stringify({
           } else { run(); }
         });
       });
-      body.addEventListener("click", function (e) {
+      var table = document.querySelector("table.entries");
+      function applySort() {
+        var th = table.querySelector("th[data-dir]");
+        if (!th) return;
+        var dir = th.dataset.dir;
+        var idx = Array.prototype.indexOf.call(th.parentNode.children, th);
+        var sign = dir === "asc" ? 1 : -1;
+        Array.prototype.slice.call(body.rows)
+          .sort(function (a, b) {
+            var av = a.cells[idx].textContent.trim(), bv = b.cells[idx].textContent.trim();
+            return sign * av.localeCompare(bv, undefined, { numeric: true, sensitivity: "base" });
+          })
+          .forEach(function (row) { body.appendChild(row); });
+      }
+      table.addEventListener("click", function (e) {
         var th = e.target.closest("th[data-sort]");
         if (!th) return;
         var dir = th.dataset.dir === "asc" ? "desc" : "asc";
         var all = th.parentNode.children;
         for (var i = 0; i < all.length; i++) {
-          if (all[i] !== th) { delete all[i].dataset.dir; }
+          if (all[i] !== th) { delete all[i].dataset.dir; all[i].removeAttribute("aria-sort"); }
         }
         th.dataset.dir = dir;
-        var idx = Array.prototype.indexOf.call(th.parentNode.children, th);
-        Array.prototype.slice.call(body.rows)
-          .sort(function (a, b) {
-            var av = a.cells[idx].textContent.trim(), bv = b.cells[idx].textContent.trim();
-            return dir === "asc" ? av.localeCompare(bv) : bv.localeCompare(av);
-          })
-          .forEach(function (row) { body.appendChild(row); });
+        th.setAttribute("aria-sort", dir === "asc" ? "ascending" : "descending");
+        applySort();
       });
 
       var INDEX = null;

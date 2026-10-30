@@ -12,8 +12,10 @@ export interface Props {
   keyField: string | string[];
   showLapsed?: boolean;
   slug?: string;
+  /** Render a client-side row filter above the table. */
+  filterable?: boolean;
 }
-const { state, showLapsed = false, slug, keyField } = Astro.props;
+const { state, showLapsed = false, slug, keyField, filterable = false } = Astro.props;
 
 // The replay key of an entry: the key field, or the composite key
 // fields joined the way the replay joins them. With a slug, the key
@@ -43,8 +45,20 @@ const cols = orderFields([...colSet], keyCols);
 
 ---
 {state.active_entries.length > 0 ? (
-  <div class="overflow-x-auto">
-    <table class="table-bulletin">
+  <div class={filterable ? "regtable" : undefined}>
+    {filterable && (
+      <div class="regtable-tools">
+        <input
+          type="search"
+          class="regtable-find"
+          placeholder="Filter the rows"
+          aria-label="Filter the rows"
+        />
+        <span class="regtable-count num" aria-live="polite"></span>
+      </div>
+    )}
+    <div class="overflow-x-auto">
+      <table class="table-bulletin">
       <thead>
         <tr>
           {cols.map((c) => (
@@ -84,6 +98,7 @@ const cols = orderFields([...colSet], keyCols);
         })}
       </tbody>
     </table>
+    </div>
   </div>
 ) : (
   <p class="italic text-[var(--step--1)]" style="color: var(--fg-muted);">
@@ -97,3 +112,12 @@ const cols = orderFields([...colSet], keyCols);
   {state.deleted_count > 0 && <>, {state.deleted_count} deleted</>}
   {state.at_ob_issue && <>; as of issue № {state.at_ob_issue}</>}.
 </p>
+
+<style>
+  .regtable-tools { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; margin: 0 0 0.75rem; }
+  .regtable-find { flex: 0 1 20rem; padding: 0.45rem 0.7rem; font: inherit; font-size: var(--step--1);
+    border: 1px solid var(--border-2); border-radius: 6px; font-family: var(--font-sans); }
+  .regtable-count { font-size: var(--step--2); color: var(--fg-subtle); font-family: var(--font-sans); }
+</style>
+
+{filterable && <script is:inline src="/assets/js/row-filter.js"></script>}
