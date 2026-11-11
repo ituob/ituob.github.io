@@ -1,10 +1,9 @@
 ---
 /**
- * How it works — the public explanation of the data model:
- * Recommendations → registers → schema'd items; issues → mixed messages;
- * register messages are actions (insert/remove/change); the git patch
- * log is the SSOT, replayed into current and point-in-time editions;
- * full files and snapshots are projections; the two validation proofs.
+ * How it works — the public explanation of the data model, written in
+ * the program's house style: complete declarative sentences, the
+ * problem established before the mechanism, claims grounded in named
+ * entities, dates and numbers.
  */
 import Base from "~/layouts/Base.astro";
 
@@ -17,12 +16,12 @@ identifier:
 data:
   _class: E212MNCAmendment
   entries:
-  - country_or_area: {en: Hungary SUP}      # a printed section heading
+  - country_or_area: {en: Hungary SUP}        # a printed section heading row
   - mcc_mnc_codes: 216 04
-    networks: Invitech ICT Services Ltd.    # the item being inserted
-  # … Kenya SUP, 639 08 Sema Mobile Services Limited …
+    networks: Invitech ICT Services Ltd.      # the item that the action inserts
+  # (the file continues with a Kenya section and its item)
   notes:
-  - "*MCC:  Mobile Country Code / Indicatif de pays du mobile …"`;
+  - "*MCC:  Mobile Country Code / Indicatif de pays du mobile / Indicativo de país para el servicio móvil"`;
 ---
 <Base
   title="How it works"
@@ -31,14 +30,26 @@ data:
 >
   <article class="hw">
     <header class="hw-head">
-      <p class="hw-eyebrow">The system</p>
+      <p class="hw-eyebrow">The model of the Bulletin</p>
       <h1>How it works</h1>
       <p class="hw-lede">
-        Every change the ITU Operational Bulletin prints for a register is kept
-        as a small, typed action — and those actions are replayed to build the
-        registers you can search on this site. This page follows one real
-        action from the printed page to today's data: the addition of mobile
-        network code <span class="num font-mono">216 04</span>.
+        The Operational Bulletin of the International Telecommunication Union
+        (ITU) publishes, in each issue, the changes that administrations and
+        operators make to the international telecommunication registers: a
+        charge card issuer is added, a mobile network code is withdrawn, a
+        signalling point is reassigned. A reader who requires the current
+        composition of a register must otherwise assemble that composition from
+        hundreds of printed issues, and a reader who requires the reason for an
+        entry must locate the issue that introduced it.
+      </p>
+      <p class="hw-lede">
+        This site answers that need by keeping the changes themselves as data.
+        Every change that the Bulletin prints for a register is recorded as a
+        typed action, the actions are collected in a reviewed repository, and
+        the registers that this site presents are computed from those actions.
+        This page explains the system by following one real action, the
+        addition of the mobile network code <span class="num font-mono">216 04</span>, from the printed page to the
+        current register.
       </p>
     </header>
 
@@ -46,33 +57,33 @@ data:
     <figure class="hw-life" aria-label="The life of an item, in four steps">
       <ol>
         <li>
-          <span class="hw-step">1 · Printed</span>
+          <span class="hw-step">1 · The printed line</span>
           <div class="hw-art">
             <p class="hw-print">Hungary — SUP</p>
             <p class="hw-print"><span class="num font-mono">216 04</span> Invitech ICT Services Ltd.</p>
-            <p class="hw-cap">OB № 1170, 15.IV.2019</p>
+            <p class="hw-cap">The line is printed in OB № 1170 of 15.IV.2019.</p>
           </div>
         </li>
         <li>
-          <span class="hw-step">2 · Patched</span>
+          <span class="hw-step">2 · The patch file</span>
           <div class="hw-art hw-art-code">
             <pre class="num font-mono">type: ADD
 ob_issue_no: '1170'</pre>
-            <p class="hw-cap">one file, one action</p>
+            <p class="hw-cap">The action occupies one file in the patch repository.</p>
           </div>
         </li>
         <li>
-          <span class="hw-step">3 · Replayed</span>
+          <span class="hw-step">3 · The replayed state</span>
           <div class="hw-art">
-            <p class="hw-print num font-mono">seed + actions → state</p>
-            <p class="hw-cap">the register as it stood at issue № 1170</p>
+            <p class="hw-print num font-mono">seed, then actions, in issue order</p>
+            <p class="hw-cap">The replay reconstructs the register as it stood at issue № 1170.</p>
           </div>
         </li>
         <li>
-          <span class="hw-step">4 · Kept</span>
+          <span class="hw-step">4 · The item today</span>
           <div class="hw-art">
             <p class="hw-print"><span class="num font-mono">216 04</span> Invitech ICT Services Ltd.</p>
-            <p class="hw-cap">live today, with its full history</p>
+            <p class="hw-cap">The item is present in the current edition, together with its recorded history.</p>
           </div>
         </li>
       </ol>
@@ -81,165 +92,161 @@ ob_issue_no: '1170'</pre>
     <section>
       <h2 id="registers"><span class="hw-no num">1</span> Recommendations define registers; registers hold items</h2>
       <p>
-        ITU-T Recommendations are the normative source. One Recommendation can
-        define one or more registers: E.164 alone defines three (the country
-        code list, the assignments list, and the dial procedures), and Q.708
-        defines two (ISPC and SANC). Seventeen registers are carried here in
-        total.
+        The International Telecommunication Union publishes its registers
+        under Recommendations, which are the normative source for what a
+        register contains. One Recommendation can define more than one
+        register: Recommendation ITU-T E.164 defines three registers (the
+        country code list, the assignments list, and the dial procedures
+        list), and Recommendation ITU-T Q.708 defines two registers (the
+        international signalling point codes (ISPC) and the signalling
+        area/network codes (SANC)). This site carries 17 registers in total.
       </p>
       <p>
-        A register is a set of <em>items</em> — one charge card issuer, one
-        mobile network code, one signalling point. The items of a register all
-        share one shape, called its <dfn>data schema</dfn>, and an item is
-        made addressable by the register's key: the issuer identifier number
-        for E.118, the MCC/MNC pair for E.212, the DNIC for X.121. Addressable
-        items are what make change possible to record.
+        A register is a set of items, where one item is one charge card
+        issuer, one mobile network assignment, or one signalling point. The
+        items of a register share a single shape, which is called the <em>data schema</em> of the register, and each item carries the key of
+        the register: the issuer identifier number for E.118, the mobile
+        country code/mobile network code (MCC/MNC) pair for E.212, and the
+        data network identification code (DNIC) for X.121. An item that
+        carries a key can be named by the register, and an item that can be
+        named is an item whose insertion, removal and modification can be
+        recorded.
       </p>
       <div class="hw-item hw-art">
-        <p class="hw-cap">An item of the E.212 register, as it stands today</p>
+        <p class="hw-cap">The item <span class="num font-mono">216 04</span> in the current edition of the E.212 register.</p>
         <p class="num font-mono">216 04 — Invitech ICT Services Ltd.</p>
-        <p class="hw-cap">key: mcc_mnc_codes · <a href="/registers/e212-mnc/entries/216%2004/">its own page</a></p>
+        <p class="hw-cap">The key of the register is the MCC/MNC pair, and the item has <a href="/registers/e212-mnc/entries/216%2004/">its own addressable page</a>.</p>
       </div>
     </section>
 
     <section>
       <h2 id="issues"><span class="hw-no num">2</span> An issue is a set of messages; a register message is an action</h2>
       <p>
-        Each issue of the Bulletin carries messages of many kinds — running
-        annexes, approved Recommendations, service restrictions, telephone
-        service, and the register amendments. The amendments are the ones that
-        change data, and each of them is an <dfn>action</dfn> on exactly one
-        register: it inserts an item, removes an item, or changes an item,
-        named by the register's key.
+        Each issue of the Bulletin carries messages of many kinds, including
+        running annexes, approved Recommendations, service restrictions,
+        telephone service notices, and amendments to the registers. The
+        amendments are the messages that change data. Each amendment is an <em>action</em> on exactly one register: the action inserts an item,
+        removes an item, or changes an item, and the item is named by the key
+        of the register.
       </p>
       <table class="hw-kinds">
         <thead>
-          <tr><th>Action</th><th>Means</th><th>Carries</th><th>A real one</th></tr>
+          <tr><th>Action</th><th>Operation</th><th>Payload</th><th>Example</th></tr>
         </thead>
         <tbody>
           <tr>
             <td><span class="hw-chip hw-chip-add num font-mono">ADD</span></td>
-            <td>insert item</td>
+            <td>inserts an item</td>
             <td>the complete new item</td>
-            <td><a href="/issues/1170/">216 04, issue № 1170</a></td>
+            <td><a href="/issues/1170/">216 04, in issue № 1170</a></td>
           </tr>
           <tr>
             <td><span class="hw-chip hw-chip-sup num font-mono">SUP</span></td>
-            <td>remove item</td>
-            <td>the key</td>
-            <td><a href="/registers/e118-iin/entries/89%20351%2007/">89 351 07, issue № 1162</a></td>
+            <td>removes an item</td>
+            <td>the key of the item</td>
+            <td><a href="/registers/e118-iin/entries/89%20351%2007/">89 351 07, in issue № 1162</a></td>
           </tr>
           <tr>
             <td><span class="hw-chip hw-chip-mod num font-mono">REP</span></td>
-            <td>change item</td>
+            <td>changes an item</td>
             <td>the key and the new values</td>
-            <td>the rarest kind — <a href="/registers/x121-dnic/entries/440%201/">440 1, issue № 1129</a></td>
+            <td><a href="/registers/x121-dnic/entries/440%201/">440 1, in issue № 1129</a></td>
           </tr>
         </tbody>
       </table>
       <p>
-        Two further kinds round out the vocabulary: <span class="num font-mono">LIR</span>
-        re-prints a row the Bulletin carries again for the reader's
-        convenience, and <span class="num font-mono">SEED</span> establishes a
-        register's initial full list — the only kind whose payload is a whole
-        item set, because an initial state has nothing before it to differ
-        from.
+        Two further kinds complete the vocabulary. An action of kind <span class="num font-mono">LIR</span> carries a row that the printed Bulletin repeats from the previous edition of the list, and an action of kind <span class="num font-mono">SEED</span> establishes the initial complete list of a register. The seed is the only kind whose payload is a whole item set, because an initial state has no earlier state from which a difference could be taken.
       </p>
     </section>
 
     <section>
       <h2 id="patch"><span class="hw-no num">3</span> The patch log is the record</h2>
       <p>
-        Action 1170-001 lives as a small file in the
-        <a href="https://github.com/ituob/itu-ob-data" rel="external">patch repository</a>,
-        one file per action, reviewed through pull requests like any other
-        code. This is the whole patch, lightly abridged:
+        Action 1170-001 exists as a small file in the <a href="https://github.com/ituob/itu-ob-data" rel="external">patch repository</a>, which holds one file per action and is reviewed through pull requests in the same manner as source code. The listing below shows the complete patch, abridged for display; the omissions are marked in the file comments.
       </p>
       <figure class="hw-patch">
         <pre class="num font-mono">{patch1170}</pre>
         <figcaption>
-          <dfn>type</dfn> the action kind · <dfn>ob_issue_no</dfn> the issue that printed it ·
-          <dfn>identifier</dfn> its printed position · <dfn>entries</dfn> the items ·
-          <dfn>notes</dfn> the printed footnotes, kept verbatim
+          In the listing, <dfn>type</dfn> carries the kind of the action, <dfn>ob_issue_no</dfn> names the issue that printed the change, <dfn>identifier</dfn> records the position that the Bulletin printed for the action, <dfn>entries</dfn> holds the items, and <dfn>notes</dfn> preserves the printed footnotes verbatim.
         </figcaption>
       </figure>
       <p>
-        These patch files are the single source of truth. Patches can always
-        regenerate the full list of a register — but a full list cannot be
-        turned back into patches, so the full files on this site are
-        <em>projections</em> of the log: produced by the build pipeline, never
-        edited by hand, and never the input that produces new changes.
-        Corrections to published data are new actions, never rewrites.
+        The patch files are the single source of truth of the program. The
+        patches can always regenerate the complete list of a register at any
+        point in time, while a complete list cannot be converted back into
+        patches, because the information about which changes produced a state
+        does not exist in the state itself. The complete files that this site
+        publishes are therefore <em>projections</em> of the patch log: the
+        build pipeline produces them, no person edits them, and they are
+        never the input from which new changes are derived. A correction to
+        published data is recorded as a new action, never as a rewrite of an
+        existing one.
       </p>
     </section>
 
     <section>
-      <h2 id="replay"><span class="hw-no num">4</span> Replay: any date, on demand</h2>
+      <h2 id="replay"><span class="hw-no num">4</span> Replay produces any date, on demand</h2>
       <p>
-        A register's state is computed, not stored: take the seed (the initial
-        full list), apply the actions in issue order, and you have the register
-        as it stood after any issue. That is why every register page carries
-        its current edition <em>and</em> every past edition.
+        The state of a register is computed rather than stored. The replay
+        engine reads the seed, which is the initial complete list of the
+        register, and applies the actions in issue order, which produces the
+        state of the register after any chosen issue. For this reason every
+        register page presents the current edition and every past edition.
       </p>
       <p>
-        The E.212 seed was set at issue № 1162, and 162 issues have touched
-        that register since. The E.118 register holds <span class="num">940</span>
-        items today, rebuilt from <span class="num">355</span> recorded changes
-        across <span class="num">123</span> issues.
-        <a href="/registers/e118-iin/at/1170/">See an edition from 1170</a>, or
-        read <a href="/registers/e118-iin/history/">a register's whole change
-        history</a>.
+        The seed of the E.212 register was established at issue № 1162, and
+        162 issues have modified that register since. The E.118 register
+        contains 940 items in its current edition; these items are rebuilt
+        from 355 recorded actions across 123 issues. The edition of E.118 at
+        issue № 1170 and the complete change history of the register are
+        available for inspection.
       </p>
-    </section>
-
-    <section>
-      <h2 id="projections"><span class="hw-no num">5</span> The files you see are projections</h2>
       <p>
-        The full lists the site renders, the point-in-time snapshots behind the
-        edition pages, and the per-register dataset files are all regenerated
-        from the patch log by the build pipeline. Each states its provenance —
-        which issue it reflects — and none of them is edited directly. When a
-        projection and a fresh replay disagree, that is a bug in the pipeline,
-        not a judgement call.
+        Readers who wish to examine the mechanism directly can <a href="/registers/e118-iin/at/1170/">open an edition from 1170</a> or read <a href="/registers/e118-iin/history/">the change history of the register</a>.
       </p>
     </section>
 
     <section>
-      <h2 id="proofs"><span class="hw-no num">6</span> Two proofs, run continuously</h2>
+      <h2 id="projections"><span class="hw-no num">5</span> The files on the site are projections</h2>
       <p>
-        Every item validates against its register's <strong>data schema</strong>,
-        and every action validates against the <strong>message schemas</strong> —
-        both declared in a single ontology
-        (<span class="num font-mono">messages.lml</span>, 86 classes) and checked
-        on every build: <span class="num">16,834</span> corpus files at last
-        count, with unknown fields rejected rather than ignored. Beyond the
-        schemas, the replays themselves are verified: rebuilt snapshots must
-        match a fresh replay, and the parsers are checked equivalent against
-        captured baselines. Content drift fails the build.
+        The complete lists that the site renders, the point-in-time snapshots
+        behind the edition pages, and the per-register dataset files are
+        projections of the patch log, and the build pipeline regenerates all
+        of them. Each projection states its provenance, which is the issue
+        that it reflects. No projection is edited directly. When a projection
+        and a fresh replay disagree, the disagreement is a defect in the
+        pipeline rather than a matter of judgement.
       </p>
     </section>
 
     <section>
-      <h2 id="repos"><span class="hw-no num">7</span> Where everything lives</h2>
+      <h2 id="proofs"><span class="hw-no num">6</span> Two proofs run continuously</h2>
+      <p>
+        Two proofs run on every build. First, every item validates against the data schema of its register, and every action validates against the message schemas; both kinds of schema are declared in a single ontology (<span class="num font-mono">messages.lml</span>, 86 classes). The corpus validation covered 16,834 files at the latest run, and the validators reject unknown fields instead of ignoring them. Second, the outputs themselves are verified: rebuilt snapshots must match a fresh replay, and the parsers are compared against captured baselines to establish equivalence. Content that would drift from the printed Bulletin fails the build.
+      </p>
+    </section>
+
+    <section>
+      <h2 id="repos"><span class="hw-no num">7</span> Where the parts live</h2>
       <table class="hw-repos">
         <tbody>
           <tr>
             <th scope="row"><a href="https://github.com/ituob/itu-ob-data" rel="external">itu-ob-data</a></th>
-            <td>the patch log — every action ever printed, as reviewed pull requests</td>
+            <td>The repository holds the patch log, which contains every action that was ever printed, each reviewed through a pull request.</td>
           </tr>
           <tr>
             <th scope="row"><a href="https://github.com/ituob/service-publications-docs" rel="external">service-publications-docs</a></th>
-            <td>the parsers, the replay engine, the schema ontology, and the proof gates</td>
+            <td>The repository contains the parsers, the replay engine, the schema ontology, and the proof gates.</td>
           </tr>
           <tr>
             <th scope="row"><a href="https://github.com/ituob/ituob.github.io" rel="external">ituob.github.io</a></th>
-            <td>this site — built statically from the replayed registers and served by a Worker</td>
+            <td>The repository contains this site, which is built statically from the replayed registers and served by a Worker.</td>
           </tr>
         </tbody>
       </table>
       <p class="hw-end">
-        The best way to check any of this is to pick a line in any register and
-        follow it: <a href="/registers/">start from the registers</a>, open an
+        Any statement on this page can be checked against the data. Select a
+        register in <a href="/registers/">the registers index</a>, open an
         item, and read its change history back to the issue that printed it.
       </p>
     </section>
@@ -270,11 +277,11 @@ ob_issue_no: '1170'</pre>
     .hw-step { display: block; font-size: var(--step--2); font-weight: 600;
       letter-spacing: 0.08em; text-transform: uppercase; color: #5B7285; margin-bottom: 0.5rem; }
     .hw-art { background: #FFFFFF; border: 1px solid #D8E4EA; border-radius: 2px;
-      padding: 0.6rem 0.7rem; min-height: 4.6rem; }
+      padding: 0.6rem 0.7rem; min-height: 5rem; }
     .hw-art p { margin: 0 0 0.25rem; font-size: var(--step--1); }
     .hw-art-code pre { margin: 0; font-size: var(--step--2); line-height: 1.45;
       white-space: pre-wrap; color: #0C3D52; }
-    .hw-cap { color: #5B7285; font-size: var(--step--2); }
+    .hw-cap { color: #5B7285; font-size: var(--step--2); line-height: 1.45; }
     .hw-life .hw-cap { margin: 0; }
     .hw-print { font-size: var(--step-0); }
     @media (max-width: 760px) {
