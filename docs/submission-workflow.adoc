@@ -770,7 +770,7 @@ the DDL). Rules:
 
 Code: `worker/lib/composer.ts`, `worker/composer-routes.ts`, `worker/lib/revert.ts`,
 `worker/lib/reconciler.ts`; the shared transitions in `worker/lib/github-webhook.ts`
-(`applyPrMerged`, `applyPrClosed`, `applyRevertMerged`, `applyRevertClosed`); migration `0007_composer.sql`.
+(`applyPrMerged`, `applyPrClosed`, `applyRevertMerged`, `applyRevertClosed`); schema in `migrations/0001_init.sql`.
 Every state change still goes through `mutate`. Nothing calls GitHub: the publisher interface gained
 `openRevertPr`, `getPullRequest` and `bumpDataPin`; the real client stays "not configured", tests use the fake.
 
