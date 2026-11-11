@@ -47,7 +47,7 @@ export class MockIdp {
     const real = globalThis.fetch;
     this.spy = vi.spyOn(globalThis, "fetch").mockImplementation(async (input: any, init?: any) => {
       const req = new Request(input, init);
-      if (!req.url.startsWith(ISSUER)) return real(input, init);
+      if (new URL(req.url).origin !== ISSUER) return real(input, init);
       return this.serve(req);
     });
   }
