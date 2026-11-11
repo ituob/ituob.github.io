@@ -1,0 +1,322 @@
+---
+/**
+ * How it works — the public explanation of the data model:
+ * Recommendations → registers → schema'd items; issues → mixed messages;
+ * register messages are actions (insert/remove/change); the git patch
+ * log is the SSOT, replayed into current and point-in-time editions;
+ * full files and snapshots are projections; the two validation proofs.
+ */
+import Base from "~/layouts/Base.astro";
+
+const patch1170 = `type: ADD
+date_requested: &1 2018-12-15
+date_active: *1
+ob_issue_no: '1170'
+identifier:
+  code: 1170-001
+data:
+  _class: E212MNCAmendment
+  entries:
+  - country_or_area: {en: Hungary SUP}      # a printed section heading
+  - mcc_mnc_codes: 216 04
+    networks: Invitech ICT Services Ltd.    # the item being inserted
+  # … Kenya SUP, 639 08 Sema Mobile Services Limited …
+  notes:
+  - "*MCC:  Mobile Country Code / Indicatif de pays du mobile …"`;
+---
+<Base
+  title="How it works"
+  masthead
+  description="How the ITU Operational Bulletin's printed changes become a replayable record over the international telecommunication registers."
+>
+  <article class="hw">
+    <header class="hw-head">
+      <p class="hw-eyebrow">The system</p>
+      <h1>How it works</h1>
+      <p class="hw-lede">
+        Every change the ITU Operational Bulletin prints for a register is kept
+        as a small, typed action — and those actions are replayed to build the
+        registers you can search on this site. This page follows one real
+        action from the printed page to today's data: the addition of mobile
+        network code <span class="num font-mono">216 04</span>.
+      </p>
+    </header>
+
+    {/* Figure: the life of an item */}
+    <figure class="hw-life" aria-label="The life of an item, in four steps">
+      <ol>
+        <li>
+          <span class="hw-step">1 · Printed</span>
+          <div class="hw-art">
+            <p class="hw-print">Hungary — SUP</p>
+            <p class="hw-print"><span class="num font-mono">216 04</span> Invitech ICT Services Ltd.</p>
+            <p class="hw-cap">OB № 1170, 15.IV.2019</p>
+          </div>
+        </li>
+        <li>
+          <span class="hw-step">2 · Patched</span>
+          <div class="hw-art hw-art-code">
+            <pre class="num font-mono">type: ADD
+ob_issue_no: '1170'</pre>
+            <p class="hw-cap">one file, one action</p>
+          </div>
+        </li>
+        <li>
+          <span class="hw-step">3 · Replayed</span>
+          <div class="hw-art">
+            <p class="hw-print num font-mono">seed + actions → state</p>
+            <p class="hw-cap">the register as it stood at issue № 1170</p>
+          </div>
+        </li>
+        <li>
+          <span class="hw-step">4 · Kept</span>
+          <div class="hw-art">
+            <p class="hw-print"><span class="num font-mono">216 04</span> Invitech ICT Services Ltd.</p>
+            <p class="hw-cap">live today, with its full history</p>
+          </div>
+        </li>
+      </ol>
+    </figure>
+
+    <section>
+      <h2 id="registers"><span class="hw-no num">1</span> Recommendations define registers; registers hold items</h2>
+      <p>
+        ITU-T Recommendations are the normative source. One Recommendation can
+        define one or more registers: E.164 alone defines three (the country
+        code list, the assignments list, and the dial procedures), and Q.708
+        defines two (ISPC and SANC). Seventeen registers are carried here in
+        total.
+      </p>
+      <p>
+        A register is a set of <em>items</em> — one charge card issuer, one
+        mobile network code, one signalling point. The items of a register all
+        share one shape, called its <dfn>data schema</dfn>, and an item is
+        made addressable by the register's key: the issuer identifier number
+        for E.118, the MCC/MNC pair for E.212, the DNIC for X.121. Addressable
+        items are what make change possible to record.
+      </p>
+      <div class="hw-item hw-art">
+        <p class="hw-cap">An item of the E.212 register, as it stands today</p>
+        <p class="num font-mono">216 04 — Invitech ICT Services Ltd.</p>
+        <p class="hw-cap">key: mcc_mnc_codes · <a href="/registers/e212-mnc/entries/216%2004/">its own page</a></p>
+      </div>
+    </section>
+
+    <section>
+      <h2 id="issues"><span class="hw-no num">2</span> An issue is a set of messages; a register message is an action</h2>
+      <p>
+        Each issue of the Bulletin carries messages of many kinds — running
+        annexes, approved Recommendations, service restrictions, telephone
+        service, and the register amendments. The amendments are the ones that
+        change data, and each of them is an <dfn>action</dfn> on exactly one
+        register: it inserts an item, removes an item, or changes an item,
+        named by the register's key.
+      </p>
+      <table class="hw-kinds">
+        <thead>
+          <tr><th>Action</th><th>Means</th><th>Carries</th><th>A real one</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="hw-chip hw-chip-add num font-mono">ADD</span></td>
+            <td>insert item</td>
+            <td>the complete new item</td>
+            <td><a href="/issues/1170/">216 04, issue № 1170</a></td>
+          </tr>
+          <tr>
+            <td><span class="hw-chip hw-chip-sup num font-mono">SUP</span></td>
+            <td>remove item</td>
+            <td>the key</td>
+            <td><a href="/registers/e118-iin/entries/89%20351%2007/">89 351 07, issue № 1162</a></td>
+          </tr>
+          <tr>
+            <td><span class="hw-chip hw-chip-mod num font-mono">REP</span></td>
+            <td>change item</td>
+            <td>the key and the new values</td>
+            <td>the rarest kind — <a href="/registers/x121-dnic/entries/440%201/">440 1, issue № 1129</a></td>
+          </tr>
+        </tbody>
+      </table>
+      <p>
+        Two further kinds round out the vocabulary: <span class="num font-mono">LIR</span>
+        re-prints a row the Bulletin carries again for the reader's
+        convenience, and <span class="num font-mono">SEED</span> establishes a
+        register's initial full list — the only kind whose payload is a whole
+        item set, because an initial state has nothing before it to differ
+        from.
+      </p>
+    </section>
+
+    <section>
+      <h2 id="patch"><span class="hw-no num">3</span> The patch log is the record</h2>
+      <p>
+        Action 1170-001 lives as a small file in the
+        <a href="https://github.com/ituob/itu-ob-data" rel="external">patch repository</a>,
+        one file per action, reviewed through pull requests like any other
+        code. This is the whole patch, lightly abridged:
+      </p>
+      <figure class="hw-patch">
+        <pre class="num font-mono">{patch1170}</pre>
+        <figcaption>
+          <dfn>type</dfn> the action kind · <dfn>ob_issue_no</dfn> the issue that printed it ·
+          <dfn>identifier</dfn> its printed position · <dfn>entries</dfn> the items ·
+          <dfn>notes</dfn> the printed footnotes, kept verbatim
+        </figcaption>
+      </figure>
+      <p>
+        These patch files are the single source of truth. Patches can always
+        regenerate the full list of a register — but a full list cannot be
+        turned back into patches, so the full files on this site are
+        <em>projections</em> of the log: produced by the build pipeline, never
+        edited by hand, and never the input that produces new changes.
+        Corrections to published data are new actions, never rewrites.
+      </p>
+    </section>
+
+    <section>
+      <h2 id="replay"><span class="hw-no num">4</span> Replay: any date, on demand</h2>
+      <p>
+        A register's state is computed, not stored: take the seed (the initial
+        full list), apply the actions in issue order, and you have the register
+        as it stood after any issue. That is why every register page carries
+        its current edition <em>and</em> every past edition.
+      </p>
+      <p>
+        The E.212 seed was set at issue № 1162, and 162 issues have touched
+        that register since. The E.118 register holds <span class="num">940</span>
+        items today, rebuilt from <span class="num">355</span> recorded changes
+        across <span class="num">123</span> issues.
+        <a href="/registers/e118-iin/at/1170/">See an edition from 1170</a>, or
+        read <a href="/registers/e118-iin/history/">a register's whole change
+        history</a>.
+      </p>
+    </section>
+
+    <section>
+      <h2 id="projections"><span class="hw-no num">5</span> The files you see are projections</h2>
+      <p>
+        The full lists the site renders, the point-in-time snapshots behind the
+        edition pages, and the per-register dataset files are all regenerated
+        from the patch log by the build pipeline. Each states its provenance —
+        which issue it reflects — and none of them is edited directly. When a
+        projection and a fresh replay disagree, that is a bug in the pipeline,
+        not a judgement call.
+      </p>
+    </section>
+
+    <section>
+      <h2 id="proofs"><span class="hw-no num">6</span> Two proofs, run continuously</h2>
+      <p>
+        Every item validates against its register's <strong>data schema</strong>,
+        and every action validates against the <strong>message schemas</strong> —
+        both declared in a single ontology
+        (<span class="num font-mono">messages.lml</span>, 86 classes) and checked
+        on every build: <span class="num">16,834</span> corpus files at last
+        count, with unknown fields rejected rather than ignored. Beyond the
+        schemas, the replays themselves are verified: rebuilt snapshots must
+        match a fresh replay, and the parsers are checked equivalent against
+        captured baselines. Content drift fails the build.
+      </p>
+    </section>
+
+    <section>
+      <h2 id="repos"><span class="hw-no num">7</span> Where everything lives</h2>
+      <table class="hw-repos">
+        <tbody>
+          <tr>
+            <th scope="row"><a href="https://github.com/ituob/itu-ob-data" rel="external">itu-ob-data</a></th>
+            <td>the patch log — every action ever printed, as reviewed pull requests</td>
+          </tr>
+          <tr>
+            <th scope="row"><a href="https://github.com/ituob/service-publications-docs" rel="external">service-publications-docs</a></th>
+            <td>the parsers, the replay engine, the schema ontology, and the proof gates</td>
+          </tr>
+          <tr>
+            <th scope="row"><a href="https://github.com/ituob/ituob.github.io" rel="external">ituob.github.io</a></th>
+            <td>this site — built statically from the replayed registers and served by a Worker</td>
+          </tr>
+        </tbody>
+      </table>
+      <p class="hw-end">
+        The best way to check any of this is to pick a line in any register and
+        follow it: <a href="/registers/">start from the registers</a>, open an
+        item, and read its change history back to the issue that printed it.
+      </p>
+    </section>
+  </article>
+
+  <style>
+    .hw { max-width: 46rem; margin: 0 auto; font-family: var(--font-sans); color: #0C3D52; }
+    .hw p { margin: 0 0 0.9rem; line-height: 1.6; }
+    .hw h2 { font-family: var(--font-display); font-size: var(--step-3); line-height: 1.2;
+      margin: 2.6rem 0 0.9rem; letter-spacing: -0.01em; }
+    .hw section + section h2 { padding-top: 1.6rem; border-top: 1px solid #D8E4EA; }
+    .hw-head { margin: 0 0 1.6rem; }
+    .hw-eyebrow { font-size: var(--step--1); font-weight: 600; letter-spacing: 0.1em;
+      text-transform: uppercase; color: #1AA1DA; margin: 0 0 0.4rem; }
+    .hw h1 { font-family: var(--font-display); font-size: var(--step-5); line-height: 1.05;
+      margin: 0 0 0.8rem; letter-spacing: -0.02em; }
+    .hw-lede { font-size: var(--step-1); color: #5B7285; margin: 0; }
+    .hw-no { display: inline-block; min-width: 1.6rem; margin-right: 0.2rem; color: #1AA1DA; }
+
+    /* Figure: the life of an item */
+    .hw-life { margin: 2rem 0 2.4rem; background: #F2F7F9; border: 1px solid #D8E4EA;
+      border-radius: 2px; padding: 1.2rem 1.2rem 0.6rem; }
+    .hw-life ol { list-style: none; margin: 0; padding: 0; display: grid;
+      grid-template-columns: repeat(4, 1fr); gap: 1rem; }
+    .hw-life li { position: relative; padding-left: 0.9rem; border-left: 2px solid #1AA1DA; }
+    .hw-life li::before { content: ""; position: absolute; left: -5px; top: 0.5rem;
+      width: 8px; height: 8px; border-radius: 50%; background: #1AA1DA; }
+    .hw-step { display: block; font-size: var(--step--2); font-weight: 600;
+      letter-spacing: 0.08em; text-transform: uppercase; color: #5B7285; margin-bottom: 0.5rem; }
+    .hw-art { background: #FFFFFF; border: 1px solid #D8E4EA; border-radius: 2px;
+      padding: 0.6rem 0.7rem; min-height: 4.6rem; }
+    .hw-art p { margin: 0 0 0.25rem; font-size: var(--step--1); }
+    .hw-art-code pre { margin: 0; font-size: var(--step--2); line-height: 1.45;
+      white-space: pre-wrap; color: #0C3D52; }
+    .hw-cap { color: #5B7285; font-size: var(--step--2); }
+    .hw-life .hw-cap { margin: 0; }
+    .hw-print { font-size: var(--step-0); }
+    @media (max-width: 760px) {
+      .hw-life ol { grid-template-columns: 1fr; gap: 0.9rem; }
+    }
+
+    /* Item example card */
+    .hw-item p { margin: 0 0 0.25rem; }
+
+    /* Action kinds table */
+    .hw-kinds { width: 100%; border-collapse: collapse; font-size: var(--step--1);
+      margin: 1rem 0 1.2rem; font-variant-numeric: tabular-nums; }
+    .hw-kinds th { text-align: left; font-size: var(--step--2); letter-spacing: 0.08em;
+      text-transform: uppercase; color: #5B7285; font-weight: 600;
+      border-bottom: 2px solid #0C3D52; padding: 0.4rem 0.7rem; }
+    .hw-kinds td { padding: 0.5rem 0.7rem; border-bottom: 1px solid #D8E4EA; vertical-align: top; }
+    .hw-chip { display: inline-block; padding: 0.05rem 0.45rem; border-radius: 3px;
+      border: 1px solid; font-size: var(--step--2); font-weight: 600; }
+    .hw-chip-add { color: #1285B1; border-color: #1285B1; background: rgba(26, 161, 218, 0.08); }
+    .hw-chip-sup { color: #DF314E; border-color: #DF314E; background: rgba(223, 49, 78, 0.07); }
+    .hw-chip-mod { color: #0C3D52; border-color: #0C3D52; background: #F2F7F9; }
+
+    /* Patch figure */
+    .hw-patch { margin: 1rem 0 1.2rem; }
+    .hw-patch pre { margin: 0; background: #0C3D52; color: #DCEAF2; border-radius: 2px;
+      padding: 1rem 1.1rem; font-size: var(--step--2); line-height: 1.5;
+      overflow-x: auto; tab-size: 2; }
+    .hw-patch figcaption { font-size: var(--step--2); color: #5B7285;
+      padding: 0.5rem 0.2rem 0; line-height: 1.5; }
+    .hw-patch figcaption dfn { font-style: normal; font-family: var(--font-mono);
+      font-weight: 600; color: #0C3D52; }
+
+    /* Repos table */
+    .hw-repos { width: 100%; border-collapse: collapse; font-size: var(--step--1); margin: 0.4rem 0 1rem; }
+    .hw-repos th { text-align: left; width: 14rem; padding: 0.5rem 0.7rem 0.5rem 0;
+      border-bottom: 1px solid #D8E4EA; font-family: var(--font-mono); font-weight: 600; }
+    .hw-repos td { padding: 0.5rem 0; border-bottom: 1px solid #D8E4EA; color: #5B7285; }
+    .hw-end { font-size: var(--step-1); color: #0C3D52; }
+
+    @media (prefers-reduced-motion: no-preference) {
+      .hw-life li, .hw-art { transition: border-color 120ms ease; }
+      .hw-life li:hover { border-left-color: #0C3D52; }
+    }
+  </style>
+</Base>
