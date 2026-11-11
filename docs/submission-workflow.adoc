@@ -778,7 +778,7 @@ Every state change still goes through `mutate`. Nothing calls GitHub: the publis
 not built, so without the stub identity every route answers 403; each entry point also requires the
 `itu-admin` role, resolved server-side from the Access email, so an editor gets 403):
 list merged-unpublished submissions; create or open an edition (idempotent; at most one `open`); read an
-edition; place (`merged -> scheduled`); remove (`scheduled -> merged`); publish. `POST /api/admin/reconcile`
+edition; place (`merged -> scheduled`); remove (`scheduled -> merged`, sends no notification: the member already heard the PR merged); publish. `POST /api/admin/reconcile`
 runs the reconciler on demand.
 
 *Decisions*
@@ -793,8 +793,8 @@ runs the reconciler on demand.
 . *Placement is bound to the target edition.* A submission can only be placed in the edition its file path
   already names (`target_edition`); anything else is 409. A submission with a revert in flight cannot be placed.
 . *One active edition is a database rule.* Partial unique indexes allow one `open` and one `composing|staged`
-  edition. An edition that empties after removals stays `composing` (no automatic reopen: that could collide
-  with another open edition).
+  edition. A `composing` edition that empties after removals goes back to `open`, or is deleted when another
+  edition is already open, in the same batch as the removal, so the open one can still be composed.
 . *Edition-state races fail the batch.* `placeItem`, `removeItem` and the per-item publish carry a statement that
   violates NOT NULL unless the edition is in the required status, so a concurrent status change rolls the
   whole transition back (409) instead of leaving a submission moved without its `edition_items` row.
@@ -818,6 +818,5 @@ runs the reconciler on demand.
   occurrence); nothing writes to it.
 
 *Gaps:* no cron trigger is configured in `wrangler*.jsonc` (the scheduled handler is wired but nothing
-fires it; the design asks for every 15 minutes); un-placing an item emits the existing `submission.pr_merged`
-notification again (notification map is keyed by target state); item order is set by placement only (no
+fires it; the design asks for every 15 minutes); item order is set by placement only (no
 reorder endpoint; gaps in `position` after removals are legal); no UI.

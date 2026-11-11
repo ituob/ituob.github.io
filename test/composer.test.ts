@@ -124,9 +124,14 @@ describe("composer: merged -> scheduled -> published", () => {
     expect((await comp("GET", "/editions/1351")).json.edition.status).toBe("composing");
     expect((await comp("GET", "/submissions")).json.submissions[0].edition).toBe(1351);
 
+    const mergedNotes = () => n("SELECT count(*) n FROM notifications WHERE submission_id=?1 AND kind='submission.pr_merged'", r.id);
+    const notesBefore = await mergedNotes();
+    expect(notesBefore).toBeGreaterThan(0);
     const removed = await comp("POST", `/editions/1351/items/${r.id}/remove`);
     expect(removed.json.submission.state).toBe("merged");
     expect(await n("SELECT count(*) n FROM edition_items")).toBe(0);
+    expect(await mergedNotes()).toBe(notesBefore); // un-placing is not announced again
+    expect((await comp("GET", "/editions/1351")).json.edition.status).toBe("open"); // an empty edition frees the slot
     expect((await comp("POST", "/editions/1351/items", ADMINU, { submission_id: r.id })).status).toBe(200);
 
     expect(fake.pinRequests).toHaveLength(0);
@@ -147,6 +152,19 @@ describe("composer: merged -> scheduled -> published", () => {
     expect(await verifyChain(db())).toBeNull();
     // A published submission appears in no work list any more.
     expect((await comp("GET", "/submissions")).json.submissions).toEqual([]);
+  });
+
+  it("an edition emptied while another is open is dropped, so the open one can be composed", async () => {
+    const a = await toMerged("e118-iin", 1351);
+    const b = await toMerged("e212-mnc", 1352);
+    await comp("POST", "/editions", ADMINU, { ob_issue_no: 1351 });
+    expect((await comp("POST", "/editions/1351/items", ADMINU, { submission_id: a.id })).status).toBe(200);
+    expect((await comp("POST", "/editions", ADMINU, { ob_issue_no: 1352 })).status).toBe(201);
+    expect((await comp("POST", "/editions/1352/items", ADMINU, { submission_id: b.id })).status).toBe(409); // 1351 holds the slot
+    expect((await comp("POST", `/editions/1351/items/${a.id}/remove`)).status).toBe(200);
+    expect(await n("SELECT count(*) n FROM editions WHERE ob_issue_no=1351")).toBe(0);
+    expect((await comp("POST", "/editions/1352/items", ADMINU, { submission_id: b.id })).status).toBe(200);
+    expect(await verifyChain(db())).toBeNull();
   });
 
   it("orders items by position and one edition composes at a time", async () => {

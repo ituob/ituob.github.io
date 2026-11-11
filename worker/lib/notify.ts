@@ -137,6 +137,9 @@ export async function transitionNotifications(db: D1Database, t: TransitionInfo)
   for (let i = 1; i < t.chain.length; i++) {
     const kind = STATE_EVENT[t.chain[i]!];
     if (!kind) continue;
+    // Taking an item back out of an edition (scheduled -> merged) is composer bookkeeping:
+    // the member was already told the PR merged, so it is not announced again.
+    if (t.chain[i - 1] === "scheduled" && t.chain[i] === "merged") continue;
     const last = i === t.chain.length - 1;
     out.push(
       ...(await notifyStatements(db, {

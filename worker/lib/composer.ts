@@ -161,6 +161,18 @@ export async function removeItem(db: D1Database, session: Session | null, no: nu
       d
         .prepare(`DELETE FROM edition_items WHERE ob_issue_no=?1 AND submission_id=?2 AND EXISTS (SELECT 1 FROM submissions WHERE id=?2 AND version=?3)`)
         .bind(no, sub.id, v),
+      // An edition emptied by removals must not keep holding the single composing slot:
+      // it goes back to `open`, or, when another edition is already open, the empty row goes.
+      d
+        .prepare(
+          `UPDATE editions SET status='open' WHERE ob_issue_no=?1 AND status='composing'
+            AND NOT EXISTS (SELECT 1 FROM edition_items WHERE ob_issue_no=?1)
+            AND NOT EXISTS (SELECT 1 FROM editions WHERE status='open')`,
+        )
+        .bind(no),
+      d
+        .prepare(`DELETE FROM editions WHERE ob_issue_no=?1 AND status='composing' AND NOT EXISTS (SELECT 1 FROM edition_items WHERE ob_issue_no=?1)`)
+        .bind(no),
     ],
   });
 }
