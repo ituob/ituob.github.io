@@ -30,8 +30,8 @@ export async function verifySignature(secret: string, raw: Uint8Array, header: s
   return crypto.subtle.verify("HMAC", key, sig, raw);
 }
 
-interface Delivery { id: string; bodySha: string; event: string; action: string | null }
-interface PrRow {
+export interface Delivery { id: string; bodySha: string; event: string; action: string | null }
+export interface PrRow {
   submission_id: string; rev: number; repo: string; branch: string; pr_number: number | null; pr_state: string | null;
   commit_sha: string | null; checks: string | null; closing_at: string | null;
 }
@@ -70,52 +70,142 @@ const prUpdate = (db: D1Database, pr: PrRow, v: number, cols: Record<string, unk
     .bind(pr.submission_id, pr.rev, ...Object.values(cols), v);
 };
 
+export type Applied =
+  | { kind: "applied"; from: State; to: State; anomaly?: string }
+  | { kind: "ignored"; why: string };
+
+/**
+ * `merged` for a patch PR. Shared by the webhook and the reconciler (which has no delivery:
+ * `d` is null), so both take the same guarded transition and a late webhook is a no-op.
+ */
+export async function applyPrMerged(db: D1Database, pr: PrRow, sub: Sub, i: { number: number; mergeSha: string | null; baseRef: string; d: Delivery | null }): Promise<Applied> {
+  if (i.baseRef !== BASE_BRANCH) return { kind: "ignored", why: "merged into a branch other than the base" };
+  if (sub.state === "withdrawn") {
+    // Withdrawn but merged anyway: the data repo now holds it. Record it; humans decide (revert PR story).
+    await run(db, [
+      ...(i.d ? [db.prepare(`INSERT INTO webhook_deliveries (delivery_id,body_sha,event,action,submission_id,received_at) VALUES (?1,?2,?3,?4,?5,?6)`).bind(i.d.id, i.d.bodySha, i.d.event, i.d.action, sub.id, now())] : []),
+      ...(await auditStatements(db, [{
+        at: now(), actor_id: null, actor_kind: "github", action: "github.merged_while_withdrawn", subject_type: "submission",
+        subject_id: sub.id, submission_id: sub.id, detail: { pr_number: i.number, merge_sha: i.mergeSha, delivery: i.d?.id ?? null },
+      }])),
+    ]);
+    return { kind: "applied", from: "withdrawn", to: "withdrawn", anomaly: "merged_while_withdrawn" };
+  }
+  if (!LIVE.includes(sub.state)) return { kind: "ignored", why: `state ${sub.state}` };
+  const sha = i.mergeSha;
+  const after = await mutate(db, sub, {
+    from: LIVE, to: "merged", actor: GITHUB, auditAction: "github.pull_request.merged",
+    detail: { pr_number: i.number, merge_sha: sha, delivery: i.d?.id ?? null },
+    note: `Pull request #${i.number} was merged${sha ? ` (${sha.slice(0, 7)})` : ""}.`,
+    extra: (db2, v) => [prUpdate(db2, pr, v, { pr_state: "merged", merge_sha: sha }), ...(i.d ? [deliveryStatement(db2, i.d, sub.id, v)] : [])],
+  });
+  return { kind: "applied", from: sub.state, to: after.state };
+}
+
+/** A patch PR closed without merging (not by the Worker itself) sends the submission back for revision. */
+export async function applyPrClosed(db: D1Database, pr: PrRow, sub: Sub, i: { number: number; d: Delivery | null }): Promise<Applied> {
+  if (pr.closing_at) return { kind: "ignored", why: "closed by the Worker" };
+  if (!LIVE.includes(sub.state)) return { kind: "ignored", why: `state ${sub.state}` };
+  // -> changes_requested, not in_review: re-approval of the same revision would collide on
+  // submission_prs(submission_id, rev); a new revision (revise) gets a new branch and PR.
+  const reason = `The pull request #${i.number} was closed without merging.`;
+  const after = await mutate(db, sub, {
+    from: LIVE, to: "changes_requested", actor: GITHUB, auditAction: "github.pull_request.closed", reason,
+    detail: { pr_number: i.number, delivery: i.d?.id ?? null }, note: `${reason} Revise the submission to open a new pull request.`,
+    extra: (db2, v) => [prUpdate(db2, pr, v, { pr_state: "closed" }), ...(i.d ? [deliveryStatement(db2, i.d, sub.id, v)] : [])],
+  });
+  return { kind: "applied", from: sub.state, to: after.state };
+}
+
+export interface RevertRow {
+  submission_id: string; attempt: number; repo: string; branch: string; pr_number: number | null; pr_state: string | null;
+}
+
+/** The revert PR we created: repo + branch, and the submission's CURRENT attempt. */
+async function ourRevert(db: D1Database, repo: unknown, branch: unknown): Promise<{ rv: RevertRow; sub: Sub } | null> {
+  if (typeof repo !== "string" || typeof branch !== "string" || !PATCH_BRANCH.test(branch)) return null;
+  const rv = await db
+    .prepare(
+      `SELECT r.* FROM submission_reverts r WHERE r.repo=?1 AND r.branch=?2
+          AND r.attempt = (SELECT max(attempt) FROM submission_reverts WHERE submission_id = r.submission_id)`,
+    )
+    .bind(repo, branch)
+    .first<RevertRow>();
+  return rv ? { rv, sub: await getSub(db, rv.submission_id) } : null;
+}
+
+const revUpdate = (db: D1Database, rv: RevertRow, v: number, cols: Record<string, unknown>) => {
+  const names = Object.keys(cols);
+  return db
+    .prepare(
+      `UPDATE submission_reverts SET ${names.map((c, k) => `${c}=?${k + 3}`).join(", ")}
+        WHERE submission_id=?1 AND attempt=?2 AND EXISTS (SELECT 1 FROM submissions WHERE id=?1 AND version=?${names.length + 3})`,
+    )
+    .bind(rv.submission_id, rv.attempt, ...Object.values(cols), v);
+};
+
+/** The revert PR merged: only now does the submission become `withdrawn` (history is never rewritten). */
+export async function applyRevertMerged(db: D1Database, rv: RevertRow, sub: Sub, i: { number: number; mergeSha: string | null; baseRef: string; d: Delivery | null }): Promise<Applied> {
+  if (i.baseRef !== BASE_BRANCH) return { kind: "ignored", why: "merged into a branch other than the base" };
+  if (sub.state !== "merged") {
+    // The revert landed but the submission is not where we left it (it was placed in an edition meanwhile):
+    // record, do not move; a human decides.
+    await run(db, [
+      ...(i.d ? [db.prepare(`INSERT INTO webhook_deliveries (delivery_id,body_sha,event,action,submission_id,received_at) VALUES (?1,?2,?3,?4,?5,?6)`).bind(i.d.id, i.d.bodySha, i.d.event, i.d.action, sub.id, now())] : []),
+      db.prepare(`UPDATE submission_reverts SET pr_state='merged', merge_sha=?3 WHERE submission_id=?1 AND attempt=?2`).bind(rv.submission_id, rv.attempt, i.mergeSha),
+      ...(await auditStatements(db, [{
+        at: now(), actor_id: null, actor_kind: "github", action: "github.revert_merged_unexpected_state", subject_type: "submission",
+        subject_id: sub.id, submission_id: sub.id, detail: { pr_number: i.number, state: sub.state, merge_sha: i.mergeSha },
+      }])),
+    ]);
+    return { kind: "applied", from: sub.state, to: sub.state, anomaly: "revert_merged_unexpected_state" };
+  }
+  const after = await mutate(db, sub, {
+    from: ["merged"], to: "withdrawn", actor: GITHUB, auditAction: "github.revert.merged",
+    reason: "Withdrawn: the revert pull request was merged.",
+    detail: { pr_number: i.number, merge_sha: i.mergeSha, delivery: i.d?.id ?? null },
+    note: `Revert pull request #${i.number} was merged${i.mergeSha ? ` (${i.mergeSha.slice(0, 7)})` : ""}; the submission is withdrawn.`,
+    extra: (db2, v) => [revUpdate(db2, rv, v, { pr_state: "merged", merge_sha: i.mergeSha }), ...(i.d ? [deliveryStatement(db2, i.d, sub.id, v)] : [])],
+  });
+  return { kind: "applied", from: sub.state, to: after.state };
+}
+
+/** The revert PR was closed unmerged: the submission stays `merged`; an admin may request a new revert. */
+export async function applyRevertClosed(db: D1Database, rv: RevertRow, sub: Sub, i: { number: number; d: Delivery | null }): Promise<Applied> {
+  if (rv.pr_state === "closed" || rv.pr_state === "merged") return { kind: "ignored", why: `revert already ${rv.pr_state}` };
+  await run(db, [
+    ...(i.d ? [db.prepare(`INSERT INTO webhook_deliveries (delivery_id,body_sha,event,action,submission_id,received_at) VALUES (?1,?2,?3,?4,?5,?6)`).bind(i.d.id, i.d.bodySha, i.d.event, i.d.action, sub.id, now())] : []),
+    db.prepare(`UPDATE submission_reverts SET pr_state='closed' WHERE submission_id=?1 AND attempt=?2 AND pr_state='open'`).bind(rv.submission_id, rv.attempt),
+    ...(await auditStatements(db, [{
+      at: now(), actor_id: null, actor_kind: "github", action: "github.revert.closed_unmerged", subject_type: "submission",
+      subject_id: sub.id, submission_id: sub.id, detail: { pr_number: i.number, delivery: i.d?.id ?? null },
+    }])),
+  ]);
+  return { kind: "applied", from: sub.state, to: sub.state };
+}
+
+const respond = (r: Applied): Response =>
+  r.kind === "ignored"
+    ? ignored(r.why)
+    : json({ ok: true, status: "applied", from: r.from, to: r.to, ...(r.anomaly ? { anomaly: r.anomaly } : {}) }, 200);
+
 async function onPullRequest(db: D1Database, p: any, d: Delivery): Promise<Response> {
   if (p.action !== "closed") return ignored("action");
   const pull = p.pull_request;
   const repo = p.repository?.full_name;
   if (!pull || pull.head?.repo?.full_name !== repo) return ignored("not a same-repository pull request");
+  const merged = pull.merged === true;
+  const input = { number: pull.number as number, mergeSha: typeof pull.merge_commit_sha === "string" ? (pull.merge_commit_sha as string) : null, baseRef: String(pull.base?.ref), d };
+
+  const rev = await ourRevert(db, repo, pull.head?.ref);
+  if (rev && rev.rv.pr_number === pull.number) {
+    return respond(merged ? await applyRevertMerged(db, rev.rv, rev.sub, input) : await applyRevertClosed(db, rev.rv, rev.sub, input));
+  }
+
   const hit = await ourPr(db, repo, pull.head?.ref);
   if (!hit || hit.pr.pr_number !== pull.number) return ignored("not a pull request we created");
   const { pr, sub } = hit;
-  const merged = pull.merged === true;
-
-  if (merged) {
-    if (pull.base?.ref !== BASE_BRANCH) return ignored("merged into a branch other than the base");
-    if (sub.state === "withdrawn") {
-      // Withdrawn but merged anyway: the data repo now holds it. Record it; humans decide (revert PR story).
-      await run(db, [
-        db.prepare(`INSERT INTO webhook_deliveries (delivery_id,body_sha,event,action,submission_id,received_at) VALUES (?1,?2,?3,?4,?5,?6)`).bind(d.id, d.bodySha, d.event, d.action, sub.id, now()),
-        ...(await auditStatements(db, [{
-          at: now(), actor_id: null, actor_kind: "github", action: "github.merged_while_withdrawn", subject_type: "submission",
-          subject_id: sub.id, submission_id: sub.id, detail: { pr_number: pull.number, merge_sha: pull.merge_commit_sha ?? null, delivery: d.id },
-        }])),
-      ]);
-      return json({ ok: true, status: "applied", anomaly: "merged_while_withdrawn" }, 200);
-    }
-    if (!LIVE.includes(sub.state)) return ignored(`state ${sub.state}`);
-    const sha = typeof pull.merge_commit_sha === "string" ? pull.merge_commit_sha : null;
-    const after = await mutate(db, sub, {
-      from: LIVE, to: "merged", actor: GITHUB, auditAction: "github.pull_request.merged",
-      detail: { pr_number: pull.number, merge_sha: sha, delivery: d.id },
-      note: `Pull request #${pull.number} was merged${sha ? ` (${sha.slice(0, 7)})` : ""}.`,
-      extra: (db2, v) => [prUpdate(db2, pr, v, { pr_state: "merged", merge_sha: sha }), deliveryStatement(db2, d, sub.id, v)],
-    });
-    return json({ ok: true, status: "applied", from: sub.state, to: after.state }, 200);
-  }
-
-  // Closed without merging. Our own close (admin withdrawal) is marked beforehand: not an event.
-  if (pr.closing_at) return ignored("closed by the Worker");
-  if (!LIVE.includes(sub.state)) return ignored(`state ${sub.state}`);
-  // -> changes_requested, not in_review: re-approval of the same revision would collide on
-  // submission_prs(submission_id, rev); a new revision (revise) gets a new branch and PR.
-  const reason = `The pull request #${pull.number} was closed without merging.`;
-  const after = await mutate(db, sub, {
-    from: LIVE, to: "changes_requested", actor: GITHUB, auditAction: "github.pull_request.closed", reason,
-    detail: { pr_number: pull.number, delivery: d.id }, note: `${reason} Revise the submission to open a new pull request.`,
-    extra: (db2, v) => [prUpdate(db2, pr, v, { pr_state: "closed" }), deliveryStatement(db2, d, sub.id, v)],
-  });
-  return json({ ok: true, status: "applied", from: sub.state, to: after.state }, 200);
+  return respond(merged ? await applyPrMerged(db, pr, sub, input) : await applyPrClosed(db, pr, sub, input));
 }
 
 async function onChecks(db: D1Database, p: any, event: string, d: Delivery): Promise<Response> {

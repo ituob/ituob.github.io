@@ -765,3 +765,59 @@ the DDL). Rules:
 . #101 and #103 say validation uses "the same compiled classes", mirrored client and server; the TS wire file has no validators (see <<validation>>).
 . Master #106 says merging then CI then "replay regenerates the projections"; the build today does not regenerate `changes/` (<<projection>>).
 . #104 mentions `@username` mentions; `users` in the shared contract has `id = identity sub` only. See `docs/discussion-notifications.adoc` for the handle requirement.
+
+== As built: composer, revert path and reconciler (card 103-06)
+
+Code: `worker/lib/composer.ts`, `worker/composer-routes.ts`, `worker/lib/revert.ts`,
+`worker/lib/reconciler.ts`; the shared transitions in `worker/lib/github-webhook.ts`
+(`applyPrMerged`, `applyPrClosed`, `applyRevertMerged`, `applyRevertClosed`); migration `0007_composer.sql`.
+Every state change still goes through `mutate`. Nothing calls GitHub: the publisher interface gained
+`openRevertPr`, `getPullRequest` and `bumpDataPin`; the real client stays "not configured", tests use the fake.
+
+*Composer API* (all under the Access-guarded `/api/admin/composer/*`; Access JWT verification is still
+not built, so without the stub identity every route answers 403; each entry point also requires the
+`itu-admin` role, resolved server-side from the Access email, so an editor gets 403):
+list merged-unpublished submissions; create or open an edition (idempotent; at most one `open`); read an
+edition; place (`merged -> scheduled`); remove (`scheduled -> merged`); publish. `POST /api/admin/reconcile`
+runs the reconciler on demand.
+
+*Decisions*
+
+. *Publish is a pin bump behind the publisher.* `publishEdition` calls `bumpDataPin` (idempotent key
+  `edition-{N}-pin`), records `freeze_sha` and `staging_commit`, and the edition becomes `staged`; then each
+  item goes `scheduled -> published` and the edition `published`. `staged` is the resume checkpoint: a failure
+  after the bump is repaired by calling publish again (no second bump; published items are skipped). A failed
+  bump writes nothing. *Not built:* the separate "Stage" and "Publish" steps, the Compare-API ancestry check,
+  the `meta.yaml` PR and the production-deploy `workflow_run` trigger. Those need the real GitHub client; the
+  composer collapses stage and publish into one call until then.
+. *Placement is bound to the target edition.* A submission can only be placed in the edition its file path
+  already names (`target_edition`); anything else is 409. A submission with a revert in flight cannot be placed.
+. *One active edition is a database rule.* Partial unique indexes allow one `open` and one `composing|staged`
+  edition. An edition that empties after removals stays `composing` (no automatic reopen: that could collide
+  with another open edition).
+. *Edition-state races fail the batch.* `placeItem`, `removeItem` and the per-item publish carry a statement that
+  violates NOT NULL unless the edition is in the required status, so a concurrent status change rolls the
+  whole transition back (409) instead of leaving a submission moved without its `edition_items` row.
+. *Revert path.* Admin withdraw of a `merged` submission records `revert.requested` (a no-history `mutate`: the
+  state does not move) and a `submission_reverts` row, then opens the revert PR through the publisher. The
+  submission becomes `withdrawn` only when that PR's merge arrives (signed webhook or reconciler), actor
+  `github`. A second click reuses the in-flight revert; a revert closed unmerged leaves the submission `merged`
+  and the next withdraw starts attempt 2 on a new branch (`...-revertN-{id8}`, still `rt-sub-*`). The revert PR
+  is not the submission's patch PR, hence the extra table (a deviation from the schema section).
+. *Published is never withdrawn.* 409 with the corrective hint. The correction is a new submission created with
+  `corrects_id` naming a published submission of the same register (checked at creation; the member endpoint
+  only reads the state, it cannot move anything).
+. *Reconciler* (scheduled handler, after the notification sweep): for `pr_open`/`ci_failed` patch PRs and
+  open or unopened revert PRs it asks the publisher for the PR and applies the same guarded `apply*` function the
+  webhook uses, without a delivery row. Repeating it changes nothing, and a late webhook after a repair is
+  ignored (the state is no longer live). An unreadable PR is reported and retried next run.
+. *Source guards.* `scheduled` and `published` may appear as a transition target only in `composer.ts`;
+  `merged` only in `github-webhook.ts` and `composer.ts` (un-placing). The guard now also catches `via: [...]`
+  and `SET state = '...'`, is a pure function with mutation probes, and checks that no member route file
+  imports the composer. The main-branch guard now names `publisher.ts` too (the fake's reported base, one
+  occurrence); nothing writes to it.
+
+*Gaps:* no cron trigger is configured in `wrangler*.jsonc` (the scheduled handler is wired but nothing
+fires it; the design asks for every 15 minutes); un-placing an item emits the existing `submission.pr_merged`
+notification again (notification map is keyed by target state); item order is set by placement only (no
+reorder endpoint; gaps in `position` after removals are legal); no UI.

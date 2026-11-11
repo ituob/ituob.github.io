@@ -4,9 +4,10 @@ import { Forbidden } from "./lib/authz.ts";
 import { type Route, body, json } from "./lib/http.ts";
 import { resolveAuthority } from "./lib/authority.ts";
 import { getPublisher } from "./lib/publisher.ts";
+import { requestRevert } from "./lib/revert.ts";
 import {
   DEFAULT_PATCH_REPO, adminWithdraw, approve, createSubmission, editDraft, listSubmissions, openPr,
-  readSubmission, reviewMove, reviseSubmission, submitDraft, withdrawOwn,
+  getSub, readSubmission, reviewMove, reviseSubmission, submitDraft, withdrawOwn,
 } from "./lib/submissions.ts";
 import type { AccessIdentity, Env, Session } from "./lib/types.ts";
 
@@ -67,6 +68,16 @@ export const submissionRoutes: Route[] = [
       return json({ ok: true, pr }, pr.error ? 202 : 200);
     } },
   { method: "POST", pattern: re(`/api/admin/submissions/${ID}/withdraw`), guard: "access",
-    handler: async ({ request, env, access, params }) =>
-      json({ ok: true, submission: await adminWithdraw(env.DB, await ituSession(env, access!), params[0]!, await body(request), getPublisher()) }) },
+    handler: async ({ request, env, access, params }) => {
+      const session = await ituSession(env, access!);
+      const b = await body(request);
+      // A merged patch is already in the data repo: withdraw it with a revert PR. The submission
+      // stays `merged` (202) until that PR's merge arrives; anything earlier closes the open PR.
+      const cur = await getSub(env.DB, params[0]!);
+      if (cur.state === "merged" || cur.state === "published") {
+        const revert = await requestRevert(env.DB, session, cur.id, b, getPublisher());
+        return json({ ok: true, submission: await getSub(env.DB, cur.id), revert }, 202);
+      }
+      return json({ ok: true, submission: await adminWithdraw(env.DB, session, cur.id, b, getPublisher()) });
+    } },
 ];

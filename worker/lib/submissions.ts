@@ -201,7 +201,9 @@ function parseCreate(b: Record<string, unknown>) {
   if (!/^[a-z0-9]+(-[a-z0-9]+)*$/.test(slug)) throw new InvalidError("slug must be lowercase kebab-case");
   if (!ACTION_TYPES.includes(action_type)) throw new InvalidError("action_type must be one of " + ACTION_TYPES.join(","));
   if (!b.payload || typeof b.payload !== "object" || Array.isArray(b.payload)) throw new InvalidError("payload must be an object");
-  return { register_id, slug, action_type, payload: b.payload as Record<string, unknown> };
+  const corrects_id = b.corrects_id === undefined || b.corrects_id === null ? null : String(b.corrects_id);
+  if (corrects_id !== null && !/^[0-9A-Z]{26}$/.test(corrects_id)) throw new InvalidError("corrects_id must be a submission id");
+  return { register_id, slug, action_type, payload: b.payload as Record<string, unknown>, corrects_id };
 }
 
 /** Country binding on every payload write. LIR (no entries) is ITU-staff only. */
@@ -217,6 +219,13 @@ export async function createSubmission(db: D1Database, session: Session | null, 
   const s = requireUser(session);
   const c = parseCreate(b);
   const snap = await bind(db, s, c.register_id, c.action_type, c.payload);
+  // A published submission is corrected by a NEW submission that names it (design "Withdrawal and the undo story").
+  if (c.corrects_id) {
+    const target = await db.prepare(`SELECT state, register_id FROM submissions WHERE id=?1`).bind(c.corrects_id).first<{ state: State; register_id: string }>();
+    if (!target) throw new InvalidError("corrects_id names an unknown submission");
+    if (target.state !== "published") throw new ConflictError(`only a published submission is corrected this way; it is ${target.state}`);
+    if (target.register_id !== c.register_id) throw new InvalidError("a correction targets the same register");
+  }
   const id = ulid();
   const t = now();
   const errors = validate({ register_id: c.register_id, action_type: c.action_type, payload: c.payload });
@@ -224,10 +233,10 @@ export async function createSubmission(db: D1Database, session: Session | null, 
   const stmts = [
     db
       .prepare(
-        `INSERT INTO submissions (id,proposer_id,affiliation_kind,affiliation_member_id,register_id,slug,action_type,state,current_rev,created_at,updated_at,version)
-         VALUES (?1,?2,?3,?4,?5,?6,?7,'draft',1,?8,?8,0)`,
+        `INSERT INTO submissions (id,proposer_id,affiliation_kind,affiliation_member_id,register_id,slug,action_type,state,current_rev,created_at,updated_at,version,corrects_id)
+         VALUES (?1,?2,?3,?4,?5,?6,?7,'draft',1,?8,?8,0,?9)`,
       )
-      .bind(id, snap.submitted_by, snap.affiliation_kind, snap.affiliation_member_id, c.register_id, c.slug, c.action_type, t),
+      .bind(id, snap.submitted_by, snap.affiliation_kind, snap.affiliation_member_id, c.register_id, c.slug, c.action_type, t, c.corrects_id),
     db
       .prepare(`INSERT INTO submission_revisions (${Object.keys(rev).join(",")}) VALUES (?1,?2,?3,?4,?5,?6,?7)`)
       .bind(...Object.values(rev)),
@@ -238,7 +247,7 @@ export async function createSubmission(db: D1Database, session: Session | null, 
       {
         at: t, actor_id: s.userId, actor_kind: "user", action: "submission.created", subject_type: "submission",
         subject_id: id, submission_id: id,
-        detail: { to: "draft", rev: 1, register_id: c.register_id, action_type: c.action_type, affiliation_kind: snap.affiliation_kind, affiliation_member_id: snap.affiliation_member_id },
+        detail: { to: "draft", rev: 1, register_id: c.register_id, action_type: c.action_type, affiliation_kind: snap.affiliation_kind, affiliation_member_id: snap.affiliation_member_id, ...(c.corrects_id ? { corrects_id: c.corrects_id } : {}) },
       },
     ])),
   ];
@@ -491,6 +500,7 @@ export async function adminWithdraw(db: D1Database, session: Session | null, id:
   const s = reviewer(session, true);
   const sub = await getSub(db, id);
   const reason = need(b, MOVES.admin_withdraw);
+  if (sub.state === "published") throw new ConflictError("a published submission cannot be withdrawn; submit a correction (corrects_id)");
   if (!(MOVES.admin_withdraw.from as readonly State[]).includes(sub.state)) throw new ConflictError(`illegal transition from ${sub.state}`);
   const pr = await db.prepare(`SELECT * FROM submission_prs WHERE submission_id=?1 ORDER BY rev DESC LIMIT 1`).bind(id).first<any>();
   const closing = !!(pr?.pr_number && pr.pr_state === "open");

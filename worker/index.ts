@@ -10,6 +10,8 @@
 import { handleAuth } from "./lib/auth-routes.ts";
 import { handleApi } from "./routes.ts";
 import { flushOutbox, sweep } from "./lib/outbox.ts";
+import { getPublisher } from "./lib/publisher.ts";
+import { reconcile } from "./lib/reconciler.ts";
 import { handleQueue } from "./queue-consumer.ts";
 import type { Env } from "./lib/types.ts";
 
@@ -42,5 +44,11 @@ export default {
   queue: handleQueue,
   async scheduled(_e: ScheduledController, env: Env): Promise<void> {
     await sweep(env);
+    // Repair lost webhooks. The real publisher is unconfigured until the App exists: that is a skip, not a crash.
+    try {
+      await reconcile(env.DB, getPublisher());
+    } catch (e) {
+      console.log(JSON.stringify({ level: "error", event: "reconcile.failed", error: String(e) }));
+    }
   },
 };

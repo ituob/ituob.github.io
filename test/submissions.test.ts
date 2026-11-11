@@ -5,6 +5,20 @@ import { activateMember, api, db, provisionItu, seedFixtures } from "./helpers.t
 
 const sources = import.meta.glob("../worker/**/*.ts", { query: "?raw", import: "default", eager: true }) as Record<string, string>;
 
+const COMPOSER = "../worker/lib/composer.ts";
+const WEBHOOK = "../worker/lib/github-webhook.ts";
+/** Where each guarded state may be the target of a transition. Anything else is a finding. */
+const ALLOWED_FILES: Record<string, string[]> = { scheduled: [COMPOSER], published: [COMPOSER], merged: [WEBHOOK, COMPOSER] };
+/** `to: "X"`, a `via: [... "X" ...]` and a raw `SET state = 'X'` assignment all move a submission there. */
+const hasTransition = (text: string, state: string) =>
+  new RegExp(`to:\\s*"${state}"|via:\\s*\\[[^\\]]*"${state}"|SET\\s+state\\s*=\\s*'${state}'`, "i").test(text);
+function transitionOffenders(srcs: Record<string, string>): Record<string, string[]> {
+  const out: Record<string, string[]> = {};
+  for (const [state, allowed] of Object.entries(ALLOWED_FILES))
+    out[state] = Object.entries(srcs).filter(([f, t]) => hasTransition(t, state) && !allowed.includes(f)).map(([f]) => f);
+  return out;
+}
+
 const SAME = { "Sec-Fetch-Site": "same-origin" };
 const EDITOR = "itu-editor@example.test";
 const ADMINU = "itu-admin@example.test";
@@ -176,11 +190,55 @@ describe("illegal transitions are rejected and write nothing", () => {
     expect(await stateOf(s)).toBe("submitted");
   });
 
-  it("merged/scheduled/published are not reachable by any endpoint", () => {
-    const hits = (re: RegExp) => Object.entries(sources).filter(([, t]) => re.test(t)).map(([f]) => f);
-    expect(hits(/to:\s*"(scheduled|published)"/)).toEqual([]);
-    // Only the signature-verified GitHub webhook may move a submission to merged.
-    expect(hits(/to:\s*"merged"/)).toEqual(["../worker/lib/github-webhook.ts"]);
+  it("merged/scheduled/published are not reachable by any member endpoint: each literal lives only in the files named here", () => {
+    expect(transitionOffenders(sources)).toEqual({ scheduled: [], published: [], merged: [] });
+    // The files that legitimately hold each literal are pinned, not merely "somewhere".
+    const holds = (state: string) => Object.entries(sources).filter(([f, t]) => hasTransition(t, state) && !f.includes("/test/")).map(([f]) => f).sort();
+    expect(holds("scheduled")).toEqual([COMPOSER]);
+    expect(holds("published")).toEqual([COMPOSER]);
+    expect(holds("merged")).toEqual([COMPOSER, WEBHOOK].sort());
+  });
+
+  it("mutation probe: the guard fires when a forbidden file gains a transition literal", () => {
+    const probes: [string, string, string][] = [
+      ["to literal in a member module", "../worker/lib/submissions.ts", '\nconst x = { to: "published" };\n'],
+      ["to literal in a member route", "../worker/submission-routes.ts", '\nconst x = { to: "scheduled" };\n'],
+      ["merged in the discussion module", "../worker/lib/discussion.ts", '\nmutate(db, s, { from: ["draft"], to: "merged" });\n'],
+      ["via smuggles a state", "../worker/lib/revert.ts", '\nconst o = { via: ["x", "scheduled"] };\n'],
+      ["raw SQL sets the state", "../worker/lib/membership.ts", "\nconst q = `UPDATE submissions SET state = 'published'`;\n"],
+      ["the reconciler cannot place", "../worker/lib/reconciler.ts", '\nconst x = { to: "scheduled" };\n'],
+      ["a route file", "../worker/composer-routes.ts", '\nconst x = { to: "published" };\n'],
+    ];
+    for (const [name, file, add] of probes) {
+      expect(sources[file], file).toBeDefined();
+      const mutated = { ...sources, [file]: sources[file] + add };
+      const off = Object.values(transitionOffenders(mutated)).flat();
+      expect(off, name).toContain(file);
+    }
+    // The allowed file is exempt only for its own literals: an unrelated transition there is not a finding either way.
+    const noComposer = { ...sources, [COMPOSER]: sources[COMPOSER] + '\nconst y = { to: "withdrawn" };\n' };
+    expect(transitionOffenders(noComposer)).toEqual({ scheduled: [], published: [], merged: [] });
+  });
+
+  it("the composer is admin-only: no member route file imports it, and its route table is Access-guarded", () => {
+    const importers = Object.entries(sources).filter(([f, t]) => f !== COMPOSER && /from\s+"[^"]*\/composer\.ts"|from\s+"\.\/lib\/composer\.ts"/.test(t)).map(([f]) => f);
+    expect(importers).toEqual(["../worker/composer-routes.ts"]);
+    const routes = sources["../worker/composer-routes.ts"]!;
+    expect(routes.match(/guard:\s*"[a-z]+"/g)!.every((g) => g === 'guard: "access"')).toBe(true);
+    expect(routes).not.toMatch(/\/api\/me\//);
+    for (const f of ["../worker/submission-routes.ts", "../worker/discussion-routes.ts"]) expect(sources[f], f).not.toMatch(/composer/i);
+    // every composer entry point checks the admin role itself, not only the route guard
+    const c = sources[COMPOSER]!;
+    const exported = [...c.matchAll(/export async function (\w+)\(db: D1Database, session: Session \| null/g)].map((m) => m[1]);
+    expect(exported.sort()).toEqual(["listEditions", "listMergedUnpublished", "openEdition", "placeItem", "publishEdition", "readEdition", "removeItem"]);
+    for (const fn of exported) {
+      const body = c.slice(c.indexOf(`export async function ${fn}(`)).split(/\nexport /)[0]!;
+      expect(body, fn).toMatch(/admin\(session\)/);
+    }
+  });
+
+  it("the scheduled handler runs the reconciler", () => {
+    expect(sources["../worker/index.ts"]).toMatch(/reconcile\(env\.DB, getPublisher\(\)\)/);
   });
 });
 
@@ -335,10 +393,12 @@ describe("approval -> PR: idempotency and failure", () => {
     expect(() => assertPatchBranch("rt-sub-1351-001-e118-iin-01J9XK2P")).not.toThrow();
     await expect(fake.openPatchPr({ repo: "r", branch: "main", path: "p", content: "c", title: "t", body: "b", idempotencyKey: "k" })).rejects.toThrow(/refusing branch/);
     await expect(db().prepare("INSERT INTO submission_prs (submission_id,rev,repo,branch,path,content_yaml,content_sha,idempotency_key) VALUES ('x',1,'r','main','p','c','s','k')").run()).rejects.toThrow();
-    // Only the webhook mentions main, once, to COMPARE an inbound ref; nothing writes to it.
+    // The webhook mentions main once, to COMPARE a PR's base ref (webhook or reconciler-read); the FAKE publisher
+    // names it once as the base it REPORTS. Nothing writes to it, and nothing else spells it.
     const mainRefs = Object.entries(sources).filter(([, t]) => /heads\/main|"main"/.test(t)).map(([f]) => f);
-    expect(mainRefs).toEqual(["../worker/lib/github-webhook.ts"]);
-    expect(sources["../worker/lib/github-webhook.ts"].match(/heads\/main|"main"/g)).toHaveLength(1);
+    expect(mainRefs).toEqual(["../worker/lib/github-webhook.ts", "../worker/lib/publisher.ts"]);
+    for (const f of mainRefs) expect(sources[f].match(/heads\/main|"main"/g), f).toHaveLength(1);
+    expect(sources["../worker/lib/publisher.ts"]).toMatch(/const FAKE_BASE = "main"/);
   });
 });
 
