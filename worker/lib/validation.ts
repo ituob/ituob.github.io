@@ -1,17 +1,18 @@
 // Submit-time validation, stage 1 (action envelope) — docs/submission-workflow.adoc "two stages".
 //
-// MEASURED PREMISE (2026-11-11): src/lib/schema.generated.ts is interfaces only
-// (every field optional, no enums, no required, no runtime validator;
-// `grep -c required` = 0) and the `data`/`data-ob` submodules (which hold the
-// per-register schema-data.yaml) are not checked out here. So the validator is
-// PLUGGABLE: stage 1 below is hand-written from the design note's envelope
-// rules, and per-register rules come from `RegisterRules` tables that a
-// generator (ituob.github.io scripts/generate_ts_types.rb, second output
-// schema.validators.generated.ts) should replace. CI stays authoritative.
+// The chain is [stage1, schemaStage]. stage1 is the hand-written action
+// envelope (key binding, per-action presence rules). schemaStage runs the
+// validators GENERATED from the LML ontology (src/lib/schema.validators.generated.ts,
+// second output of service-publications-docs scripts/generate_ts_types.rb):
+// the same classes the Ruby gem compiles, so scalar types, collections, enums
+// and unknown keys are checked against the ontology, not a hand-kept table.
+// CI stays authoritative; this is the fast door check. The chain is PLUGGABLE.
+
+import { AMENDMENT_CLASSES, validateClass } from "../../src/lib/schema.validators.generated.ts";
 
 export interface FieldError {
   path: string;
-  code: "required" | "type" | "enum" | "mismatch";
+  code: "required" | "type" | "enum" | "mismatch" | "unknown";
   message: string;
 }
 
@@ -65,7 +66,11 @@ export function registerKeysOf(register_id: string, payload: unknown): string[] 
   return keys;
 }
 
-const needsEntries: ReadonlySet<string> = new Set(["ADD", "REP", "MOD", "SUP", "DEL"]);
+// LIR and SUP carry the repeated / superseded entries in the stored shape
+// (measured over the corpus); the ontology has no `reason` or `superseded_by`
+// attribute on an amendment, so the old LIR-reason and SUP-superseded_by
+// presence rules contradicted the ontology and are gone.
+const needsEntries: ReadonlySet<string> = new Set(["ADD", "REP", "MOD", "SUP", "DEL", "LIR"]);
 
 export const stage1: PayloadValidator = ({ register_id, action_type, payload }) => {
   const errs: FieldError[] = [];
@@ -83,11 +88,6 @@ export const stage1: PayloadValidator = ({ register_id, action_type, payload }) 
   if (d.notes !== undefined && !(Array.isArray(d.notes) && d.notes.every((n) => typeof n === "string")))
     errs.push({ path: "data.notes", code: "type", message: "data.notes must be a list of strings" });
 
-  if (action_type === "LIR") {
-    // UNVERIFIED shape: rules live in datasets/schema-change.yaml (not available here).
-    if (blank(d.reason)) req("data.reason", "LIR requires a reason");
-    return errs;
-  }
   if (needsEntries.has(action_type)) {
     if (!Array.isArray(d.entries) || d.entries.length === 0) {
       req("data.entries", `${action_type} requires at least one entry`);
@@ -100,20 +100,46 @@ export const stage1: PayloadValidator = ({ register_id, action_type, payload }) 
       if (!isObj(e)) return errs.push({ path: at, code: "type", message: "entry must be an object" });
       if (keyOf(e[rules.keyField]) === null) req(`${at}.${rules.keyField}`, `${rules.keyField} is required`);
       if (full) for (const f of rules.requiredEntryFields) if (blank(e[f])) req(`${at}.${f}`, `${f} is required`);
-      if (action_type === "SUP" && blank(e.superseded_by)) req(`${at}.superseded_by`, "SUP requires superseded_by");
     });
   }
   return errs;
 };
 
+/**
+ * Ontology stage: the payload is the member-authored part of one ob-issues
+ * action file. The Worker assigns `identifier`, `ob_issue_no`, `reference`
+ * and the dates at approval (finalYaml), so the envelope is checked with a
+ * stand-in identifier; `data` is checked against the amendment class its
+ * `_class` names, with unknown keys rejected as the Ruby gate does.
+ */
+export const schemaStage: PayloadValidator = ({ payload }) => {
+  if (!isObj(payload)) return [];
+  const toError = (i: { path: string; code: FieldError["code"]; message: string }): FieldError => ({ path: i.path, code: i.code, message: i.message });
+  const errs = validateClass("RegisterChange", { ...payload, identifier: payload.identifier ?? { code: "pending" } }).map(toError);
+  const d = payload.data;
+  if (!isObj(d)) return errs;
+  const cls = d._class;
+  if (typeof cls !== "string" || !AMENDMENT_CLASSES.includes(cls)) {
+    if (cls !== undefined) errs.push({ path: "data._class", code: "enum", message: `data._class must be one of the register amendment classes` });
+    return errs;
+  }
+  return errs.concat(validateClass(cls, d, "data").map(toError));
+};
+
 /** Stage 2 hook (item payloads vs register schema + key uniqueness vs snapshot). Intentionally empty: gap. */
 export const stage2: PayloadValidator = () => [];
 
-let active: PayloadValidator[] = [stage1];
+const DEFAULT_CHAIN: PayloadValidator[] = [stage1, schemaStage];
+let active: PayloadValidator[] = DEFAULT_CHAIN;
 /** Replace the validator chain (generator output, or a test double). */
 export function setValidators(v: PayloadValidator[] | null) {
-  active = v ?? [stage1];
+  active = v ?? DEFAULT_CHAIN;
 }
 export function validate(ctx: ValidationContext): FieldError[] {
-  return active.flatMap((v) => v(ctx));
+  const seen = new Set<string>();
+  // Two layers may report the same defect (e.g. a bad data._class); report it once.
+  return active.flatMap((v) => v(ctx)).filter((e) => {
+    const k = `${e.path}\u0000${e.code}`;
+    return seen.has(k) ? false : (seen.add(k), true);
+  });
 }

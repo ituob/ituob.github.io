@@ -24,7 +24,7 @@ const EDITOR = "itu-editor@example.test";
 const ADMINU = "itu-admin@example.test";
 const MEMBER_A = "member-A@example.test";
 
-const entry = (over: Record<string, unknown> = {}) => ({ country_or_area: "Aland", company_name: "Acme Telecom", ...over });
+const entry = (over: Record<string, unknown> = {}) => ({ country_or_area: { en: "Aland" }, company_name: "Acme Telecom", ...over });
 const payload = (entries: unknown[] = [entry()], type = "ADD") => ({ type, data: { _class: "E118Amendment", entries } });
 const body = (p: unknown = payload()) => ({ register_id: "E118_IIN", slug: "e118-iin", action_type: "ADD", payload: p });
 
@@ -244,7 +244,7 @@ describe("illegal transitions are rejected and write nothing", () => {
 
 describe("country binding and authority", () => {
   it("cross-country, mixed, unresolvable keys: 403 and nothing written", async () => {
-    for (const entries of [[entry({ country_or_area: "Bland" })], [entry(), entry({ country_or_area: "Bland" })], [entry({ country_or_area: "Nowhere" })]]) {
+    for (const entries of [[entry({ country_or_area: { en: "Bland" } })], [entry(), entry({ country_or_area: { en: "Bland" } })], [entry({ country_or_area: { en: "Nowhere" } })]]) {
       expect((await api("POST", "/api/me/submissions", { session: "member-A", body: body(payload(entries)) })).status).toBe(403);
     }
     expect(await count("SELECT count(*) n FROM submissions")).toBe(0);
@@ -253,9 +253,9 @@ describe("country binding and authority", () => {
 
   it("editing or revising towards another country is refused, and a spoofed proposer/affiliation in the body is ignored", async () => {
     const id = await draft();
-    const e = await api("PUT", `/api/me/submissions/${id}`, { session: "member-A", body: { payload: payload([entry({ country_or_area: "Bland" })]) } });
+    const e = await api("PUT", `/api/me/submissions/${id}`, { session: "member-A", body: { payload: payload([entry({ country_or_area: { en: "Bland" } })]) } });
     expect(e.status).toBe(403);
-    const r = await api("POST", "/api/me/submissions", { session: "member-B", body: { ...body(payload([entry({ country_or_area: "Bland" })])), proposer_id: "member-A", affiliation_member_id: "A", affiliation_kind: "itu" } });
+    const r = await api("POST", "/api/me/submissions", { session: "member-B", body: { ...body(payload([entry({ country_or_area: { en: "Bland" } })])), proposer_id: "member-A", affiliation_member_id: "A", affiliation_kind: "itu" } });
     expect(r.status).toBe(201);
     expect(r.json.submission).toMatchObject({ proposer_id: "member-B", affiliation_kind: "member", affiliation_member_id: "B" });
   });
@@ -314,13 +314,16 @@ describe("validation stage 1", () => {
     expect(await count("SELECT count(*) n FROM submission_revisions WHERE submission_id=?1", id)).toBe(2);
   });
 
-  it("envelope errors: wrong class, type mismatch, empty entries, SUP without superseded_by, LIR needs ITU", async () => {
+  it("envelope errors: wrong class, type mismatch, SUP in the stored shape submits, LIR needs ITU", async () => {
     const bad = await draft("member-A", { type: "DEL", data: { _class: "nope", entries: [entry()] } });
     const r = await me(bad, "submit");
     expect(r.status).toBe(422);
     expect(r.json.errors.map((e: any) => e.path).sort()).toEqual(["data._class", "type"]);
     const sup = (await api("POST", "/api/me/submissions", { session: "member-A", body: { ...body(payload([entry()], "SUP")), action_type: "SUP" } })).json.submission.id;
-    expect((await me(sup, "submit")).json.errors[0].path).toBe("data.entries[0].superseded_by");
+    // A stored SUP file carries the superseded entry as-is; the ontology has no superseded_by on an amendment.
+    expect((await me(sup, "submit")).status).toBe(200);
+    const withKey = (await api("POST", "/api/me/submissions", { session: "member-A", body: { ...body(payload([entry({ superseded_by: { x: 1 } })], "SUP")), action_type: "SUP" } })).json.submission.id;
+    expect((await me(withKey, "submit")).json.errors.map((e: any) => `${e.code}:${e.path}`)).toEqual(["unknown:data.entries[0].superseded_by"]);
     const lir = await api("POST", "/api/me/submissions", { session: "member-A", body: { ...body(), action_type: "LIR" } });
     expect(lir.status).toBe(403);
   });

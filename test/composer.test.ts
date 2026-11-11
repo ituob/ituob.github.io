@@ -9,7 +9,7 @@ const SECRET = "test-webhook-secret";
 const EDITOR = "itu-editor@example.test";
 const ADMINU = "itu-admin@example.test";
 const MEMBER_A = "member-A@example.test";
-const payload = () => ({ type: "ADD", data: { _class: "E118Amendment", entries: [{ country_or_area: "Aland", company_name: "Acme Telecom" }] } });
+const payload = () => ({ type: "ADD", data: { _class: "E118Amendment", entries: [{ country_or_area: { en: "Aland" }, company_name: "Acme Telecom" }] } });
 
 let fake: FakePatchPublisher;
 beforeEach(async () => {

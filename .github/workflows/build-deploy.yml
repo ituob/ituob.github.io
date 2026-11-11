@@ -31,15 +31,16 @@ jobs:
 
     # The data-ob scripts run on the ituob gem bundle (data-ob/ituob/Gemfile,
     # committed lockfile) — the repo-root Gemfile is the legacy Jekyll chain.
-    - name: Generate TS wire types from the LML ontology
+    - name: Generate TS wire types and runtime validators from the LML ontology
       working-directory: data-ob
       env:
         BUNDLE_GEMFILE: ituob/Gemfile
         SITE_TYPES_PATH: ${{ github.workspace }}/src/lib/schema.generated.ts
+        SITE_VALIDATORS_PATH: ${{ github.workspace }}/src/lib/schema.validators.generated.ts
       run: bundle install && bundle exec ruby scripts/generate_ts_types.rb
 
-    - name: Verify committed wire types match the ontology
-      run: git diff --exit-code -- src/lib/schema.generated.ts
+    - name: Verify committed wire types and validators match the ontology
+      run: git diff --exit-code -- src/lib/schema.generated.ts src/lib/schema.validators.generated.ts
 
     - name: Generate register snapshots
       working-directory: data-ob
