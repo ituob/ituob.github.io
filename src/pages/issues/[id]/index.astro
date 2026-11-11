@@ -164,7 +164,7 @@ const authoritativeHref =
   extraStylesheets={["/assets/css/issue.css"]}
   headScripts={["https://kit.fontawesome.com/3ebc4b9810.js"]}
 >
-  {issue.incomplete && <IncompleteBanner />}
+  {issue.incomplete && <IncompleteBanner incomplete />}
 
   <header>
     <h1 class="bulletin-title">
@@ -348,6 +348,27 @@ const authoritativeHref =
           </div>
         </article>
       ))}
+    </section>
+  )}
+
+  {Object.keys(issue.annexes).length > 0 && (
+    <section class="annexes" id="annexes">
+      <h3>Annexes to this issue</h3>
+      {Object.entries(issue.annexes).map(([pubId]) => {
+        const known = PUBLICATION_BY_SLUG.get(pubId);
+        const annexTitle =
+          loadListMetadata(pubId)?.title?.en ??
+          loadDatasetMetadata(known?.slug ?? pubId)?.title?.en ??
+          known?.label ??
+          pubId;
+        return (
+          <article class="annex">
+            <header>
+              <h3 class="title">{annexTitle}</h3>
+            </header>
+          </article>
+        );
+      })}
     </section>
   )}
 

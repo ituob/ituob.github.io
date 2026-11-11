@@ -173,10 +173,13 @@ export const loadIssue = memoize((id: number): LoadedIssue | null => {
       textual,
     },
     amendments: { structured, textual: textualAmd, placeholder },
-    incomplete: generalIsEmpty(generalDir, textual, runningAnnexes, approvedRecommendations) &&
-                 Object.keys(structured).length === 0 &&
-                 Object.keys(textualAmd).length === 0 &&
-                 Object.keys(placeholder).length === 0,
+    // An explicit `incomplete: true` in the issue's meta.yaml always wins;
+    // otherwise mirror Jekyll's computed check (nothing to show).
+    incomplete: meta.incomplete === true ||
+                 (generalIsEmpty(generalDir, textual, runningAnnexes, approvedRecommendations) &&
+                  Object.keys(structured).length === 0 &&
+                  Object.keys(textualAmd).length === 0 &&
+                  Object.keys(placeholder).length === 0),
   };
 });
 
