@@ -164,7 +164,7 @@ const authoritativeHref =
   extraStylesheets={["/assets/css/issue.css"]}
   headScripts={["https://kit.fontawesome.com/3ebc4b9810.js"]}
 >
-  {issue.incomplete && <IncompleteBanner />}
+  {issue.incomplete && <IncompleteBanner incomplete />}
 
   <header>
     <h1 class="bulletin-title">
@@ -262,7 +262,7 @@ const authoritativeHref =
           <header>
             <h3 class="title">
               <span class="text">{g.title}</span>
-              <a id={g.anchorId} class="anchor" title="Link to this message" href={`/issues/${id}/#${g.anchorId}`}>#</a>
+              <a id={g.anchorId} class="anchor" title="Link to this message" href={`/issues/${id}/#${g.anchorId}`} aria-label="Link to this message"><i class="fas fa-link" aria-hidden="true"></i></a>
             </h3>
           </header>
           <div class="included-contents">
@@ -315,7 +315,7 @@ const authoritativeHref =
                 {" "}to
               </span>
               <a class="text" href={a.datasetHref}>{a.title}</a>
-              <a id={a.anchorId} class="anchor" title="Link to this message" href={`/issues/${id}/#${a.anchorId}`}>#</a>
+              <a id={a.anchorId} class="anchor" title="Link to this message" href={`/issues/${id}/#${a.anchorId}`} aria-label="Link to this message"><i class="fas fa-link" aria-hidden="true"></i></a>
             </h3>
             {a.recCode && (
               <p class="recommendation">
@@ -348,6 +348,27 @@ const authoritativeHref =
           </div>
         </article>
       ))}
+    </section>
+  )}
+
+  {Object.keys(issue.annexes).length > 0 && (
+    <section class="annexes" id="annexes">
+      <h3>Annexes to this issue</h3>
+      {Object.entries(issue.annexes).map(([pubId]) => {
+        const known = PUBLICATION_BY_SLUG.get(pubId);
+        const annexTitle =
+          loadListMetadata(pubId)?.title?.en ??
+          loadDatasetMetadata(known?.slug ?? pubId)?.title?.en ??
+          known?.label ??
+          pubId;
+        return (
+          <article class="annex">
+            <header>
+              <h3 class="title">{annexTitle}</h3>
+            </header>
+          </article>
+        );
+      })}
     </section>
   )}
 
