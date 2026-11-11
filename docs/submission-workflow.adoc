@@ -1,0 +1,822 @@
+= Submission workflow — propose, review, approve, publish (design note for #103)
+:toc:
+:toclevels: 2
+
+Status: DESIGN, no code. Companion to `docs/cloudflare-webapp.adoc`
+(Phase 3) and `docs/discussion-notifications.adoc` (#104). Facts in
+this note were measured on 2026-11-11 against `ituob.github.io` @
+ac522eb, `service-publications-docs` @ 0651a679 and `itu-ob-data` @
+e17484b; anything not measured is marked *UNVERIFIED*.
+
+== Hard invariants (inherited, restated so the design can be checked against them)
+
+. No code path writes to the patch repository's `main`. The Worker only
+  creates branches and opens pull requests. A human merges.
+. Approval = the Worker writes the YAML patch to a branch through the
+  GitHub API and opens a PR, so the CI gate chain applies.
+. Corrections are new patches, never rewrites of history or of full
+  files. No code path authors a full-state file (`data.yaml`, snapshots,
+  `datasets/*/changes/`).
+. No email from a request path (see #104: Cloudflare Queues).
+
+== Facts that shape the design (read these first)
+
+[cols="2,4,3"]
+|===
+| Fact | Evidence | Consequence
+
+| The patch log that CI gates and that the pipeline reads is `ob-issues/{issue}/{slug}/{NNN}-{ACTION}.yaml` in *`ituob/service-publications-docs`*, not in `itu-ob-data`.
+| `ls itu-ob-data` has `issues/ lists/ recommendations/ reference-docs/`, no `ob-issues/`. `service-publications-docs/ob-issues/` holds 7,955 tracked files, 389 issues (max 1343).
+| #103 text ("a branch of itu-ob-data under `ob-issues/{issue}/{register}/`") names the wrong repo. See <<target-repo>>.
+
+| `itu-ob-data` has no validation gate at all.
+| Its only workflow, `deploy.yml`, sends a `repository_dispatch` to `ituob/ituob.org` (a different repo) on push to `main`/`staging`. Every gate (`validate-ob-issues.yml`, `test.yml`) lives in `service-publications-docs`.
+| A PR on `itu-ob-data` would get *no* gate chain. This defeats the point of the PR.
+
+| `ob-issues/` is today generated from `itu-ob-data/issues/` by `scripts/build_ob_issues.rb` (per-issue `rm_rf` + rewrite), and `datasets/*/changes/` is in turn regenerated from `ob-issues/` by `scripts/migrate_actions_to_changes.rb` (wipe + rewrite).
+| Script headers; `ob-issues/manifest.yaml` records `itu_ob_data_path`. `itu-ob-data` is still the live legacy-editor feed (commits "update OB 1350" on 2026-11; `ob-issues` stops at 1343).
+| Two sources can write `ob-issues/{N}`. <<source-of-truth>> decides who wins.
+
+| Replay and snapshots read `datasets/{seed}-{slug}/changes/*.yaml`, *not* `ob-issues/`.
+| `scripts/generate_register_snapshots.rb` builds `DirectoryChangeSource` from `entry.seed_path`; `build-deploy.yml` runs only `generate_ts_types.rb` and `generate_register_snapshots.rb`. Nothing runs `migrate_actions_to_changes.rb`.
+| A new `ob-issues` patch changes *nothing* on the site until the projection is regenerated. See <<projection>>.
+
+| The site pins data by submodule SHA (`data` = itu-ob-data @ 90f9972, `data-ob` = service-publications-docs @ 0651a679); builds do `submodules: recursive`. Bumps already travel as PRs (`chore/bump-data-ob-*` branches). `staging` branch push deploys staging-www.ituob.org.
+| `git ls-tree HEAD data data-ob`; `.github/workflows/build-deploy.yml`; `git branch -r`.
+| Merging a patch into the data repo does *not* publish it. Publication is a pin bump. This is the lever for the unpublished/published distinction (<<publication>>).
+
+| `src/lib/schema.generated.ts` is interfaces only: every field optional, no enums, no `required`, no runtime validator (`grep -c required` = 0).
+| File inspection.
+| It cannot be the submit-time validator by itself. See <<validation>>.
+
+| `rt-*` is a developer-branch prefix, not a per-PR naming scheme.
+| `service-publications-docs`: `rt-improvements`, `rt-parse-ob-issues`, `rt-parse-ob-issues-candidate`; `itu-ob-data`: `rt-2026-normalization`; site: `rt-astro-site`, `rt-fix-links`, `rt-jekyll-new-pipeline`.
+| We keep the `rt-` prefix as the issue asks, but the suffix is ours. See <<branch-naming>>.
+
+| Neither patch repo shows branch protection through the API (404 on `branches/main/protection`, empty rulesets). Our token may lack admin, so this is *UNVERIFIED*.
+| `gh api repos/ituob/{itu-ob-data,service-publications-docs}/branches/main/protection`.
+| "Never write main" is currently convention. The design enforces it in the App's code, and asks for a ruleset (<<open-decisions>> D3).
+|===
+
+[[target-repo]]
+== Target repository for patch PRs
+
+*Recommendation: `ituob/service-publications-docs`*, path
+`ob-issues/{ob_issue_no}/{slug}/{NNN}-{ACTION}.yaml`. It is where the
+patch log is read from, where the gates run, and where the existing
+files already look exactly like what the Worker will write (checked:
+`ob-issues/1297/e212-mnc/001-ADD.yaml`, `type/date_requested/
+date_active/ob_issue_no/reference/identifier{code}/data{_class,entries,
+notes}`).
+
+The repo is a Worker configuration value (`PATCH_REPO`, default
+`ituob/service-publications-docs`), so the decision is reversible
+without code change. If Ronald insists on `itu-ob-data`, then that repo
+first needs the validate/test workflows ported to it, otherwise the PR
+is ungated and the second hard invariant is void.
+
+[[source-of-truth]]
+== Source of truth: reconcile with the legacy feed
+
+`build_ob_issues.rb` regenerates `ob-issues/{N}` from
+`itu-ob-data/issues/{N}` and overwrites. Two cases:
+
+* A new submission-derived issue (>= 1351, or the open edition) has no
+  `itu-ob-data/issues/{N}` yet: no collision.
+* If the legacy editor (Darkod55's flow) also publishes edition N, the
+  script would `rm_rf` the submission patches in `ob-issues/N`.
+
+Rule for the design: *from the cut-over edition on, `ob-issues/{N}` is
+authored only by this workflow.* The cut-over edition is an explicit
+config (`CUTOVER_EDITION`); `build_ob_issues.rb` must refuse to touch
+editions >= it (a card for the pipeline, not for this note). Until that
+guard lands, the Worker refuses to open a PR for an edition for which
+`itu-ob-data/issues/{N}` exists on its `main` (one Contents API probe).
+
+[[projection]]
+== The projection gap (blocks the demo)
+
+Replay consumes `datasets/*/changes/`, which is a committed projection
+of `ob-issues/`. A PR that adds only an `ob-issues` file passes the gates
+and changes no snapshot. The demo step "replay regenerates the
+projections -> staging shows the change" therefore needs one of:
+
+[cols="1,4,3"]
+|===
+| Option | What | Verdict
+
+| A (recommend)
+| `build-deploy.yml` runs `migrate_actions_to_changes.rb` before `generate_register_snapshots.rb`. `datasets/*/changes/` stops being a committed truth (follow-up: untrack it). The projection is produced only by the pipeline, per the program rules.
+| Smallest change; one-line pipeline edit in the site repo plus a drift-gate retirement. Slower build by the script's runtime (UNVERIFIED, measure).
+
+| B
+| A workflow in `service-publications-docs` regenerates and commits `changes/` onto the PR branch (bot commit).
+| Needs an App token so the push re-triggers checks; adds bot commits to every PR; the projection stays committed, so it can drift.
+
+| C
+| The Worker also writes `changes/*.yaml`.
+| REJECTED: the Worker would author projections ("never authored").
+|===
+
+== D1 schema (#103)
+
+Shared contract, referenced not redefined: `users(id TEXT PK = identity
+'sub')` (#102), `members`, `memberships`, roles `itu-admin | itu-editor |
+member-submitter` (#105), `getSession(request) -> {userId, roles,
+memberStateId|null} | null` with a local stub. Every actor column below
+is `users.id`. All timestamps are ISO-8601 UTC text (`datetime('now')`
+is not used in app code so tests can inject a clock). Identifiers are
+ULIDs generated in the Worker.
+
+[source,sql]
+----------------------------------------------------------------
+-- One logical proposal. Mutable only in its pointer columns; the
+-- content lives in submission_revisions (immutable).
+CREATE TABLE submissions (
+  id                TEXT PRIMARY KEY,                 -- ULID
+  proposer_id       TEXT NOT NULL REFERENCES users(id),
+  affiliation_kind  TEXT NOT NULL CHECK (affiliation_kind IN ('itu','member')),  -- snapshot at write time (#105 contract)
+  affiliation_member_id TEXT,                         -- members.id snapshot; NULL for 'itu'
+  register_id       TEXT NOT NULL,                    -- catalogs/registers.yaml register_id, e.g. E118_IIN
+  slug              TEXT NOT NULL,                    -- directory slug, e.g. e118-iin
+  action_type       TEXT NOT NULL
+    CHECK (action_type IN ('ADD','SUP','REP','LIR','MOD','DEL')),   -- SEED is never member-submitted (see below)
+  state             TEXT NOT NULL
+    CHECK (state IN ('draft','submitted','in_review','changes_requested',
+                     'approved','rejected','withdrawn',
+                     'pr_pending','pr_open','ci_failed','merged',
+                     'scheduled','published')),
+  current_rev       INTEGER NOT NULL DEFAULT 1,       -- points into submission_revisions
+  duplicate_of      TEXT,                             -- "start from a duplicate of an existing entry": register key, informational
+  corrects_id       TEXT REFERENCES submissions(id),  -- set when this is a corrective follow-on to a published submission
+  target_edition    INTEGER,                          -- ob_issue_no, set at approval (NULL before)
+  seq               INTEGER,                          -- NNN allocated at approval
+  discussion_closed INTEGER NOT NULL DEFAULT 0,       -- #104 moderator flag
+  created_at        TEXT NOT NULL,
+  updated_at        TEXT NOT NULL,
+  version           INTEGER NOT NULL DEFAULT 0        -- optimistic-concurrency counter, see state machine
+);
+CREATE INDEX idx_sub_state ON submissions(state, updated_at);
+CREATE INDEX idx_sub_proposer ON submissions(proposer_id);
+CREATE INDEX idx_sub_register ON submissions(register_id, state);
+
+-- Immutable. Revise = INSERT a new row; never UPDATE payload.
+CREATE TABLE submission_revisions (
+  submission_id TEXT NOT NULL REFERENCES submissions(id),
+  rev           INTEGER NOT NULL,
+  payload_yaml  TEXT NOT NULL,   -- the exact bytes that would be committed (one ob-issues action file body)
+  payload_sha   TEXT NOT NULL,   -- sha256 of payload_yaml
+  validation    TEXT NOT NULL,   -- JSON: {stage1:[...], stage2:[...], validator_version, schema_sha}
+  created_by    TEXT NOT NULL REFERENCES users(id),
+  created_at    TEXT NOT NULL,
+  PRIMARY KEY (submission_id, rev)
+);
+
+-- Append-only transition history (the issue's `review_state`).
+-- Written in the same db.batch() as the submissions.state update.
+CREATE TABLE review_state (
+  id            INTEGER PRIMARY KEY AUTOINCREMENT,
+  submission_id TEXT NOT NULL REFERENCES submissions(id),
+  rev           INTEGER NOT NULL,
+  from_state    TEXT,                       -- NULL on creation
+  to_state      TEXT NOT NULL,
+  actor_id      TEXT,                       -- NULL only for system actor
+  actor_kind    TEXT NOT NULL CHECK (actor_kind IN ('user','system','github')),
+  reason        TEXT,                       -- required for changes_requested, rejected, withdrawn
+  at            TEXT NOT NULL
+);
+CREATE INDEX idx_rs_sub ON review_state(submission_id, id);
+
+-- Reviewer assignment (who is "in review").
+CREATE TABLE review_assignments (
+  submission_id TEXT NOT NULL REFERENCES submissions(id),
+  reviewer_id   TEXT NOT NULL REFERENCES users(id),
+  assigned_by   TEXT NOT NULL REFERENCES users(id),
+  at            TEXT NOT NULL,
+  PRIMARY KEY (submission_id, reviewer_id)
+);
+
+-- Per-(edition, slug) sequence allocator: two PRs for the same
+-- edition must not both create NNN=003.
+CREATE TABLE edition_seq (
+  ob_issue_no INTEGER NOT NULL,
+  slug        TEXT NOT NULL,
+  next_seq    INTEGER NOT NULL,
+  PRIMARY KEY (ob_issue_no, slug)
+);
+
+-- GitHub-side state of an approved submission. One row per attempt
+-- family; the branch name is deterministic (idempotency key).
+CREATE TABLE submission_prs (
+  submission_id TEXT NOT NULL REFERENCES submissions(id),
+  rev           INTEGER NOT NULL,               -- revision that was committed
+  repo          TEXT NOT NULL,                  -- PATCH_REPO at the time
+  branch        TEXT NOT NULL,
+  base_sha      TEXT,
+  commit_sha    TEXT,
+  pr_number     INTEGER,
+  pr_state      TEXT CHECK (pr_state IN ('open','closed','merged')),
+  merge_sha     TEXT,
+  checks        TEXT,                           -- JSON summary from webhook: {conclusion, failed:[names], head_sha}
+  attempts      INTEGER NOT NULL DEFAULT 0,
+  last_error    TEXT,
+  PRIMARY KEY (submission_id, rev)
+);
+CREATE UNIQUE INDEX idx_pr_branch ON submission_prs(repo, branch);
+
+-- Editions and composer placement (admin-only surface).
+CREATE TABLE editions (
+  ob_issue_no   INTEGER PRIMARY KEY,
+  status        TEXT NOT NULL CHECK (status IN ('open','composing','staged','published')),
+  freeze_sha    TEXT,           -- data-repo commit the staging pin points at
+  meta_pr       INTEGER,        -- PR that adds ob-issues/{N}/meta.yaml
+  staging_commit TEXT,          -- site-repo commit on `staging`
+  published_at  TEXT,
+  created_at    TEXT NOT NULL
+);
+CREATE TABLE edition_items (
+  ob_issue_no   INTEGER NOT NULL REFERENCES editions(ob_issue_no),
+  submission_id TEXT NOT NULL REFERENCES submissions(id),
+  position      INTEGER NOT NULL,
+  PRIMARY KEY (ob_issue_no, submission_id)
+);
+
+-- Single audit table for the whole product, hash-chained.
+CREATE TABLE audit_log (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  at          TEXT NOT NULL,
+  actor_id    TEXT,                 -- users.id; NULL for system/github
+  actor_kind  TEXT NOT NULL CHECK (actor_kind IN ('user','system','github')),
+  action      TEXT NOT NULL,        -- dotted verb: submission.created, submission.state, comment.revised, discussion.closed, pr.opened, ...
+  subject_type TEXT NOT NULL,       -- 'submission' | 'comment' | 'edition' | 'user'
+  subject_id  TEXT NOT NULL,
+  submission_id TEXT,               -- denormalised for the per-submission timeline
+  detail      TEXT,                 -- JSON
+  request_id  TEXT,                 -- cf-ray, links to Workers logs
+  prev_hash   TEXT NOT NULL,
+  hash        TEXT NOT NULL         -- sha256(prev_hash || canonical(row without hash))
+);
+CREATE INDEX idx_audit_sub ON audit_log(submission_id, id);
+----------------------------------------------------------------
+
+Notes:
+
+* `review_state` and `audit_log` both record a transition; this is
+  deliberate. `review_state` is the typed history that drives the UI and
+  the allowed-transition check; `audit_log` is the tamper-evident
+  record of *everything* (including #104 comment edits). Both rows are
+  inserted in one `db.batch([...])` with the state update, so they
+  cannot disagree.
+* Hash chain: the Worker computes `hash` inside the same batch using the
+  latest `hash` read in the batch's first statement. Concurrent writers
+  would fork the chain, so audit appends go through a single Durable
+  Object, `AuditChain`, that serialises appends and then writes to D1
+  (alternative: drop the chain, keep append-only. See D6).
+* `payload_yaml` is the exact file body. The Worker stores what it will
+  commit so the reviewer reviews the bytes that land.
+* `SEED` is excluded from `action_type`: it is the one full-state action
+  and a bulk import emits a SEED/patch series through a reviewed PR made
+  by staff tooling, not through the member form. The enum matches
+  `ActionType` in `messages.lml` minus SEED (`LIR` is kept; staff
+  submit it, members normally do not: role rule in <<authz>>).
+* `affiliation_kind` / `affiliation_member_id` are the #105 affiliation
+  snapshot (`docs/membership-roles.adoc`, commit 90e0239): copied from the
+  session at write time, never joined to the live membership for display
+  or history. `proposer_id` is that note's `submitted_by`. A review
+  decision row in `review_state` does not repeat the snapshot; it is
+  rendered with `affiliationOf(actor_id at at)`, see #105. Unaffiliated
+  accounts (no roles) cannot create submissions at all.
+
+[[authz]]
+=== Routes and who may do what
+
+Route guards follow the #102/#105 contract
+(`docs/identity-accounts.adoc`, `docs/membership-roles.adoc`): Cloudflare
+Access guards only `/admin/*`, `/api/admin/*` and `/api/ci/*`
+(committee, CI service tokens); member-facing mutations live under the
+session-guarded `/api/me/*` (`getSession` required, role and country
+checked server-side); any other non-GET `/api/*` route denies by default.
+
+[cols="3,3"]
+|===
+| Route family | Operations
+
+| `/api/me/submissions/*`
+| create draft, edit draft, submit, revise, withdraw (pre-approval), read own, read for review (ITU roles by session)
+
+| `/api/admin/submissions/*`
+| start review, request changes, reject, approve, assign, withdraw after approval, retry/send-back after a GitHub failure; Access-gated (editors act here; the handler also checks the `itu-editor`/`itu-admin` role from the session mapped by `sub`, because Access identity and in-app roles are not auto-linked)
+| `/api/admin/editions/*`
+| compose, meta PR, stage, publish
+| `/api/ci/*`
+| nothing in v1 (the GitHub webhook has its own HMAC-verified route `POST /api/github/webhook`, a non-GET route that explicitly opts out of Access and session guards and verifies `X-Hub-Signature-256`; this is the one deliberate exception to deny-by-default)
+|===
+
+[cols="3,2,3"]
+|===
+| Action | Role | Guard
+
+| create / edit draft, submit, revise after changes-requested, withdraw (pre-approval)
+| `member-submitter` who is `proposer_id`; `itu-editor`/`itu-admin` on their own submissions
+| session.userId = proposer_id; and for member-submitter the target must be allowed for `memberStateId` (rule owned by #105, called as `canSubmitFor(session, register_id, key)`)
+
+| move to `in_review`, `changes_requested`, `approved`, `rejected`
+| `itu-editor`, `itu-admin`
+| editor may not review their own submission (`proposer_id != actor`); an admin override is audited with reason `self-review-override`
+
+| withdraw after approval, compose edition, publish
+| `itu-admin`
+| edition ops are admin-only and sit outside the public IA
+|===
+
+== State machine
+
+[source]
+----------------------------------------------------------------
+draft ──submit──▶ submitted ──start_review──▶ in_review
+  │                  │ ▲                         │
+  │                  │ └──── resubmit ────┐      ├─request_changes─▶ changes_requested
+  │                  │                    │      │                        │ revise (new rev) │
+  withdraw        withdraw                └──────┼────────────────────────┘ ▼ submitted
+  ▼                  ▼                           ├─reject─▶ rejected   (terminal)
+  withdrawn       withdrawn                      └─approve─▶ approved
+                                                               │ enqueue open_pr (same txn)
+                                                               ▼
+                                                            pr_pending ──(GitHub error, retries exhausted)──▶ stays pr_pending + alert
+                                                               │ branch+PR created
+                                                               ▼
+                                              ┌──────────── pr_open ◀───── re-approve after fix
+                                              │ webhook: checks failed           │
+                                              ▼                                  │
+                                           ci_failed ──editor fixes revision─────┘
+                                              (or → changes_requested to send back to proposer)
+                                              │
+              pr_open ──webhook: PR merged──▶ merged ──composer places it──▶ scheduled ──publish──▶ published
+              pr_open ──admin withdraw (closes PR, deletes branch)──▶ withdrawn
+              merged  ──admin withdraw──▶ revert PR (see below) ──merged──▶ withdrawn
+----------------------------------------------------------------
+
+Transition table (the only legal moves; anything else is rejected with
+409 and nothing written):
+
+[cols="2,2,2,3"]
+|===
+| From | To | Actor | Side effects (all in the same `db.batch`)
+
+| (none) | draft | proposer | submission + rev 1 + review_state + audit
+| draft | submitted | proposer | re-validate (<<validation>>); notify reviewers (#104)
+| submitted | in_review | itu-editor | assignment row optional
+| in_review | changes_requested | itu-editor | reason required; comment thread entry
+| changes_requested | submitted | proposer | new `submission_revisions` row (`current_rev`+1); re-validate; notify
+| in_review | rejected | itu-editor | reason required; terminal
+| in_review | approved | itu-editor | allocate `target_edition`+`seq` (<<allocation>>); insert `submission_prs` row; enqueue `open_pr`; the state moves on to `pr_pending` in the same batch
+| pr_pending | pr_open | system | queue consumer after branch + PR created
+| pr_open | ci_failed | github | webhook `check_suite`/`workflow_run` conclusion failure on head_sha == `commit_sha`; stores failed check names in `submission_prs.checks`
+| ci_failed | changes_requested | itu-editor | send back to proposer with the failed-check text as the reason
+| ci_failed | in_review | itu-editor | editor corrects the payload themselves: new rev authored by the editor, audited; then re-approve
+| in_review (after a fix) | approved | itu-editor | for an existing branch: append a commit to the same branch (no force push), same PR
+| pr_open | merged | github | webhook `pull_request` closed + merged; record `merge_sha`
+| pr_open | withdrawn | itu-admin | `PATCH /pulls/{n} state=closed`, delete branch; reason required
+| merged | scheduled | itu-admin | `edition_items` row (composer)
+| scheduled | published | itu-admin | on publish (<<publication>>)
+| draft, submitted, changes_requested | withdrawn | proposer | reason optional
+|===
+
+Rules:
+
+* *Optimistic concurrency.* Every transition is
+  `UPDATE submissions SET state=?, version=version+1 WHERE id=? AND
+  state=? AND version=?`; zero rows changed -> 409 (stale UI or double
+  click). The history rows are inserted only if the update matched
+  (D1 batch with the `changes()` check, or a conditional `INSERT ...
+  SELECT ... WHERE changes()=1`).
+* *Resubmit invalidates reviews.* Every `submitted` carries a new rev;
+  the reviewer diff is always against the rev they last saw.
+* *Approval is bound to a revision.* `approved` records `rev`; the
+  commit in the PR must hash-match `submission_revisions.payload_sha`
+  of that `rev` (the consumer re-reads it; a mismatch aborts and
+  alerts).
+* `merged`, `scheduled` and `published` are driven only by GitHub
+  webhooks and the admin composer. No user can set them by API.
+
+=== Withdrawal and the undo story
+
+[cols="2,3,3"]
+|===
+| Situation | Mechanism | Why it respects "corrections are new patches"
+
+| Before approval
+| `withdrawn`, content kept
+| Nothing reached git.
+
+| Approved, PR open, not merged
+| Close PR, delete the branch (branch deletion of a Worker-created `rt-sub-*` ref only)
+| Nothing merged. Nothing in the log.
+
+| Merged to the data repo `main` but edition not published
+| *Revert PR*: a new PR (same machinery, `kind=revert`) that deletes the file `ob-issues/{N}/{slug}/{NNN}-{ACTION}.yaml`. State `withdrawn` only when that PR merges.
+| History is not rewritten; `main` only moves forward. The edition is unpublished, so no reader has seen the entry. *Flag D4:* this deletes a patch from the head of the log. If Ronald prefers pure append-only even pre-publication, use a compensating action instead.
+
+| Published
+| A new submission with `corrects_id` set, normally an `REP`/`MOD` of the entry or `SUP`/`DEL`, going through the whole flow
+| The registry is a change log; a printed bulletin cannot be recalled.
+|===
+
+[[allocation]]
+=== Edition and sequence allocation
+
+An `ob-issues` file needs an edition number `{N}` and a three-digit
+sequence `{NNN}`; a submission does not know either. At approval the
+editor picks `target_edition` (default: the single `editions` row with
+`status='open'`), and the Worker allocates `seq` in the same batch:
+
+[source,sql]
+----------------------------------------------------------------
+INSERT INTO edition_seq(ob_issue_no, slug, next_seq) VALUES (?, ?, 2)
+  ON CONFLICT(ob_issue_no, slug) DO UPDATE SET next_seq = next_seq + 1
+  RETURNING next_seq - 1;
+----------------------------------------------------------------
+
+so concurrent approvals get distinct numbers. Gaps (withdrawn PRs) are
+legal in the file name sequence; *UNVERIFIED:* `scripts/check_issue_files.rb`
+and `ObjectRepository::ACTION_FILE_PATTERN (\d{3}-[A-Z]+)` accept gaps. The
+implementation card measures that on a fixture before relying on it.
+Also derived by the Worker: `reference: OB-{N}`, `identifier.code:
+"{N}-{NNN}"` (as in `1297-001`), `ob_issue_no: '{N}'` (string, as in the
+corpus), `date_requested`/`date_active` from the submission/edition (the
+existing files show both `null` and a date; the card fixes the rule from
+the schema).
+
+[[validation]]
+== Submit-time validation (two stages)
+
+=== Which implementation is authoritative
+
+The compiled classes are Ruby (`lutaml-model` classes compiled from
+`messages.lml` at boot); a Worker cannot run them. The honest layers:
+
+[cols="1,3,2"]
+|===
+| Layer | What it is | Authority
+
+| *CI (authoritative)*
+| On the PR: `bundle exec ituob dataset validate`, `scripts/validate_references.rb`, `verify_parser_equivalence.rb --verify`, `validate_data_lml.rb --all` (every `ob-issues/**/*.yaml` through the compiled classes), plus the rspec suite. Defined in `service-publications-docs/.github/workflows/validate-ob-issues.yml` and `test.yml`.
+| The only thing that can block a merge. Equals the round-trip proof's code path.
+
+| *Worker, stage 1 + 2 (fast, strict, not authoritative)*
+| A TypeScript validator generated from the same `messages.lml` and the register `schema-data.yaml`. Rejects at the door with field-pointer errors.
+| Fail-fast only. A pass does not promise CI will pass; a fail is believed.
+|===
+
+Recommendation on the mirror: *do not use `schema.generated.ts` alone*,
+it is shape-free (all optional, no enums, no required). Extend the
+existing generator (`scripts/generate_ts_types.rb`, already reads the
+LML via `Lutaml::Lml.parse_document`) with a second output
+`schema.validators.generated.ts` containing, per class: required
+attributes, cardinalities, enum member sets and the `mapping yaml` wire
+names, as plain data tables + a small interpreter in `worker/`. CI
+already regenerates and diff-checks `schema.generated.ts`; the same
+step gains the same drift check for the validators. Per-register item
+rules (the `datasets/*/schema-data.yaml` JSON Schemas, hand-maintained
+today and "to become generated" per #100/#106) are used meanwhile
+through `@cfworker/json-schema` (no `eval`, works in Workers).
+*UNVERIFIED:* that this library handles the draft-07 features used by
+`schema-data.yaml`; measure in the implementation card.
+
+Parity of the two layers is itself a gate: a CI job on the site repo
+runs the Worker validator and the Ruby classes over the whole 10,532-file
+corpus and fails on any disagreement (corpus = known-good, so the
+validator must accept all of it) plus a negative fixture set.
+
+=== The two stages
+
+. *Stage 1, action envelope.* The submission payload is exactly one
+  `ob-issues` action file: `type`, `ob_issue_no`, `reference`,
+  `identifier.code`, `data._class` (the register's `*Amendment`
+  class), `data.entries[]`, `data.notes[]`. Validated against the
+  message/action classes (`RegisterChange`, `ActionType`, the register's
+  `*Amendment`/`*Action`). Per-action rules: ADD/REP carry complete
+  `entries`; MOD key + new values; SUP/DEL the key (and `superseded_by`
+  for SUP); LIR a `reason` (rules from `datasets/schema-change.yaml`).
+. *Stage 2, item payloads.* Every `entries[]` element validates against
+  the register's data schema (the LML Entry class, e.g. `E118Entry`)
+  *and* the key-uniqueness semantic against current state: ADD of a key
+  that exists, or REP/MOD/SUP/DEL of a key that does not, is an error.
+  Current state comes from the snapshot, `current.json` per register,
+  which the CI-built site already contains (`dist/` assets; the Worker
+  reads it via `env.ASSETS` or R2 once Phase 1 lands). A stale snapshot
+  produces a *warning*, not a block (the edition may be one deploy
+  behind); CI (`replay`) is the real check.
+
+Validation results are stored per revision (`validation` JSON) with
+the `schema_sha` of the compiled ontology, so a reviewer can see which
+schema version a submission was validated against. Errors are returned
+as `{path: "data.entries[2].company_name", code, message}` for the form
+to anchor (this same path vocabulary is the anchor for #104 field
+comments).
+
+Textual datasets (list-v, coast-stations, bureaufax, rr251, e212-icc) take
+a verbatim text field, validated only for size and encoding; their
+amendment files are `text.yaml`, which this design does not extend
+(*scope:* member-submitted actions are the keyed registers).
+
+== Approval -> branch -> PR
+
+=== GitHub identity: App, not token
+
+*Recommend a GitHub App* installed on the patch repo only (permissions:
+Contents RW, Pull requests RW, Checks R, Metadata R; webhooks:
+`pull_request`, `check_suite`, `workflow_run`), over a PAT.
+
+* A PR opened with an App installation token *does* trigger
+  `pull_request` workflows (PRs opened with the Actions `GITHUB_TOKEN`
+  do not), so the gates run.
+* Not tied to a person's account or an `ITUOB_CI_PAT_TOKEN`-style
+  personal token; scope is the single repo; tokens last one hour.
+* The Worker mints the JWT (RS256, WebCrypto) and exchanges it for an
+  installation token, cached in KV for 50 min. The private key is a
+  Worker secret.
+
+Account setup needed (cannot be done by us): an *ituob organisation
+owner* must create/install the App on `ituob/service-publications-docs`
+(and `ituob.github.io` for the staging bump), and hand over App id,
+installation id, private key and webhook secret. Per the program rules
+the request to the owner goes through Hassan.
+
+The App cannot be technically prevented from writing `main` by
+permissions alone, so: (1) code rule, the only write calls are
+`POST git/refs` for refs under `refs/heads/rt-sub-*`, commits onto
+those, `POST pulls`, `PATCH pulls state=closed`, `DELETE git/refs/
+heads/rt-sub-*`; a unit test greps the client for any other verb/ref;
+(2) a repository ruleset on `main` requiring PR + the gate checks,
+with the App not on the bypass list (D3).
+
+[[branch-naming]]
+=== Branch and PR naming
+
+* Branch: `rt-sub-{ob_issue_no}-{NNN}-{slug}-{ulid8}` e.g.
+  `rt-sub-1351-003-e118-iin-01J9XK2P`. Keeps the existing `rt-` prefix
+  as asked, but the existing `rt-*` names are long-lived developer
+  branches and carry no per-PR convention, so the suffix is new.
+  Deterministic from the submission, hence the idempotency key.
+* Commit message: `OB-{N}: {ACTION} {register_id} {key}` + trailers
+  `Submission-Id`, `Proposed-by: {display name}` (no email),
+  `Approved-by: {display name}`, `Submission-Rev`. Author is the App.
+* PR title same as commit subject; body: link back to the submission
+  page, the validation summary, the review thread digest, and a fixed
+  footer. PR labels: `submission`, `register:{slug}`.
+
+=== Idempotency and retry
+
+The queue message is `{submission_id, rev, kind: open_pr|append_commit|close_pr|revert}`.
+The consumer is idempotent because every external object has a
+deterministic name and every step checks before it creates:
+
+. Read `submission_prs`; if `pr_number` is set and PR is open -> done,
+  just set `pr_open`.
+. Get `base_sha` = tip of `main` (record it in `submission_prs`).
+. Create the ref `refs/heads/{branch}`; on 422 "already exists", read
+  it and continue (a previous attempt got this far).
+. Put the file with the Contents API (`PUT /contents/{path}` on the
+  branch, passing the existing blob `sha` when the file exists and
+  its content equals the stored `payload_yaml` -> no-op; differs ->
+  update, append-only commit).
+. Open the PR; if `POST pulls` returns 422 "a pull request already
+  exists", search by `head=` and adopt it.
+. One `db.batch` updates `submission_prs` and state `pr_pending ->
+  pr_open`, plus audit + notification enqueue.
+
+Failure classes: network/5xx/`secondary rate limit` -> Queues retry
+with backoff (`max_retries` 5, `retry_delay` increasing, honour
+`Retry-After`), then DLQ `ituob-github-dlq`, an alert (see #104
+observability) and the submission stays `pr_pending` and visible in the
+admin list with `last_error`. 401/403 (App suspended or key rotated) ->
+no retry, alert at once. 422 not explained above (e.g. file path blocked)
+-> terminal: record `last_error`, an admin sees "Retry" / "Send back".
+Webhook deliveries are de-duplicated by `X-GitHub-Delivery` (stored in
+`audit_log.detail`); a lost webhook is repaired by a scheduled
+reconciler (Cron Trigger, every 15 min) that lists open PRs by head
+prefix `rt-sub-` and compares with D1.
+
+=== CI back-channel
+
+`pull_request` webhooks and `check_suite` completion update
+`submission_prs.checks`. A required-check list is configured in the
+ruleset, so the PR cannot merge until green; the Worker reports the
+state to the submission page ("3 of 4 checks green, failing:
+`Instance-data validation against the LML ontology`"). The Worker never
+merges (D2): a human with merge rights does it in GitHub, and the
+`pull_request closed+merged` webhook drives `merged`.
+
+[[publication]]
+== PR merged -> composer -> issue publication -> staging preview
+
+The site publishes by *pin*. Merging a patch to the data repo does not
+publish it; `ituob.github.io` publishes what its `data-ob` submodule
+pointer says. This makes the published/unpublished distinction exact.
+
+. *Merged.* Webhook sets `merged`. The submission appears in the
+  composer's "approved, unpublished" list for its `target_edition`.
+. *Compose* (admin-only, out of the public IA). The admin places
+  merged items into edition `{N}` (`edition_items`, order = position
+  in the printed issue; the printed order is a composer concern, the
+  data replay does not depend on it). Composition also needs the issue
+  `meta.yaml` (publication/cut-off dates, `issn`, `authors`) at
+  `ob-issues/{N}/meta.yaml`; the Worker opens *one* additional PR
+  (`kind=edition_meta`, branch `rt-edition-{N}-meta`) from a form. That
+  PR goes through the same gates and is merged by a human. General
+  messages and annexes of an issue are out of scope of this note
+  (`messages/` and `general/` actions); *flag* in the master issue.
+. *Freeze.* When all `edition_items` are `merged` and the meta PR is
+  merged, the admin presses "Stage". The Worker records `freeze_sha`
+  = the tip of the data repo `main`, after verifying with the Compare
+  API that every item's `merge_sha` is an ancestor of `freeze_sha`
+  and that no *other* `ob-issues/{M}` with `M >= N` is present except
+  patches of this edition (anything else, e.g. an early-merged next
+  edition item, makes the pin unsafe; the Worker refuses with the
+  offending files listed, because a pin carries everything below it).
+. *Stage.* The Worker pushes a commit to the site repo's `staging`
+  branch moving the `data-ob` gitlink to `freeze_sha` (Git Data API,
+  tree entry mode `160000`). This is the same operation the repo
+  already performs by hand (`chore/bump-data-ob-*`). Pushing `staging`
+  fires `build-deploy.yml`: submodules -> (projection step, <<projection>>)
+  -> snapshots -> astro build -> `astro check` -> deploy to
+  `ituob-org-staging`. The `workflow_run completed` webhook moves the edition to
+  `staged` and records `staging_commit`.
+  This is a write to the *site's* `staging` branch, not to the patch
+  repo's `main`; the site's `main` is untouched.
+. *Preview.* The composer shows deep links to the changed registers on
+  `https://staging-www.ituob.org/registers/{slug}` and the
+  `at-{N}` snapshot (the generator writes `at-{N}.json` per issue that
+  touched a register; the exact page URL for `at-{N}` is
+  *UNVERIFIED*, pinned by the demo script). An admin reviews them.
+. *Publish.* "Publish" opens a PR on the site repo (`staging` -> `main`,
+  or the data-ob bump onto `main`), merged by a human, then production
+  deploys through the existing gated production job. On the production
+  deploy's `workflow_run` success the Worker marks every
+  `edition_items` submission `published`, edition `published`,
+  sends the `issue published` notification (#104) and writes audit rows.
+
+Because a pin bump is "all or nothing", two editions can never be staged
+together; `editions.status` enforces at most one in `composing`/`staged`.
+
+== Acceptance demo script (maps to the issue's Acceptance)
+
+Preconditions: App installed, ruleset on `main`, staging Worker with D1
+and Queues bound, the projection step (<<projection>>) in the site build,
+`CUTOVER_EDITION` set, a test register (`E118_IIN`).
+
+. A user with role `member-submitter` and `memberStateId=CAN` signs in
+  (local stub or identity) and opens "Propose a change", picks E.118 ->
+  ADD, fills the item form. Submit-time stage 1/2 errors are shown for a
+  deliberately blank `company_name`, fixed, `draft -> submitted`.
+  Check: `review_state` has 2 rows; audit rows 2; the editor got an inbox
+  item (#104).
+. An `itu-editor` opens it (`in_review`), sees the action as a diff
+  (item key, kind of change, before/after against the snapshot), posts a
+  field comment and `request_changes` -> `changes_requested`.
+. The member revises (rev 2) -> `submitted`; editor approves.
+  Check: `target_edition`, `seq` allocated; queue consumer ran; branch
+  `rt-sub-...` exists; file
+  `ob-issues/{N}/e118-iin/001-ADD.yaml` is the exact stored bytes; PR
+  open with the App as author; state `pr_open`.
+. Replay the consumer message by hand (idempotency): nothing duplicates.
+. CI on the PR: all gates green (`validate-ob-issues`, `test`). Show one
+  deliberately broken variant (a bad `_class`) failing `validate_data_lml.rb`
+  and the submission going `ci_failed`.
+. A maintainer merges the PR (the Worker does not). Webhook -> `merged`.
+. The projection step and snapshot regeneration run in the staging
+  build (push of the pin bump). `staging-www.ituob.org` shows the new
+  IIN at the register page and in `at-{N}` snapshot.
+. The admin composer places the item into edition `{N}`, creates meta PR,
+  stages, previews, publishes; submission `published`; `audit_log` chain
+  verifies (`GET /api/admin/audit/verify` recomputes the hashes).
+. Negative checks: no `POST /git/refs` for `refs/heads/main` anywhere
+  (assert on recorded GitHub requests); no file other than the single
+  action file in the PR diff; every `review_state` row has `actor_id`
+  and `at`.
+
+== Audit trail
+
+Every transition, assignment, edit of a draft, validation result,
+queue attempt outcome, webhook receipt, PR/branch operation, composer
+placement, stage and publish writes an `audit_log` row (verbs listed in
+the DDL). Rules:
+
+* Actors are always attributable: a user id, or `system` (queue
+  consumer, cron), or `github` (verified webhook; the GitHub login and
+  delivery id are in `detail`).
+* Append-only: the application role has no UPDATE/DELETE statement for
+  `audit_log`/`review_state`/`submission_revisions` (a test asserts no
+  such SQL exists in `worker/`); the hash chain makes offline tampering
+  detectable by `verify`.
+* Reads: a submission's timeline merges `review_state`, `audit_log`
+  (submission-scoped) and #104 comments/revisions/tombstones by `at`.
+* PII: `detail` stores user ids and GitHub logins, never email bodies
+  or tokens.
+
+[[open-decisions]]
+== Open decisions (with recommendations)
+
+[cols="1,4,4"]
+|===
+| # | Decision | Recommendation
+
+| D1
+| Patch repo: `service-publications-docs` or `itu-ob-data`?
+| `service-publications-docs` (it has `ob-issues/` and the gates). Owner: Ronald via Hassan.
+
+| D2
+| Does the Worker ever merge a green PR?
+| No for v1. A human merges. Revisit with an explicit ruling.
+
+| D3
+| Repository ruleset on `main` of the patch repo and the site repo (require PR + checks; App not a bypass actor)?
+| Yes; needs an org admin. Without it the invariant is convention only.
+
+| D4
+| Withdrawing a merged-but-unpublished item: revert PR vs compensating action.
+| Revert PR (nothing published yet).
+
+| D5
+| Projection: build-time regeneration (A) vs committed-by-bot (B).
+| A, and untrack `datasets/*/changes/`.
+
+| D6
+| Hash-chained `audit_log` via a Durable Object, or plain append-only?
+| Chain via DO; cheap, and the issue asks for a *full* audit trail. Plain append-only if DO is a cost concern.
+
+| D7
+| Cut-over edition: when does `ob-issues/{N}` stop being generated from `itu-ob-data/issues`?
+| Config `CUTOVER_EDITION` = the first edition produced through this app; guard in `build_ob_issues.rb`.
+
+| D8
+| General messages / annexes (non-register) in the composer.
+| Out of #103 scope; ask in the master issue before the composer card.
+|===
+
+== Contradictions between the issues and the repos
+
+. #103 says patches go to *itu-ob-data* under `ob-issues/{issue}/{register}/`. `ob-issues/` is in *service-publications-docs*; `itu-ob-data` has `issues/` (legacy editor format).
+. #103/#106 say "the patch log in git is the SSOT". For all existing editions `ob-issues/` is *generated* from `itu-ob-data/issues` by `build_ob_issues.rb`, and `datasets/*/changes/` is generated from `ob-issues`. The SSOT claim is true only from the cut-over edition on.
+. #103 says the PR path "follows the existing `rt-*` pattern". `rt-*` are developer branch names; there is no per-submission pattern to follow.
+. #103 says the composer is shown in `docs/mockups/ob-registers.html`. That file does not exist; the only mockup is `docs/mockups/ob-ledger.html`; it shows Composer as a primary nav item and tab (not visibly admin-only), shows the composer as a per-action form (an authoring surface), and says "Freeform prose keeps a rich-text surface" against #101/#106 "no ProseMirror". #103 uses "composer" for the issue-assembly tool, the mockup for the action form: two different things share the name. This note uses *composer* for issue assembly (admin) and *proposal form* for authoring.
+. #103 says a submission carries "REP/MOD the key plus new values, SUP/DEL the key" (per-item `RegisterChange` shape, as in `datasets/*/changes`), while `ob-issues` files are per-amendment with `entries[]` rows. This note commits the `ob-issues` shape (one action file per approved submission).
+. #101 and #103 say validation uses "the same compiled classes", mirrored client and server; the TS wire file has no validators (see <<validation>>).
+. Master #106 says merging then CI then "replay regenerates the projections"; the build today does not regenerate `changes/` (<<projection>>).
+. #104 mentions `@username` mentions; `users` in the shared contract has `id = identity sub` only. See `docs/discussion-notifications.adoc` for the handle requirement.
+
+== As built: composer, revert path and reconciler (card 103-06)
+
+Code: `worker/lib/composer.ts`, `worker/composer-routes.ts`, `worker/lib/revert.ts`,
+`worker/lib/reconciler.ts`; the shared transitions in `worker/lib/github-webhook.ts`
+(`applyPrMerged`, `applyPrClosed`, `applyRevertMerged`, `applyRevertClosed`); schema in `migrations/0001_init.sql`.
+Every state change still goes through `mutate`. Nothing calls GitHub: the publisher interface gained
+`openRevertPr`, `getPullRequest` and `bumpDataPin`; the real client stays "not configured", tests use the fake.
+
+*Composer API* (all under the Access-guarded `/api/admin/composer/*`; Access JWT verification is still
+not built, so without the stub identity every route answers 403; each entry point also requires the
+`itu-admin` role, resolved server-side from the Access email, so an editor gets 403):
+list merged-unpublished submissions; create or open an edition (idempotent; at most one `open`); read an
+edition; place (`merged -> scheduled`); remove (`scheduled -> merged`, sends no notification: the member already heard the PR merged); publish. `POST /api/admin/reconcile`
+runs the reconciler on demand.
+
+*Decisions*
+
+. *Publish is a pin bump behind the publisher.* `publishEdition` calls `bumpDataPin` (idempotent key
+  `edition-{N}-pin`), records `freeze_sha` and `staging_commit`, and the edition becomes `staged`; then each
+  item goes `scheduled -> published` and the edition `published`. `staged` is the resume checkpoint: a failure
+  after the bump is repaired by calling publish again (no second bump; published items are skipped). A failed
+  bump writes nothing. *Not built:* the separate "Stage" and "Publish" steps, the Compare-API ancestry check,
+  the `meta.yaml` PR and the production-deploy `workflow_run` trigger. Those need the real GitHub client; the
+  composer collapses stage and publish into one call until then.
+. *Placement is bound to the target edition.* A submission can only be placed in the edition its file path
+  already names (`target_edition`); anything else is 409. A submission with a revert in flight cannot be placed.
+. *One active edition is a database rule.* Partial unique indexes allow one `open` and one `composing|staged`
+  edition. A `composing` edition that empties after removals goes back to `open`, or is deleted when another
+  edition is already open, in the same batch as the removal, so the open one can still be composed.
+. *Edition-state races fail the batch.* `placeItem`, `removeItem` and the per-item publish carry a statement that
+  violates NOT NULL unless the edition is in the required status, so a concurrent status change rolls the
+  whole transition back (409) instead of leaving a submission moved without its `edition_items` row.
+. *Revert path.* Admin withdraw of a `merged` submission records `revert.requested` (a no-history `mutate`: the
+  state does not move) and a `submission_reverts` row, then opens the revert PR through the publisher. The
+  submission becomes `withdrawn` only when that PR's merge arrives (signed webhook or reconciler), actor
+  `github`. A second click reuses the in-flight revert; a revert closed unmerged leaves the submission `merged`
+  and the next withdraw starts attempt 2 on a new branch (`...-revertN-{id8}`, still `rt-sub-*`). The revert PR
+  is not the submission's patch PR, hence the extra table (a deviation from the schema section).
+. *Published is never withdrawn.* 409 with the corrective hint. The correction is a new submission created with
+  `corrects_id` naming a published submission of the same register (checked at creation; the member endpoint
+  only reads the state, it cannot move anything).
+. *Reconciler* (scheduled handler, after the notification sweep): for `pr_open`/`ci_failed` patch PRs and
+  open or unopened revert PRs it asks the publisher for the PR and applies the same guarded `apply*` function the
+  webhook uses, without a delivery row. Repeating it changes nothing, and a late webhook after a repair is
+  ignored (the state is no longer live). An unreadable PR is reported and retried next run.
+. *Source guards.* `scheduled` and `published` may appear as a transition target only in `composer.ts`;
+  `merged` only in `github-webhook.ts` and `composer.ts` (un-placing). The guard now also catches `via: [...]`
+  and `SET state = '...'`, is a pure function with mutation probes, and checks that no member route file
+  imports the composer. The main-branch guard now names `publisher.ts` too (the fake's reported base, one
+  occurrence); nothing writes to it.
+
+*Gaps:* no cron trigger is configured in `wrangler*.jsonc` (the scheduled handler is wired but nothing
+fires it; the design asks for every 15 minutes); item order is set by placement only (no
+reorder endpoint; gaps in `position` after removals are legal); no UI.

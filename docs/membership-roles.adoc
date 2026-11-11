@@ -1,0 +1,337 @@
+= Accounts, ITU staff and TSB member countries — design note (ituob/ituob.github.io#105)
+
+Design only. Depends on `docs/identity-accounts.adoc` (#102: `users`,
+`getSession`). Consumed by the workflow (#103: submission enforcement)
+and discussion (#104: affiliation display). Nothing here relies on an
+unverified property of `ribosei/identity` except through the
+"Assumptions to verify" list in the #102 note (A3 email claims is the
+only one touched; it is cross-referenced below).
+
+== Model in one paragraph
+
+Every account is, at any moment, in exactly one of three states:
+*unaffiliated* (just registered, no authority), *ITU staff* (an active
+`itu` membership plus one or two ITU roles), or *member* (an active
+membership bound to exactly one TSB member state, role
+`member-submitter`). Authority comes only from an *active* membership
+verified by an ITU admin; self-registration and self-claims never
+activate anything. Registers are keyed by country or area, so the
+member state binding is also the authorization boundary for submissions.
+
+== Roster (`members`)
+
+=== How the roster arrives — decision
+
+*Recommendation: manual seed from the TSB member list, reviewed in git,
+with an admin-only, diff-previewed re-import as the refresh path. No
+live sync in v1.*
+
+Reasons:
+
+* No ITU source of a machine-readable, authoritative member list is
+  identified in the issues or the repo; building a sync against an
+  unknown source is speculative. The issue itself accepts "manual import
+  is acceptable to start".
+* The roster changes slowly (accession and status changes are rare,
+  published events) and consequentially (it defines who may submit).
+  Rare + consequential favors a reviewed human step over an automatic
+  one.
+* Reviewed seed = auditable. The seed file is a PR-reviewed artifact,
+  consistent with the program rule that data changes arrive by PR.
+
+Mechanism:
+
+. Seed file `data-members/members.csv` (or YAML) lives in this repo (not
+  in the generated `dist`); columns: `id`, `name`, `itu_country_code`
+  (the code used by the registers' country/area column),
+  `iso3166_alpha2` (nullable; non-country members and areas exist),
+  `membership_kind`, `member_since`, `status`.
+. A one-off script converts it to idempotent SQL
+  (`INSERT … ON CONFLICT(id) DO UPDATE`) applied by
+  `wrangler d1 execute` (staging first, then production), recorded in
+  the migration history.
+. *Refresh path:* an ITU admin uploads a new list to
+  `POST /api/admin/roster/import?dry_run=1` (Access-protected, see #102
+  coexistence). The response is a diff (added, renamed, status-changed,
+  *missing from the new list*). A second call without `dry_run` applies
+  it. Members absent from the new list are never deleted; they are
+  proposed to become `status = 'withdrawn'` and require an explicit
+  admin confirmation. The same CSV is committed by PR so git remains the
+  record.
+. Revisit sync (ITU source) only when an authoritative feed is
+  identified; the table shape does not change.
+
+=== DDL
+
+[source,sql]
+----
+CREATE TABLE members (
+  id               TEXT PRIMARY KEY,       -- stable slug, e.g. 'CHE'; never reused
+  name             TEXT NOT NULL,          -- display name, e.g. 'Switzerland (Confederation of)'
+  register_key     TEXT NOT NULL UNIQUE,   -- exact string used in the registers'
+                                           -- country-or-area column (see mapping below)
+  iso3166_alpha2   TEXT,                   -- nullable
+  itu_identifier   TEXT,                   -- ITU membership identifier, as published
+  status           TEXT NOT NULL DEFAULT 'active'
+                   CHECK (status IN ('active','suspended','withdrawn')),
+  member_since     TEXT,
+  created_at       TEXT NOT NULL,
+  updated_at       TEXT NOT NULL
+);
+----
+
+*Country mapping.* The registers carry a free text "Country / area"
+value (E.164, E.212, ... ). A submission is validated against
+`members.register_key`, never against free text from the client. The
+seed step must reconcile every distinct country/area value occurring in
+the 17 register Entry classes with a `members` row, and flag values with
+no member (non-ITU areas, historical entities, "International network"
+entries). Those entries are not claimable by any member state and are
+ITU-editor-only. This reconciliation requires the data submodules; it
+was not run for this note (they are not checked out in the design
+worktree) and is listed as an implementation task.
+
+== Memberships and roles
+
+=== DDL
+
+[source,sql]
+----
+-- One row per affiliation period. History is never rewritten or deleted.
+CREATE TABLE memberships (
+  id              INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id         TEXT NOT NULL REFERENCES users(id),
+  kind            TEXT NOT NULL CHECK (kind IN ('itu','member')),
+  member_id       TEXT REFERENCES members(id),
+  status          TEXT NOT NULL
+                  CHECK (status IN ('pending','active','rejected','deactivated')),
+  claimed_at      TEXT,                   -- applicant's claim (member kind)
+  claim_note      TEXT,                   -- applicant's evidence, e.g. administration, role
+  decided_by      TEXT REFERENCES users(id),   -- ITU admin who verified/rejected/deactivated
+  decided_at      TEXT,
+  decision_note   TEXT,
+  created_at      TEXT NOT NULL,
+  -- 'itu' has no member state; 'member' must name exactly one
+  CHECK ( (kind = 'itu'    AND member_id IS NULL)
+       OR (kind = 'member' AND member_id IS NOT NULL) )
+);
+
+-- "Exactly one": at most one live (pending or active) affiliation per account.
+CREATE UNIQUE INDEX memberships_one_live
+  ON memberships (user_id) WHERE status IN ('pending','active');
+CREATE INDEX memberships_member ON memberships (member_id, status);
+
+CREATE TABLE user_roles (
+  user_id    TEXT NOT NULL REFERENCES users(id),
+  role       TEXT NOT NULL CHECK (role IN ('itu-admin','itu-editor','member-submitter')),
+  granted_by TEXT REFERENCES users(id),
+  granted_at TEXT NOT NULL,
+  PRIMARY KEY (user_id, role)
+);
+
+-- Append-only audit of every membership/role/roster decision.
+CREATE TABLE membership_events (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  at          TEXT NOT NULL,
+  actor_id    TEXT REFERENCES users(id),  -- NULL only for seed/migration
+  subject_id  TEXT REFERENCES users(id),
+  membership_id INTEGER REFERENCES memberships(id),
+  event       TEXT NOT NULL,   -- claimed|verified|rejected|deactivated|reactivated|
+                               -- role_granted|role_revoked|provisioned
+  detail      TEXT
+);
+----
+
+Invariants (enforced in the data-access layer and, where SQLite can,
+by constraints above):
+
+. *Role/kind coherence.* `itu-admin` / `itu-editor` require an active
+  `kind = 'itu'` membership; `member-submitter` requires an active
+  `kind = 'member'` membership whose member has `status = 'active'`. A
+  role row whose membership is not active is inert: `getSession` ignores
+  it.
+. *Every account is affiliated or inert.* An account with no live
+  membership has `roles: []`, `memberStateId: null` and can do nothing
+  except submit a claim. This reads the acceptance criterion "every
+  account is ITU staff or bound to exactly one member state" as "every
+  *authorized* account"; a freshly registered account necessarily
+  exists unaffiliated for a moment. If the owner reads it strictly,
+  registration itself would have to be invitation-only; flagged in the
+  hand-off.
+. *Changing country* is deactivate + new claim; the old row stays, so a
+  user is never bound to two member states, and history stays attributed
+  to the correct state.
+
+=== `getSession` contribution
+
+For session user `u`:
+
+[source,sql]
+----
+SELECT m.kind, m.member_id, ms.status AS member_status
+  FROM memberships m LEFT JOIN members ms ON ms.id = m.member_id
+ WHERE m.user_id = :u AND m.status = 'active';
+-- + SELECT role FROM user_roles WHERE user_id = :u
+----
+
+* No active row: `{ roles: [], memberStateId: null }`.
+* `kind='itu'`: `roles` = the user's `itu-*` rows; `memberStateId: null`.
+* `kind='member'` and the state is `active`: `roles = ['member-submitter']`,
+  `memberStateId = member_id`. If the *state* is suspended or withdrawn,
+  no roles (membership status change blocks submissions, see tests).
+
+== Claim and verification flow (no self-activation)
+
+[source]
+----
+user logs in (#102)  →  unaffiliated, sees "Claim your member state"
+   │ POST /api/me/membership/claim { memberId, note }      (session-authenticated)
+   ▼
+memberships(kind=member, member_id=X, status=pending)       roles: none
+   │ ITU admin works the queue in /admin (Access-gated)
+   ├─ verify  → status=active, user_roles += member-submitter, decided_by/at
+   └─ reject  → status=rejected (reason recorded); user may re-claim
+----
+
+Rules:
+
+* The claim endpoint creates `pending` only; it cannot set `active`,
+  cannot accept a `status` or `role` from the body, and refuses if a
+  live membership already exists (the partial unique index is the final
+  guard).
+* *Verification is by ITU, out of band against the TSB contact for that
+  administration.* Presenting a matching email domain is a hint shown to
+  the admin, never an automatic approval. If the identity service
+  asserts `email_verified` (#102 A3), the verified email is displayed to
+  the admin as evidence; no logic branches on it.
+* The verifying account must hold `itu-admin`, acting through the
+  Access-guarded admin surface (so an identity account alone can never
+  verify: it would have to bypass Access). The decision's actor is
+  recorded as `decided_by` (a user) with the Access email in
+  `membership_events.detail` while the Access/identity link is
+  undecided (#102 Open item 3).
+* Rate limit and cap pending claims per user (for example 3) and per
+  member state (for example 20) to stop queue flooding.
+* *ITU staff are provisioned directly*, never claimed: an admin creates
+  a `kind='itu'` membership + role for an existing `users` row (looked
+  up by `sub` after the person has logged in once). Optional
+  pre-provisioning by email applies on first login only if A3 holds and
+  `email_verified` is true. The first `itu-admin` is bootstrapped by a
+  one-time migration/CLI that names the person's `sub` (recorded in
+  `membership_events` with `actor_id` NULL, `event='provisioned'`).
+* Deactivation: ITU admin sets `status='deactivated'` with a note,
+  revokes nothing else (`user_roles` rows remain but are inert), deletes
+  the user's `sessions` so effect is immediate. Reactivation is a new
+  decision (`reactivated` event), not a status rewrite.
+
+== Server-side enforcement
+
+Principle: the client is UX, the server is security. All checks are
+functions in one authorization module consumed by #103/#104 handlers,
+taking the `Session` from `getSession`, so there is a single place to
+test and review.
+
+[cols="3,3"]
+|===
+| Action | Requirement
+| propose / review-draft an entry for country C | `member-submitter` **and** `session.memberStateId == members.id` whose `register_key` equals the entry's country value, derived server-side from the entry payload (not from a client-supplied member id)
+| propose an entry with no matching member (non-ITU area) | `itu-editor` or `itu-admin` only
+| read own member state's drafts | `member-submitter` for that state
+| read other states' drafts | ITU roles only
+| approve, publish into an OB issue | `itu-admin` or `itu-editor` per #103's matrix
+| roster administration, verify/reject/deactivate claims, provision ITU staff, grant roles | `itu-admin` only, via the Access-guarded admin surface
+|===
+
+Country binding on every submission:
+
+. The handler parses the submission through the compiled LML classes
+  (house rule), extracts the country/area key of *each* entry/patch in
+  the payload, and resolves each through `members.register_key`.
+. If any key resolves to a member other than `session.memberStateId`, or
+  does not resolve, the *whole* submission is rejected 403 with no
+  partial write. Batch submissions cannot smuggle a second country.
+. Updates to an existing draft re-run the check (a member cannot edit a
+  draft of another state by guessing its id), and reads of a draft check
+  the draft's owning `member_id`, not just authentication.
+. `member_id` and affiliation on a submission row are written by the
+  server from the session; any such field in the request body is
+  ignored.
+
+*Interface contract for #103* (stated here so the two designs agree): a
+submission row stores the actor's affiliation as a *snapshot* —
+`submitted_by` (users.id), `affiliation_kind` ('itu'|'member'),
+`affiliation_member_id` (nullable) — copied at write time. It does not
+join to the user's current membership for display or for history.
+
+=== Deactivation preserves history
+
+* Deactivating a membership (or suspending/withdrawing the member
+  state) blocks *new* actions at the next request (roles resolve to
+  none). Nothing is deleted or rewritten.
+* Existing submissions, comments and decisions keep their snapshot
+  affiliation and their `member_id`; they remain readable by ITU roles
+  and (for the state's own users while the state is active) by that
+  state.
+* A user's past activity stays attributed to the affiliation held at the
+  time, even after they re-affiliate or the state's status changes.
+* No foreign key from submissions to `memberships(status)`; FKs go to
+  `users` and `members` rows that are never deleted (only status-changed).
+  `ON DELETE` is `RESTRICT` throughout; deletion of `users`, `members`
+  or `memberships` is unsupported in application code.
+
+== Affiliation display
+
+Single function `affiliationOf(userId | snapshot) -> { kind, label }`:
+"ITU" for `kind='itu'`, otherwise the member's `name`. Used by
+submission headers, review actions and comments (#104). Display uses the
+*snapshot on the record*, not the live membership, so a gazette-of-record
+audit trail never changes retroactively. `/api/whoami` returns the
+current affiliation for the viewer's own header (see #102 note).
+Deactivated actors render with their historical affiliation and a muted
+"former" marker.
+
+== Tests (server-side; run against the local D1 and the stub from #102)
+
+The issue's list, made concrete (each is an automated test of the
+handler, not of the UI):
+
+. *Cross-country denial.* Fixture `member-A` submits an entry whose
+  country is B: 403, zero rows written. A mixed payload (entries for A
+  and B): 403, zero rows written. An unresolvable country: 403.
+. *Spoofed binding ignored.* Request body carrying `memberId=B`,
+  `status=active` or `roles=[...]` does not change outcome or write
+  those fields.
+. *Deactivation blocks but preserves.* After `deactivated-member-A`
+  action: new submission 403; session roles `[]`; previously stored
+  submissions and comments still read back unchanged with the same
+  affiliation snapshot; audit rows exist.
+. *Survives status changes.* A submission by A remains valid and
+  visible when A's `members.status` becomes `suspended`, `withdrawn`,
+  and back to `active`; its affiliation and country do not change.
+. *No self-activation.* A claimant cannot reach `active` through any
+  member-facing endpoint; `pending` yields `roles: []`; a user with an
+  existing live membership cannot create another (unique index).
+. *Role/kind coherence.* An `itu-editor` role row without an active
+  `kind='itu'` membership yields `roles: []`; a `member-submitter`
+  without a member state binding yields `roles: []`.
+. *ITU-only actions.* Approval, publication, roster import, claim
+  verification return 403 for `member-submitter` and for any identity
+  session without Access (the route does not accept sessions).
+. *Roster import.* Re-import is idempotent; a member missing from the
+  new list is reported, not deleted.
+. *End to end (acceptance).* Claim → admin verify → submit for own
+  country succeeds → deactivate → submit fails; every user row either
+  has no live membership (inert) or exactly one live membership.
+
+== Open items
+
+. Reading of "every account is either ITU staff or bound to exactly one
+  member state" — see invariant 2; the design treats unaffiliated as an
+  explicit, inert state.
+. Country mapping reconciliation against the 17 register Entry classes
+  (needs the data submodules).
+. The matrix of ITU roles (`itu-admin` vs `itu-editor`) for approve vs
+  publish is #103's; this note fixes only that roster/membership
+  administration is `itu-admin`.
+. Where member-facing mutations are mounted relative to Access:
+  see Open item 1 in the #102 note.

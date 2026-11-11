@@ -31,15 +31,20 @@ jobs:
 
     # The data-ob scripts run on the ituob gem bundle (data-ob/ituob/Gemfile,
     # committed lockfile) — the repo-root Gemfile is the legacy Jekyll chain.
-    - name: Generate TS wire types from the LML ontology
+    - name: Generate TS wire types and runtime validators from the LML ontology
       working-directory: data-ob
       env:
         BUNDLE_GEMFILE: ituob/Gemfile
         SITE_TYPES_PATH: ${{ github.workspace }}/src/lib/schema.generated.ts
-      run: bundle install && bundle exec ruby scripts/generate_ts_types.rb
+        SITE_VALIDATORS_PATH: ${{ github.workspace }}/src/lib/schema.validators.generated.ts
+        CLASS_DESCRIPTION_PATH: ${{ github.workspace }}/src/lib/form/class-description.generated.json
+      run: |
+        bundle install
+        bundle exec ruby scripts/generate_ts_types.rb
+        bundle exec ruby scripts/generate_class_description.rb
 
-    - name: Verify committed wire types match the ontology
-      run: git diff --exit-code -- src/lib/schema.generated.ts
+    - name: Verify committed wire types, validators and form description match the ontology
+      run: git diff --exit-code -- src/lib/schema.generated.ts src/lib/schema.validators.generated.ts src/lib/form/class-description.generated.json
 
     - name: Generate register snapshots
       working-directory: data-ob
@@ -50,6 +55,16 @@ jobs:
 
     - name: Install dependencies
       run: npm ci
+
+    - name: Worker tests
+      run: npx vitest run
+
+    - name: Worker typecheck
+      run: npm run typecheck:worker
+
+    # Round-trips every form-driven file in data-ob through the form model.
+    - name: Form round-trip tests
+      run: npm run test:form
 
     - name: Build Astro site
       run: npm run build

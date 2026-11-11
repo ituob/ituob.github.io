@@ -1,0 +1,4795 @@
+{
+  "source": "ituob/lib/ituob/ontology/messages.lml",
+  "primitives": [
+    "String",
+    "Integer",
+    "Boolean",
+    "Date",
+    "Float",
+    "Time",
+    "Hash",
+    "HashOrText",
+    "DateOrText"
+  ],
+  "enums": {
+    "ActionType": [
+      "ADD",
+      "SUP",
+      "REP",
+      "LIR",
+      "MOD",
+      "DEL",
+      "SEED"
+    ]
+  },
+  "classes": {
+    "MultilingualString": {
+      "attributes": [
+        {
+          "name": "en",
+          "wire": "en",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "fr",
+          "wire": "fr",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "es",
+          "wire": "es",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "zh",
+          "wire": "zh",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "ru",
+          "wire": "ru",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "ar",
+          "wire": "ar",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        }
+      ]
+    },
+    "Amendment": {
+      "attributes": [
+        {
+          "name": "_class",
+          "wire": "_class",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false,
+          "default": "Amendment"
+        },
+        {
+          "name": "position_on",
+          "wire": "position_on",
+          "type": "Date",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "notes",
+          "wire": "notes",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": true
+        }
+      ]
+    },
+    "Change": {
+      "attributes": [
+        {
+          "name": "type",
+          "wire": "type",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "identifier",
+          "wire": "identifier",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "data",
+          "wire": "data",
+          "type": "Entry",
+          "kind": "class",
+          "required": false,
+          "collection": false
+        }
+      ]
+    },
+    "ChangeSet": {
+      "attributes": [
+        {
+          "name": "date_requested",
+          "wire": "date_requested",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "date_active",
+          "wire": "date_active",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "ob_issue_no",
+          "wire": "ob_issue_no",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "reference",
+          "wire": "reference",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "changes",
+          "wire": "changes",
+          "type": "Change",
+          "kind": "class",
+          "required": false,
+          "collection": true
+        }
+      ]
+    },
+    "Entry": {
+      "attributes": [
+        {
+          "name": "_class",
+          "wire": "_class",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false,
+          "default": "Entry"
+        }
+      ]
+    },
+    "GeneralMessage": {
+      "attributes": [
+        {
+          "name": "type",
+          "wire": "type",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "ob_issue_no",
+          "wire": "ob_issue_no",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "contents",
+          "wire": "contents",
+          "type": "Hash",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        }
+      ]
+    },
+    "IssueAuthor": {
+      "attributes": [
+        {
+          "name": "name",
+          "wire": "name",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "address",
+          "wire": "address",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "contacts",
+          "wire": "contacts",
+          "type": "IssueContact",
+          "kind": "class",
+          "required": false,
+          "collection": true
+        },
+        {
+          "name": "recommended",
+          "wire": "recommended",
+          "type": "Boolean",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        }
+      ]
+    },
+    "IssueContact": {
+      "attributes": [
+        {
+          "name": "type",
+          "wire": "type",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "data",
+          "wire": "data",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "recommended",
+          "wire": "recommended",
+          "type": "Boolean",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        }
+      ]
+    },
+    "IssueGeneral": {
+      "attributes": [
+        {
+          "name": "messages",
+          "wire": "messages",
+          "type": "GeneralMessage",
+          "kind": "class",
+          "required": false,
+          "collection": true
+        }
+      ]
+    },
+    "IssueMetadata": {
+      "attributes": [
+        {
+          "name": "id",
+          "wire": "id",
+          "type": "Integer",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "incomplete",
+          "wire": "incomplete",
+          "type": "Boolean",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "publication_date",
+          "wire": "publication_date",
+          "type": "DateOrText",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "cutoff_date",
+          "wire": "cutoff_date",
+          "type": "DateOrText",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "issn",
+          "wire": "issn",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "languages",
+          "wire": "languages",
+          "type": "Hash",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "authors",
+          "wire": "authors",
+          "type": "IssueAuthor",
+          "kind": "class",
+          "required": false,
+          "collection": true
+        }
+      ]
+    },
+    "OldIssue": {
+      "attributes": [
+        {
+          "name": "metadata",
+          "wire": "metadata",
+          "type": "IssueMetadata",
+          "kind": "class",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "general",
+          "wire": "general",
+          "type": "IssueGeneral",
+          "kind": "class",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "amendments",
+          "wire": "amendments",
+          "type": "Amendment",
+          "kind": "class",
+          "required": false,
+          "collection": true
+        }
+      ]
+    },
+    "E118Action": {
+      "attributes": [
+        {
+          "name": "action_type",
+          "wire": "action_type",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "position",
+          "wire": "position",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "entries",
+          "wire": "entries",
+          "type": "E118Entry",
+          "kind": "class",
+          "required": false,
+          "collection": true
+        }
+      ]
+    },
+    "E118Amendment": {
+      "attributes": [
+        {
+          "name": "_class",
+          "wire": "_class",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false,
+          "default": "E118Amendment"
+        },
+        {
+          "name": "position_on",
+          "wire": "position_on",
+          "type": "Date",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "notes",
+          "wire": "notes",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": true
+        },
+        {
+          "name": "actions",
+          "wire": "actions",
+          "type": "E118Action",
+          "kind": "class",
+          "required": false,
+          "collection": true
+        },
+        {
+          "name": "position",
+          "wire": "position",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "entries",
+          "wire": "entries",
+          "type": "E118Entry",
+          "kind": "class",
+          "required": false,
+          "collection": true
+        },
+        {
+          "name": "description",
+          "wire": "description",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "caption",
+          "wire": "caption",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "country",
+          "wire": "country",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        }
+      ]
+    },
+    "E118Entry": {
+      "attributes": [
+        {
+          "name": "_class",
+          "wire": "_class",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false,
+          "default": "E118Entry"
+        },
+        {
+          "name": "country_or_area",
+          "wire": "country_or_area",
+          "type": "MultilingualString",
+          "kind": "class",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "company_name",
+          "wire": "company_name",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "company_address_1",
+          "wire": "company_address_1",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "company_address_2",
+          "wire": "company_address_2",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "company_address_3",
+          "wire": "company_address_3",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "contact",
+          "wire": "contact",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "contact_address_1",
+          "wire": "contact_address_1",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "contact_address_2",
+          "wire": "contact_address_2",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "contact_address_3",
+          "wire": "contact_address_3",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "contact_address_4",
+          "wire": "contact_address_4",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "contact_address_5",
+          "wire": "contact_address_5",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "contact_address_6",
+          "wire": "contact_address_6",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "tel",
+          "wire": "tel",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": true
+        },
+        {
+          "name": "fax",
+          "wire": "fax",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": true
+        },
+        {
+          "name": "email",
+          "wire": "email",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": true
+        },
+        {
+          "name": "issue_id_number",
+          "wire": "issue_id_number",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "effective_date",
+          "wire": "effective_date",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        }
+      ]
+    },
+    "E164ACNAction": {
+      "attributes": [
+        {
+          "name": "action_type",
+          "wire": "action_type",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "position",
+          "wire": "position",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "entries",
+          "wire": "entries",
+          "type": "E164ACNEntry",
+          "kind": "class",
+          "required": false,
+          "collection": true
+        },
+        {
+          "name": "notes",
+          "wire": "notes",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        }
+      ]
+    },
+    "E164ACNAmendment": {
+      "attributes": [
+        {
+          "name": "_class",
+          "wire": "_class",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false,
+          "default": "E164ACNAmendment"
+        },
+        {
+          "name": "position_on",
+          "wire": "position_on",
+          "type": "Date",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "notes",
+          "wire": "notes",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": true
+        },
+        {
+          "name": "actions",
+          "wire": "actions",
+          "type": "E164ACNAction",
+          "kind": "class",
+          "required": false,
+          "collection": true
+        },
+        {
+          "name": "position",
+          "wire": "position",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "entries",
+          "wire": "entries",
+          "type": "E164ACNEntry",
+          "kind": "class",
+          "required": false,
+          "collection": true
+        },
+        {
+          "name": "description",
+          "wire": "description",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "caption",
+          "wire": "caption",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "country",
+          "wire": "country",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        }
+      ]
+    },
+    "E164ACNEntry": {
+      "attributes": [
+        {
+          "name": "_class",
+          "wire": "_class",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false,
+          "default": "E164ACNEntry"
+        },
+        {
+          "name": "country_or_area",
+          "wire": "country_or_area",
+          "type": "MultilingualString",
+          "kind": "class",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "country_code",
+          "wire": "country_code",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "mobile_telephone_numbers",
+          "wire": "mobile_telephone_numbers",
+          "type": "MultilingualString",
+          "kind": "class",
+          "required": false,
+          "collection": false
+        }
+      ]
+    },
+    "E164BEntry": {
+      "attributes": [
+        {
+          "name": "_class",
+          "wire": "_class",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false,
+          "default": "E164BEntry"
+        },
+        {
+          "name": "country_or_area",
+          "wire": "country_or_area",
+          "type": "MultilingualString",
+          "kind": "class",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "country_code",
+          "wire": "country_code",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "mobile_telephone_numbers",
+          "wire": "mobile_telephone_numbers",
+          "type": "MultilingualString",
+          "kind": "class",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "remarks",
+          "wire": "remarks",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        }
+      ]
+    },
+    "E164CCAction": {
+      "attributes": [
+        {
+          "name": "action_type",
+          "wire": "action_type",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "position",
+          "wire": "position",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "entries",
+          "wire": "entries",
+          "type": "E164CCEntry",
+          "kind": "class",
+          "required": false,
+          "collection": true
+        },
+        {
+          "name": "notes",
+          "wire": "notes",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "note",
+          "wire": "note",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        }
+      ]
+    },
+    "E164CCAmendment": {
+      "attributes": [
+        {
+          "name": "_class",
+          "wire": "_class",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false,
+          "default": "E164CCAmendment"
+        },
+        {
+          "name": "position_on",
+          "wire": "position_on",
+          "type": "Date",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "notes",
+          "wire": "notes",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": true
+        },
+        {
+          "name": "actions",
+          "wire": "actions",
+          "type": "E164CCAction",
+          "kind": "class",
+          "required": false,
+          "collection": true
+        },
+        {
+          "name": "position",
+          "wire": "position",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "entries",
+          "wire": "entries",
+          "type": "E164CCEntry",
+          "kind": "class",
+          "required": false,
+          "collection": true
+        },
+        {
+          "name": "description",
+          "wire": "description",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "caption",
+          "wire": "caption",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "country",
+          "wire": "country",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        }
+      ]
+    },
+    "E164CCEntry": {
+      "attributes": [
+        {
+          "name": "_class",
+          "wire": "_class",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false,
+          "default": "E164CCEntry"
+        },
+        {
+          "name": "applicant",
+          "wire": "applicant",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "network",
+          "wire": "network",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "cc_ic",
+          "wire": "cc_ic",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "status",
+          "wire": "status",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "formerly",
+          "wire": "formerly",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "action_date",
+          "wire": "action_date",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "reclamation_date",
+          "wire": "reclamation_date",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        }
+      ]
+    },
+    "E164DEntry": {
+      "attributes": [
+        {
+          "name": "_class",
+          "wire": "_class",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false,
+          "default": "E164DEntry"
+        },
+        {
+          "name": "country_code",
+          "wire": "country_code",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "country_area_or_service",
+          "wire": "country_area_or_service",
+          "type": "MultilingualString",
+          "kind": "class",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "note",
+          "wire": "note",
+          "type": "MultilingualString",
+          "kind": "class",
+          "required": false,
+          "collection": false
+        }
+      ]
+    },
+    "E164DNoteNEntry": {
+      "attributes": [
+        {
+          "name": "_class",
+          "wire": "_class",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false,
+          "default": "E164DNoteNEntry"
+        },
+        {
+          "name": "network",
+          "wire": "network",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "cc_ic",
+          "wire": "cc_ic",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "status",
+          "wire": "status",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        }
+      ]
+    },
+    "E164DNoteOEntry": {
+      "attributes": [
+        {
+          "name": "_class",
+          "wire": "_class",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false,
+          "default": "E164DNoteOEntry"
+        },
+        {
+          "name": "applicant",
+          "wire": "applicant",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "network",
+          "wire": "network",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "cc_ic",
+          "wire": "cc_ic",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "status",
+          "wire": "status",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "formerly",
+          "wire": "formerly",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        }
+      ]
+    },
+    "E164DNotePQEntry": {
+      "attributes": [
+        {
+          "name": "_class",
+          "wire": "_class",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false,
+          "default": "E164DNotePQEntry"
+        },
+        {
+          "name": "applicant",
+          "wire": "applicant",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "network",
+          "wire": "network",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "cc_ic",
+          "wire": "cc_ic",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "status",
+          "wire": "status",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "formerly",
+          "wire": "formerly",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        }
+      ]
+    },
+    "E212MNCAction": {
+      "attributes": [
+        {
+          "name": "action_type",
+          "wire": "action_type",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "position",
+          "wire": "position",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "entries",
+          "wire": "entries",
+          "type": "E212MNCEntry",
+          "kind": "class",
+          "required": false,
+          "collection": true
+        },
+        {
+          "name": "notes",
+          "wire": "notes",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "note",
+          "wire": "note",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        }
+      ]
+    },
+    "E212MNCAmendment": {
+      "attributes": [
+        {
+          "name": "_class",
+          "wire": "_class",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false,
+          "default": "E212MNCAmendment"
+        },
+        {
+          "name": "position_on",
+          "wire": "position_on",
+          "type": "Date",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "notes",
+          "wire": "notes",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": true
+        },
+        {
+          "name": "actions",
+          "wire": "actions",
+          "type": "E212MNCAction",
+          "kind": "class",
+          "required": false,
+          "collection": true
+        },
+        {
+          "name": "position",
+          "wire": "position",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "entries",
+          "wire": "entries",
+          "type": "E212MNCEntry",
+          "kind": "class",
+          "required": false,
+          "collection": true
+        },
+        {
+          "name": "description",
+          "wire": "description",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "caption",
+          "wire": "caption",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "country",
+          "wire": "country",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        }
+      ]
+    },
+    "E212MNCEntry": {
+      "attributes": [
+        {
+          "name": "_class",
+          "wire": "_class",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false,
+          "default": "E212MNCEntry"
+        },
+        {
+          "name": "mcc_mnc_codes",
+          "wire": "mcc_mnc_codes",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "country_or_area",
+          "wire": "country_or_area",
+          "type": "MultilingualString",
+          "kind": "class",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "networks",
+          "wire": "networks",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "note",
+          "wire": "note",
+          "type": "MultilingualString",
+          "kind": "class",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "former_name",
+          "wire": "former_name",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "range",
+          "wire": "range",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        }
+      ]
+    },
+    "E218TRCCAction": {
+      "attributes": [
+        {
+          "name": "action_type",
+          "wire": "action_type",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "position",
+          "wire": "position",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "entries",
+          "wire": "entries",
+          "type": "E218TRCCEntry",
+          "kind": "class",
+          "required": false,
+          "collection": true
+        },
+        {
+          "name": "notes",
+          "wire": "notes",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        }
+      ]
+    },
+    "E218TRCCAmendment": {
+      "attributes": [
+        {
+          "name": "_class",
+          "wire": "_class",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false,
+          "default": "E218TRCCAmendment"
+        },
+        {
+          "name": "position_on",
+          "wire": "position_on",
+          "type": "Date",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "notes",
+          "wire": "notes",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": true
+        },
+        {
+          "name": "actions",
+          "wire": "actions",
+          "type": "E218TRCCAction",
+          "kind": "class",
+          "required": false,
+          "collection": true
+        },
+        {
+          "name": "position",
+          "wire": "position",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "entries",
+          "wire": "entries",
+          "type": "E218TRCCEntry",
+          "kind": "class",
+          "required": false,
+          "collection": true
+        },
+        {
+          "name": "description",
+          "wire": "description",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "caption",
+          "wire": "caption",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "country",
+          "wire": "country",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        }
+      ]
+    },
+    "E218TRCCEntry": {
+      "attributes": [
+        {
+          "name": "_class",
+          "wire": "_class",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false,
+          "default": "E218TRCCEntry"
+        },
+        {
+          "name": "tmcc_code",
+          "wire": "tmcc_code",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "country_or_area",
+          "wire": "country_or_area",
+          "type": "MultilingualString",
+          "kind": "class",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "reserved",
+          "wire": "reserved",
+          "type": "Boolean",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "note",
+          "wire": "note",
+          "type": "MultilingualString",
+          "kind": "class",
+          "required": false,
+          "collection": false
+        }
+      ]
+    },
+    "F32TDIAction": {
+      "attributes": [
+        {
+          "name": "action_type",
+          "wire": "action_type",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "position",
+          "wire": "position",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "description",
+          "wire": "description",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "entries",
+          "wire": "entries",
+          "type": "F32TDIEntry",
+          "kind": "class",
+          "required": false,
+          "collection": true
+        }
+      ]
+    },
+    "F32TDIAmendment": {
+      "attributes": [
+        {
+          "name": "_class",
+          "wire": "_class",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false,
+          "default": "F32TDIAmendment"
+        },
+        {
+          "name": "position_on",
+          "wire": "position_on",
+          "type": "Date",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "notes",
+          "wire": "notes",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": true
+        },
+        {
+          "name": "actions",
+          "wire": "actions",
+          "type": "F32TDIAction",
+          "kind": "class",
+          "required": false,
+          "collection": true
+        },
+        {
+          "name": "position",
+          "wire": "position",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "entries",
+          "wire": "entries",
+          "type": "F32TDIEntry",
+          "kind": "class",
+          "required": false,
+          "collection": true
+        },
+        {
+          "name": "description",
+          "wire": "description",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "caption",
+          "wire": "caption",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "country",
+          "wire": "country",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        }
+      ]
+    },
+    "F32TDIEntry": {
+      "attributes": [
+        {
+          "name": "_class",
+          "wire": "_class",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false,
+          "default": "F32TDIEntry"
+        },
+        {
+          "name": "country_or_area",
+          "wire": "country_or_area",
+          "type": "MultilingualString",
+          "kind": "class",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "country_or_area_note",
+          "wire": "country_or_area_note",
+          "type": "MultilingualString",
+          "kind": "class",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "notes",
+          "wire": "notes",
+          "type": "MultilingualString",
+          "kind": "class",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "network_roa",
+          "wire": "network_roa",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "network_roa_note",
+          "wire": "network_roa_note",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "network_code",
+          "wire": "network_code",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "network_code_note",
+          "wire": "network_code_note",
+          "type": "MultilingualString",
+          "kind": "class",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "telegraph_office_name",
+          "wire": "telegraph_office_name",
+          "type": "MultilingualString",
+          "kind": "class",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "office_code",
+          "wire": "office_code",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "office_code_note",
+          "wire": "office_code_note",
+          "type": "MultilingualString",
+          "kind": "class",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "subarea",
+          "wire": "subarea",
+          "type": "MultilingualString",
+          "kind": "class",
+          "required": false,
+          "collection": false
+        }
+      ]
+    },
+    "F400Action": {
+      "attributes": [
+        {
+          "name": "action_type",
+          "wire": "action_type",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "position",
+          "wire": "position",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "entries",
+          "wire": "entries",
+          "type": "F400Entry",
+          "kind": "class",
+          "required": false,
+          "collection": true
+        },
+        {
+          "name": "notes",
+          "wire": "notes",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        }
+      ]
+    },
+    "F400Amendment": {
+      "attributes": [
+        {
+          "name": "_class",
+          "wire": "_class",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false,
+          "default": "F400Amendment"
+        },
+        {
+          "name": "position_on",
+          "wire": "position_on",
+          "type": "Date",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "notes",
+          "wire": "notes",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": true
+        },
+        {
+          "name": "actions",
+          "wire": "actions",
+          "type": "F400Action",
+          "kind": "class",
+          "required": false,
+          "collection": true
+        },
+        {
+          "name": "position",
+          "wire": "position",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "entries",
+          "wire": "entries",
+          "type": "F400Entry",
+          "kind": "class",
+          "required": false,
+          "collection": true
+        },
+        {
+          "name": "description",
+          "wire": "description",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "caption",
+          "wire": "caption",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "country",
+          "wire": "country",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        }
+      ]
+    },
+    "F400Entry": {
+      "attributes": [
+        {
+          "name": "_class",
+          "wire": "_class",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false,
+          "default": "F400Entry"
+        },
+        {
+          "name": "country_or_area",
+          "wire": "country_or_area",
+          "type": "MultilingualString",
+          "kind": "class",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "admd_name",
+          "wire": "admd_name",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "not_operational_yet",
+          "wire": "not_operational_yet",
+          "type": "Boolean",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "country_code",
+          "wire": "country_code",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "for_test_purposes",
+          "wire": "for_test_purposes",
+          "type": "Boolean",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "mt",
+          "wire": "mt",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "ipm",
+          "wire": "ipm",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "other",
+          "wire": "other",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "helpdesk",
+          "wire": "helpdesk",
+          "type": "Hash",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "autoanswer",
+          "wire": "autoanswer",
+          "type": "Hash",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "contact_address",
+          "wire": "contact_address",
+          "type": "Hash",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "note",
+          "wire": "note",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        }
+      ]
+    },
+    "ListVIIIAction": {
+      "attributes": [
+        {
+          "name": "action_type",
+          "wire": "action_type",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "position",
+          "wire": "position",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "country",
+          "wire": "country",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "description",
+          "wire": "description",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "entries",
+          "wire": "entries",
+          "type": "ListVIIIStation",
+          "kind": "class",
+          "required": false,
+          "collection": true
+        }
+      ]
+    },
+    "ListVIIIAmendment": {
+      "attributes": [
+        {
+          "name": "_class",
+          "wire": "_class",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false,
+          "default": "ListVIIIAmendment"
+        },
+        {
+          "name": "position_on",
+          "wire": "position_on",
+          "type": "Date",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "notes",
+          "wire": "notes",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": true
+        },
+        {
+          "name": "actions",
+          "wire": "actions",
+          "type": "ListVIIIAction",
+          "kind": "class",
+          "required": false,
+          "collection": true
+        },
+        {
+          "name": "position",
+          "wire": "position",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "entries",
+          "wire": "entries",
+          "type": "ListVIIIStation",
+          "kind": "class",
+          "required": false,
+          "collection": true
+        },
+        {
+          "name": "description",
+          "wire": "description",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "caption",
+          "wire": "caption",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "country",
+          "wire": "country",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        }
+      ]
+    },
+    "ListVIIICentralizingOffice": {
+      "attributes": [
+        {
+          "name": "name",
+          "wire": "name",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "postal_address",
+          "wire": "postal_address",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "contact",
+          "wire": "contact",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "remarks",
+          "wire": "remarks",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        }
+      ]
+    },
+    "ListVIIIMeasurement": {
+      "attributes": [
+        {
+          "name": "section",
+          "wire": "section",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "measurement_type",
+          "wire": "measurement_type",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "coordinates",
+          "wire": "coordinates",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "hours_of_service",
+          "wire": "hours_of_service",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "frequency_ranges",
+          "wire": "frequency_ranges",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "details",
+          "wire": "details",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "remarks",
+          "wire": "remarks",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        }
+      ]
+    },
+    "ListVIIIStation": {
+      "attributes": [
+        {
+          "name": "_class",
+          "wire": "_class",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false,
+          "default": "ListVIIIStation"
+        },
+        {
+          "name": "country",
+          "wire": "country",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "name",
+          "wire": "name",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "postal_address",
+          "wire": "postal_address",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "contact",
+          "wire": "contact",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "part_ii_reference",
+          "wire": "part_ii_reference",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "part_iii_reference",
+          "wire": "part_iii_reference",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "centralizing_office",
+          "wire": "centralizing_office",
+          "type": "ListVIIICentralizingOffice",
+          "kind": "class",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "measurements",
+          "wire": "measurements",
+          "type": "ListVIIIMeasurement",
+          "kind": "class",
+          "required": false,
+          "collection": true
+        }
+      ]
+    },
+    "M1400Action": {
+      "attributes": [
+        {
+          "name": "action_type",
+          "wire": "action_type",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "position",
+          "wire": "position",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "entries",
+          "wire": "entries",
+          "type": "M1400Entry",
+          "kind": "class",
+          "required": false,
+          "collection": true
+        },
+        {
+          "name": "notes",
+          "wire": "notes",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "note",
+          "wire": "note",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        }
+      ]
+    },
+    "M1400Amendment": {
+      "attributes": [
+        {
+          "name": "_class",
+          "wire": "_class",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false,
+          "default": "M1400Amendment"
+        },
+        {
+          "name": "position_on",
+          "wire": "position_on",
+          "type": "Date",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "notes",
+          "wire": "notes",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": true
+        },
+        {
+          "name": "actions",
+          "wire": "actions",
+          "type": "M1400Action",
+          "kind": "class",
+          "required": false,
+          "collection": true
+        },
+        {
+          "name": "position",
+          "wire": "position",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "entries",
+          "wire": "entries",
+          "type": "M1400Entry",
+          "kind": "class",
+          "required": false,
+          "collection": true
+        },
+        {
+          "name": "description",
+          "wire": "description",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "caption",
+          "wire": "caption",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "country",
+          "wire": "country",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        }
+      ]
+    },
+    "M1400Entry": {
+      "attributes": [
+        {
+          "name": "_class",
+          "wire": "_class",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false,
+          "default": "M1400Entry"
+        },
+        {
+          "name": "iso_code",
+          "wire": "iso_code",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "country_or_area",
+          "wire": "country_or_area",
+          "type": "MultilingualString",
+          "kind": "class",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "company_name",
+          "wire": "company_name",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "address_line_1",
+          "wire": "address_line_1",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "address_line_2",
+          "wire": "address_line_2",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "address_line_3",
+          "wire": "address_line_3",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "carrier_code",
+          "wire": "carrier_code",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "contact",
+          "wire": "contact",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "tel",
+          "wire": "tel",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "fax",
+          "wire": "fax",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "email",
+          "wire": "email",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": true
+        }
+      ]
+    },
+    "NNPAction": {
+      "attributes": [
+        {
+          "name": "action_type",
+          "wire": "action_type",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "position",
+          "wire": "position",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "description",
+          "wire": "description",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "entries",
+          "wire": "entries",
+          "type": "NumberingPlanEntry",
+          "kind": "class",
+          "required": false,
+          "collection": true
+        }
+      ]
+    },
+    "NNPAmendment": {
+      "attributes": [
+        {
+          "name": "_class",
+          "wire": "_class",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false,
+          "default": "NNPAmendment"
+        },
+        {
+          "name": "position_on",
+          "wire": "position_on",
+          "type": "Date",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "notes",
+          "wire": "notes",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": true
+        },
+        {
+          "name": "actions",
+          "wire": "actions",
+          "type": "NNPAction",
+          "kind": "class",
+          "required": false,
+          "collection": true
+        },
+        {
+          "name": "position",
+          "wire": "position",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "entries",
+          "wire": "entries",
+          "type": "NumberingPlanEntry",
+          "kind": "class",
+          "required": false,
+          "collection": true
+        },
+        {
+          "name": "description",
+          "wire": "description",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "caption",
+          "wire": "caption",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "country",
+          "wire": "country",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        }
+      ]
+    },
+    "NumberingPlanEntry": {
+      "attributes": [
+        {
+          "name": "_class",
+          "wire": "_class",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false,
+          "default": "NumberingPlanEntry"
+        },
+        {
+          "name": "country_or_area",
+          "wire": "country_or_area",
+          "type": "MultilingualString",
+          "kind": "class",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "country_code",
+          "wire": "country_code",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "international_prefix",
+          "wire": "international_prefix",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "national_prefix",
+          "wire": "national_prefix",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "national_sig_number",
+          "wire": "national_sig_number",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "utc_dst",
+          "wire": "utc_dst",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "note",
+          "wire": "note",
+          "type": "MultilingualString",
+          "kind": "class",
+          "required": false,
+          "collection": false
+        }
+      ]
+    },
+    "DPAction": {
+      "attributes": [
+        {
+          "name": "action_type",
+          "wire": "action_type",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "position",
+          "wire": "position",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "country",
+          "wire": "country",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "description",
+          "wire": "description",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "entries",
+          "wire": "entries",
+          "type": "DPEntry",
+          "kind": "class",
+          "required": false,
+          "collection": true
+        },
+        {
+          "name": "notes",
+          "wire": "notes",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        }
+      ]
+    },
+    "DPAmendment": {
+      "attributes": [
+        {
+          "name": "_class",
+          "wire": "_class",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false,
+          "default": "DPAmendment"
+        },
+        {
+          "name": "position_on",
+          "wire": "position_on",
+          "type": "Date",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "notes",
+          "wire": "notes",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": true
+        },
+        {
+          "name": "actions",
+          "wire": "actions",
+          "type": "DPAction",
+          "kind": "class",
+          "required": false,
+          "collection": true
+        },
+        {
+          "name": "position",
+          "wire": "position",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "entries",
+          "wire": "entries",
+          "type": "DPEntry",
+          "kind": "class",
+          "required": false,
+          "collection": true
+        },
+        {
+          "name": "description",
+          "wire": "description",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "caption",
+          "wire": "caption",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "country",
+          "wire": "country",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        }
+      ]
+    },
+    "DPEntry": {
+      "attributes": [
+        {
+          "name": "_class",
+          "wire": "_class",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false,
+          "default": "DPEntry"
+        },
+        {
+          "name": "country_or_area",
+          "wire": "country_or_area",
+          "type": "MultilingualString",
+          "kind": "class",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "country_code",
+          "wire": "country_code",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "international_prefix",
+          "wire": "international_prefix",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "national_prefix",
+          "wire": "national_prefix",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "national_sig_number",
+          "wire": "national_sig_number",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "utc_dst",
+          "wire": "utc_dst",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "note",
+          "wire": "note",
+          "type": "MultilingualString",
+          "kind": "class",
+          "required": false,
+          "collection": false
+        }
+      ]
+    },
+    "Q708ISPCAction": {
+      "attributes": [
+        {
+          "name": "action_type",
+          "wire": "action_type",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "position",
+          "wire": "position",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "entries",
+          "wire": "entries",
+          "type": "Q708ISPCEntry",
+          "kind": "class",
+          "required": false,
+          "collection": true
+        },
+        {
+          "name": "notes",
+          "wire": "notes",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        }
+      ]
+    },
+    "Q708ISPCAmendment": {
+      "attributes": [
+        {
+          "name": "_class",
+          "wire": "_class",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false,
+          "default": "Q708ISPCAmendment"
+        },
+        {
+          "name": "position_on",
+          "wire": "position_on",
+          "type": "Date",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "notes",
+          "wire": "notes",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": true
+        },
+        {
+          "name": "actions",
+          "wire": "actions",
+          "type": "Q708ISPCAction",
+          "kind": "class",
+          "required": false,
+          "collection": true
+        },
+        {
+          "name": "position",
+          "wire": "position",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "entries",
+          "wire": "entries",
+          "type": "Q708ISPCEntry",
+          "kind": "class",
+          "required": false,
+          "collection": true
+        },
+        {
+          "name": "description",
+          "wire": "description",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "caption",
+          "wire": "caption",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "country",
+          "wire": "country",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        }
+      ]
+    },
+    "Q708ISPCEntry": {
+      "attributes": [
+        {
+          "name": "_class",
+          "wire": "_class",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false,
+          "default": "Q708ISPCEntry"
+        },
+        {
+          "name": "ipsc",
+          "wire": "ipsc",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "country",
+          "wire": "country",
+          "type": "MultilingualString",
+          "kind": "class",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "dec",
+          "wire": "dec",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "signal_point_name",
+          "wire": "signal_point_name",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "signal_point_operator",
+          "wire": "signal_point_operator",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        }
+      ]
+    },
+    "Q708SANCAction": {
+      "attributes": [
+        {
+          "name": "action_type",
+          "wire": "action_type",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "position",
+          "wire": "position",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "entries",
+          "wire": "entries",
+          "type": "Q708SANCEntry",
+          "kind": "class",
+          "required": false,
+          "collection": true
+        },
+        {
+          "name": "notes",
+          "wire": "notes",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "order",
+          "wire": "order",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        }
+      ]
+    },
+    "Q708SANCAmendment": {
+      "attributes": [
+        {
+          "name": "_class",
+          "wire": "_class",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false,
+          "default": "Q708SANCAmendment"
+        },
+        {
+          "name": "position_on",
+          "wire": "position_on",
+          "type": "Date",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "notes",
+          "wire": "notes",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": true
+        },
+        {
+          "name": "actions",
+          "wire": "actions",
+          "type": "Q708SANCAction",
+          "kind": "class",
+          "required": false,
+          "collection": true
+        },
+        {
+          "name": "position",
+          "wire": "position",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "entries",
+          "wire": "entries",
+          "type": "Q708SANCEntry",
+          "kind": "class",
+          "required": false,
+          "collection": true
+        },
+        {
+          "name": "description",
+          "wire": "description",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "caption",
+          "wire": "caption",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "country",
+          "wire": "country",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        }
+      ]
+    },
+    "Q708SANCEntry": {
+      "attributes": [
+        {
+          "name": "_class",
+          "wire": "_class",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false,
+          "default": "Q708SANCEntry"
+        },
+        {
+          "name": "code",
+          "wire": "code",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "area_or_network",
+          "wire": "area_or_network",
+          "type": "MultilingualString",
+          "kind": "class",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "note",
+          "wire": "note",
+          "type": "MultilingualString",
+          "kind": "class",
+          "required": false,
+          "collection": false
+        }
+      ]
+    },
+    "RR251Action": {
+      "attributes": [
+        {
+          "name": "action_type",
+          "wire": "action_type",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "position",
+          "wire": "position",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "entries",
+          "wire": "entries",
+          "type": "RR251Entry",
+          "kind": "class",
+          "required": false,
+          "collection": true
+        },
+        {
+          "name": "notes",
+          "wire": "notes",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        }
+      ]
+    },
+    "RR251Amendment": {
+      "attributes": [
+        {
+          "name": "_class",
+          "wire": "_class",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false,
+          "default": "RR251Amendment"
+        },
+        {
+          "name": "position_on",
+          "wire": "position_on",
+          "type": "Date",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "notes",
+          "wire": "notes",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": true
+        },
+        {
+          "name": "actions",
+          "wire": "actions",
+          "type": "RR251Action",
+          "kind": "class",
+          "required": false,
+          "collection": true
+        },
+        {
+          "name": "position",
+          "wire": "position",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "entries",
+          "wire": "entries",
+          "type": "RR251Entry",
+          "kind": "class",
+          "required": false,
+          "collection": true
+        },
+        {
+          "name": "description",
+          "wire": "description",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "caption",
+          "wire": "caption",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "country",
+          "wire": "country",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        }
+      ]
+    },
+    "RR251Entry": {
+      "attributes": [
+        {
+          "name": "_class",
+          "wire": "_class",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false,
+          "default": "RR251Entry"
+        },
+        {
+          "name": "country_or_area",
+          "wire": "country_or_area",
+          "type": "MultilingualString",
+          "kind": "class",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "country_or_area_note",
+          "wire": "country_or_area_note",
+          "type": "MultilingualString",
+          "kind": "class",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "notes",
+          "wire": "notes",
+          "type": "MultilingualString",
+          "kind": "class",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "network_roa",
+          "wire": "network_roa",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "network_roa_note",
+          "wire": "network_roa_note",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "network_code",
+          "wire": "network_code",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "network_code_note",
+          "wire": "network_code_note",
+          "type": "MultilingualString",
+          "kind": "class",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "telegraph_office_name",
+          "wire": "telegraph_office_name",
+          "type": "MultilingualString",
+          "kind": "class",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "office_code",
+          "wire": "office_code",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "office_code_note",
+          "wire": "office_code_note",
+          "type": "MultilingualString",
+          "kind": "class",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "subarea",
+          "wire": "subarea",
+          "type": "MultilingualString",
+          "kind": "class",
+          "required": false,
+          "collection": false
+        }
+      ]
+    },
+    "T35AssignmentAuthority": {
+      "attributes": [
+        {
+          "name": "terminal_type",
+          "wire": "terminal_type",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "contact_name",
+          "wire": "contact_name",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "organization",
+          "wire": "organization",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "department",
+          "wire": "department",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "address",
+          "wire": "address",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "telephone",
+          "wire": "telephone",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "fax",
+          "wire": "fax",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "email",
+          "wire": "email",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "related_links",
+          "wire": "related_links",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": true
+        }
+      ]
+    },
+    "T35NAAction": {
+      "attributes": [
+        {
+          "name": "action_type",
+          "wire": "action_type",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "position",
+          "wire": "position",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "entries",
+          "wire": "entries",
+          "type": "T35NAEntry",
+          "kind": "class",
+          "required": false,
+          "collection": true
+        },
+        {
+          "name": "notes",
+          "wire": "notes",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        }
+      ]
+    },
+    "T35NAAmendment": {
+      "attributes": [
+        {
+          "name": "_class",
+          "wire": "_class",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false,
+          "default": "T35NAAmendment"
+        },
+        {
+          "name": "position_on",
+          "wire": "position_on",
+          "type": "Date",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "notes",
+          "wire": "notes",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": true
+        },
+        {
+          "name": "actions",
+          "wire": "actions",
+          "type": "T35NAAction",
+          "kind": "class",
+          "required": false,
+          "collection": true
+        },
+        {
+          "name": "position",
+          "wire": "position",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "entries",
+          "wire": "entries",
+          "type": "T35NAEntry",
+          "kind": "class",
+          "required": false,
+          "collection": true
+        },
+        {
+          "name": "description",
+          "wire": "description",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "caption",
+          "wire": "caption",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "country",
+          "wire": "country",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        }
+      ]
+    },
+    "T35NAEntry": {
+      "attributes": [
+        {
+          "name": "_class",
+          "wire": "_class",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false,
+          "default": "T35NAEntry"
+        },
+        {
+          "name": "country",
+          "wire": "country",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "administration_name",
+          "wire": "administration_name",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "manufactures_htv",
+          "wire": "manufactures_htv",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "last_updated",
+          "wire": "last_updated",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "assignment_authority",
+          "wire": "assignment_authority",
+          "type": "T35AssignmentAuthority",
+          "kind": "class",
+          "required": false,
+          "collection": true
+        },
+        {
+          "name": "note",
+          "wire": "note",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        }
+      ]
+    },
+    "X121DNICAction": {
+      "attributes": [
+        {
+          "name": "action_type",
+          "wire": "action_type",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "position",
+          "wire": "position",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "country",
+          "wire": "country",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "caption",
+          "wire": "caption",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "description",
+          "wire": "description",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "entries",
+          "wire": "entries",
+          "type": "X121DNICEntry",
+          "kind": "class",
+          "required": false,
+          "collection": true
+        }
+      ]
+    },
+    "X121DNICAmendment": {
+      "attributes": [
+        {
+          "name": "_class",
+          "wire": "_class",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false,
+          "default": "X121DNICAmendment"
+        },
+        {
+          "name": "position_on",
+          "wire": "position_on",
+          "type": "Date",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "notes",
+          "wire": "notes",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": true
+        },
+        {
+          "name": "actions",
+          "wire": "actions",
+          "type": "X121DNICAction",
+          "kind": "class",
+          "required": false,
+          "collection": true
+        },
+        {
+          "name": "position",
+          "wire": "position",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "entries",
+          "wire": "entries",
+          "type": "X121DNICEntry",
+          "kind": "class",
+          "required": false,
+          "collection": true
+        },
+        {
+          "name": "description",
+          "wire": "description",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "caption",
+          "wire": "caption",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "country",
+          "wire": "country",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        }
+      ]
+    },
+    "X121DNICEntry": {
+      "attributes": [
+        {
+          "name": "_class",
+          "wire": "_class",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false,
+          "default": "X121DNICEntry"
+        },
+        {
+          "name": "dnic_number",
+          "wire": "dnic_number",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "country_or_area",
+          "wire": "country_or_area",
+          "type": "MultilingualString",
+          "kind": "class",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "network_name",
+          "wire": "network_name",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "note",
+          "wire": "note",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        }
+      ]
+    },
+    "GeneralApprovedRecommendation": {
+      "attributes": [
+        {
+          "name": "recommendation",
+          "wire": "recommendation",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "approved_date",
+          "wire": "approved_date",
+          "type": "DateOrText",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        }
+      ]
+    },
+    "GeneralApprovedRecommendations": {
+      "attributes": [
+        {
+          "name": "type",
+          "wire": "type",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "items",
+          "wire": "items",
+          "type": "GeneralApprovedRecommendation",
+          "kind": "class",
+          "required": false,
+          "collection": true
+        },
+        {
+          "name": "by",
+          "wire": "by",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "procedures",
+          "wire": "procedures",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "ob_issue_no",
+          "wire": "ob_issue_no",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "payload",
+          "wire": "payload",
+          "type": "Hash",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "contents",
+          "wire": "contents",
+          "type": "Hash",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        }
+      ]
+    },
+    "GeneralCallbackProcedures": {
+      "attributes": [
+        {
+          "name": "type",
+          "wire": "type",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "ob_issue_no",
+          "wire": "ob_issue_no",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "contents",
+          "wire": "contents",
+          "type": "Hash",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        }
+      ]
+    },
+    "GeneralCustom": {
+      "attributes": [
+        {
+          "name": "type",
+          "wire": "type",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "title",
+          "wire": "title",
+          "type": "Hash",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "recommendation",
+          "wire": "recommendation",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "text",
+          "wire": "text",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "ob_issue_no",
+          "wire": "ob_issue_no",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "contents",
+          "wire": "contents",
+          "type": "Hash",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        }
+      ]
+    },
+    "GeneralIpns": {
+      "attributes": [
+        {
+          "name": "type",
+          "wire": "type",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "network",
+          "wire": "network",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "mcc_mnc",
+          "wire": "mcc_mnc",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "date_of_assignment",
+          "wire": "date_of_assignment",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "notes",
+          "wire": "notes",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "ob_issue_no",
+          "wire": "ob_issue_no",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "contents",
+          "wire": "contents",
+          "type": "Hash",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        }
+      ]
+    },
+    "GeneralIptn": {
+      "attributes": [
+        {
+          "name": "type",
+          "wire": "type",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "entries",
+          "wire": "entries",
+          "type": "IptnEntry",
+          "kind": "class",
+          "required": false,
+          "collection": true
+        },
+        {
+          "name": "notes",
+          "wire": "notes",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "manual",
+          "wire": "manual",
+          "type": "Boolean",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "ob_issue_no",
+          "wire": "ob_issue_no",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "contents",
+          "wire": "contents",
+          "type": "Hash",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        }
+      ]
+    },
+    "GeneralMid": {
+      "attributes": [
+        {
+          "name": "type",
+          "wire": "type",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "ob_issue_no",
+          "wire": "ob_issue_no",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "contents",
+          "wire": "contents",
+          "type": "Hash",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        }
+      ]
+    },
+    "GeneralMiscCommunications": {
+      "attributes": [
+        {
+          "name": "type",
+          "wire": "type",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "text",
+          "wire": "text",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "ob_issue_no",
+          "wire": "ob_issue_no",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "contents",
+          "wire": "contents",
+          "type": "HashOrText",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        }
+      ]
+    },
+    "GeneralOrgChanges": {
+      "attributes": [
+        {
+          "name": "type",
+          "wire": "type",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "text",
+          "wire": "text",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "ob_issue_no",
+          "wire": "ob_issue_no",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "contents",
+          "wire": "contents",
+          "type": "Hash",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        }
+      ]
+    },
+    "GeneralRunningAnnexes": {
+      "attributes": [
+        {
+          "name": "type",
+          "wire": "type",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "extra_links",
+          "wire": "extra_links",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": true
+        },
+        {
+          "name": "ob_issue_no",
+          "wire": "ob_issue_no",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "payload",
+          "wire": "payload",
+          "type": "Hash",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "contents",
+          "wire": "contents",
+          "type": "Hash",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        }
+      ]
+    },
+    "GeneralServiceRestriction": {
+      "attributes": [
+        {
+          "name": "country",
+          "wire": "country",
+          "type": "MultilingualString",
+          "kind": "class",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "ob",
+          "wire": "ob",
+          "type": "Integer",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "page",
+          "wire": "page",
+          "type": "Integer",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        }
+      ]
+    },
+    "GeneralSanc": {
+      "attributes": [
+        {
+          "name": "country",
+          "wire": "country",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "sanc",
+          "wire": "sanc",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        }
+      ]
+    },
+    "GeneralSancs": {
+      "attributes": [
+        {
+          "name": "type",
+          "wire": "type",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "items",
+          "wire": "items",
+          "type": "GeneralSanc",
+          "kind": "class",
+          "required": false,
+          "collection": true
+        },
+        {
+          "name": "notes",
+          "wire": "notes",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "ob_issue_no",
+          "wire": "ob_issue_no",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "contents",
+          "wire": "contents",
+          "type": "Hash",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        }
+      ]
+    },
+    "GeneralServiceRestrictions": {
+      "attributes": [
+        {
+          "name": "type",
+          "wire": "type",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "ob_issue_no",
+          "wire": "ob_issue_no",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "items",
+          "wire": "items",
+          "type": "GeneralServiceRestriction",
+          "kind": "class",
+          "required": false,
+          "collection": true
+        },
+        {
+          "name": "contents",
+          "wire": "contents",
+          "type": "Hash",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        }
+      ]
+    },
+    "GeneralTelephoneSection": {
+      "attributes": [
+        {
+          "name": "type",
+          "wire": "type",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "country_name",
+          "wire": "country_name",
+          "type": "MultilingualString",
+          "kind": "class",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "phone_code",
+          "wire": "phone_code",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "contact",
+          "wire": "contact",
+          "type": "MultilingualString",
+          "kind": "class",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "communications",
+          "wire": "communications",
+          "type": "GeneralTelephoneCommunication",
+          "kind": "class",
+          "required": false,
+          "collection": true
+        }
+      ]
+    },
+    "GeneralTelephoneCommunication": {
+      "attributes": [
+        {
+          "name": "date",
+          "wire": "date",
+          "type": "DateOrText",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "contents",
+          "wire": "contents",
+          "type": "Hash",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        }
+      ]
+    },
+    "GeneralTelephoneService": {
+      "attributes": [
+        {
+          "name": "type",
+          "wire": "type",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "text",
+          "wire": "text",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "ob_issue_no",
+          "wire": "ob_issue_no",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "contents",
+          "wire": "contents",
+          "type": "GeneralTelephoneSection",
+          "kind": "class",
+          "required": false,
+          "collection": true
+        }
+      ]
+    },
+    "GeneralTelephoneServices": {
+      "attributes": [
+        {
+          "name": "type",
+          "wire": "type",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "items",
+          "wire": "items",
+          "type": "GeneralTelephoneService",
+          "kind": "class",
+          "required": false,
+          "collection": true
+        },
+        {
+          "name": "ob_issue_no",
+          "wire": "ob_issue_no",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "contents",
+          "wire": "contents",
+          "type": "Hash",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        }
+      ]
+    },
+    "TextAction": {
+      "attributes": [
+        {
+          "name": "action_type",
+          "wire": "action_type",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "position",
+          "wire": "position",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        }
+      ]
+    },
+    "TextAmendment": {
+      "attributes": [
+        {
+          "name": "_class",
+          "wire": "_class",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false,
+          "default": "TextAmendment"
+        },
+        {
+          "name": "position_on",
+          "wire": "position_on",
+          "type": "Date",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "notes",
+          "wire": "notes",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": true
+        },
+        {
+          "name": "actions",
+          "wire": "actions",
+          "type": "TextAction",
+          "kind": "class",
+          "required": false,
+          "collection": true
+        },
+        {
+          "name": "dataset_code",
+          "wire": "dataset_code",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "text",
+          "wire": "text",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        }
+      ]
+    },
+    "IptnEntry": {
+      "attributes": [
+        {
+          "name": "applicant",
+          "wire": "applicant",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "network",
+          "wire": "network",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "cc_ic",
+          "wire": "cc_ic",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "action",
+          "wire": "action",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "action_date",
+          "wire": "action_date",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "formerly",
+          "wire": "formerly",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "notes",
+          "wire": "notes",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "reclamation_date",
+          "wire": "reclamation_date",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "trial",
+          "wire": "trial",
+          "type": "Boolean",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        }
+      ]
+    },
+    "Identifier": {
+      "attributes": [
+        {
+          "name": "code",
+          "wire": "code",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "query",
+          "wire": "query",
+          "type": "Hash",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        }
+      ]
+    },
+    "RegisterChange": {
+      "attributes": [
+        {
+          "name": "type",
+          "wire": "type",
+          "type": "ActionType",
+          "kind": "enum",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "register_id",
+          "wire": "register",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "identifier",
+          "wire": "identifier",
+          "type": "Identifier",
+          "kind": "class",
+          "required": true,
+          "collection": false
+        },
+        {
+          "name": "recommendation",
+          "wire": "recommendation",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "data",
+          "wire": "data",
+          "type": "Hash",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "ob_issue_no",
+          "wire": "ob_issue_no",
+          "type": "Integer",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "date_active",
+          "wire": "date_active",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "date_requested",
+          "wire": "date_requested",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "reference",
+          "wire": "reference",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "description",
+          "wire": "description",
+          "type": "Hash",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "superseded_by",
+          "wire": "superseded_by",
+          "type": "Hash",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "reason",
+          "wire": "reason",
+          "type": "Hash",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "merge_strategy",
+          "wire": "merge_strategy",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        }
+      ]
+    }
+  }
+}

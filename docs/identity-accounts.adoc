@@ -1,0 +1,424 @@
+= User accounts on ribosei/identity — design note (ituob/ituob.github.io#102)
+
+Design only. No code lands before this note is reviewed (#102 acceptance:
+"design document committed before the code lands"). Sibling note:
+`docs/membership-roles.adoc` (#105). Architecture context:
+`docs/cloudflare-webapp.adoc`, Phase 2.
+
+== Status of this note
+
+`ribosei/identity` is a private repository that the author of this note
+could not read (`gh repo view ribosei/identity` fails with "Could not
+resolve to a Repository"; `ribosei` itself is an Organization). The
+issue's survey task ("what it exposes, what it expects of relying
+parties") is therefore *not done*. Instead this note designs the Worker
+as a standard *OpenID Connect relying party* (authorization-code flow
+with PKCE) and quarantines every guess about the identity service in
+<<assumptions>>. Nothing else in this note, or in the membership note,
+depends on an unverified fact about the service except through that list.
+
+== Goals and non-goals
+
+Goals: register / log in / keep a session across pages / log out for
+TSB members and submitters (#102 acceptance); a D1 `users` table keyed
+by the identity service's stable subject; a `getSession()` seam the
+authorization work (#105) and workflow (#103) consume; `/api/whoami`.
+
+Non-goals: building a login UI or credential store (the identity
+service owns registration, passwords/MFA, recovery); membership and
+roles (#105); replacing Cloudflare Access for the committee.
+
+== Division of labor
+
+[cols="2,3,3"]
+|===
+| | Cloudflare Access | ribosei/identity
+
+| Audience | ITU OB team / committee, CI | TSB member users, submitters, ITU staff accounts used inside the app
+| Protects | `/admin/*`, the Access-scoped API namespace (see <<coexistence>>) | nothing at the edge; the Worker is the relying party
+| Credential | Access JWT (`Cf-Access-Jwt-Assertion`), service-token headers | session cookie issued by the Worker after an OIDC login
+| Writes from CI | the only path (service tokens) | never
+|===
+
+== Routes
+
+Auth routes live under `/auth/*`, *outside* any Access application, so
+an anonymous visitor can start a login. They are handled by the Worker
+before `ASSETS` (the Worker already runs first: `run_worker_first`).
+
+[cols="2,1,4"]
+|===
+| Route | Method | Purpose
+| `/auth/login?return_to=/path` | GET | Start flow: create flow state, redirect to the authorization endpoint
+| `/auth/callback` | GET | Receive `code` + `state`, exchange, create session, redirect to `return_to`
+| `/auth/logout` | POST | Destroy the local session; optionally redirect to the identity service's end-session endpoint
+| `/api/whoami` | GET | Current session, same JSON conventions as `/api/health`
+|===
+
+Staging (`staging-www.ituob.org`) and production (`www.ituob.org`) are
+distinct Workers and distinct hosts: each needs its own OIDC client
+registration and redirect URI. The apex `ituob.org` only redirects to
+`www`; it never hosts auth routes.
+
+== Login flow (authorization code + PKCE)
+
+[source]
+----
+Browser            Worker (www.ituob.org)                 ribosei/identity
+  | GET /auth/login      |                                       |
+  |--------------------->| gen state, nonce, code_verifier       |
+  |                      | store flow row (D1), set flow cookie  |
+  |<--302 authorize?response_type=code&client_id&redirect_uri    |
+  |       &scope=openid email profile&state&nonce                |
+  |       &code_challenge=S256(verifier)&code_challenge_method=S256
+  |------------------------------------------------------------->|
+  |            (registration / login / MFA happens at identity)  |
+  |<--302 /auth/callback?code&state------------------------------|
+  | GET /auth/callback   |                                       |
+  |--------------------->| check flow cookie == state, row fresh |
+  |                      | POST token endpoint (code, verifier)->|
+  |                      |<-- id_token (+ access_token)          |
+  |                      | verify id_token (JWKS, iss, aud, exp, |
+  |                      |   nonce); upsert users; new session   |
+  |<--302 return_to, Set-Cookie session                          |
+----
+
+Rules:
+
+* *Confidential client.* The Worker holds `client_secret` as a Worker
+  secret and authenticates to the token endpoint server-side; PKCE is
+  used in addition (defense in depth, and required if the service
+  registers the client as public).
+* *Flow state.* `flow_id` (random 128-bit) keys a row in `oidc_flows`
+  (state, nonce, code_verifier, return_to, created_at); TTL 10 minutes,
+  single use (deleted on first callback attempt, success or failure).
+  The browser carries only a cookie `__Host-ituob_flow=<flow_id>`
+  (HttpOnly, Secure, SameSite=Lax, Path=/, Max-Age=600; the `__Host-` prefix forbids any other path, so the earlier `Path=/auth` was invalid and is corrected here). The
+  callback requires `state` == `flow.state` _and_ the cookie's flow id,
+  which defeats login CSRF and code injection.
+* *`return_to` is a path, never a URL.* It must match `^/[^/\\]` and be
+  re-validated at callback; anything else becomes `/`. This prevents an
+  open redirect.
+* *ID token validation:* signature against the service's JWKS (cached,
+  refreshed on unknown `kid`), `iss` equals the configured issuer,
+  `aud` contains our client id, `exp`/`iat` with 60 s skew, `nonce`
+  equals the stored nonce, `alg` restricted to an allow-list (RS256 or
+  ES256; never `none`, never HS* with the public key).
+* *Scopes:* `openid email profile`. We do not request offline access:
+  the Worker does not call identity APIs on a user's behalf, so no
+  refresh token is stored (see <<sessions>>).
+* *Auth must not run on Access routes' behalf.* A user who is authed
+  via identity gains no admin capability (see <<coexistence>>).
+
+== First-login linking
+
+At the callback, after the ID token verifies:
+
+. `sub` is the only key. Look up `users.id = sub`.
+. Not found: INSERT a `users` row (`email`, `display_name` from claims,
+  `created_at = last_login_at = now`). The account then has *no
+  membership*: `getSession` returns `roles: []`, `memberStateId: null`
+  and the UI routes the user to the "claim a member state" step owned by
+  #105. Registration at the identity service never grants any
+  authority here.
+. Found: UPDATE `last_login_at`, refresh `email` and `display_name`
+  (profile data is a cache of the identity service, which stays
+  authoritative for it).
+. Never match or merge accounts by email. Email is mutable and may be
+  unverified; `sub` is the identity. Linking an ITU staff provisioning
+  record (#105) by email is allowed only when the ID token asserts
+  `email_verified: true` — and is itself listed as an assumption.
+
+== Sessions [[sessions]]
+
+Server-side sessions in D1, opaque cookie token. Rationale: instant
+revocation (deactivate a user, role change), no secrets in the cookie,
+rotation is a row update. A signed stateless cookie was rejected because
+#105 requires that deactivation take effect immediately on every
+submission.
+
+[cols="2,5"]
+|===
+| Attribute | Value
+
+| Cookie name | `__Host-ituob_session` (the `__Host-` prefix forces `Secure`, `Path=/`, no `Domain`: host-only, so staging and production never share it)
+| Value | 256-bit random, base64url. Only `SHA-256(token)` is stored (`sessions.token_hash`); a D1 read leak does not yield usable cookies
+| Flags | `HttpOnly; Secure; SameSite=Lax; Path=/`
+| Idle timeout | 24 hours, sliding (`last_seen_at` bumped at most once per 5 minutes to bound D1 writes)
+| Absolute lifetime | 7 days from creation, then a full re-login (no refresh token)
+| Rotation | New token on login; on any role/membership change for that user; and on a 30-minute interval during use. Old token stays valid for a 60 s grace window (`prev_token_hash`) so parallel in-flight requests do not log the user out
+| Fixation | A pre-existing session cookie is discarded at callback; the session is always newly minted
+| Roles | *Not stored in the session.* Roles and `memberStateId` are read from D1 (#105 tables) when `getSession` runs, so deactivation is immediate
+| Revocation | Delete the row(s); `DELETE FROM sessions WHERE user_id = ?` for a suspended user
+|===
+
+CSRF: `SameSite=Lax` plus a server-side check on every non-GET `/api/*`
+and `/auth/logout` request that `Origin` (or `Sec-Fetch-Site`) is
+same-origin, otherwise 403. Responses carrying session state set
+`Cache-Control: no-store` and `Vary: Cookie`. `public/_headers` already
+sets HSTS/nosniff/frame-deny; no change needed beyond `no-store` on
+API responses.
+
+=== Static pages and the session
+
+The ~9,400 static pages are served from `ASSETS` and stay cacheable;
+they never embed per-user data. The UI discovers its user by calling
+`/api/whoami` from the browser (an island on pages that care). Worker
+code reads the cookie only for `/auth/*` and `/api/*`, so the static
+path is unchanged.
+
+== Logout
+
+`POST /auth/logout`: delete the session row, send
+`Set-Cookie: __Host-ituob_session=; Max-Age=0; Path=/; Secure; HttpOnly; SameSite=Lax`,
+and respond 303 to `/`. Local logout is mandatory. Whether to also end
+the identity-service session (RP-initiated logout, `end_session_endpoint`
+with `id_token_hint` and `post_logout_redirect_uri`) is an assumption
+(A6); until verified, the UI says "signed out of ituob.org" and the next
+login may silently re-authenticate at the identity service. Back-channel
+logout is out of scope for v1.
+
+== D1 data model: `users`
+
+Keyed by the identity service's stable subject. Exactly the contract
+shared with #105:
+
+[source,sql]
+----
+CREATE TABLE users (
+  id            TEXT PRIMARY KEY,          -- identity 'sub', verbatim, never reformatted
+  email         TEXT,                      -- cache of the 'email' claim; not unique, not a key
+  display_name  TEXT,                      -- cache of 'name' (or preferred_username)
+  created_at    TEXT NOT NULL,             -- ISO-8601 UTC
+  last_login_at TEXT
+);
+
+CREATE INDEX users_email ON users (lower(email));   -- lookups only; no UNIQUE
+
+-- supporting tables owned by this issue
+CREATE TABLE sessions (
+  id              TEXT PRIMARY KEY,        -- random row id (not the cookie)
+  user_id         TEXT NOT NULL REFERENCES users(id),
+  token_hash      TEXT NOT NULL UNIQUE,    -- SHA-256 of the cookie value
+  prev_token_hash TEXT,                    -- rotation grace (60 s)
+  rotated_at      TEXT,
+  created_at      TEXT NOT NULL,
+  last_seen_at    TEXT NOT NULL,
+  expires_at      TEXT NOT NULL            -- absolute
+);
+CREATE INDEX sessions_user ON sessions (user_id);
+
+CREATE TABLE oidc_flows (
+  id            TEXT PRIMARY KEY,
+  state         TEXT NOT NULL,
+  nonce         TEXT NOT NULL,
+  code_verifier TEXT NOT NULL,
+  return_to     TEXT NOT NULL,
+  created_at    TEXT NOT NULL              -- TTL 10 min, swept lazily
+);
+----
+
+Design notes:
+
+* `email` is deliberately nullable and non-unique: the service may not
+  provide it (A3) and may allow changes; no authorization decision keys
+  on it.
+* No `role`, `member_id` or `is_itu` column on `users`. Authorization
+  data lives in #105's tables so the identity layer and the policy layer
+  can change independently ("leave room" in the issue = no columns to
+  migrate later).
+* If `sub` is only unique per issuer, `id` becomes `<issuer>#<sub>`
+  (A4). The shape of the value is opaque to every other table.
+
+== `getSession` — the seam
+
+Shared contract, kept verbatim:
+
+[source,ts]
+----
+type Session = {
+  userId: string;                // users.id = identity 'sub'
+  roles: Role[];                 // 'itu-admin' | 'itu-editor' | 'member-submitter'
+  memberStateId: string | null;  // members.id; null for ITU staff and unaffiliated
+};
+
+getSession(request: Request, env: Env): Promise<Session | null>
+----
+
+Contract:
+
+* Returns `null` for no/invalid/expired cookie. Never throws for an
+  unauthenticated request; the caller decides 401 vs redirect.
+* A user with a valid session but no active membership gets
+  `roles: []`, `memberStateId: null` (authenticated, unauthorized).
+* Roles come from #105 (`memberships` + `user_roles`) joined at call
+  time; this note owns only the session half.
+* *Every* authorization check in later issues goes through this
+  function. No handler reads cookies or tokens directly.
+
+Two implementations behind one interface:
+
+[cols="1,3"]
+|===
+| `getSession` (real) | Cookie → `sessions` → `users` → #105 role join. Used when `env.AUTH_MODE = "oidc"`
+| `getSession` (stub) | Local/dev/test: used when `env.AUTH_MODE = "stub"` (the default if no identity config is present)
+|===
+
+== Local stub for dev and tests
+
+The stub exists so #103/#104/#105 can be built and tested before the
+identity service is reachable.
+
+* Activated only by `AUTH_MODE=stub` set in `wrangler dev` vars or a
+  test harness. *Production and staging configs must never set it*; the
+  Worker refuses to start the stub (returns 500 on first request) when
+  `request.url` host is `ituob.org` or `*.ituob.org`.
+* Reads a fixture from a header `X-Stub-Session: <fixture-name>` (or
+  a `stub_session` dev cookie on `localhost`) and resolves it from a
+  checked-in fixture table: `itu-admin`, `itu-editor`, `member-A`
+  (member-submitter for state A), `member-B`, `unaffiliated`,
+  `deactivated-member-A`. Each fixture is a full `Session` plus
+  seeded `users`/`memberships` rows in the test D1.
+* The stub implements the same `getSession` signature; tests for #105
+  enforcement run against the stub in CI with a local D1 (miniflare /
+  `wrangler dev --local`), so no network, no identity service.
+* `/auth/*` returns 501 in stub mode, so nobody mistakes the stub for a
+  login.
+* A real-flow integration test is added only once A1–A8 are verified,
+  using a recorded or test-tenant identity instance.
+
+== `/api/whoami`
+
+Same shape conventions as `/api/health` (`{ ok, service, version, … }`),
+always HTTP 200 for a well-formed request so a page can call it freely:
+
+[source,json]
+----
+{ "ok": true, "service": "ituob-org", "version": "phase-2",
+  "authenticated": true,
+  "user": { "id": "…sub…", "displayName": "…", "email": "…" },
+  "roles": ["member-submitter"],
+  "memberStateId": "CHE",
+  "affiliation": { "kind": "member", "label": "Switzerland" } }
+----
+
+Anonymous: `{ "ok": true, "service": "ituob-org", "version": "phase-2",
+"authenticated": false }`. `Cache-Control: no-store`. `affiliation` is
+supplied by #105. `/api/whoami` is read-only and lives outside Access,
+like `/api/health`; it reveals nothing the caller's own cookie does not
+already prove.
+
+== Coexistence with Cloudflare Access [[coexistence]]
+
+Rule (the shared contract): *Access keeps `/admin/*` and every mutating
+API path that Access guards; Access service tokens remain the only
+CI-to-API write path; an identity account never bypasses Access.*
+
+How it is made real:
+
+. *Two disjoint trust paths, never merged.* A request is authorized by
+  (a) Access — a verified `Cf-Access-Jwt-Assertion` the Worker
+  re-validates against the team JWKS (`aud` = the Access application
+  AUD tag) — _or_ (b) an identity session. A route declares which one it
+  accepts. A session cookie on an Access route is ignored; an Access
+  JWT on a session-only route is ignored.
+. *Defense in depth.* The Worker does not trust that Access sits in
+  front: handlers on Access routes verify the JWT themselves, so a
+  mis-scoped Access application fails closed (401) rather than open.
+  Service-token callers are recognised by the JWT's `common_name`
+  (client id), not by headers the client can forge.
+. *Path layout.* Auth routes are `/auth/*` (outside Access). Access
+  applications cover `/admin/*` and the Access-scoped API namespace
+  (proposed `/api/admin/*` and `/api/ci/*`). Session-authenticated
+  mutations by members (#103 submissions, #104 comments) need a
+  namespace outside Access — see Open items. Anything that is mutating
+  and matches neither an Access path nor a session-guarded handler
+  returns 401/405, preserving "unauthenticated `/api/*` writes are
+  impossible": the Worker's default for any non-GET under `/api/` is
+  deny unless a route explicitly opts into one of the two trust paths.
+. *ITU staff are two things.* An ITU staffer may hold an Access identity
+  (email OTP/SSO) for `/admin/*` and an identity-service account for
+  in-app roles. The two are not auto-linked; `/admin/*` handlers that
+  need a user attribute (audit actor) record the Access email, and an
+  optional link by verified email is deferred (Open items).
+
+== Threats
+
+[cols="2,4"]
+|===
+| Threat | Mitigation
+
+| Login CSRF / code injection | `state` bound to a single-use flow row and an HttpOnly flow cookie; PKCE verifier; callback consumes the flow before the token call
+| Open redirect via `return_to` | path-only allow-list regex, re-checked at callback
+| Token replay / ID token substitution | `nonce`, `aud`, `iss`, `exp` checks; single-use code
+| Session theft by XSS | HttpOnly cookie, no token in JS or storage; CSP is set by `_headers`
+| Session theft from D1 leak | only hashes stored
+| Fixation | new token on login and on privilege change
+| CSRF on mutations | SameSite=Lax + Origin/Sec-Fetch-Site check + POST-only logout
+| Account takeover by email collision | key is `sub`; never merge by email; email-based linking requires verified claim (A3)
+| Stale authority after deactivation | roles resolved from D1 per request; sessions deletable per user
+| Identity service outage | existing sessions keep working (no call to identity per request); new logins fail closed with a static error page; Access path unaffected
+| Staging/production cross-contamination | host-only `__Host-` cookies, separate client registrations and secrets
+| Stub shipped to production | stub refuses `*.ituob.org`; vars absent from both wrangler configs; CI grep that `AUTH_MODE` is not in `wrangler*.jsonc`
+| Privilege confusion with Access | disjoint trust paths; a session never satisfies an Access route; Worker re-verifies the Access JWT
+| Rate abuse of `/auth/login` | Cloudflare rate-limit rule on `/auth/*`; flow rows swept; per-IP cap on `oidc_flows` inserts
+|===
+
+== Open items (decisions, not assumptions about the service)
+
+. *Member mutations vs. Access.* Issue #102 says Access guards "mutating
+  `/api/*`", while #105/#103 require members to submit via the API. A
+  member cannot pass committee Access. This design scopes Access to
+  `/admin/*`, `/api/admin/*`, `/api/ci/*` and gives
+  session-authenticated member mutations a separate namespace (proposed
+  `/api/me/*`, or `/api/submissions` guarded by `getSession`) with
+  default-deny. This needs the owner's confirmation; see the hand-off
+  report.
+. D1 binding is not yet declared in `wrangler.jsonc` /
+  `wrangler.staging.jsonc` (no `d1_databases`, no `vars`). Adding the
+  binding, secrets (`OIDC_CLIENT_SECRET`) and `OIDC_ISSUER`/
+  `OIDC_CLIENT_ID` vars is part of the implementation PR.
+. Optional link between an Access identity and a `users` row for audit.
+
+== Assumptions to verify against ribosei/identity [[assumptions]]
+
+Everything below is a guess. Each must be confirmed (or the design
+adjusted) once the repository or a running instance is reachable. No
+other part of this note, or of `docs/membership-roles.adoc`, relies on
+an unverified property of the service except through this list.
+
+[cols="1,4,4"]
+|===
+| # | Assumption | If false
+
+| A1 | *Protocol.* The service is a standard OpenID Connect provider supporting the authorization-code flow and PKCE with `S256`. | If it is plain OAuth2 without ID tokens, use the userinfo endpoint for claims and drop nonce validation; if it is a proprietary session service, the Worker's callback/token code is replaced and only the seam (`getSession`, `users`) survives.
+| A2 | *Discovery.* `<issuer>/.well-known/openid-configuration` exists and publishes `authorization_endpoint`, `token_endpoint`, `jwks_uri`, `issuer`, `end_session_endpoint`. | Hard-code endpoints in config; document them.
+| A3 | *Claims.* `openid email profile` scopes yield `sub`, `email`, `email_verified`, and `name` (or `preferred_username`) in the ID token or userinfo. | `email`/`display_name` stay NULL; ITU-staff pre-provisioning by email (#105) is unavailable and provisioning is by `sub` after first login.
+| A4 | *`sub` stability.* `sub` is immutable, never reassigned, and unique within the issuer (single issuer for all accounts). | Use `<issuer>#<sub>` keys; if `sub` can change (e.g. account merge) a mapping/alias table is needed.
+| A5 | *Client registration.* We may register one confidential client per environment (`www.ituob.org`, `staging-www.ituob.org`) with exact redirect URIs `https://<host>/auth/callback`, and receive a `client_secret`; the service allows PKCE with a confidential client. | If only public clients, drop the secret and rely on PKCE alone; if redirect-URI wildcards only, restrict to the exact URIs anyway.
+| A6 | *Logout.* The service exposes RP-initiated logout (`end_session_endpoint`, `id_token_hint`, `post_logout_redirect_uri` registrable). | Local-only logout (this note's default behavior); UI wording stays "signed out of ituob.org".
+| A7 | *Registration UX.* Self-service registration exists in the service's own UI (the issue's "A user can register through the identity service"), is reachable from the authorization endpoint (e.g. `prompt=create` or a link), and returns to the redirect URI afterward with a normal code. | Add a "Register" link to the identity service's own sign-up URL; if registration is invitation-only or admin-provisioned, #102's acceptance criterion is unmeetable as written and the issue owner must be told.
+| A8 | *Token and key behavior.* ID tokens are signed with an asymmetric key published at `jwks_uri` with rotation by `kid`; access tokens are not needed by the Worker; no refresh token is required for a 7-day ituob session. | Adjust validation (e.g. introspection) and, if the service issues only short-lived sessions that must be refreshed, add a refresh step or shorten our absolute lifetime.
+| A9 | *Account lifecycle.* Disabled/deleted identity accounts cannot start new logins; the service does not push deprovisioning events. | Our own session `expires_at` (7 d) and #105 deactivation are the only brakes; add a periodic userinfo re-check or back-channel logout if the service offers one.
+| A10 | *Admin / MFA.* Account recovery, passwords and MFA are handled entirely by the service; ITU staff can be required to use MFA there. | If not, MFA for ITU roles must be enforced elsewhere (Access already gives the admin surface it).
+| A11 | *Reachability.* The service is reachable from Cloudflare Workers over HTTPS with a stable public issuer URL in staging and production. | The local stub remains the only auth path; log in cannot ship.
+|===
+
+== Implementation: configuration knobs (#102, AUTH_MODE="oidc")
+
+Set via Worker vars/secrets only. No default points at a real host;
+missing or invalid required config makes `/auth/*` answer 503 and
+`getSession` return null (fail closed). Non-https endpoints are refused
+except on loopback.
+
+[cols="1,2,3"]
+|===
+| Assumption | Knob | Behavior
+| A1, A2 | `OIDC_ISSUER` (required), `OIDC_AUTHORIZATION_ENDPOINT`, `OIDC_TOKEN_ENDPOINT`, `OIDC_JWKS_URI` | Standard OIDC; discovery at `<issuer>/.well-known/openid-configuration` (its `issuer` must equal the config) unless an endpoint is set explicitly
+| A3 | `OIDC_SCOPES` (default `openid email profile`) | Claims read: `sub`, `email`, `name`/`preferred_username`; missing email/name stay NULL and never wipe a cached value
+| A4 | `OIDC_SUB_KEY` = `verbatim` (default) or `issuer` | `users.id` = `sub`, or `<issuer>#<sub>`
+| A5 | `OIDC_CLIENT_ID` (required), `OIDC_CLIENT_SECRET` (secret), `OIDC_CLIENT_AUTH` = `basic` (default) / `post` / `none`, `OIDC_REDIRECT_URI` | Confidential or public client; redirect URI defaults to `<request origin>/auth/callback`. PKCE S256 is always sent
+| A6 | `OIDC_END_SESSION_ENDPOINT`, `OIDC_POST_LOGOUT_REDIRECT_URI` | RP-initiated logout only when set (with `client_id` and `post_logout_redirect_uri`; no `id_token_hint`, the ID token is not stored); otherwise local logout only
+| A8 | `OIDC_ID_TOKEN_ALGS` (default `RS256,ES256`) | JWKS lookup by `kid`; one rate-limited (60 s) refresh on unknown kid; no refresh token, no access token use
+| A7, A9, A10, A11 | none | Not exercised by code: registration UX, deprovisioning, MFA and reachability are properties of the service
+|===
