@@ -12,6 +12,7 @@
     "check": "astro check",
     "astro": "astro",
     "test:worker": "vitest run",
+    "test:form": "vitest run --config vitest.form.config.ts",
     "typecheck:worker": "tsc -p worker/tsconfig.json"
   },
   "dependencies": {
