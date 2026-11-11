@@ -37,10 +37,14 @@ jobs:
         BUNDLE_GEMFILE: ituob/Gemfile
         SITE_TYPES_PATH: ${{ github.workspace }}/src/lib/schema.generated.ts
         SITE_VALIDATORS_PATH: ${{ github.workspace }}/src/lib/schema.validators.generated.ts
-      run: bundle install && bundle exec ruby scripts/generate_ts_types.rb
+        CLASS_DESCRIPTION_PATH: ${{ github.workspace }}/src/lib/form/class-description.generated.json
+      run: |
+        bundle install
+        bundle exec ruby scripts/generate_ts_types.rb
+        bundle exec ruby scripts/generate_class_description.rb
 
-    - name: Verify committed wire types and validators match the ontology
-      run: git diff --exit-code -- src/lib/schema.generated.ts src/lib/schema.validators.generated.ts
+    - name: Verify committed wire types, validators and form description match the ontology
+      run: git diff --exit-code -- src/lib/schema.generated.ts src/lib/schema.validators.generated.ts src/lib/form/class-description.generated.json
 
     - name: Generate register snapshots
       working-directory: data-ob
@@ -51,6 +55,16 @@ jobs:
 
     - name: Install dependencies
       run: npm ci
+
+    - name: Worker tests
+      run: npx vitest run
+
+    - name: Worker typecheck
+      run: npm run typecheck:worker
+
+    # Round-trips every form-driven file in data-ob through the form model.
+    - name: Form round-trip tests
+      run: npm run test:form
 
     - name: Build Astro site
       run: npm run build
