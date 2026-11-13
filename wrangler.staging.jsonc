@@ -1,19 +1,37 @@
-// Staging — the pre-production soak channel.
-//
-// Deploys from the `staging` branch; serves staging-www.ituob.org
-// (custom domain auto-provisioned into the Cloudflare zone on deploy).
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "ituob-org-staging",
   "main": "worker/index.ts",
   "compatibility_date": "2026-10-01",
   "workers_dev": false,
-  "routes": [{ "pattern": "staging-www.ituob.org", "custom_domain": true }],
-  "run_worker_first": true,
+  "routes": [
+    {
+      "pattern": "staging-www.ituob.org",
+      "custom_domain": true
+    }
+  ],
   "assets": {
     "directory": "./dist",
     "binding": "ASSETS",
     "html_handling": "auto-trailing-slash",
-    "not_found_handling": "404-page"
+    "not_found_handling": "404-page",
+    "run_worker_first": true
+  },
+  "vars": {
+    "AUTH_MODE": "oidc",
+    "OIDC_CLIENT_AUTH": "basic"
+  },
+  "secrets": {
+    "required": [
+      "OIDC_CLIENT_SECRET",
+      "RESEND_API_KEY",
+      "GITHUB_APP_PRIVATE_KEY",
+      "GITHUB_WEBHOOK_SECRET"
+    ]
+  },
+  "triggers": {
+    "crons": [
+      "*/5 * * * *"
+    ]
   }
 }
