@@ -1,6 +1,6 @@
 // Approval -> branch -> PR, behind an interface (docs/submission-workflow.adoc
-// "Approval -> branch -> PR"). The real GitHub App client is not built here;
-// tests use FakePatchPublisher. NOTHING in this layer may target `main`.
+// "Approval -> branch -> PR"). Tests can override the configured GitHub App client.
+// Protected branches change only through reviewed pull requests.
 
 export interface OpenPatchPrRequest {
   repo: string;
@@ -81,24 +81,17 @@ export function branchName(issue: number, seq: number, slug: string, submissionI
   return `rt-sub-${issue}-${nnn}-${s}-${submissionId.slice(-8)}`;
 }
 
-/** Real GitHub App implementation: a stub until the App exists (account setup, see design note). */
-export class GitHubAppPatchPublisher implements PatchPublisher {
-  async openPatchPr(_req: OpenPatchPrRequest): Promise<OpenedPr> {
-    throw new PublisherNotConfigured();
-  }
-  async closePatchPr(): Promise<void> {
-    throw new PublisherNotConfigured();
-  }
-  async openRevertPr(_req: OpenRevertPrRequest): Promise<OpenedPr> {
-    throw new PublisherNotConfigured();
-  }
-  async getPullRequest(): Promise<PullRequestState> {
-    throw new PublisherNotConfigured();
-  }
-  async bumpDataPin(_req: PinBumpRequest): Promise<PinBump> {
-    throw new PublisherNotConfigured();
-  }
+export interface PublisherConfig {
+  GITHUB_APP_ID?: string;
+  GITHUB_APP_PRIVATE_KEY?: string;
+  GITHUB_APP_INSTALLATION_ID?: string;
+  PATCH_REPO?: string;
+  GITHUB_SITE_REPO?: string;
+  GITHUB_DATA_GITLINK?: string;
+  GITHUB_STAGING_BRANCH?: string;
 }
+export { GitHubAppPatchPublisher } from "./github-publisher";
+import { GitHubAppPatchPublisher } from "./github-publisher";
 
 /** The base branch the FAKE reports for a PR (a read-side value: nothing here writes to it). */
 const FAKE_BASE = "main";
@@ -191,10 +184,10 @@ export class FakePatchPublisher implements PatchPublisher {
 }
 
 let override: PatchPublisher | null = null;
-/** Test seam / future wiring point. Production resolves the (unconfigured) App client. */
+/** Test seam. Production resolves the explicitly configured App client. */
 export function setPublisher(p: PatchPublisher | null) {
   override = p;
 }
-export function getPublisher(): PatchPublisher {
-  return override ?? new GitHubAppPatchPublisher();
+export function getPublisher(config?: PublisherConfig): PatchPublisher {
+  return override ?? new GitHubAppPatchPublisher(config);
 }
