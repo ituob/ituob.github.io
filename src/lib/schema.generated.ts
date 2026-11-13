@@ -149,6 +149,10 @@ export interface E164CCAmendmentWire {
 
 export interface E164CCEntryWire {
   _class?: string;
+  country_code?: string;
+  country_area_or_service?: MultilingualStringWire;
+  note?: MultilingualStringWire;
+  notes?: string[];
   applicant?: string;
   network?: string;
   cc_ic?: string;
@@ -276,7 +280,7 @@ export interface F32TDIEntryWire {
   country_or_area_note?: MultilingualStringWire;
   notes?: MultilingualStringWire;
   network_roa?: string;
-  network_roa_note?: string;
+  network_roa_note?: MultilingualStringWire;
   network_code?: string;
   network_code_note?: MultilingualStringWire;
   telegraph_office_name?: MultilingualStringWire;
@@ -500,6 +504,13 @@ export interface IssueMetadataWire {
   authors?: IssueAuthorWire[];
 }
 
+export interface KeyHistoryEntryWire {
+  key?: string;
+  type?: string;
+  ob_issue_no?: number;
+  identifier?: IdentifierWire;
+}
+
 export interface ListVIIIActionWire {
   action_type?: string;
   position?: string;
@@ -629,6 +640,13 @@ export interface OldIssueWire {
   amendments?: AmendmentWire[];
 }
 
+export interface ProjectionProvenanceWire {
+  register_id?: string;
+  as_of_issue?: number;
+  seed_issue?: number;
+  last_change_issue?: number;
+}
+
 export interface Q708ISPCActionWire {
   action_type?: string;
   position?: string;
@@ -734,8 +752,24 @@ export interface RegisterChangeWire {
   merge_strategy?: string;
 }
 
+export interface RegisterEditionWire {
+  provenance?: ProjectionProvenanceWire;
+  items?: EntryWire[];
+  lapsed_keys?: string[];
+  deleted_keys?: string[];
+  key_history?: KeyHistoryEntryWire[];
+}
+
+export interface RegisterKeyHistoryWire {
+  provenance?: ProjectionProvenanceWire;
+  key?: string;
+  membership?: string;
+  entries?: KeyHistoryEntryWire[];
+}
+
 export interface T35AssignmentAuthorityWire {
-  terminal_type?: string;
+  terminal_type?: string[];
+  last_updated?: string;
   contact_name?: string;
   organization?: string;
   department?: string;
@@ -769,7 +803,7 @@ export interface T35NAEntryWire {
   _class?: string;
   country?: string;
   administration_name?: string;
-  manufactures_htv?: string;
+  manufactures_htv?: boolean;
   last_updated?: string;
   assignment_authority?: T35AssignmentAuthorityWire[];
   note?: string;

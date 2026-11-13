@@ -963,6 +963,38 @@
           "default": "E164CCEntry"
         },
         {
+          "name": "country_code",
+          "wire": "country_code",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "country_area_or_service",
+          "wire": "country_area_or_service",
+          "type": "MultilingualString",
+          "kind": "class",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "note",
+          "wire": "note",
+          "type": "MultilingualString",
+          "kind": "class",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "notes",
+          "wire": "notes",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": true
+        },
+        {
           "name": "applicant",
           "wire": "applicant",
           "type": "String",
@@ -1699,8 +1731,8 @@
         {
           "name": "network_roa_note",
           "wire": "network_roa_note",
-          "type": "String",
-          "kind": "primitive",
+          "type": "MultilingualString",
+          "kind": "class",
           "required": false,
           "collection": false
         },
@@ -3418,6 +3450,14 @@
           "type": "String",
           "kind": "primitive",
           "required": false,
+          "collection": true
+        },
+        {
+          "name": "last_updated",
+          "wire": "last_updated",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
           "collection": false
         },
         {
@@ -3629,7 +3669,7 @@
         {
           "name": "manufactures_htv",
           "wire": "manufactures_htv",
-          "type": "String",
+          "type": "Boolean",
           "kind": "primitive",
           "required": false,
           "collection": false
@@ -4788,6 +4828,158 @@
           "kind": "primitive",
           "required": false,
           "collection": false
+        }
+      ]
+    },
+    "ProjectionProvenance": {
+      "attributes": [
+        {
+          "name": "register_id",
+          "wire": "register_id",
+          "type": "String",
+          "kind": "primitive",
+          "required": true,
+          "collection": false
+        },
+        {
+          "name": "as_of_issue",
+          "wire": "as_of_issue",
+          "type": "Integer",
+          "kind": "primitive",
+          "required": true,
+          "collection": false
+        },
+        {
+          "name": "seed_issue",
+          "wire": "seed_issue",
+          "type": "Integer",
+          "kind": "primitive",
+          "required": true,
+          "collection": false
+        },
+        {
+          "name": "last_change_issue",
+          "wire": "last_change_issue",
+          "type": "Integer",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        }
+      ]
+    },
+    "KeyHistoryEntry": {
+      "attributes": [
+        {
+          "name": "key",
+          "wire": "key",
+          "type": "String",
+          "kind": "primitive",
+          "required": true,
+          "collection": false
+        },
+        {
+          "name": "type",
+          "wire": "type",
+          "type": "ActionType",
+          "kind": "enum",
+          "required": true,
+          "collection": false
+        },
+        {
+          "name": "ob_issue_no",
+          "wire": "ob_issue_no",
+          "type": "Integer",
+          "kind": "primitive",
+          "required": true,
+          "collection": false
+        },
+        {
+          "name": "identifier",
+          "wire": "identifier",
+          "type": "Identifier",
+          "kind": "class",
+          "required": true,
+          "collection": false
+        }
+      ]
+    },
+    "RegisterEdition": {
+      "attributes": [
+        {
+          "name": "provenance",
+          "wire": "provenance",
+          "type": "ProjectionProvenance",
+          "kind": "class",
+          "required": true,
+          "collection": false
+        },
+        {
+          "name": "items",
+          "wire": "items",
+          "type": "Entry",
+          "kind": "class",
+          "required": false,
+          "collection": true
+        },
+        {
+          "name": "lapsed_keys",
+          "wire": "lapsed_keys",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": true
+        },
+        {
+          "name": "deleted_keys",
+          "wire": "deleted_keys",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": true
+        },
+        {
+          "name": "key_history",
+          "wire": "key_history",
+          "type": "KeyHistoryEntry",
+          "kind": "class",
+          "required": false,
+          "collection": true
+        }
+      ]
+    },
+    "RegisterKeyHistory": {
+      "attributes": [
+        {
+          "name": "provenance",
+          "wire": "provenance",
+          "type": "ProjectionProvenance",
+          "kind": "class",
+          "required": true,
+          "collection": false
+        },
+        {
+          "name": "key",
+          "wire": "key",
+          "type": "String",
+          "kind": "primitive",
+          "required": true,
+          "collection": false
+        },
+        {
+          "name": "membership",
+          "wire": "membership",
+          "type": "String",
+          "kind": "primitive",
+          "required": true,
+          "collection": false
+        },
+        {
+          "name": "entries",
+          "wire": "entries",
+          "type": "KeyHistoryEntry",
+          "kind": "class",
+          "required": false,
+          "collection": true
         }
       ]
     }
