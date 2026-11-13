@@ -4,7 +4,7 @@ on:
   push:
     branches: [ main, staging ]
   pull_request:
-    branches: [ main ]
+    branches: [ main, feat/webapp-integration ]
   workflow_dispatch:
 
 permissions:
@@ -62,6 +62,15 @@ jobs:
     - name: Worker typecheck
       run: npm run typecheck:worker
 
+    - name: Provider and deployment configuration tests
+      run: npx vitest run --config vitest.providers.config.ts
+
+    - name: Item history and textual action regression tests
+      run: |
+        node --experimental-strip-types --test test/item-history.node-test.ts
+        node --experimental-transform-types --test test/textual-validation.node-test.ts
+        node --test test/parity-render.node-test.mjs
+
     # Round-trips every form-driven file in data-ob through the form model.
     - name: Form round-trip tests
       run: npm run test:form
@@ -88,10 +97,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
+    - uses: actions/setup-node@v4
+      with:
+        node-version: '22'
     - uses: actions/download-artifact@v4
       with:
         name: site-dist
         path: dist
+    - name: Verify staging bindings and authentication configuration
+      env:
+        CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+      run: node scripts/configure-cloudflare.mjs --check --environment staging
     - name: Deploy to Cloudflare Workers (staging)
       uses: cloudflare/wrangler-action@v3
       with:
@@ -110,10 +126,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
+    - uses: actions/setup-node@v4
+      with:
+        node-version: '22'
     - uses: actions/download-artifact@v4
       with:
         name: site-dist
         path: dist
+    - name: Verify production bindings and authentication configuration
+      env:
+        CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+      run: node scripts/configure-cloudflare.mjs --check --environment production
     - name: Deploy to Cloudflare Workers (production)
       uses: cloudflare/wrangler-action@v3
       with:

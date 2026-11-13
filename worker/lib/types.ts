@@ -28,8 +28,15 @@ export interface Env {
   OIDC_SCOPES?: string;
   OIDC_SUB_KEY?: string;
   OIDC_ID_TOKEN_ALGS?: string;
-  /** Patch repository for approval PRs (design D1); default ituob/service-publications-docs. */
+  /** Authoritative action repository, explicitly configured for real publishing. */
   PATCH_REPO?: string;
+  /** GitHub App credentials; the private key is PKCS8 PEM in a Worker secret. */
+  GITHUB_APP_ID?: string;
+  GITHUB_APP_PRIVATE_KEY?: string;
+  GITHUB_APP_INSTALLATION_ID?: string;
+  GITHUB_SITE_REPO?: string;
+  GITHUB_DATA_GITLINK?: string;
+  GITHUB_STAGING_BRANCH?: string;
   /** GitHub webhook secret (Worker secret). Unset: /api/github/webhook fails closed with 503. */
   GITHUB_WEBHOOK_SECRET?: string;
   /** Notification carrier queue (`ituob-notify`); absent locally/unprovisioned: rows stay queued. */

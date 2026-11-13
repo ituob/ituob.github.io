@@ -1,5 +1,5 @@
-import { assertPatchBranch, PublisherNotConfigured } from "./publisher";
-import type { OpenPatchPrRequest, OpenRevertPrRequest, OpenedPr, PatchPublisher, PinBump, PinBumpRequest, PublisherConfig, PullRequestState } from "./publisher";
+import { assertPatchBranch, PublisherNotConfigured } from "./publisher.ts";
+import type { OpenPatchPrRequest, OpenRevertPrRequest, OpenedPr, PatchPublisher, PinBump, PinBumpRequest, PublisherConfig, PullRequestState } from "./publisher.ts";
 
 type Json = Record<string, any>;
 export type GitHubTransport = (input: string, init: RequestInit) => Promise<Response>;

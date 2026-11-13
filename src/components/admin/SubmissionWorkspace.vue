@@ -93,6 +93,7 @@ onMounted(() => perform(async () => { await list(); const id = new URLSearchPara
     </fieldset>
     <section v-if="creating || detail">
       <h2>{{ creating ? 'New action proposal' : `${detail?.submission.id} — ${detail?.submission.state}` }}</h2>
+      <p v-if="detail"><a :href="`/me/discussions/?id=${encodeURIComponent(detail.submission.id)}${admin ? '&review=1' : ''}`">Discussion and review history</a></p>
       <p>This editor authors one action patch. Publication identifiers and edition metadata are assigned at approval.</p>
       <fieldset :disabled="busy || !creating"><legend>Action identity</legend>
         <label v-if="registers.length">Register <select @change="registerChange"><option value="">Choose a register</option><option v-for="r in registers" :key="r.slug" :value="r.slug">{{ r.label }}</option></select></label>

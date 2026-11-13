@@ -25,6 +25,9 @@ export default defineConfig(async () => {
     ],
     test: {
       include: ["test/**/*.test.ts"],
+      // Protocol/host-config tests have a separate Node runner; D1 integration
+      // stays here, inside workerd with real migrations and request handling.
+      exclude: ["test/deployment-config.test.ts", "test/publisher.test.ts", "test/access.test.ts", "test/email.test.ts"],
       setupFiles: ["./test/setup.ts"],
     },
   };

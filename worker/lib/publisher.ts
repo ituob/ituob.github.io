@@ -90,8 +90,8 @@ export interface PublisherConfig {
   GITHUB_DATA_GITLINK?: string;
   GITHUB_STAGING_BRANCH?: string;
 }
-export { GitHubAppPatchPublisher } from "./github-publisher";
-import { GitHubAppPatchPublisher } from "./github-publisher";
+export { GitHubAppPatchPublisher } from "./github-publisher.ts";
+import { GitHubAppPatchPublisher } from "./github-publisher.ts";
 
 /** The base branch the FAKE reports for a PR (a read-side value: nothing here writes to it). */
 const FAKE_BASE = "main";
