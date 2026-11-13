@@ -38,7 +38,7 @@ import RegisterTable from '~/components/RegisterTable.astro';
 const state = { active_entries: [{ country: 'iso-3166:de', manufactures_htv: true, last_updated: '2006-03-10' }], entry_count: 1, lapsed_keys: ['old'], lapsed_count: 1, deleted_count: 0, at_ob_issue: 1001 };
 ---
 <RegisterTable state={state} keyField="country" showLapsed />`);
-    const result = spawnSync(process.execPath, [join(root, 'node_modules/astro/bin/astro.mjs'), 'build'], { cwd: fixture, encoding: 'utf8' });
+    const result = spawnSync(process.execPath, [join(root, 'node_modules/astro/bin/astro.mjs'), 'build'], { cwd: fixture, encoding: 'utf8', env: { ...process.env, OB_DATA_ROOT: join(fixture, 'data-ob'), ITU_OB_DATA_ROOT: join(fixture, 'data') } });
     assert.equal(result.status, 0, result.stdout + result.stderr);
     const html = id => readFileSync(join(fixture, `dist/issues/${id}/index.html`), 'utf8');
     const authored = html(1351);
