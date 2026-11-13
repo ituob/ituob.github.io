@@ -323,12 +323,12 @@ export const CLASSES: Readonly<Record<string, Readonly<Record<string, FieldSpec>
     "procedures": { kind: "string" },
     "ob_issue_no": { kind: "string" },
     "payload": { kind: "hash" },
-    "contents": { kind: "hash" },
+    "contents": { kind: "hashOrText" },
   },
   "GeneralCallbackProcedures": {
     "type": { kind: "string" },
     "ob_issue_no": { kind: "string" },
-    "contents": { kind: "hash" },
+    "contents": { kind: "hashOrText" },
   },
   "GeneralCustom": {
     "type": { kind: "string" },
@@ -336,7 +336,7 @@ export const CLASSES: Readonly<Record<string, Readonly<Record<string, FieldSpec>
     "recommendation": { kind: "string" },
     "text": { kind: "string" },
     "ob_issue_no": { kind: "string" },
-    "contents": { kind: "hash" },
+    "contents": { kind: "hashOrText" },
   },
   "GeneralIpns": {
     "type": { kind: "string" },
@@ -345,7 +345,7 @@ export const CLASSES: Readonly<Record<string, Readonly<Record<string, FieldSpec>
     "date_of_assignment": { kind: "string" },
     "notes": { kind: "string" },
     "ob_issue_no": { kind: "string" },
-    "contents": { kind: "hash" },
+    "contents": { kind: "hashOrText" },
   },
   "GeneralIptn": {
     "type": { kind: "string" },
@@ -353,17 +353,17 @@ export const CLASSES: Readonly<Record<string, Readonly<Record<string, FieldSpec>
     "notes": { kind: "string" },
     "manual": { kind: "boolean" },
     "ob_issue_no": { kind: "string" },
-    "contents": { kind: "hash" },
+    "contents": { kind: "hashOrText" },
   },
   "GeneralMessage": {
     "type": { kind: "string" },
     "ob_issue_no": { kind: "string" },
-    "contents": { kind: "hash" },
+    "contents": { kind: "hashOrText" },
   },
   "GeneralMid": {
     "type": { kind: "string" },
     "ob_issue_no": { kind: "string" },
-    "contents": { kind: "hash" },
+    "contents": { kind: "hashOrText" },
   },
   "GeneralMiscCommunications": {
     "type": { kind: "string" },
@@ -375,14 +375,14 @@ export const CLASSES: Readonly<Record<string, Readonly<Record<string, FieldSpec>
     "type": { kind: "string" },
     "text": { kind: "string" },
     "ob_issue_no": { kind: "string" },
-    "contents": { kind: "hash" },
+    "contents": { kind: "hashOrText" },
   },
   "GeneralRunningAnnexes": {
     "type": { kind: "string" },
     "extra_links": { kind: "string", many: true },
     "ob_issue_no": { kind: "string" },
     "payload": { kind: "hash" },
-    "contents": { kind: "hash" },
+    "contents": { kind: "hashOrText" },
   },
   "GeneralSanc": {
     "country": { kind: "string" },
@@ -393,7 +393,7 @@ export const CLASSES: Readonly<Record<string, Readonly<Record<string, FieldSpec>
     "items": { kind: "class", ref: "GeneralSanc", many: true },
     "notes": { kind: "string" },
     "ob_issue_no": { kind: "string" },
-    "contents": { kind: "hash" },
+    "contents": { kind: "hashOrText" },
   },
   "GeneralServiceRestriction": {
     "country": { kind: "class", ref: "MultilingualString" },
@@ -404,11 +404,11 @@ export const CLASSES: Readonly<Record<string, Readonly<Record<string, FieldSpec>
     "type": { kind: "string" },
     "ob_issue_no": { kind: "string" },
     "items": { kind: "class", ref: "GeneralServiceRestriction", many: true },
-    "contents": { kind: "hash" },
+    "contents": { kind: "hashOrText" },
   },
   "GeneralTelephoneCommunication": {
     "date": { kind: "dateOrText" },
-    "contents": { kind: "hash" },
+    "contents": { kind: "hashOrText" },
   },
   "GeneralTelephoneSection": {
     "type": { kind: "string" },
@@ -427,7 +427,7 @@ export const CLASSES: Readonly<Record<string, Readonly<Record<string, FieldSpec>
     "type": { kind: "string" },
     "items": { kind: "class", ref: "GeneralTelephoneService", many: true },
     "ob_issue_no": { kind: "string" },
-    "contents": { kind: "hash" },
+    "contents": { kind: "hashOrText" },
   },
   "Identifier": {
     "code": { kind: "string" },

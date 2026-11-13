@@ -56,7 +56,7 @@ describe("canonical general-message draft authoring", () => {
     }
     expect(() => validateGeneralMessage("../meta",{})).toThrow(InvalidError);
     expect(() => generalBinding("misc_communications",1000)).toThrow();
-    expect(() => validateGeneralMessage("sanc",{type:"sanc"})).toThrow(/SANC authoring unavailable/);
+    expect(validateGeneralMessage("sanc",{type:"sanc"}).className).toBe("GeneralSancs");
   });
   it.each(["running_annexes","approved_recommendations","telephone_service_2"])("round-trips real canonical %s fixture through form, DB and exact approved YAML",async type => {
     const value = parse(readFileSync(`test/fixtures/general-messages/${type}.yaml`,"utf8"));
@@ -70,6 +70,22 @@ describe("canonical general-message draft authoring", () => {
     expect(parse(artifact.content)).toEqual(value);
     expect((await readGeneralMessage(db,editor,saved.id)).value).toEqual(value);
     expect(await verifyChain(db)).toBeNull();
+  });
+  it("preserves a real legacy SANC document alongside typed authored rows and notes", async () => {
+    const legacy = parse(readFileSync("test/fixtures/general-messages/sanc.yaml","utf8"));
+    const value = {...legacy, ob_issue_no:"1331", items:[{country:"Example",sanc:"7-001"}], notes:"Retain note"};
+    const saved = await create(value);
+    expect(saved.class_name).toBe("GeneralSancs");
+    expect(saved.path).toBe("ob-issues/1331/sanc/001.yaml");
+    await approveGeneralMessage(db,admin,saved.id,1);
+    expect(parse((await generalMessageArtifact(db,saved.id)).content)).toEqual(value);
+    expect(legacy.contents).toEqual(saved.value.contents);
+  });
+  it("authors scalar telephone communication prose with exact approved wire values", async () => {
+    const value = {type:"telephone_service_2",ob_issue_no:"1331",contents:[{country_name:{en:"Example"},communications:[{contents:"Readable telephone notice"},{contents:{en:"English",fr:"Français",es:"Español",ar:"العربية",ru:"Русский",zh:"中文"}}]}]};
+    const saved = await create(value);
+    await approveGeneralMessage(db,admin,saved.id,1);
+    expect(parse((await generalMessageArtifact(db,saved.id)).content)).toEqual(value);
   });
   it("authors readable plain prose, allocates safe sequences, and emits the class itself", async () => {
     const first = await create(), second = await create();

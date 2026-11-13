@@ -4,8 +4,9 @@ import TranslationAssist from './TranslationAssist.vue';
 import { description } from '../../lib/form/description';
 import { initialValue } from '../../lib/admin-client';
 import { appendItem, clearField, removeItem, setField, type FormNode } from '../../lib/form/model';
+import { PROSE_LANGUAGES, isLanguageProse, setProseLanguage } from '../../lib/form/general';
 import { YamlTimestamp } from '../../lib/form/yaml-io';
-const props = defineProps<{ node: FormNode; path?: string; readonly?: boolean; translation?: boolean; opaqueReadonly?: boolean }>();
+const props = defineProps<{ node: FormNode; path?: string; readonly?: boolean; translation?: boolean; opaqueReadonly?: boolean; prose?: boolean }>();
 const emit = defineEmits<{ change: [node: FormNode]; invalid: [path: string, message: string] }>();
 const jsonError = ref('');
 const englishSource = computed(() => {
@@ -19,6 +20,12 @@ function jsonInput(event: Event) {
     if (props.node.kind === 'leaf' && props.node.type === 'Hash' && (!value || typeof value !== 'object' || Array.isArray(value))) throw new Error('Enter a JSON object');
     leaf(value); jsonError.value = ''; emit('invalid', props.path ?? '', '');
   } catch { jsonError.value = 'Enter a valid JSON object for this field.'; emit('invalid', props.path ?? '', jsonError.value); }
+}
+function languageInput(language: string, event: Event) {
+  if (props.node.kind === 'leaf') leaf(setProseLanguage(props.node.value, language, (event.target as HTMLTextAreaElement).value));
+}
+function languageValue(language: string): unknown {
+  return props.node.kind === 'leaf' && isLanguageProse(props.node.value) ? props.node.value[language] : undefined;
 }
 function leaf(value: unknown) { if (props.node.kind === 'leaf') emit('change', { ...props.node, value }); }
 function input(event: Event) {
@@ -45,7 +52,7 @@ function replaceItem(index: number, child: FormNode) {
       <template v-else>
         <button v-if="field.node === null" type="button" @click="emit('change', setField(node, field.attr.name, initialValue(field.attr)))">Add {{ field.attr.wire }}</button>
         <template v-else>
-          <SchemaNode :node="field.node" :path="`${path || 'data'}.${field.attr.wire}`" :readonly="readonly" :translation="translation" :opaque-readonly="opaqueReadonly" @change="replaceField(field.attr.name, $event)" @invalid="(path, message) => emit('invalid', path, message)" />
+          <SchemaNode :node="field.node" :path="`${path || 'data'}.${field.attr.wire}`" :readonly="readonly" :translation="translation" :opaque-readonly="opaqueReadonly" :prose="prose" @change="replaceField(field.attr.name, $event)" @invalid="(path, message) => emit('invalid', path, message)" />
           <button type="button" @click="emit('change', clearField(node, field.attr.name)); emit('invalid', `${path || 'data'}.${field.attr.wire}`, '')">Remove {{ field.attr.wire }}</button>
         </template>
       </template>
@@ -58,7 +65,7 @@ function replaceItem(index: number, child: FormNode) {
   <fieldset v-else-if="node.kind === 'list'" :disabled="readonly">
     <legend>{{ path }} ({{ node.items.length }} items)</legend>
     <div v-for="(item, index) in node.items" :key="index">
-      <SchemaNode :node="item" :path="`${path}[${index}]`" :readonly="readonly" :translation="translation" :opaque-readonly="opaqueReadonly" @change="replaceItem(index, $event)" @invalid="(path, message) => emit('invalid', path, message)" />
+      <SchemaNode :node="item" :path="`${path}[${index}]`" :readonly="readonly" :translation="translation" :opaque-readonly="opaqueReadonly" :prose="prose" @change="replaceItem(index, $event)" @invalid="(path, message) => emit('invalid', path, message)" />
       <button type="button" @click="emit('change', removeItem(node, index)); emit('invalid', path || 'data', '')">Remove item {{ index + 1 }}</button>
     </div>
     <button type="button" @click="emit('change', appendItem(node, initialValue({ name: 'item', wire: 'item', type: node.itemType, kind: node.itemKind, collection: false, required: false })))">Add item</button>
@@ -70,6 +77,21 @@ function replaceItem(index: number, child: FormNode) {
     </select>
     <input v-else-if="node.type === 'Boolean'" type="checkbox" :checked="node.value === true" :disabled="readonly" @change="input" />
     <input v-else-if="['Integer', 'Float'].includes(node.type)" type="number" :step="node.type === 'Integer' ? 1 : 'any'" :value="node.value as number" :disabled="readonly" @input="input" />
+    <template v-else-if="prose && node.type === 'HashOrText' && (typeof node.value === 'string' || isLanguageProse(node.value))">
+      <template v-if="typeof node.value === 'string'">
+        <textarea :value="node.value" :disabled="readonly" rows="5" @input="input" />
+        <button type="button" :disabled="readonly" @click="leaf({en: node.value})">Use language fields (current text becomes English)</button>
+      </template>
+      <template v-else>
+        <span v-for="language in PROSE_LANGUAGES" :key="language" class="prose-language">
+          <span>{{ language }}</span>
+          <textarea v-if="languageValue(language) === undefined || typeof languageValue(language) === 'string'"
+            :aria-label="`${path} ${language}`" :lang="language" :dir="language === 'ar' ? 'rtl' : 'auto'"
+            :value="String(languageValue(language) ?? '')" :disabled="readonly" rows="5" @input="languageInput(language, $event)" />
+          <span v-else>Stored rich text is preserved read-only.</span>
+        </span>
+      </template>
+    </template>
     <template v-else-if="node.value !== null && typeof node.value === 'object' && !(node.value instanceof YamlTimestamp)">
       <template v-if="opaqueReadonly"><p>Stored content is preserved. This field is read-only.</p><pre>{{ JSON.stringify(node.value, null, 2) }}</pre></template>
       <textarea v-else :value="JSON.stringify(node.value, null, 2)" :disabled="readonly" rows="5" @input="jsonInput" /><small>This field stores an opaque object. Edit this field as JSON.</small><p v-if="jsonError" role="alert">{{ jsonError }}</p>

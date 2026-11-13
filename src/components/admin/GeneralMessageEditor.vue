@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue';
 import { api, ApiError } from '../../lib/admin-client';
-import { GENERAL_TYPES, generalBinding } from '../../lib/form/general';
-import { blankState, setField, toFormState, toInstance, type FormNode } from '../../lib/form/model';
+import { GENERAL_TYPES, generalBinding, newGeneralState } from '../../lib/form/general';
+import { blankState, toFormState, toInstance, type FormNode } from '../../lib/form/model';
 import { validateClass, type SchemaIssue } from '../../lib/schema.validators.generated';
 import type { GeneralMessage } from '../../../worker/lib/general-messages';
 import SchemaNode from './SchemaNode.vue';
@@ -17,7 +17,7 @@ const dirty = computed(() => JSON.stringify(toInstance(node.value)) !== JSON.str
 const endpoint = '/api/admin/general-messages';
 function fresh() {
   draft.value = null; inputErrors.value = {}; errors.value = [];
-  node.value = setField(blankState(className.value),'type',{kind:'leaf',type:'String',value:type.value});
+  node.value = newGeneralState(type.value);
 }
 function accept(value: GeneralMessage) {
   draft.value = value; issueNo.value = value.ob_issue_no; type.value = value.type;
@@ -64,7 +64,7 @@ fresh(); onMounted(() => perform(reload));
 </script>
 <template>
   <section :aria-busy="busy" aria-label="General-message authoring">
-    <p>Prepare canonical issue messages using ontology fields. Plain text is available where the ontology permits strings. Existing opaque multilingual and rich-text objects are preserved read-only; rich-text authoring is not available. Hash-only telephone prose requires ontology and editor work. SANC authoring is unavailable until the corpus and service class dispatch agree.</p>
+    <p>Prepare canonical issue messages using ontology fields. Prose supports plain text and English, French, Spanish, Arabic, Russian and Chinese. Existing rich-text documents are preserved read-only.</p>
     <p v-if="error" role="alert">{{ error }}</p><p v-if="notice" role="status">{{ notice }}</p>
     <ul v-if="errors.length" role="alert"><li v-for="(issue,index) in errors" :key="index">{{ issue.path }}: {{ issue.message }}</li></ul>
     <fieldset :disabled="busy"><legend>Saved drafts</legend>
@@ -74,8 +74,8 @@ fresh(); onMounted(() => perform(reload));
     </fieldset>
     <fieldset :disabled="busy"><legend>{{ draft ? 'Edit saved message' : 'New message' }}</legend>
       <label>Issue number <input v-model.number="issueNo" type="number" min="1" max="99999" :disabled="!!draft" /></label>
-      <label>Message type <select v-model="type" :disabled="!!draft" @change="fresh"><option v-for="choice in GENERAL_TYPES" :key="choice" :disabled="choice === 'sanc'">{{ choice }}{{ choice === 'sanc' ? ' (model mismatch; unavailable)' : '' }}</option></select></label>
-      <SchemaNode :node="node" path="message" :opaque-readonly="true" @change="node=$event" @invalid="invalid" />
+      <label>Message type <select v-model="type" :disabled="!!draft" @change="fresh"><option v-for="choice in GENERAL_TYPES" :key="choice" >{{ choice }}</option></select></label>
+      <SchemaNode :node="node" path="message" :opaque-readonly="true" :prose="true" @change="node=$event" @invalid="invalid" />
       <button type="button" @click="save">Save draft</button>
       <button type="button" :disabled="!draft || dirty || !!draft.approved_at" @click="approve">Approve saved revision (administrator)</button>
       <button type="button" :disabled="!draft?.approved_at || dirty" @click="openReview">Open publication review PR (administrator)</button>

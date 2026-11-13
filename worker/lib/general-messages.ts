@@ -23,7 +23,6 @@ const staff = (s: Session | null) => requireRole(s, "itu-admin", "itu-editor");
 export function validateGeneralMessage(type: unknown, value: unknown): { className: string; value: Record<string, unknown> } {
   let className: string;
   try { ({ className } = generalBinding(type)); } catch (error) { throw new InvalidError(error instanceof Error ? error.message : "invalid general-message type"); }
-  if (type === "sanc") throw new InvalidError("SANC authoring unavailable: corpus GeneralSancs differs from service GeneralMessage dispatch; align the source model first");
   const errors = validateClass(className, value);
   if (!value || typeof value !== "object" || Array.isArray(value)) errors.push({ path: "", code: "type", message: "message must be an object" });
   else {

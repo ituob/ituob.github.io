@@ -332,13 +332,13 @@ export interface GeneralApprovedRecommendationsWire {
   procedures?: string;
   ob_issue_no?: string;
   payload?: Record<string, unknown>;
-  contents?: Record<string, unknown>;
+  contents?: Record<string, unknown> | string;
 }
 
 export interface GeneralCallbackProceduresWire {
   type?: string;
   ob_issue_no?: string;
-  contents?: Record<string, unknown>;
+  contents?: Record<string, unknown> | string;
 }
 
 export interface GeneralCustomWire {
@@ -347,7 +347,7 @@ export interface GeneralCustomWire {
   recommendation?: string;
   text?: string;
   ob_issue_no?: string;
-  contents?: Record<string, unknown>;
+  contents?: Record<string, unknown> | string;
 }
 
 export interface GeneralIpnsWire {
@@ -357,7 +357,7 @@ export interface GeneralIpnsWire {
   date_of_assignment?: string;
   notes?: string;
   ob_issue_no?: string;
-  contents?: Record<string, unknown>;
+  contents?: Record<string, unknown> | string;
 }
 
 export interface GeneralIptnWire {
@@ -366,19 +366,19 @@ export interface GeneralIptnWire {
   notes?: string;
   manual?: boolean;
   ob_issue_no?: string;
-  contents?: Record<string, unknown>;
+  contents?: Record<string, unknown> | string;
 }
 
 export interface GeneralMessageWire {
   type?: string;
   ob_issue_no?: string;
-  contents?: Record<string, unknown>;
+  contents?: Record<string, unknown> | string;
 }
 
 export interface GeneralMidWire {
   type?: string;
   ob_issue_no?: string;
-  contents?: Record<string, unknown>;
+  contents?: Record<string, unknown> | string;
 }
 
 export interface GeneralMiscCommunicationsWire {
@@ -392,7 +392,7 @@ export interface GeneralOrgChangesWire {
   type?: string;
   text?: string;
   ob_issue_no?: string;
-  contents?: Record<string, unknown>;
+  contents?: Record<string, unknown> | string;
 }
 
 export interface GeneralRunningAnnexesWire {
@@ -400,7 +400,7 @@ export interface GeneralRunningAnnexesWire {
   extra_links?: string[];
   ob_issue_no?: string;
   payload?: Record<string, unknown>;
-  contents?: Record<string, unknown>;
+  contents?: Record<string, unknown> | string;
 }
 
 export interface GeneralSancWire {
@@ -413,7 +413,7 @@ export interface GeneralSancsWire {
   items?: GeneralSancWire[];
   notes?: string;
   ob_issue_no?: string;
-  contents?: Record<string, unknown>;
+  contents?: Record<string, unknown> | string;
 }
 
 export interface GeneralServiceRestrictionWire {
@@ -426,12 +426,12 @@ export interface GeneralServiceRestrictionsWire {
   type?: string;
   ob_issue_no?: string;
   items?: GeneralServiceRestrictionWire[];
-  contents?: Record<string, unknown>;
+  contents?: Record<string, unknown> | string;
 }
 
 export interface GeneralTelephoneCommunicationWire {
   date?: string;
-  contents?: Record<string, unknown>;
+  contents?: Record<string, unknown> | string;
 }
 
 export interface GeneralTelephoneSectionWire {
@@ -453,7 +453,7 @@ export interface GeneralTelephoneServicesWire {
   type?: string;
   items?: GeneralTelephoneServiceWire[];
   ob_issue_no?: string;
-  contents?: Record<string, unknown>;
+  contents?: Record<string, unknown> | string;
 }
 
 export interface IdentifierWire {

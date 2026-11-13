@@ -35,3 +35,16 @@ it("D1 concurrent creates allocate distinct canonical message sequences",async (
   expect(saved.map(x=>x.path).sort()).toEqual(["ob-issues/1400/misc_communications/001.yaml","ob-issues/1400/misc_communications/002.yaml"]);
   expect(await verifyChain(db())).toBeNull();
 });
+
+it.each([
+  {type:"sanc",contents:{en:{type:"doc",content:[]}},items:[{country:"Example",sanc:"7-001"}],notes:"Preserved note"},
+  {type:"telephone_service_2",contents:[{country_name:{en:"Example"},communications:[{contents:"Readable authored telephone prose"}]}]},
+])("D1 freezes typed $type authoring without rewriting its prose",async message => {
+  const authored = {...message,ob_issue_no:"1400"};
+  const saved = await createGeneralMessage(db(),admin,{ob_issue_no:1400,type:message.type,value:authored});
+  await approveGeneralMessage(db(),admin,saved.id,1);
+  const artifact = await generalMessageArtifact(db(),saved.id,1);
+  expect(artifact.path).toBe(`ob-issues/1400/${message.type}/001.yaml`);
+  expect(parse(artifact.content)).toEqual(authored);
+  expect((await readGeneralMessage(db(),admin,saved.id)).value).toEqual(authored);
+});
