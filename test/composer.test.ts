@@ -47,9 +47,9 @@ async function hook(event: string, p: unknown) {
   );
   return { status: res.status, json: (await res.json().catch(() => null)) as any };
 }
-const closedEvent = (repo: string, branch: string, number: number, merged: boolean, base = "main") => ({
+const closedEvent = (repo: string, branch: string, number: number, merged: boolean, base = "main", headSha?: string) => ({
   action: "closed", repository: { full_name: repo },
-  pull_request: { number, merged, merge_commit_sha: merged ? "m".repeat(40) : null, head: { ref: branch, repo: { full_name: repo } }, base: { ref: base } },
+  pull_request: { number, merged, merge_commit_sha: merged ? "m".repeat(40) : null, head: { ref: branch, ...(headSha ? { sha: headSha } : {}), repo: { full_name: repo } }, base: { ref: base } },
 });
 
 /** draft -> ... -> pr_open (approval opens the PR through the fake). */
@@ -75,7 +75,7 @@ async function toPrOpen(slug = "e118-iin", edition = 1351) {
 /** ... -> merged through the real webhook. */
 async function toMerged(slug = "e118-iin", edition = 1351) {
   const r = await toPrOpen(slug, edition);
-  const h = await hook("pull_request", closedEvent(r.pr.repo, r.pr.branch, r.pr.pr_number, true));
+  const h = await hook("pull_request", closedEvent(r.pr.repo, r.pr.branch, r.pr.pr_number, true, "main", r.pr.commit_sha));
   expect(h.status).toBe(200);
   expect(await stateOf(r.id)).toBe("merged");
   return r;
@@ -468,6 +468,23 @@ describe("revert path: merged -> (revert PR merged) -> withdrawn", () => {
 });
 
 describe("reconciler: repairs a lost webhook, idempotently", () => {
+  it("will not repair a merged PR when the stored approved head differs from GitHub", async () => {
+    const r = await toPrOpen();
+    fake.mergePr(r.pr.pr_number);
+    await db().prepare("UPDATE submission_prs SET commit_sha=?2 WHERE submission_id=?1").bind(r.id, "f".repeat(40)).run();
+
+    const before = await counts();
+    const rejected = await reconcile(db(), fake);
+    expect(rejected.errors).toEqual([{ submission_id: r.id, error: "Pull request does not match the recorded approved head" }]);
+    expect(rejected.repaired).toEqual([]);
+    expect(await stateOf(r.id)).toBe("pr_open");
+    expect(await counts()).toEqual(before);
+
+    await db().prepare("UPDATE submission_prs SET commit_sha=?2 WHERE submission_id=?1").bind(r.id, r.pr.commit_sha).run();
+    expect((await reconcile(db(), fake)).repaired).toEqual([{ submission_id: r.id, kind: "pr.merged", from: "pr_open", to: "merged" }]);
+    expect(await stateOf(r.id)).toBe("merged");
+  });
+
   it("a PR merged upstream moves pr_open -> merged once; a second run and the late webhook change nothing", async () => {
     const r = await toPrOpen();
     fake.mergePr(r.pr.pr_number);
@@ -483,7 +500,7 @@ describe("reconciler: repairs a lost webhook, idempotently", () => {
     expect([rep2.repaired, rep2.errors, rep2.checked]).toEqual([[], [], 0]);
     expect(await counts()).toEqual(after1);
     // the lost webhook finally arrives: ignored, no second transition
-    const late = await hook("pull_request", closedEvent(r.pr.repo, r.pr.branch, r.pr.pr_number, true));
+    const late = await hook("pull_request", closedEvent(r.pr.repo, r.pr.branch, r.pr.pr_number, true, "main", r.pr.commit_sha));
     expect(late.status).toBe(202);
     expect(await counts()).toEqual(after1);
     expect(await verifyChain(db())).toBeNull();

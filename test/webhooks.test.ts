@@ -130,6 +130,33 @@ describe("only PRs we created", () => {
   });
 });
 
+describe("approved patch head integrity", () => {
+  it("ignores missing or changed close-event heads without changing state or audit, then accepts the recorded head", async () => {
+    const { id, pr } = await toPrOpen();
+    const before = {
+      state: await stateOf(id),
+      review: await one("SELECT count(*) n FROM review_state WHERE submission_id=?1", id),
+      audit: await one("SELECT count(*) n FROM audit_log WHERE submission_id=?1", id),
+      deliveries: await one("SELECT count(*) n FROM webhook_deliveries"),
+    };
+    const changed = prEvent(pr, { merged: true });
+    changed.pull_request.head.sha = "f".repeat(40);
+    expect((await hook("pull_request", changed)).status).toBe(202);
+    const missing = prEvent(pr, { merged: true });
+    delete (missing.pull_request.head as any).sha;
+    expect((await hook("pull_request", missing)).status).toBe(202);
+    expect({
+      state: await stateOf(id),
+      review: await one("SELECT count(*) n FROM review_state WHERE submission_id=?1", id),
+      audit: await one("SELECT count(*) n FROM audit_log WHERE submission_id=?1", id),
+      deliveries: await one("SELECT count(*) n FROM webhook_deliveries"),
+    }).toEqual(before);
+
+    expect((await hook("pull_request", prEvent(pr, { merged: true }))).json).toMatchObject({ status: "applied", to: "merged" });
+    expect(await stateOf(id)).toBe("merged");
+  });
+});
+
 describe("transitions", () => {
   it("merged: pr_open -> merged by github, merge_sha kept, proposer notified, system comment, audited", async () => {
     const { id, pr } = await toPrOpen();
