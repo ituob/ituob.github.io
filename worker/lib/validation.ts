@@ -8,6 +8,7 @@
 // and unknown keys are checked against the ontology, not a hand-kept table.
 // CI stays authoritative; this is the fast door check. The chain is PLUGGABLE.
 
+import { PUBLICATION_BY_ID, REGISTERS } from "../../src/lib/catalogs.ts";
 import { AMENDMENT_CLASSES, validateClass } from "../../src/lib/schema.validators.generated.ts";
 
 export interface FieldError {
@@ -21,6 +22,7 @@ export type ActionType = (typeof ACTION_TYPES)[number];
 
 export interface ValidationContext {
   register_id: string;
+  slug?: string;
   action_type: ActionType;
   payload: unknown;
 }
@@ -35,9 +37,19 @@ export interface RegisterRules {
 }
 export const REGISTER_RULES: Record<string, RegisterRules> = {
   E118_IIN: { keyField: "country_or_area", requiredEntryFields: ["company_name"] },
+  "R_SP_LN.VIII": { keyField: "country", requiredEntryFields: [] },
 };
 const DEFAULT_RULES: RegisterRules = { keyField: "country_or_area", requiredEntryFields: [] };
 export const rulesFor = (register_id: string): RegisterRules => REGISTER_RULES[register_id] ?? DEFAULT_RULES;
+
+/** IDs and filesystem destinations are catalog values, never a sanitized client path. */
+export function submissionTargetErrors(register_id: string, slug?: string): FieldError[] {
+  const target = PUBLICATION_BY_ID.get(register_id) ?? REGISTERS.find((r) => r.registerId === register_id);
+  if (!target) return [{ path: "register_id", code: "unknown", message: "register_id must name a catalog publication or register" }];
+  return slug !== undefined && target.slug !== slug
+    ? [{ path: "slug", code: "mismatch", message: `slug must be ${target.slug} for ${register_id}` }]
+    : [];
+}
 
 const isObj = (v: unknown): v is Record<string, unknown> => !!v && typeof v === "object" && !Array.isArray(v);
 const blank = (v: unknown) =>
@@ -72,8 +84,8 @@ export function registerKeysOf(register_id: string, payload: unknown): string[] 
 // presence rules contradicted the ontology and are gone.
 const needsEntries: ReadonlySet<string> = new Set(["ADD", "REP", "MOD", "SUP", "DEL", "LIR"]);
 
-export const stage1: PayloadValidator = ({ register_id, action_type, payload }) => {
-  const errs: FieldError[] = [];
+export const stage1: PayloadValidator = ({ register_id, slug, action_type, payload }) => {
+  const errs: FieldError[] = submissionTargetErrors(register_id, slug);
   const req = (path: string, message: string) => errs.push({ path, code: "required", message });
   if (!isObj(payload)) return [{ path: "", code: "type", message: "payload must be an object" }];
   if (payload.type !== undefined && payload.type !== action_type)
@@ -83,10 +95,22 @@ export const stage1: PayloadValidator = ({ register_id, action_type, payload }) 
     return errs;
   }
   const d = payload.data;
-  if (typeof d._class !== "string" || !/^[A-Za-z0-9]+Amendment$/.test(d._class))
+  if (typeof d._class !== "string" || !AMENDMENT_CLASSES.includes(d._class))
     errs.push({ path: "data._class", code: blank(d._class) ? "required" : "enum", message: "data._class must name the register's *Amendment class" });
   if (d.notes !== undefined && !(Array.isArray(d.notes) && d.notes.every((n) => typeof n === "string")))
     errs.push({ path: "data.notes", code: "type", message: "data.notes must be a list of strings" });
+
+  // The ontology's TextAmendment has text/actions, not entry rows. Only
+  // explicitly textual publications may use it; all fields still pass schemaStage.
+  if (d._class === "TextAmendment") {
+    if (PUBLICATION_BY_ID.get(register_id)?.classification !== "textual")
+      errs.push({ path: "data._class", code: "mismatch", message: "TextAmendment requires a catalog textual publication" });
+    if (blank(d.dataset_code)) req("data.dataset_code", "dataset_code is required for a text amendment");
+    else if (d.dataset_code !== register_id)
+      errs.push({ path: "data.dataset_code", code: "mismatch", message: "dataset_code must equal register_id" });
+    if (blank(d.text)) req("data.text", "text is required for a text amendment");
+    return errs;
+  }
 
   if (needsEntries.has(action_type)) {
     if (!Array.isArray(d.entries) || d.entries.length === 0) {
