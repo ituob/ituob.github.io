@@ -173,10 +173,12 @@ export const loadIssue = memoize((id: number): LoadedIssue | null => {
       textual,
     },
     amendments: { structured, textual: textualAmd, placeholder },
-    incomplete: generalIsEmpty(generalDir, textual, runningAnnexes, approvedRecommendations) &&
+    // Preserve an explicit corpus disclaimer even when some content is present.
+    incomplete: meta.incomplete === true ||
+                 (generalIsEmpty(generalDir, textual, runningAnnexes, approvedRecommendations) &&
                  Object.keys(structured).length === 0 &&
                  Object.keys(textualAmd).length === 0 &&
-                 Object.keys(placeholder).length === 0,
+                 Object.keys(placeholder).length === 0),
   };
 });
 

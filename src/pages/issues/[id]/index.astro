@@ -15,6 +15,7 @@ import {
   MESSAGE_TYPE_ORDER,
   GENERAL_TYPE_LABELS,
   PUBLICATION_BY_SLUG,
+  PUBLICATION_BY_ID,
   type GeneralMessageType,
   type Language,
 } from "~/lib/catalogs";
@@ -164,7 +165,7 @@ const authoritativeHref =
   extraStylesheets={["/assets/css/issue.css"]}
   headScripts={["https://kit.fontawesome.com/3ebc4b9810.js"]}
 >
-  {issue.incomplete && <IncompleteBanner />}
+  {issue.incomplete && <IncompleteBanner incomplete />}
 
   <header>
     <h1 class="bulletin-title">
@@ -348,6 +349,26 @@ const authoritativeHref =
           </div>
         </article>
       ))}
+    </section>
+  )}
+
+  {Object.keys(issue.annexes).length > 0 && (
+    <section class="annexes" id="annexes">
+      <h3>Annexes to this issue</h3>
+      {Object.keys(issue.annexes).map((pubId) => {
+        const known = PUBLICATION_BY_ID.get(pubId);
+        const meta = loadListMetadata(pubId);
+        const title = meta?.title?.en ?? known?.label ?? pubId;
+        return (
+          <article class="annex">
+            <header>
+              <h3 class="title">
+                {meta?.url ? <a href={meta.url}>{title}</a> : title}
+              </h3>
+            </header>
+          </article>
+        );
+      })}
     </section>
   )}
 

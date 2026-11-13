@@ -20,6 +20,7 @@ function inline(s: string): string {
     .replace(/\*([^*]+)\*/g, "<strong>$1</strong>")
     .replace(/_([^_]+)_/g, "<em>$1</em>")
     .replace(/\^\^([^^]+)\^\^/g, "<sup>$1</sup>")
+    .replace(/\^([^^]+)\^/g, "<sup>$1</sup>")
     .replace(/`([^`]+)`/g, "<code>$1</code>");
 }
 

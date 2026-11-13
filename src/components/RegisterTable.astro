@@ -23,7 +23,11 @@ for (const entry of state.active_entries) {
 }
 const cols = [...colSet].sort();
 
-
+// Printed T.35 question; the normalized key is an internal abbreviation.
+const columnLabel = (key: string): string =>
+  key === "manufactures_htv"
+    ? "National manufacturers of H-, T- or V-Series compliant equipment?"
+    : key.replace(/_/g, " ");
 ---
 {state.active_entries.length > 0 ? (
   <div class="overflow-x-auto">
@@ -31,7 +35,7 @@ const cols = [...colSet].sort();
       <thead>
         <tr>
           {cols.map((c) => (
-            <th>{c.replace(/_/g, " ")}</th>
+            <th>{columnLabel(c)}</th>
           ))}
         </tr>
       </thead>
