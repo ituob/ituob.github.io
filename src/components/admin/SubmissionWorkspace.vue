@@ -5,7 +5,7 @@ import { blankState, toFormState, type FormNode } from '../../lib/form/model';
 import { actionPayload, actionTypes, amendmentClasses, api, ApiError, payloadErrors, revisionErrors } from '../../lib/admin-client';
 import type { SchemaIssue } from '../../lib/schema.validators.generated';
 import SchemaNode from './SchemaNode.vue';
-const props = withDefaults(defineProps<{ admin?: boolean; create?: boolean; registers?: { register_id: string; slug: string; label: string }[] }>(), { registers: () => [] });
+const props = withDefaults(defineProps<{ admin?: boolean; create?: boolean; translation?: boolean; registers?: { register_id: string; slug: string; label: string }[] }>(), { registers: () => [] });
 interface Submission { id: string; register_id: string; slug: string; action_type: string; state: string; current_rev: number }
 interface Revision { rev: number; payload_yaml: string; validation: string; created_at: string }
 interface Detail { ok: true; submission: Submission; revisions: Revision[]; history: { from_state: string; to_state: string; reason: string | null; at: string }[]; pr: { pr_number: number | null; pr_state: string; last_error: string | null } | null }
@@ -103,7 +103,7 @@ onMounted(() => perform(async () => { await list(); const id = new URLSearchPara
         <label>Amendment class <select v-model="className" @change="node = blankState(className); inputErrors = {}"><option v-for="name in amendmentClasses" :key="name">{{ name }}</option></select></label>
         <label v-if="creating">Corrects published submission (optional) <input v-model="correctsId" /></label>
       </fieldset>
-      <SchemaNode :node="node" path="data" :readonly="busy || !editable" @change="node = $event" @invalid="invalid" />
+      <SchemaNode :node="node" path="data" :readonly="busy || !editable" :translation="translation" @change="node = $event" @invalid="invalid" />
       <fieldset :disabled="busy"><legend>Workflow</legend>
         <template v-if="editable && !admin">
           <button v-if="creating || detail?.submission.state === 'draft'" @click="save()">Save draft</button>

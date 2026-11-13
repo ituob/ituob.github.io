@@ -4,4 +4,4 @@ import SubmissionWorkspace from '../../components/admin/SubmissionWorkspace.vue'
 import { listSnapshotSlugs, loadManifest } from '../../lib/snapshots';
 const registers = listSnapshotSlugs().flatMap(slug => { const m = loadManifest(slug); return m ? [{ slug, register_id: m.register_id, label: m.title.en ?? m.register_id }] : []; });
 ---
-<Base title="Action editor"><h1>Schema action editor</h1><p>Create a proposal using your signed-in member identity. ITU review is available from the administration queue.</p><SubmissionWorkspace create registers={registers} client:load /><noscript>Enable JavaScript to edit action proposals.</noscript></Base>
+<Base title="Action editor"><h1>Schema action editor</h1><p>Create a proposal using your signed-in member identity. ITU review is available from the administration queue.</p><SubmissionWorkspace create translation registers={registers} client:load /><noscript>Enable JavaScript to edit action proposals.</noscript></Base>

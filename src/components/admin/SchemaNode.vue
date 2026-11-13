@@ -1,12 +1,18 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
+import TranslationAssist from './TranslationAssist.vue';
 import { description } from '../../lib/form/description';
 import { initialValue } from '../../lib/admin-client';
 import { appendItem, clearField, removeItem, setField, type FormNode } from '../../lib/form/model';
 import { YamlTimestamp } from '../../lib/form/yaml-io';
-const props = defineProps<{ node: FormNode; path?: string; readonly?: boolean }>();
+const props = defineProps<{ node: FormNode; path?: string; readonly?: boolean; translation?: boolean }>();
 const emit = defineEmits<{ change: [node: FormNode]; invalid: [path: string, message: string] }>();
 const jsonError = ref('');
+const englishSource = computed(() => {
+  if (props.node.kind !== 'object' || props.node.className !== 'MultilingualString') return '';
+  const en = props.node.fields.find(f => f.attr.wire === 'en')?.node;
+  return en?.kind === 'leaf' && typeof en.value === 'string' ? en.value : '';
+});
 function jsonInput(event: Event) {
   try {
     const value = JSON.parse((event.target as HTMLTextAreaElement).value);
@@ -39,17 +45,20 @@ function replaceItem(index: number, child: FormNode) {
       <template v-else>
         <button v-if="field.node === null" type="button" @click="emit('change', setField(node, field.attr.name, initialValue(field.attr)))">Add {{ field.attr.wire }}</button>
         <template v-else>
-          <SchemaNode :node="field.node" :path="`${path || 'data'}.${field.attr.wire}`" :readonly="readonly" @change="replaceField(field.attr.name, $event)" @invalid="(path, message) => emit('invalid', path, message)" />
+          <SchemaNode :node="field.node" :path="`${path || 'data'}.${field.attr.wire}`" :readonly="readonly" :translation="translation" @change="replaceField(field.attr.name, $event)" @invalid="(path, message) => emit('invalid', path, message)" />
           <button type="button" @click="emit('change', clearField(node, field.attr.name)); emit('invalid', `${path || 'data'}.${field.attr.wire}`, '')">Remove {{ field.attr.wire }}</button>
         </template>
       </template>
+      <TranslationAssist v-if="translation && !readonly && englishSource && ['fr','es','ar','ru','zh'].includes(field.attr.wire)"
+        :source="englishSource" from="en" :to="field.attr.wire"
+        @apply="emit('change', setField(node, field.attr.name, { kind: 'leaf', type: 'String', value: $event }))" />
     </div>
     <p v-if="Object.keys(node.extras).length">Additional stored fields are preserved: {{ Object.keys(node.extras).join(', ') }}.</p>
   </fieldset>
   <fieldset v-else-if="node.kind === 'list'" :disabled="readonly">
     <legend>{{ path }} ({{ node.items.length }} items)</legend>
     <div v-for="(item, index) in node.items" :key="index">
-      <SchemaNode :node="item" :path="`${path}[${index}]`" :readonly="readonly" @change="replaceItem(index, $event)" @invalid="(path, message) => emit('invalid', path, message)" />
+      <SchemaNode :node="item" :path="`${path}[${index}]`" :readonly="readonly" :translation="translation" @change="replaceItem(index, $event)" @invalid="(path, message) => emit('invalid', path, message)" />
       <button type="button" @click="emit('change', removeItem(node, index)); emit('invalid', path || 'data', '')">Remove item {{ index + 1 }}</button>
     </div>
     <button type="button" @click="emit('change', appendItem(node, initialValue({ name: 'item', wire: 'item', type: node.itemType, kind: node.itemKind, collection: false, required: false })))">Add item</button>

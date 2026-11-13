@@ -5,7 +5,7 @@ import { Forbidden } from "../worker/lib/authz.ts";
 import { InvalidError } from "../worker/lib/membership.ts";
 import { getAccessIdentity } from "../worker/lib/session.ts";
 import { translationRoutes } from "../worker/translation-routes.ts";
-import { activateMember, provisionItu, seedFixtures } from "./helpers.ts";
+import { activateMember, api, provisionItu, seedFixtures } from "./helpers.ts";
 
 type Mode = "reply" | "silent" | "close" | "error" | "empty" | "binary" | "refuse";
 class FakeSocket implements SocketLike {
@@ -85,5 +85,26 @@ describe("POST /api/admin/translate handler", () => {
   it("surfaces upstream failure as an error (UpstreamError, mapped to 502) with no text", async () => {
     seam("close");
     await expect(call(EDITOR, ok)).rejects.toMatchObject({ name: "Error", message: expect.stringMatching(/unavailable/) });
+  });
+});
+
+
+describe("translation through the Worker router", () => {
+  it("enforces Access, staff role and same origin before connecting", async () => {
+    seam("reply");
+    expect((await api("POST", "/api/admin/translate", { body: ok })).status).toBe(403);
+    expect((await api("POST", "/api/admin/translate", { access: "member-A@example.test", body: ok })).status).toBe(403);
+    expect((await api("POST", "/api/admin/translate", { access: EDITOR, body: ok, headers: { "Sec-Fetch-Site": "cross-site" } })).status).toBe(403);
+    expect(urls).toEqual([]);
+    const res = await api("POST", "/api/admin/translate", { access: EDITOR, body: ok });
+    expect(res.status).toBe(200);
+    expect(res.json.text).toBe("fr:Hello");
+    expect(urls).toEqual(["wss://nmt.itu.int/marian_translate_enfr"]);
+  });
+  it("returns upstream failures as observable errors", async () => {
+    seam("refuse");
+    const res = await api("POST", "/api/admin/translate", { access: EDITOR, body: ok });
+    expect(res.status).toBe(502);
+    expect(res.json.error).toMatch(/translation service unavailable/);
   });
 });

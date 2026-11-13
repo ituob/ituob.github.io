@@ -18,6 +18,7 @@ import { StubMisconfigured, getAccessIdentity, getSession, takePendingSessionCoo
 import { type Route, body, json, str } from "./lib/http.ts";
 import { UpstreamError, ValidationFailed } from "./lib/submissions.ts";
 import { discussionRoutes } from "./discussion-routes.ts";
+import { translationRoutes } from "./translation-routes.ts";
 import { composerRoutes } from "./composer-routes.ts";
 import { ituSession, submissionRoutes } from "./submission-routes.ts";
 import { webhookRoutes } from "./webhook-routes.ts";
@@ -27,6 +28,7 @@ const workflowAndAccountRoutes: Route[] = [
   ...submissionRoutes,
   ...composerRoutes,
   ...discussionRoutes,
+  ...translationRoutes,
   ...webhookRoutes,
   {
     method: "GET",

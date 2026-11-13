@@ -238,7 +238,7 @@ describe("illegal transitions are rejected and write nothing", () => {
   });
 
   it("the scheduled handler runs the reconciler", () => {
-    expect(sources["../worker/index.ts"]).toMatch(/reconcile\(env\.DB, getPublisher\(\)\)/);
+    expect(sources["../worker/index.ts"]).toMatch(/reconcile\(env\.DB, getPublisher\(env\)\)/);
   });
 });
 
@@ -428,7 +428,13 @@ describe("approval -> PR: idempotency and failure", () => {
     await expect(db().prepare("INSERT INTO submission_prs (submission_id,rev,repo,branch,path,content_yaml,content_sha,idempotency_key) VALUES ('x',1,'r','main','p','c','s','k')").run()).rejects.toThrow();
     // The webhook mentions main once, to COMPARE a PR's base ref (webhook or reconciler-read); the FAKE publisher
     // names it once as the base it REPORTS. Nothing writes to it, and nothing else spells it.
-    const mainRefs = Object.entries(sources).filter(([, t]) => /heads\/main|"main"/.test(t)).map(([f]) => f);
+    // The real adapter explicitly refuses protected staging targets. Remove
+    // only that denial literal before checking for other protected-ref mentions.
+    const adapter = "../worker/lib/github-publisher.ts";
+    const denial = '["main", "master"].includes(staging)';
+    expect(sources[adapter]).toContain(denial);
+    const checked = { ...sources, [adapter]: sources[adapter].replace(denial, 'protectedStagingRef') };
+    const mainRefs = Object.entries(checked).filter(([, t]) => /heads\/main|"main"/.test(t)).map(([f]) => f);
     expect(mainRefs).toEqual(["../worker/lib/github-webhook.ts", "../worker/lib/publisher.ts"]);
     for (const f of mainRefs) expect(sources[f].match(/heads\/main|"main"/g), f).toHaveLength(1);
     expect(sources["../worker/lib/publisher.ts"]).toMatch(/const FAKE_BASE = "main"/);
