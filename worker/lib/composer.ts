@@ -181,24 +181,20 @@ export async function removeItem(db: D1Database, session: Session | null, no: nu
 
 /**
  * Publish an edition: a pin bump behind the publisher, then scheduled -> published for every item.
- * Resumable: the edition is `staged` (with freeze_sha) once the bump succeeded, so a failure midway
- * is repaired by calling this again; items already published are skipped and the bump is idempotent.
+ * Pending pin PRs/deployments leave the edition composing and every item scheduled.
+ * Resumable: only a confirmed bump stages the edition (with freeze_sha); a failure midway
+ * is repaired by calling this again. Already published items are skipped; the bump is idempotent.
  */
 export async function publishEdition(db: D1Database, session: Session | null, no: number, publisher: PatchPublisher) {
   const s = admin(session);
   let ed = await getEdition(db, no);
   if (ed.status === "published") throw new ConflictError(`edition ${no} is already published`);
   if (ed.status === "open") throw new ConflictError(`edition ${no} has nothing placed`);
-  const items = (
-    await db
-      .prepare(
-        `SELECT i.submission_id, s.state, p.merge_sha FROM edition_items i JOIN submissions s ON s.id=i.submission_id
-           LEFT JOIN submission_prs p ON p.submission_id=s.id AND p.rev=(SELECT max(rev) FROM submission_prs WHERE submission_id=s.id)
-          WHERE i.ob_issue_no=?1 ORDER BY i.position`,
-      )
-      .bind(no)
-      .all<{ submission_id: string; state: string; merge_sha: string | null }>()
-  ).results;
+  const itemQuery = `SELECT i.submission_id, i.position, s.state, p.merge_sha FROM edition_items i JOIN submissions s ON s.id=i.submission_id
+    LEFT JOIN submission_prs p ON p.submission_id=s.id AND p.rev=(SELECT max(rev) FROM submission_prs WHERE submission_id=s.id)
+    WHERE i.ob_issue_no=?1 ORDER BY i.position`;
+  const items = (await db.prepare(itemQuery).bind(no)
+    .all<{ submission_id: string; position: number; state: string; merge_sha: string | null }>()).results;
   if (items.length === 0) throw new ConflictError(`edition ${no} has nothing placed`);
   const bad = items.find((i) => i.state !== "scheduled" && i.state !== "published");
   if (bad) throw new ConflictError(`item ${bad.submission_id} is ${bad.state}, not scheduled`);
@@ -213,8 +209,20 @@ export async function publishEdition(db: D1Database, session: Session | null, no
     } catch (e) {
       throw new UpstreamError(`could not bump the data pin: ${String((e as Error).message)}`);
     }
+    if (bump.pending) return { edition: ed, published: [], pending: bump.pending };
     const t = now();
     await run(db, [
+      // Check the selected snapshot in the SAME transaction as staging. Placement may have
+      // changed during the upstream request; publishing that stale pin must roll back.
+      db.prepare(`INSERT INTO edition_items (ob_issue_no, submission_id, position)
+        SELECT ?1, '-', NULL WHERE (SELECT count(*) FROM edition_items WHERE ob_issue_no=?1) != ?3
+          OR EXISTS (SELECT 1 FROM json_each(?2) expected WHERE NOT EXISTS (
+            SELECT 1 FROM (${itemQuery}) current
+              WHERE current.submission_id=json_extract(expected.value, '$.submission_id')
+                AND current.position=json_extract(expected.value, '$.position')
+                AND current.state=json_extract(expected.value, '$.state')
+                AND current.merge_sha IS json_extract(expected.value, '$.merge_sha')
+          ))`).bind(no, JSON.stringify(items), items.length),
       db.prepare(`UPDATE editions SET status='staged', freeze_sha=?2, staging_commit=?3 WHERE ob_issue_no=?1 AND status='composing'`).bind(no, bump.freezeSha, bump.siteCommit),
       requireEditionStatusAfter(db, no),
       ...(await auditStatements(db, [auditEdition(t, s.userId, no, "edition.staged", { freeze_sha: bump.freezeSha, staging_commit: bump.siteCommit })])),

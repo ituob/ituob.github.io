@@ -1,5 +1,5 @@
 import { exports } from "cloudflare:workers";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { verifyChain } from "../worker/lib/audit.ts";
 import { FakePatchPublisher, setPublisher } from "../worker/lib/publisher.ts";
 import { reconcile } from "../worker/lib/reconciler.ts";
@@ -179,6 +179,88 @@ describe("composer: merged -> scheduled -> published", () => {
     await comp("POST", "/editions", ADMINU, { ob_issue_no: 1352 });
     expect((await comp("POST", "/editions/1352/items", ADMINU, { submission_id: c.id })).status).toBe(409);
     expect(await stateOf(c.id)).toBe("merged");
+  });
+
+  it("pending pin PRs and staging failures preserve placements until a confirmed deployment publishes once", async () => {
+    const a = await placed("e118-iin");
+    const b = await toMerged("e164-cc");
+    await comp("POST", "/editions/1351/items", ADMINU, { submission_id: b.id });
+    // Capture actual D1 state, including attribution, notifications and audit before any pin request.
+    const snapshot = async () => ({
+      edition: await one("SELECT * FROM editions WHERE ob_issue_no=1351"),
+      items: await rows("SELECT * FROM edition_items ORDER BY position"),
+      submissions: await rows("SELECT * FROM submissions ORDER BY id"),
+      history: await rows("SELECT * FROM review_state ORDER BY id"),
+      audit: await rows("SELECT * FROM audit_log ORDER BY id"),
+      notifications: await rows("SELECT * FROM notifications ORDER BY id"),
+    });
+    const before = await snapshot();
+    const pending = { prNumber: 42, url: "https://github.invalid/site/pull/42", reason: "pin PR is open" };
+    const bump = vi.spyOn(fake, "bumpDataPin");
+    for (const reason of ["pin PR is open", "staging deployment is pending", "staging deployment failed", "pin PR was closed without merge"]) {
+      pending.reason = reason;
+      bump.mockResolvedValueOnce({ freezeSha: "unconfirmed-data", siteCommit: "unconfirmed-site", pending });
+      const res = await comp("POST", "/editions/1351/publish");
+      expect(res.status, reason).toBe(202);
+      expect(res.json.pending).toEqual(pending);
+      expect(res.json.published).toEqual([]);
+      expect([res.json.edition.status, res.json.edition.freeze_sha, res.json.edition.staging_commit, res.json.edition.published_at])
+        .toEqual(["composing", null, null, null]);
+      expect(await snapshot()).toEqual(before);
+    }
+    bump.mockRejectedValueOnce(new Error("GitHub read failed"));
+    expect((await comp("POST", "/editions/1351/publish")).status).toBe(502);
+    expect(await snapshot()).toEqual(before);
+    expect(bump.mock.calls).toHaveLength(5);
+    for (const [request] of bump.mock.calls) {
+      expect(request).toEqual({ edition: 1351, idempotencyKey: "edition-1351-pin", items: [
+        { submissionId: a.id, mergeSha: "m".repeat(40) },
+        { submissionId: b.id, mergeSha: "m".repeat(40) },
+      ] });
+    }
+    // Ready responses retain the existing ready-provider contract.
+    bump.mockRestore();
+    const ready = await comp("POST", "/editions/1351/publish");
+    expect([ready.status, ready.json.published, ready.json.pending]).toEqual([200, [a.id, b.id], undefined]);
+    expect([ready.json.edition.status, ready.json.edition.freeze_sha, ready.json.edition.staging_commit])
+      .toEqual(["published", "f1".padEnd(40, "0"), "s1".padEnd(40, "0")]);
+    expect(typeof ready.json.edition.published_at).toBe("string");
+    expect(await rows("SELECT * FROM edition_items ORDER BY position")).toEqual(before.items);
+    for (const id of [a.id, b.id]) {
+      expect(await stateOf(id)).toBe("published");
+      expect(await rows("SELECT actor_kind, actor_id FROM review_state WHERE submission_id=?1 AND to_state='published'", id))
+        .toEqual([{ actor_kind: "user", actor_id: "itu-admin" }]);
+      expect(await n("SELECT count(*) n FROM notifications WHERE submission_id=?1 AND kind='submission.published'", id)).toBeGreaterThan(0);
+    }
+    expect(await n("SELECT count(*) n FROM audit_log WHERE action='edition.staged'")).toBe(1);
+    expect(await n("SELECT count(*) n FROM audit_log WHERE action='edition.published'")).toBe(1);
+    expect(await n("SELECT count(*) n FROM audit_log WHERE action='composer.published'")).toBe(2);
+    const after = await snapshot();
+    expect((await comp("POST", "/editions/1351/publish")).status).toBe(409);
+    expect(await snapshot()).toEqual(after);
+    expect(fake.pinRequests).toHaveLength(1);
+    expect(await verifyChain(db())).toBeNull();
+  });
+
+  it.each(["add", "replace"])("rejects a ready pin when a concurrent %s changes placement", async (change) => {
+    const a = await placed("e118-iin");
+    const b = await toMerged("e164-cc");
+    const bump = vi.spyOn(fake, "bumpDataPin").mockImplementationOnce(async () => {
+      if (change === "replace") expect((await comp("POST", `/editions/1351/items/${a.id}/remove`)).status).toBe(200);
+      expect((await comp("POST", "/editions/1351/items", ADMINU, { submission_id: b.id })).status).toBe(200);
+      return { freezeSha: "stale-freeze", siteCommit: "stale-site" };
+    });
+    const res = await comp("POST", "/editions/1351/publish");
+    expect(res.status).toBe(409);
+    bump.mockRestore();
+    expect(await one("SELECT status, freeze_sha, staging_commit, published_at FROM editions"))
+      .toEqual({ status: "composing", freeze_sha: null, staging_commit: null, published_at: null });
+    expect(await rows("SELECT submission_id, position FROM edition_items ORDER BY position"))
+      .toEqual(change === "add" ? [{ submission_id: a.id, position: 1 }, { submission_id: b.id, position: 2 }] : [{ submission_id: b.id, position: 1 }]);
+    expect([await stateOf(a.id), await stateOf(b.id)]).toEqual([change === "add" ? "scheduled" : "merged", "scheduled"]);
+    expect(await n("SELECT count(*) n FROM audit_log WHERE action IN ('edition.staged','composer.published','edition.published')")).toBe(0);
+    expect(await n("SELECT count(*) n FROM notifications WHERE kind='submission.published'")).toBe(0);
+    expect(await verifyChain(db())).toBeNull();
   });
 
   it("a failed pin bump publishes nothing and a retry publishes once", async () => {
