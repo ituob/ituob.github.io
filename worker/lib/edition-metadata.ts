@@ -3,7 +3,7 @@ import type { IssueMetadataWire } from "../../src/lib/schema.generated.ts";
 import { validateClass } from "../../src/lib/schema.validators.generated.ts";
 import { auditStatements } from "./audit.ts";
 import { requireRole } from "./authz.ts";
-import { editionNo } from "./composer.ts";
+import { editionNo } from "./edition-number.ts";
 import { ConflictError, InvalidError, NotFoundError } from "./membership.ts";
 import { run, ValidationFailed } from "./submissions.ts";
 import type { Session } from "./types.ts";

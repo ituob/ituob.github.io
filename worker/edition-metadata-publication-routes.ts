@@ -1,4 +1,4 @@
-import { editionNo } from "./lib/composer.ts";
+import { editionNo } from "./lib/edition-number.ts";
 import { openMetadataReview, readMetadataReview } from "./lib/edition-metadata-publication.ts";
 import { type Route, body, json } from "./lib/http.ts";
 import { InvalidError } from "./lib/membership.ts";

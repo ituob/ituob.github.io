@@ -1,5 +1,5 @@
-import { assertPatchBranch, assertMetadataRequest, METADATA_BRANCH, PublisherNotConfigured } from "./publisher.ts";
-import type { OpenPatchPrRequest, OpenMetadataPrRequest, OpenRevertPrRequest, OpenedPr, PatchPublisher, PinBump, PinBumpRequest, PublisherConfig, PullRequestState } from "./publisher.ts";
+import { assertPatchBranch, assertMetadataRequest, assertMessageRequest, METADATA_BRANCH, MESSAGE_BRANCH, PublisherNotConfigured } from "./publisher.ts";
+import type { OpenPatchPrRequest, OpenMetadataPrRequest, OpenGeneralMessagePrRequest, OpenRevertPrRequest, OpenedPr, PatchPublisher, PinBump, PinBumpRequest, PublisherConfig, PullRequestState } from "./publisher.ts";
 
 type Json = Record<string, any>;
 export type GitHubTransport = (input: string, init: RequestInit) => Promise<Response>;
@@ -157,10 +157,11 @@ export class GitHubAppPatchPublisher implements PatchPublisher {
     if (pr.head?.ref !== branch || pr.head?.sha !== sha || pr.head?.repo?.full_name !== repo.slice(7) || pr.base?.ref !== base || pr.base?.repo?.full_name !== repo.slice(7)) throw new Error("Pull request does not match publisher branch");
     return pr;
   }
-  private async open(req: OpenPatchPrRequest | OpenRevertPrRequest, deleting: boolean, metadata = false): Promise<OpenedPr> {
+  private async open(req: OpenPatchPrRequest | OpenRevertPrRequest, deleting: boolean, kind: "patch" | "metadata" | "message" = "patch"): Promise<OpenedPr> {
     let repo: string;
-    if (metadata) {
-      assertMetadataRequest(req as OpenMetadataPrRequest);
+    if (kind !== "patch") {
+      if (kind === "metadata") assertMetadataRequest(req as OpenMetadataPrRequest);
+      else assertMessageRequest(req as OpenGeneralMessagePrRequest);
       if (!req.idempotencyKey) throw new Error("Missing idempotency key");
       repo = this.dataRepo(req.repo);
     } else repo = this.patch(req);
@@ -182,29 +183,41 @@ export class GitHubAppPatchPublisher implements PatchPublisher {
     return { prNumber: pr.number, url: pr.html_url, commitSha: sha, baseSha: commit.parents[0].sha };
   }
   openPatchPr(req: OpenPatchPrRequest): Promise<OpenedPr> { return this.open(req, false); }
-  openMetadataPr(req: OpenMetadataPrRequest): Promise<OpenedPr> { return this.open(req, false, true); }
-  getMetadataPullRequest(req: { repo: string; prNumber: number }): Promise<PullRequestState> { return this.readPullRequest(req, true); }
+  openMetadataPr(req: OpenMetadataPrRequest): Promise<OpenedPr> { return this.open(req, false, "metadata"); }
+  getMetadataPullRequest(req: { repo: string; prNumber: number }): Promise<PullRequestState> { return this.readPullRequest(req, "metadata"); }
+  openGeneralMessagePr(req: OpenGeneralMessagePrRequest): Promise<OpenedPr> { return this.open(req, false, "message"); }
+  getGeneralMessagePullRequest(req: { repo: string; prNumber: number }): Promise<PullRequestState> { return this.readPullRequest(req, "message"); }
   openRevertPr(req: OpenRevertPrRequest): Promise<OpenedPr> { return this.open(req, true); }
   async getPullRequest(req: { repo: string; prNumber: number }): Promise<PullRequestState> {
-    return this.readPullRequest(req, false);
+    return this.readPullRequest(req, "patch");
   }
-  private async readPullRequest(req: { repo: string; prNumber: number }, metadata: boolean): Promise<PullRequestState> {
+  private async readPullRequest(req: { repo: string; prNumber: number }, kind: "patch" | "metadata" | "message"): Promise<PullRequestState> {
     const repo = this.dataRepo(req.repo);
     const pr = await this.request(`${repo}/pulls/${this.prNumber(req.prNumber)}`);
-    if (metadata) {
+    if (kind === "metadata") {
       if (!METADATA_BRANCH.test(pr.head.ref)) throw new Error("Unowned metadata branch");
+    } else if (kind === "message") {
+      if (!MESSAGE_BRANCH.test(pr.head.ref)) throw new Error("Unowned general message branch");
     } else assertPatchBranch(pr.head.ref);
     this.validatePr(pr, repo, pr.head.ref, (await this.defaultRef(repo)).ref, pr.head.sha);
-    await this.verifyOwnedPatch(repo, pr.head.ref, pr.head.sha, metadata);
+    await this.verifyOwnedPatch(repo, pr.head.ref, pr.head.sha, kind);
     return { state: pr.state, merged: pr.merged === true, mergeSha: pr.merged ? requireSha(pr.merge_commit_sha) : null, baseRef: pr.base.ref };
   }
-  private async verifyOwnedPatch(repo: string, branch: string, sha: string, metadata = false): Promise<void> {
+  private async verifyOwnedPatch(repo: string, branch: string, sha: string, kind: "patch" | "metadata" | "message" = "patch"): Promise<void> {
     const commit = await this.commit(repo, sha);
     const prefix = `ituob-publisher ${branch} `;
     if (!commit.message.startsWith(prefix) || !/^[A-Za-z0-9_-]{43}$/.test(commit.message.slice(prefix.length)) || commit.parents?.length !== 1) throw new Error("Unowned pull request");
     const diff = await this.request(`${repo}/compare/${requireSha(commit.parents[0].sha)}...${requireSha(sha)}`);
-    const issue = metadata ? /^rt-meta-([1-9]\d*)-r[1-9]\d*$/.exec(branch)?.[1] : null;
-    const validPath = metadata ? diff.files?.[0]?.filename === `ob-issues/${issue}/meta.yaml` : actionPath.test(diff.files?.[0]?.filename ?? "");
+    const issue = kind === "metadata" ? /^rt-meta-([1-9]\d*)-r[1-9]\d*$/.exec(branch)?.[1] : null;
+    const filename = diff.files?.[0]?.filename ?? "";
+    let validPath = kind === "metadata" ? filename === `ob-issues/${issue}/meta.yaml` : actionPath.test(filename);
+    if (kind === "message") {
+      const match = /^rt-msg-([1-9]\d*)-([0-9A-Z]{26})-r([1-9]\d*)$/.exec(branch)!;
+      const relative = filename.slice(`ob-issues/${match[1]}/`.length);
+      const type = relative.startsWith("general/") ? relative.slice(8, -5) : relative.split("/")[0];
+      try { assertMessageRequest({ edition: Number(match[1]), messageId: match[2], revision: Number(match[3]), messageType: type, branch, path: filename } as OpenGeneralMessagePrRequest); validPath = true; }
+      catch { validPath = false; }
+    }
     if (diff.files?.length !== 1 || diff.files[0].previous_filename || !validPath) throw new Error("Unowned patch changes");
   }
   private prNumber(value: number): number {

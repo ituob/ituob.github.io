@@ -5,7 +5,7 @@ import { description } from '../../lib/form/description';
 import { initialValue } from '../../lib/admin-client';
 import { appendItem, clearField, removeItem, setField, type FormNode } from '../../lib/form/model';
 import { YamlTimestamp } from '../../lib/form/yaml-io';
-const props = defineProps<{ node: FormNode; path?: string; readonly?: boolean; translation?: boolean }>();
+const props = defineProps<{ node: FormNode; path?: string; readonly?: boolean; translation?: boolean; opaqueReadonly?: boolean }>();
 const emit = defineEmits<{ change: [node: FormNode]; invalid: [path: string, message: string] }>();
 const jsonError = ref('');
 const englishSource = computed(() => {
@@ -45,7 +45,7 @@ function replaceItem(index: number, child: FormNode) {
       <template v-else>
         <button v-if="field.node === null" type="button" @click="emit('change', setField(node, field.attr.name, initialValue(field.attr)))">Add {{ field.attr.wire }}</button>
         <template v-else>
-          <SchemaNode :node="field.node" :path="`${path || 'data'}.${field.attr.wire}`" :readonly="readonly" :translation="translation" @change="replaceField(field.attr.name, $event)" @invalid="(path, message) => emit('invalid', path, message)" />
+          <SchemaNode :node="field.node" :path="`${path || 'data'}.${field.attr.wire}`" :readonly="readonly" :translation="translation" :opaque-readonly="opaqueReadonly" @change="replaceField(field.attr.name, $event)" @invalid="(path, message) => emit('invalid', path, message)" />
           <button type="button" @click="emit('change', clearField(node, field.attr.name)); emit('invalid', `${path || 'data'}.${field.attr.wire}`, '')">Remove {{ field.attr.wire }}</button>
         </template>
       </template>
@@ -58,7 +58,7 @@ function replaceItem(index: number, child: FormNode) {
   <fieldset v-else-if="node.kind === 'list'" :disabled="readonly">
     <legend>{{ path }} ({{ node.items.length }} items)</legend>
     <div v-for="(item, index) in node.items" :key="index">
-      <SchemaNode :node="item" :path="`${path}[${index}]`" :readonly="readonly" :translation="translation" @change="replaceItem(index, $event)" @invalid="(path, message) => emit('invalid', path, message)" />
+      <SchemaNode :node="item" :path="`${path}[${index}]`" :readonly="readonly" :translation="translation" :opaque-readonly="opaqueReadonly" @change="replaceItem(index, $event)" @invalid="(path, message) => emit('invalid', path, message)" />
       <button type="button" @click="emit('change', removeItem(node, index)); emit('invalid', path || 'data', '')">Remove item {{ index + 1 }}</button>
     </div>
     <button type="button" @click="emit('change', appendItem(node, initialValue({ name: 'item', wire: 'item', type: node.itemType, kind: node.itemKind, collection: false, required: false })))">Add item</button>
@@ -71,7 +71,8 @@ function replaceItem(index: number, child: FormNode) {
     <input v-else-if="node.type === 'Boolean'" type="checkbox" :checked="node.value === true" :disabled="readonly" @change="input" />
     <input v-else-if="['Integer', 'Float'].includes(node.type)" type="number" :step="node.type === 'Integer' ? 1 : 'any'" :value="node.value as number" :disabled="readonly" @input="input" />
     <template v-else-if="node.value !== null && typeof node.value === 'object' && !(node.value instanceof YamlTimestamp)">
-      <textarea :value="JSON.stringify(node.value, null, 2)" :disabled="readonly" rows="5" @input="jsonInput" /><small>This field stores an opaque object. Edit this field as JSON.</small><p v-if="jsonError" role="alert">{{ jsonError }}</p>
+      <template v-if="opaqueReadonly"><p>Stored content is preserved. This field is read-only.</p><pre>{{ JSON.stringify(node.value, null, 2) }}</pre></template>
+      <textarea v-else :value="JSON.stringify(node.value, null, 2)" :disabled="readonly" rows="5" @input="jsonInput" /><small>This field stores an opaque object. Edit this field as JSON.</small><p v-if="jsonError" role="alert">{{ jsonError }}</p>
     </template>
     <textarea v-else :value="node.value instanceof YamlTimestamp ? node.value.text : String(node.value ?? '')" :disabled="readonly" rows="3" @input="input" />
   </label>

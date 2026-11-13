@@ -217,7 +217,13 @@ async function bind(db: D1Database, session: Session, register_id: string, actio
   const keys = registerKeysOf(register_id, payload);
   if (action === "LIR" && !isItu(session)) throw new Forbidden();
   // ITU roles are not key-bound; authorizeEntries needs a non-empty list to be callable.
-  if (keys.length === 0 && !isItu(session)) throw new InvalidError("no country/area key found in the entries");
+  if (keys.length === 0 && !isItu(session)) {
+    // An invalid class cannot supply a country field. Return its schema errors
+    // rather than hiding them behind the valid-but-unscoped payload error.
+    const errors = validate({ register_id, action_type: action, payload });
+    if (errors.length) throw new ValidationFailed(errors);
+    throw new InvalidError("no country/area key found in the entries");
+  }
   return authorizeEntries(db, session, keys.length ? keys : ["-"]);
 }
 

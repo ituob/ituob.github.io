@@ -247,3 +247,34 @@ describe("edition metadata PR protocol", () => {
     expect(api.prs).toHaveLength(1);
   });
 });
+
+describe("general message PR protocol", () => {
+  const messageId = "01J9XK2P000000000000000001";
+  const message = { ...req, messageId, messageType: "misc_communications", edition: 1300, revision: 1,
+    branch: `rt-msg-1300-${messageId}-r1`, path: "ob-issues/1300/misc_communications/001.yaml",
+    content: "type: misc_communications\nob_issue_no: '1300'\ncontents: 'An authored announcement.'\n", idempotencyKey: "general-message-1" };
+  it("creates and reads only the owned immutable general message PR", async () => {
+    const api = new GitHub(), client = api.client();
+    const first = await client.openGeneralMessagePr(message);
+    expect(await client.openGeneralMessagePr(message)).toEqual(first);
+    expect(api.entries.get(C).path).toBe(message.path);
+    expect(api.entries.get(C).content).toBe(message.content);
+    expect(api.prs).toHaveLength(1);
+    expect((await client.getGeneralMessagePullRequest({ repo: req.repo, prNumber: first.prNumber })).state).toBe("open");
+    await expect(client.getMetadataPullRequest({ repo: req.repo, prNumber: first.prNumber })).rejects.toThrow(/metadata branch/);
+    expect(api.calls.filter(c => c.method === "PATCH")).toEqual([]);
+  });
+  it("rejects mixed issues, unknown types, full-state paths, protected refs and invalid sequence before network", async () => {
+    const api = new GitHub();
+    for (const bad of [{ branch: "main" }, { edition: 1301 }, { path: "ob-issues/1300/data.yaml" }, { messageType: "unknown" }, { path: "ob-issues/1300/misc_communications/000.yaml" }, { path: "ob-issues/1300/misc_communications/../001.yaml" }])
+      await expect(api.client().openGeneralMessagePr({ ...message, ...bad })).rejects.toThrow();
+    expect(api.calls).toEqual([]);
+  });
+  it("accepts recognized singleton paths and preserves existing canonical content", async () => {
+    const api = new GitHub();
+    await api.client().openGeneralMessagePr({ ...message, messageType: "running_annexes", path: "ob-issues/1300/general/running_annexes.yaml" });
+    const occupied = new GitHub(); occupied.parentFiles = true;
+    await expect(occupied.client().openGeneralMessagePr(message)).rejects.toThrow(/conflicts/);
+    expect(occupied.prs).toEqual([]);
+  });
+});

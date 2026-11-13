@@ -24,11 +24,7 @@ export interface Edition {
 const now = () => new Date().toISOString();
 const admin = (s: Session | null): Session => requireRole(s, "itu-admin");
 
-export function editionNo(v: unknown): number {
-  const n = typeof v === "string" && /^\d+$/.test(v) ? Number(v) : v;
-  if (typeof n !== "number" || !Number.isInteger(n) || n < 1 || n > 99999) throw new InvalidError("ob_issue_no must be a positive integer");
-  return n;
-}
+export { editionNo } from "./edition-number.ts";
 
 export async function getEdition(db: D1Database, no: number): Promise<Edition> {
   const e = await db.prepare(`SELECT * FROM editions WHERE ob_issue_no=?1`).bind(no).first<Edition>();

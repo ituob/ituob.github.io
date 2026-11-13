@@ -1,4 +1,4 @@
-import { editionNo } from "./lib/composer.ts";
+import { editionNo } from "./lib/edition-number.ts";
 import { readMetadata, saveMetadata, scheduleMetadata } from "./lib/edition-metadata.ts";
 import { type Route, body, json } from "./lib/http.ts";
 import { ituSession } from "./submission-routes.ts";

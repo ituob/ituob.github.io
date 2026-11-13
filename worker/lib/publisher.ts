@@ -12,6 +12,14 @@ export interface OpenPatchPrRequest {
   body: string;
   idempotencyKey: string;
 }
+import { classify } from "../../src/lib/form/corpus.ts";
+
+export interface OpenGeneralMessagePrRequest extends OpenPatchPrRequest {
+  edition: number;
+  revision: number;
+  messageId: string;
+  messageType: string;
+}
 export interface OpenMetadataPrRequest extends OpenPatchPrRequest {
   edition: number;
   revision: number;
@@ -57,6 +65,8 @@ export interface PatchPublisher {
   /** Idempotent per `idempotencyKey`: a replay returns the same PR, never a second. */
   openPatchPr(req: OpenPatchPrRequest): Promise<OpenedPr>;
   openMetadataPr(req: OpenMetadataPrRequest): Promise<OpenedPr>;
+  openGeneralMessagePr(req: OpenGeneralMessagePrRequest): Promise<OpenedPr>;
+  getGeneralMessagePullRequest(req: { repo: string; prNumber: number }): Promise<PullRequestState>;
   getMetadataPullRequest(req: { repo: string; prNumber: number }): Promise<PullRequestState>;
   /** Close the PR and delete the Worker-created branch (never merges, never touches other refs). */
   closePatchPr(req: { repo: string; branch: string; prNumber: number }): Promise<void>;
@@ -79,6 +89,16 @@ export const PATCH_BRANCH = /^rt-sub-\d+-\d{3}-[a-z0-9-]+-[0-9A-Z]{8}$/;
 /** The single guard every publisher implementation calls first. */
 export function assertPatchBranch(branch: string): void {
   if (!PATCH_BRANCH.test(branch)) throw new Error(`refusing branch ${JSON.stringify(branch)}: only rt-sub-* patch branches are writable`);
+}
+
+export const MESSAGE_BRANCH = /^rt-msg-[1-9]\d*-[0-9A-Z]{26}-r[1-9]\d*$/;
+export function assertMessageRequest(req: OpenGeneralMessagePrRequest): void {
+  if (!Number.isSafeInteger(req.edition) || req.edition < 1 || !Number.isSafeInteger(req.revision) || req.revision < 1 || !/^[0-9A-Z]{26}$/.test(req.messageId) || req.branch !== `rt-msg-${req.edition}-${req.messageId}-r${req.revision}`) throw new Error("Invalid general message destination");
+  const prefix = `ob-issues/${req.edition}/`;
+  const relative = req.path.startsWith(prefix) ? req.path.slice(prefix.length) : "";
+  const singleton = ["running_annexes", "approved_recommendations"].includes(req.messageType);
+  if (singleton ? relative !== `general/${req.messageType}.yaml` : !new RegExp(`^${req.messageType}/(?!000)[0-9]{3}\\.yaml$`).test(relative)) throw new Error("Invalid general message path");
+  if (classify(relative, { type: req.messageType })?.role !== "general") throw new Error("Unknown general message type");
 }
 
 export const METADATA_BRANCH = /^rt-meta-[1-9]\d*-r[1-9]\d*$/;
@@ -143,6 +163,11 @@ export class FakePatchPublisher implements PatchPublisher {
   getMetadataPullRequest(req: { repo: string; prNumber: number }): Promise<PullRequestState> {
     return this.getPullRequest(req);
   }
+  openGeneralMessagePr(req: OpenGeneralMessagePrRequest): Promise<OpenedPr> {
+    assertMessageRequest(req);
+    return this.open(req);
+  }
+  getGeneralMessagePullRequest(req: { repo: string; prNumber: number }): Promise<PullRequestState> { return this.getPullRequest(req); }
   async closePatchPr(req: { repo: string; branch: string; prNumber: number }): Promise<void> {
     assertPatchBranch(req.branch);
     if (this.failClose) throw new Error("GitHub 502 on close");

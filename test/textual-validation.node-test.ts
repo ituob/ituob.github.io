@@ -159,3 +159,13 @@ test("unknown register identities fail closed, including object property names",
     assert.deepEqual(registerKeysOf(id, payload), []);
   }
 });
+
+test("unknown amendment classes return schema errors before an unscoped-country error or any write", async () => {
+  const { createSubmission, ValidationFailed } = await import("../worker/lib/submissions.ts");
+  const noDatabaseAccess = new Proxy({}, { get() { throw new Error("unexpected database access"); } });
+  const member = { userId: "member-A", roles: ["member-submitter"] as ["member-submitter"], memberStateId: "A" };
+  await assert.rejects(createSubmission(noDatabaseAccess as never, member, {
+    register_id: "E118_IIN", slug: "e118-iin", action_type: "ADD",
+    payload: { type: "DEL", data: { _class: "nope", entries: [{ country_or_area: { en: "Aland" }, issue_id_number: "89 358 01", company_name: "Acme" }] } },
+  }), (error: unknown) => error instanceof ValidationFailed && JSON.stringify(error.errors.map(e => e.path).sort()) === JSON.stringify(["data._class", "type"]));
+});
