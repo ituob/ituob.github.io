@@ -8,7 +8,6 @@ import {
   cumulativeAmendmentNumber,
   loadRegisterCatalog,
   lastAnnexBefore,
-  loadGeneralAdoc,
 } from "~/lib/loaders";
 import { formatSwissDate } from "~/lib/format";
 import {
@@ -22,10 +21,7 @@ import {
 import RunningAnnexes from "~/components/RunningAnnexes.astro";
 import ApprovedRecommendations from "~/components/ApprovedRecommendations.astro";
 import IncompleteBanner from "~/components/IncompleteBanner.astro";
-import TextualMessage from "~/components/TextualMessage.astro";
-import AdocText from "~/components/AdocText.astro";
-import TelephoneService from "~/components/TelephoneService.astro";
-import ServiceRestrictions from "~/components/ServiceRestrictions.astro";
+import GeneralMessage from "~/components/GeneralMessage.astro";
 import StructuredAmendment from "~/components/StructuredAmendment.astro";
 import TextualAmendment from "~/components/TextualAmendment.astro";
 import type { TextualGeneralMessage } from "~/lib/types";
@@ -55,15 +51,6 @@ for (const m of issue.general.textual) {
   arr.push(m);
   textualByType.set(m.type, arr);
 }
-
-// A few messages normalize as references to an AsciiDoc asset
-// (contents: "general/<file>.adoc"); their text is loaded from the
-// corpus at build time.
-const adocTextFor = (m: TextualGeneralMessage): string | null => {
-  const contents = m.contents as unknown;
-  if (typeof contents !== "string" || !contents.endsWith(".adoc")) return null;
-  return loadGeneralAdoc(id, contents);
-};
 
 const amendmentSlugs = [
   ...new Set([
@@ -272,17 +259,7 @@ const authoritativeHref =
               <ApprovedRecommendations message={issue.general.approvedRecommendations} />
             )}
             {textualByType.has(t) && textualByType.get(t)!.map((m) => (
-              <>
-                {t === "service_restrictions" && Array.isArray((m as unknown as { items?: unknown }).items) ? (
-                  <ServiceRestrictions items={(m as unknown as { items: never[] }).items} lang={lang} />
-                ) : t === "telephone_service_2" && Array.isArray((m as unknown as { contents?: unknown }).contents) ? (
-                  <TelephoneService contents={(m as unknown as { contents: never[] }).contents} lang={lang} />
-                ) : adocTextFor(m) ? (
-                  <AdocText text={adocTextFor(m) ?? ""} />
-                ) : (
-                  <TextualMessage message={m} lang={lang} />
-                )}
-              </>
+              <GeneralMessage message={m} issueId={id} lang={lang} />
             ))}
           </div>
         </article>

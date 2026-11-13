@@ -11,7 +11,7 @@ import {
 } from "~/lib/catalogs";
 import RunningAnnexes from "~/components/RunningAnnexes.astro";
 import ApprovedRecommendations from "~/components/ApprovedRecommendations.astro";
-import TextualMessage from "~/components/TextualMessage.astro";
+import GeneralMessage from "~/components/GeneralMessage.astro";
 import StructuredAmendment from "~/components/StructuredAmendment.astro";
 import TextualAmendment from "~/components/TextualAmendment.astro";
 import { availableLanguages } from "~/lib/i18n";
@@ -24,7 +24,7 @@ export function getStaticPaths() {
     if (!issue) continue;
     const langs = new Set<Language>();
     for (const m of issue.general.textual) {
-      for (const l of availableLanguages(m.contents)) langs.add(l);
+      for (const l of availableLanguages(m)) langs.add(l);
     }
     for (const t of Object.values(issue.amendments.textual)) {
       for (const l of availableLanguages(t.contents)) langs.add(l);
@@ -66,7 +66,7 @@ const amendmentSlugs = [
 
 const langsAvail = new Set<Language>(["en"]);
 for (const m of issue.general.textual) {
-  for (const l of availableLanguages(m.contents)) langsAvail.add(l);
+  for (const l of availableLanguages(m)) langsAvail.add(l);
 }
 
 function sectionId(label: string): string {
@@ -111,7 +111,7 @@ function sectionId(label: string): string {
           {textualByType.has(t) && (
             <div class="space-y-8">
               {textualByType.get(t)!.map((m) => (
-                <TextualMessage message={m} lang={lang} />
+                <GeneralMessage message={m} issueId={id} lang={lang} />
               ))}
             </div>
           )}
