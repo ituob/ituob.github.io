@@ -56,6 +56,11 @@ jobs:
     - name: Install dependencies
       run: npm ci
 
+    - name: Verify generated register identities and country fields
+      run: |
+        node scripts/generate-register-rules.mjs data-ob/catalogs/registers.yaml
+        git diff --exit-code -- src/lib/register-rules.generated.ts
+
     - name: Worker tests
       run: npx vitest run
 
@@ -64,6 +69,8 @@ jobs:
 
     - name: Provider and deployment configuration tests
       run: npx vitest run --config vitest.providers.config.ts
+    - name: Edition metadata SQL regression tests
+      run: npx vitest run --config test/edition-metadata.config.ts
 
     - name: Item history and textual action regression tests
       run: |

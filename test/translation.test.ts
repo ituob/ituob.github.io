@@ -56,6 +56,18 @@ describe("translate()", () => {
   });
 });
 
+describe("late socket lifetime", () => {
+  it("closes a connector that finishes after the request deadline", async () => {
+    let connect!: (socket: SocketLike) => void;
+    setTranslationConnector(() => new Promise(resolve => { connect = resolve; }));
+    await expect(translate({ text: "Hello", from: "en", to: "fr" }, 5)).rejects.toThrow(/timed out/);
+    const late = new FakeSocket("reply"); connect(late);
+    await new Promise(resolve => setTimeout(resolve, 0));
+    expect(late.closed).toBe(true);
+    expect(late.sent).toEqual([]);
+  });
+});
+
 describe("POST /api/admin/translate handler", () => {
   it("returns the translation for an ITU editor", async () => {
     seam("reply");
@@ -65,7 +77,7 @@ describe("POST /api/admin/translate handler", () => {
   });
   it("rejects pairs outside the allowlist and never connects", async () => {
     seam("reply");
-    for (const [from, to] of [["fr", "en"], ["en", "en"], ["en", "de"], ["en", "fr/../x"], ["../", "fr"]]) await expect(call(EDITOR, { text: "x", from, to })).rejects.toBeInstanceOf(InvalidError);
+    for (const [from, to] of [["fr", "en"], ["en", "en"], ["en", "de"], ["en", "fr/../x"], ["../", "fr"], ["e", "nfr"], ["", "enfr"]]) await expect(call(EDITOR, { text: "x", from, to })).rejects.toBeInstanceOf(InvalidError);
     expect(urls).toEqual([]);
   });
   it("bounds input length and rejects empty or non-string text", async () => {

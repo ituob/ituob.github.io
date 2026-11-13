@@ -62,3 +62,11 @@ These run the real migrations/SQL in Node SQLite with a transactional D1 adapter
 they do not establish workerd or D1 compatibility. Actual D1 regressions:
 `npx vitest run test/edition-metadata.test.ts`. The host runner must also exercise
 the registered routes and mounted composer after integration.
+
+== Reviewed metadata publication
+
+The composer can reserve scheduled metadata and open a review PR through the configured GitHub App. The reserved bytes and revision are immutable even if an upstream response is lost; retrying resumes the same branch and PR. The adapter only creates `rt-meta-<issue>-r<revision>` and the matching `ob-issues/<issue>/meta.yaml`; existing metadata is never overwritten.
+
+`POST /api/admin/composer/editions/:no/metadata/open-pr` takes `expected_revision` and requires an ITU administrator. `GET` on the `metadata/pr` suffix reads the verified review state. Creating a PR returns pending status and never marks an edition published. New locally authored metadata must have its review merged before the composer can publish; its merge SHA joins the frozen data ancestry checks. Legacy issues without a local metadata draft retain the existing composer path.
+
+Scheduling records intended dates. It does not deploy the site or automatically publish at that date.

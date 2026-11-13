@@ -1,10 +1,17 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
+import EditionMetadata from './EditionMetadata.vue';
 import { api, canPlace, editionNumber, publicationNotice, type ComposerSubmission, type Edition, type EditionItem } from '../../lib/discussion-client';
 interface EditionDetail { edition: Edition; items: EditionItem[] }
 interface Pending { prNumber: number; url?: string; reason: string }
 const editions = ref<Edition[]>([]), submissions = ref<ComposerSubmission[]>([]), detail = ref<EditionDetail | null>(null);
 const number = ref<number | null>(null), busy = ref(false), loaded = ref(false), error = ref(''), notice = ref(''), pending = ref<Pending | null>(null);
+const metadataRevision = ref<number | null>(null), metadataReview = ref<{ pr: { pr_url: string | null; pr_number: number | null }; pending: boolean; state?: { merged: boolean } | null } | null>(null);
+async function metadataPr(check = false) { await perform(async () => {
+  if (!detail.value) throw new Error('Choose an edition.');
+  const endpoint = `${prefix}/editions/${detail.value.edition.ob_issue_no}/metadata`;
+  metadataReview.value = check ? await api(`${endpoint}/pr`) : await api(`${endpoint}/open-pr`, 'POST', { expected_revision: metadataRevision.value });
+}); }
 const prefix = '/api/admin/composer';
 function pendingUrl(value?: string) { try { const url = new URL(value ?? ''); return url.protocol === 'https:' ? url.href : undefined; } catch { return undefined; } }
 async function perform(work: () => Promise<void>) { busy.value = true; error.value = ''; notice.value = ''; try { await work(); } catch (e) { error.value = e instanceof Error ? e.message : 'Request failed'; } finally { busy.value = false; } }
@@ -16,7 +23,7 @@ async function refresh() {
   detail.value = selected ? await api<EditionDetail>(`${prefix}/editions/${selected.ob_issue_no}`) : null;
   if (selected?.ob_issue_no !== previousNo || detail.value?.edition.status === 'published') pending.value = null;
 }
-async function select(no: number) { detail.value = await api<EditionDetail>(`${prefix}/editions/${editionNumber(no)}`); pending.value = null; }
+async function select(no: number) { metadataRevision.value = null; metadataReview.value = null; detail.value = await api<EditionDetail>(`${prefix}/editions/${editionNumber(no)}`); pending.value = null; }
 async function open() { await perform(async () => {
   const no = editionNumber(Number(number.value));
   await api(`${prefix}/editions`, 'POST', { ob_issue_no: no }); await refresh(); await select(no); notice.value = `Edition ${no} selected. Current state: ${detail.value?.edition.status}.`;
@@ -47,6 +54,10 @@ onMounted(() => perform(refresh));
     <form @submit.prevent="open"><fieldset :disabled="busy"><legend>Open edition</legend><label>OB edition number <input v-model.number="number" required type="number" min="1" max="99999" step="1" /></label><button>Open or select edition</button></fieldset></form>
     <fieldset :disabled="busy"><legend>Editions</legend><button @click="perform(refresh)">Refresh composer</button><p v-if="loaded && !editions.length && !error">No editions have been opened.</p><ul><li v-for="edition in editions" :key="edition.ob_issue_no"><button @click="perform(() => select(edition.ob_issue_no))">OB {{ edition.ob_issue_no }} · {{ edition.status }}</button></li></ul></fieldset>
     <section v-if="detail"><h2>OB {{ detail.edition.ob_issue_no }} · {{ detail.edition.status }}</h2>
+      <EditionMetadata :key="detail.edition.ob_issue_no" :issue-no="detail.edition.ob_issue_no" @saved="metadataRevision = $event.scheduled_at ? $event.revision : null" />
+      <div><button :disabled="busy || !metadataRevision" @click="metadataPr()">Open metadata review PR</button><button :disabled="busy" @click="metadataPr(true)">Check metadata review</button>
+        <p v-if="metadataReview" role="status">Metadata {{ metadataReview.pending ? 'review pending' : 'merged' }} · PR {{ metadataReview.pr.pr_number ?? 'request reserved; retry to resume' }} <a v-if="pendingUrl(metadataReview.pr.pr_url || undefined)" :href="pendingUrl(metadataReview.pr.pr_url || undefined)" target="_blank" rel="noopener noreferrer">Inspect metadata PR</a></p>
+      </div>
       <dl><dt>Frozen data revision</dt><dd>{{ detail.edition.freeze_sha || 'Not frozen' }}</dd><dt>Staging commit</dt><dd>{{ detail.edition.staging_commit || 'Not staged' }}</dd><dt>Publication recorded</dt><dd>{{ detail.edition.published_at || 'Not published' }}</dd></dl>
       <p v-if="!detail.items.length">No items placed in this edition.</p>
       <ol><li v-for="item in detail.items" :key="item.submission_id">{{ item.slug }} · {{ item.action_type }} · {{ item.state }} · {{ item.submission_id }}<p>Patch: {{ item.path }} · Merged revision: {{ item.merge_sha || 'Unavailable' }}</p><button v-if="detail.edition.status === 'composing'" :disabled="busy" @click="remove(item.submission_id)">Remove from edition</button></li></ol>

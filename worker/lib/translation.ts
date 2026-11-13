@@ -41,7 +41,7 @@ export function parseRequest(b: Record<string, unknown>): TranslateRequest {
   if (typeof text !== "string" || typeof from !== "string" || typeof to !== "string") throw new InvalidError("text, from and to must be strings");
   if (!text.trim()) throw new InvalidError("text must not be empty");
   if (text.length > MAX_CHARS) throw new InvalidError(`text must be at most ${MAX_CHARS} characters`);
-  if (!LANGUAGE_PAIRS.has(`${from}${to}`)) throw new InvalidError("unsupported language pair");
+  if (from !== "en" || !["fr", "ar", "zh", "ru", "es"].includes(to) || !LANGUAGE_PAIRS.has(`${from}${to}`)) throw new InvalidError("unsupported language pair");
   return { text, from, to };
 }
 
@@ -51,11 +51,13 @@ export async function translate(req: TranslateRequest, timeoutMs = TIMEOUT_MS): 
   const connect = override ?? fetchConnector;
   let socket: SocketLike | undefined;
   let timer: ReturnType<typeof setTimeout> | undefined;
+  let finished = false;
   const fail = (why: string) => new UpstreamError(`translation service unavailable: ${why}`);
   try {
     const run = (async () => {
       try { socket = await connect(url); } catch (e) { throw fail(e instanceof Error ? e.message : "connect failed"); }
       const s = socket;
+      if (finished) { try { s.close(1000, "timed out"); } catch {} throw fail("timed out"); }
       return await new Promise<string>((resolve, reject) => {
         s.addEventListener("message", (e) => {
           if (typeof e.data === "string" && e.data.trim()) resolve(e.data);
@@ -70,6 +72,7 @@ export async function translate(req: TranslateRequest, timeoutMs = TIMEOUT_MS): 
     const deadline = new Promise<never>((_, reject) => { timer = setTimeout(() => reject(fail("timed out")), timeoutMs); });
     return await Promise.race([run, deadline]);
   } finally {
+    finished = true;
     if (timer !== undefined) clearTimeout(timer);
     try { socket?.close(1000, "done"); } catch { /* already closed */ }
   }

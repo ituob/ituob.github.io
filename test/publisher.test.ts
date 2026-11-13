@@ -70,7 +70,7 @@ class GitHub {
     }
     if (suffix.startsWith("/git/refs/")) { this.refs.delete(decodeURIComponent(suffix.slice(16))); return respond(null, 204); }
     if (suffix.startsWith("/compare/")) {
-      if (site || suffix.endsWith(`...${C}`)) return respond({ files: [{ filename: site ? "data-ob" : path, status: this.entries.get(C)?.sha === null ? "removed" : "added" }] });
+      if (site || suffix.endsWith(`...${C}`)) return respond({ files: [{ filename: site ? "data-ob" : this.entries.get(C)?.path ?? path, status: this.entries.get(C)?.sha === null ? "removed" : "added" }] });
       return respond({ status: this.compareStatus });
     }
     if (suffix.startsWith("/contents/")) {
@@ -214,5 +214,36 @@ describe("staging pin publication", () => {
     await expect(client.bumpDataPin(pin)).rejects.toThrow("differs from original pin PR");
     api.compareStatus = "diverged";
     await expect(client.bumpDataPin(pin)).rejects.toThrow("does not contain every");
+  });
+});
+
+
+describe("edition metadata PR protocol", () => {
+  const metadata = { ...req, branch: "rt-meta-1300-r1", path: "ob-issues/1300/meta.yaml", edition: 1300, revision: 1, content: "id: 1300\npublication_date: 2026-11-15\ncutoff_date: 2026-11-01\n", idempotencyKey: "metadata-1300-r1" };
+  it("creates only an immutable metadata branch and exact append-only file, then reuses the PR", async () => {
+    const api = new GitHub(), client = api.client();
+    const first = await client.openMetadataPr(metadata);
+    expect(await client.openMetadataPr(metadata)).toEqual(first);
+    expect(api.entries.get(C).path).toBe(metadata.path);
+    expect(api.entries.get(C).content).toBe(metadata.content);
+    expect(api.calls.filter(c => c.path === "/repos/org/data/git/refs").map(c => c.body.ref)).toEqual(["refs/heads/rt-meta-1300-r1"]);
+    expect(api.calls.filter(c => c.method === "PATCH")).toEqual([]);
+    expect((await client.getMetadataPullRequest({ repo: req.repo, prNumber: first.prNumber })).state).toBe("open");
+    await expect(client.getPullRequest({ repo: req.repo, prNumber: first.prNumber })).rejects.toThrow(/refusing branch/);
+  });
+  it("rejects protected refs, action paths, wrong issues and revisions before network", async () => {
+    const api = new GitHub();
+    for (const bad of [{ branch: "main" }, { path }, { edition: 1301 }, { revision: 2 }, { revision: 0 }, { path: "ob-issues/1300/../meta.yaml" }]) await expect(api.client().openMetadataPr({ ...metadata, ...bad })).rejects.toThrow();
+    expect(api.calls).toEqual([]);
+    await expect(api.client().openPatchPr(metadata)).rejects.toThrow();
+  });
+  it("preserves existing authoritative metadata and rejects changed retry bytes", async () => {
+    const existing = new GitHub(); existing.parentFiles = true;
+    await expect(existing.client().openMetadataPr(metadata)).rejects.toThrow(/conflicts/);
+    expect(existing.calls.filter(c => c.method === "POST" && c.path.includes("/git/"))).toEqual([]);
+    const api = new GitHub(), client = api.client();
+    await client.openMetadataPr(metadata);
+    await expect(client.openMetadataPr({ ...metadata, content: "id: 1\n" })).rejects.toThrow(/requested publisher commit/);
+    expect(api.prs).toHaveLength(1);
   });
 });

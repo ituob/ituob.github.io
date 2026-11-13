@@ -3,6 +3,7 @@
 // verified webhook path) back to `merged` when an admin takes an item out of an edition. Every move
 // goes through `mutate`. All entry points require itu-admin; the routes are Access-guarded and no
 // member endpoint imports this file (source guards in test/submissions.test.ts).
+import { metadataMergeForPublication } from "./edition-metadata-publication.ts";
 import { auditStatements } from "./audit.ts";
 import { requireRole } from "./authz.ts";
 import { ConflictError, InvalidError, NotFoundError } from "./membership.ts";
@@ -200,11 +201,12 @@ export async function publishEdition(db: D1Database, session: Session | null, no
   if (bad) throw new ConflictError(`item ${bad.submission_id} is ${bad.state}, not scheduled`);
 
   if (ed.status === "composing") {
+    const metadataMerge = await metadataMergeForPublication(db, s, no, publisher);
     let bump;
     try {
       bump = await publisher.bumpDataPin({
         edition: no, idempotencyKey: `edition-${no}-pin`,
-        items: items.map((i) => ({ submissionId: i.submission_id, mergeSha: i.merge_sha })),
+        items: [...items.map((i) => ({ submissionId: i.submission_id, mergeSha: i.merge_sha })), ...(metadataMerge ? [metadataMerge] : [])],
       });
     } catch (e) {
       throw new UpstreamError(`could not bump the data pin: ${String((e as Error).message)}`);

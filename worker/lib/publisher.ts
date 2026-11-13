@@ -12,6 +12,10 @@ export interface OpenPatchPrRequest {
   body: string;
   idempotencyKey: string;
 }
+export interface OpenMetadataPrRequest extends OpenPatchPrRequest {
+  edition: number;
+  revision: number;
+}
 export interface OpenedPr {
   prNumber: number;
   commitSha: string;
@@ -52,6 +56,8 @@ export interface PinBump {
 export interface PatchPublisher {
   /** Idempotent per `idempotencyKey`: a replay returns the same PR, never a second. */
   openPatchPr(req: OpenPatchPrRequest): Promise<OpenedPr>;
+  openMetadataPr(req: OpenMetadataPrRequest): Promise<OpenedPr>;
+  getMetadataPullRequest(req: { repo: string; prNumber: number }): Promise<PullRequestState>;
   /** Close the PR and delete the Worker-created branch (never merges, never touches other refs). */
   closePatchPr(req: { repo: string; branch: string; prNumber: number }): Promise<void>;
   /** A PR (never a push to main) that deletes `path`. Idempotent per `idempotencyKey`. */
@@ -73,6 +79,11 @@ export const PATCH_BRANCH = /^rt-sub-\d+-\d{3}-[a-z0-9-]+-[0-9A-Z]{8}$/;
 /** The single guard every publisher implementation calls first. */
 export function assertPatchBranch(branch: string): void {
   if (!PATCH_BRANCH.test(branch)) throw new Error(`refusing branch ${JSON.stringify(branch)}: only rt-sub-* patch branches are writable`);
+}
+
+export const METADATA_BRANCH = /^rt-meta-[1-9]\d*-r[1-9]\d*$/;
+export function assertMetadataRequest(req: OpenMetadataPrRequest): void {
+  if (!Number.isSafeInteger(req.edition) || req.edition < 1 || !Number.isSafeInteger(req.revision) || req.revision < 1 || req.branch !== `rt-meta-${req.edition}-r${req.revision}` || req.path !== `ob-issues/${req.edition}/meta.yaml`) throw new Error("Invalid edition metadata destination");
 }
 
 export function branchName(issue: number, seq: number, slug: string, submissionId: string): string {
@@ -109,6 +120,9 @@ export class FakePatchPublisher implements PatchPublisher {
 
   async openPatchPr(req: OpenPatchPrRequest): Promise<OpenedPr> {
     assertPatchBranch(req.branch);
+    return this.open(req);
+  }
+  private async open(req: OpenPatchPrRequest): Promise<OpenedPr> {
     this.requests.push(req);
     if (this.failNext > 0) {
       this.failNext--;
@@ -121,6 +135,13 @@ export class FakePatchPublisher implements PatchPublisher {
     this.byKey.set(req.idempotencyKey, pr);
     if (this.afterCreate) await this.afterCreate(pr);
     return pr;
+  }
+  async openMetadataPr(req: OpenMetadataPrRequest): Promise<OpenedPr> {
+    assertMetadataRequest(req);
+    return this.open(req);
+  }
+  getMetadataPullRequest(req: { repo: string; prNumber: number }): Promise<PullRequestState> {
+    return this.getPullRequest(req);
   }
   async closePatchPr(req: { repo: string; branch: string; prNumber: number }): Promise<void> {
     assertPatchBranch(req.branch);

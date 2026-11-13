@@ -1,5 +1,5 @@
-import { assertPatchBranch, PublisherNotConfigured } from "./publisher.ts";
-import type { OpenPatchPrRequest, OpenRevertPrRequest, OpenedPr, PatchPublisher, PinBump, PinBumpRequest, PublisherConfig, PullRequestState } from "./publisher.ts";
+import { assertPatchBranch, assertMetadataRequest, METADATA_BRANCH, PublisherNotConfigured } from "./publisher.ts";
+import type { OpenPatchPrRequest, OpenMetadataPrRequest, OpenRevertPrRequest, OpenedPr, PatchPublisher, PinBump, PinBumpRequest, PublisherConfig, PullRequestState } from "./publisher.ts";
 
 type Json = Record<string, any>;
 export type GitHubTransport = (input: string, init: RequestInit) => Promise<Response>;
@@ -157,8 +157,13 @@ export class GitHubAppPatchPublisher implements PatchPublisher {
     if (pr.head?.ref !== branch || pr.head?.sha !== sha || pr.head?.repo?.full_name !== repo.slice(7) || pr.base?.ref !== base || pr.base?.repo?.full_name !== repo.slice(7)) throw new Error("Pull request does not match publisher branch");
     return pr;
   }
-  private async open(req: OpenPatchPrRequest | OpenRevertPrRequest, deleting: boolean): Promise<OpenedPr> {
-    const repo = this.patch(req);
+  private async open(req: OpenPatchPrRequest | OpenRevertPrRequest, deleting: boolean, metadata = false): Promise<OpenedPr> {
+    let repo: string;
+    if (metadata) {
+      assertMetadataRequest(req as OpenMetadataPrRequest);
+      if (!req.idempotencyKey) throw new Error("Missing idempotency key");
+      repo = this.dataRepo(req.repo);
+    } else repo = this.patch(req);
     const content = deleting ? undefined : (req as OpenPatchPrRequest).content;
     const message = this.marker(req.branch, await fingerprint([req.idempotencyKey, req.path, deleting ? null : content]));
     const base = await this.defaultRef(repo);
@@ -177,21 +182,30 @@ export class GitHubAppPatchPublisher implements PatchPublisher {
     return { prNumber: pr.number, url: pr.html_url, commitSha: sha, baseSha: commit.parents[0].sha };
   }
   openPatchPr(req: OpenPatchPrRequest): Promise<OpenedPr> { return this.open(req, false); }
+  openMetadataPr(req: OpenMetadataPrRequest): Promise<OpenedPr> { return this.open(req, false, true); }
+  getMetadataPullRequest(req: { repo: string; prNumber: number }): Promise<PullRequestState> { return this.readPullRequest(req, true); }
   openRevertPr(req: OpenRevertPrRequest): Promise<OpenedPr> { return this.open(req, true); }
   async getPullRequest(req: { repo: string; prNumber: number }): Promise<PullRequestState> {
+    return this.readPullRequest(req, false);
+  }
+  private async readPullRequest(req: { repo: string; prNumber: number }, metadata: boolean): Promise<PullRequestState> {
     const repo = this.dataRepo(req.repo);
     const pr = await this.request(`${repo}/pulls/${this.prNumber(req.prNumber)}`);
-    assertPatchBranch(pr.head.ref);
+    if (metadata) {
+      if (!METADATA_BRANCH.test(pr.head.ref)) throw new Error("Unowned metadata branch");
+    } else assertPatchBranch(pr.head.ref);
     this.validatePr(pr, repo, pr.head.ref, (await this.defaultRef(repo)).ref, pr.head.sha);
-    await this.verifyOwnedPatch(repo, pr.head.ref, pr.head.sha);
+    await this.verifyOwnedPatch(repo, pr.head.ref, pr.head.sha, metadata);
     return { state: pr.state, merged: pr.merged === true, mergeSha: pr.merged ? requireSha(pr.merge_commit_sha) : null, baseRef: pr.base.ref };
   }
-  private async verifyOwnedPatch(repo: string, branch: string, sha: string): Promise<void> {
+  private async verifyOwnedPatch(repo: string, branch: string, sha: string, metadata = false): Promise<void> {
     const commit = await this.commit(repo, sha);
     const prefix = `ituob-publisher ${branch} `;
     if (!commit.message.startsWith(prefix) || !/^[A-Za-z0-9_-]{43}$/.test(commit.message.slice(prefix.length)) || commit.parents?.length !== 1) throw new Error("Unowned pull request");
     const diff = await this.request(`${repo}/compare/${requireSha(commit.parents[0].sha)}...${requireSha(sha)}`);
-    if (diff.files?.length !== 1 || diff.files[0].previous_filename || !actionPath.test(diff.files[0].filename)) throw new Error("Unowned patch changes");
+    const issue = metadata ? /^rt-meta-([1-9]\d*)-r[1-9]\d*$/.exec(branch)?.[1] : null;
+    const validPath = metadata ? diff.files?.[0]?.filename === `ob-issues/${issue}/meta.yaml` : actionPath.test(diff.files?.[0]?.filename ?? "");
+    if (diff.files?.length !== 1 || diff.files[0].previous_filename || !validPath) throw new Error("Unowned patch changes");
   }
   private prNumber(value: number): number {
     if (!Number.isSafeInteger(value) || value < 1) throw new Error("Invalid PR number");
