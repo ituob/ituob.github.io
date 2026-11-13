@@ -90,7 +90,7 @@ describe("the Worker submission path calls the generated validators", () => {
   afterEach(() => setPublisher(null));
 
   const body = (payload: unknown) => ({ register_id: "E118_IIN", slug: "e118-iin", action_type: "ADD", payload });
-  const entry = { country_or_area: { en: "Aland" }, company_name: "Acme Telecom" };
+  const entry = { country_or_area: { en: "Aland" }, company_name: "Acme Telecom", issue_id_number: "89 358 01" };
   const mkDraft = async (payload: unknown) => {
     const r = await api("POST", "/api/me/submissions", { session: "member-A", body: body(payload) });
     expect(r.status).toBe(201);

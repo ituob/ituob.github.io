@@ -125,7 +125,7 @@ describe("text has no verifiable member country scope", () => {
     ["NNP", "nnp", "NNPAmendment", "country_or_area"],
     ["RR.25.1", "rr251", "RR251Amendment", "country_or_area"],
     ["R_SP_LN.VIII", "list-viii", "ListVIIIAmendment", "country"],
-  ])("retains specialized %s country binding and rejects foreign/mixed countries", async (id, slug, cls, field) => {
+  ])("retains specialized %s country binding and rejects foreign/mixed countries or unrepresentable identities", async (id, slug, cls, field) => {
     const entry = (country: string) => ({ [field!]: field === "country" ? country : { en: country } });
     for (const entries of [[entry("Bland")], [entry("Aland"), entry("Bland")]]) {
       const refused = await api("POST", "/api/me/submissions", { session: "member-A", body: textBody(id, slug, { type: "ADD", data: { _class: cls, entries } }) });
@@ -133,7 +133,13 @@ describe("text has no verifiable member country scope", () => {
     }
     expect(await count("submissions")).toBe(0);
     const created = await api("POST", "/api/me/submissions", { session: "member-A", body: textBody(id, slug, { type: "ADD", data: { _class: cls, entries: [entry("Aland")] } }) });
-    expect(created.status).toBe(201);
-    expect((await post(created.json.submission.id, "submit", "member-A")).status).toBe(200);
+    if (id === "R_SP_LN.VIII") {
+      expect(created.status).toBe(422);
+      expect(created.json.errors).toContainEqual(expect.objectContaining({ path: "data._class", code: "mismatch", message: expect.stringContaining("Catalog identity (callsign) is not represented") }));
+      expect(await count("submissions")).toBe(0);
+    } else {
+      expect(created.status).toBe(201);
+      expect((await post(created.json.submission.id, "submit", "member-A")).status).toBe(200);
+    }
   });
 });

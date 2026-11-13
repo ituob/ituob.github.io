@@ -12,7 +12,7 @@ import { activateMember, api, db, provisionItu, seedFixtures } from "./helpers.t
 const sources = import.meta.glob("../worker/**/*.ts", { query: "?raw", import: "default", eager: true }) as Record<string, string>;
 const EDITOR = "itu-editor@example.test";
 const ADMINU = "itu-admin@example.test";
-const entry = () => ({ country_or_area: { en: "Aland" }, company_name: "Acme Telecom" });
+const entry = () => ({ country_or_area: { en: "Aland" }, company_name: "Acme Telecom", issue_id_number: "89 358 01" });
 const payload = () => ({ type: "ADD", data: { _class: "E118Amendment", entries: [entry()] } });
 const subBody = () => ({ register_id: "E118_IIN", slug: "e118-iin", action_type: "ADD", payload: payload() });
 

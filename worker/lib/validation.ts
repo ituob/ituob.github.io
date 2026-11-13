@@ -1,7 +1,7 @@
-// Submit-time validation, stage 1 (action envelope) — docs/submission-workflow.adoc "two stages".
+// Durable-write validation, stage 1 (action envelope) — docs/submission-workflow.adoc "two stages".
 //
 // The chain is [stage1, schemaStage]. stage1 is the hand-written action
-// envelope (key binding, per-action presence rules). schemaStage runs the
+// envelope (generated register identities and country binding, per-action presence rules). schemaStage runs the
 // validators GENERATED from the LML ontology (src/lib/schema.validators.generated.ts,
 // second output of service-publications-docs scripts/generate_ts_types.rb):
 // the same classes the Ruby gem compiles, so scalar types, collections, enums
@@ -9,6 +9,7 @@
 // CI stays authoritative; this is the fast door check. The chain is PLUGGABLE.
 
 import { PUBLICATION_BY_ID, REGISTERS } from "../../src/lib/catalogs.ts";
+import { AMENDMENT_COUNTRY_FIELDS, AMENDMENT_ENTRY_FIELDS, REGISTER_IDENTITIES, type RegisterIdentity } from "../../src/lib/register-rules.generated.ts";
 import { AMENDMENT_CLASSES, validateClass } from "../../src/lib/schema.validators.generated.ts";
 
 export interface FieldError {
@@ -28,19 +29,11 @@ export interface ValidationContext {
 }
 export type PayloadValidator = (ctx: ValidationContext) => FieldError[];
 
-/** Per-register rules. INTERIM hand-maintained table (gap: generate from messages.lml / schema-data.yaml). */
-export interface RegisterRules {
-  /** Entry field holding the country/area register_key, used for country binding. */
-  keyField: string;
-  /** Entry fields that must be non-empty for ADD/REP. */
-  requiredEntryFields: string[];
-}
-export const REGISTER_RULES: Record<string, RegisterRules> = {
-  E118_IIN: { keyField: "country_or_area", requiredEntryFields: ["company_name"] },
-  "R_SP_LN.VIII": { keyField: "country", requiredEntryFields: [] },
-};
-const DEFAULT_RULES: RegisterRules = { keyField: "country_or_area", requiredEntryFields: [] };
-export const rulesFor = (register_id: string): RegisterRules => REGISTER_RULES[register_id] ?? DEFAULT_RULES;
+/** Identity is catalog-defined. Country authority is independently model-defined. */
+export const rulesFor = (register_id: string): RegisterIdentity | undefined => Object.hasOwn(REGISTER_IDENTITIES, register_id) ? REGISTER_IDENTITIES[register_id] : undefined;
+
+// Existing product constraint, additional to the generated schema and identity.
+const requiredEntryFields: Readonly<Record<string, readonly string[]>> = { E118_IIN: ["company_name"] };
 
 /** IDs and filesystem destinations are catalog values, never a sanitized client path. */
 export function submissionTargetErrors(register_id: string, slug?: string): FieldError[] {
@@ -66,10 +59,23 @@ function keyOf(v: unknown): string | null {
   return null;
 }
 
+/** Match replay's canonical multilingual identity order, independent of member country lookup. */
+function identityPart(value: unknown): string | null {
+  if (typeof value === "string") return value.trim() || null;
+  if (!isObj(value)) return null;
+  for (const language of ["fr", "en", "es", "zh", "ru", "ar"]) {
+    const text = value[language];
+    if (typeof text === "string" && text.trim()) return text.trim();
+  }
+  return null;
+}
+
 /** Country keys derived server-side from the payload (never a client-supplied member id). */
 export function registerKeysOf(register_id: string, payload: unknown): string[] {
   const entries = isObj(payload) && isObj(payload.data) && Array.isArray(payload.data.entries) ? payload.data.entries : [];
-  const field = rulesFor(register_id).keyField;
+  const cls = isObj(payload) && isObj(payload.data) ? payload.data._class : null;
+  const field = typeof cls === "string" && Object.hasOwn(AMENDMENT_COUNTRY_FIELDS, cls) ? AMENDMENT_COUNTRY_FIELDS[cls] : null;
+  if (!rulesFor(register_id) || !field) return [];
   const keys: string[] = [];
   for (const e of entries) {
     const k = isObj(e) ? keyOf(e[field]) : null;
@@ -118,12 +124,29 @@ export const stage1: PayloadValidator = ({ register_id, slug, action_type, paylo
       return errs;
     }
     const rules = rulesFor(register_id);
+    if (!rules) return errs;
+    if (rules.amendmentClass && typeof d._class === "string" && AMENDMENT_CLASSES.includes(d._class) && d._class !== rules.amendmentClass)
+      errs.push({ path: "data._class", code: "mismatch", message: `data._class must be ${rules.amendmentClass} for ${register_id}` });
+    const countryField = typeof d._class === "string" && Object.hasOwn(AMENDMENT_COUNTRY_FIELDS, d._class) ? AMENDMENT_COUNTRY_FIELDS[d._class] : null;
+    const entryFields = typeof d._class === "string" && Object.hasOwn(AMENDMENT_ENTRY_FIELDS, d._class) ? AMENDMENT_ENTRY_FIELDS[d._class] : undefined;
+    const groups = [rules.keyFields, ...rules.fallbackKeyFields];
+    const representable = !entryFields || groups.some(group => group.some(field => entryFields.includes(field)));
+    if (!representable)
+      errs.push({ path: "data._class", code: "mismatch", message: `Catalog identity (${groups.map(group => group.join(" + ")).join(" or ")}) is not represented by ${d._class}; the catalog and model must be aligned before typed entries can be saved` });
     const full = action_type === "ADD" || action_type === "REP";
     d.entries.forEach((e, i) => {
       const at = `data.entries[${i}]`;
       if (!isObj(e)) return errs.push({ path: at, code: "type", message: "entry must be an object" });
-      if (keyOf(e[rules.keyField]) === null) req(`${at}.${rules.keyField}`, `${rules.keyField} is required`);
-      if (full) for (const f of rules.requiredEntryFields) if (blank(e[f])) req(`${at}.${f}`, `${f} is required`);
+      // Replay permits partial composite keys but requires at least one part;
+      // fallback groups are alternatives, never additional required fields.
+      if (representable && !groups.some(fields => fields.some(field => identityPart(e[field]) !== null))) {
+        const fields = groups.map(group => group.join(" + ")).join(" or ");
+        const field = groups.flat().find(candidate => entryFields?.includes(candidate)) ?? rules.keyFields[0];
+        req(`${at}.${field}`, `A register identity (${fields}) is required`);
+      }
+      if (countryField && keyOf(e[countryField]) === null)
+        req(`${at}.${countryField}`, `${countryField} is required`);
+      if (full) for (const f of requiredEntryFields[register_id] ?? []) if (blank(e[f])) req(`${at}.${f}`, `${f} is required`);
     });
   }
   return errs;

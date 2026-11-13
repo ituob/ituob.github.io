@@ -24,7 +24,7 @@ const EDITOR = "itu-editor@example.test";
 const ADMINU = "itu-admin@example.test";
 const MEMBER_A = "member-A@example.test";
 
-const entry = (over: Record<string, unknown> = {}) => ({ country_or_area: { en: "Aland" }, company_name: "Acme Telecom", ...over });
+const entry = (over: Record<string, unknown> = {}) => ({ country_or_area: { en: "Aland" }, company_name: "Acme Telecom", issue_id_number: "89 358 01", ...over });
 const payload = (entries: unknown[] = [entry()], type = "ADD") => ({ type, data: { _class: "E118Amendment", entries } });
 const body = (p: unknown = payload()) => ({ register_id: "E118_IIN", slug: "e118-iin", action_type: "ADD", payload: p });
 
@@ -348,6 +348,38 @@ describe("validation stage 1", () => {
     expect((await me(sup.json.submission.id, "submit")).status).toBe(200);
     const lir = await api("POST", "/api/me/submissions", { session: "member-A", body: { ...body(), action_type: "LIR" } });
     expect(lir.status).toBe(403);
+  });
+
+  it("persists E164_CC fallback identities for ITU staff and rejects missing identities without partial writes", async () => {
+    const ccPayload = (entry: Record<string, unknown>) => ({ type: "ADD", data: { _class: "E164CCAmendment", entries: [entry] } });
+    const original = ccPayload({ cc_ic: "+883 5100", applicant: "Example network" });
+    const created = await api("POST", "/api/me/submissions", { session: "itu-editor", body: { register_id: "E164_CC", slug: "e164-cc", action_type: "ADD", payload: original } });
+    expect(created.status, JSON.stringify(created.json)).toBe(201);
+    const id = created.json.submission.id;
+    const before = await durableSnapshot();
+    const invalid = ccPayload({ applicant: "Unkeyed network" });
+    const badCreate = await api("POST", "/api/me/submissions", { session: "itu-editor", body: { register_id: "E164_CC", slug: "e164-cc", action_type: "ADD", payload: invalid } });
+    expect(badCreate.status).toBe(422);
+    expect(badCreate.json.errors).toContainEqual(expect.objectContaining({ path: "data.entries[0].cc_ic", code: "required", message: expect.stringContaining("cc_ic") }));
+    const badEdit = await api("PUT", `/api/me/submissions/${id}`, { session: "itu-editor", body: { payload: invalid } });
+    expect(badEdit.status).toBe(422);
+    expect(await durableSnapshot()).toEqual(before);
+    const edited = await api("PUT", `/api/me/submissions/${id}`, { session: "itu-editor", body: { payload: ccPayload({ cc_ic: "+883 5100", applicant: "Revised network" }) } });
+    expect(edited.status).toBe(200);
+    expect(edited.json.submission.current_rev).toBe(2);
+    expect((await me(id, "submit", "itu-editor")).status).toBe(200);
+  });
+
+  it("country-bearing E118 drafts still require actual identity before create or edit", async () => {
+    const id = await draft();
+    const before = await durableSnapshot();
+    const invalid = payload([entry({ issue_id_number: " " })]);
+    const created = await api("POST", "/api/me/submissions", { session: "member-A", body: body(invalid) });
+    expect(created.status).toBe(422);
+    expect(created.json.errors).toContainEqual(expect.objectContaining({ path: "data.entries[0].issue_id_number", code: "required" }));
+    const edited = await api("PUT", `/api/me/submissions/${id}`, { session: "member-A", body: { payload: invalid } });
+    expect(edited.status).toBe(422);
+    expect(await durableSnapshot()).toEqual(before);
   });
 
   it("revise with invalid content is refused and writes no revision", async () => {

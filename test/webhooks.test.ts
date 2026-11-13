@@ -8,7 +8,7 @@ import { activateMember, api, db, provisionItu, seedFixtures } from "./helpers.t
 const SECRET = "test-webhook-secret";
 const EDITOR = "itu-editor@example.test";
 const ADMINU = "itu-admin@example.test";
-const payload = () => ({ type: "ADD", data: { _class: "E118Amendment", entries: [{ country_or_area: { en: "Aland" }, company_name: "Acme Telecom" }] } });
+const payload = () => ({ type: "ADD", data: { _class: "E118Amendment", entries: [{ country_or_area: { en: "Aland" }, company_name: "Acme Telecom", issue_id_number: "89 358 01" }] } });
 
 let fake: FakePatchPublisher;
 beforeEach(async () => {
@@ -156,7 +156,7 @@ describe("transitions", () => {
     expect((await rows("SELECT kind FROM notifications WHERE user_id='member-A' AND submission_id=?1", id)).map((n) => n.kind)).toContain("submission.changes_requested");
     expect((await rows("SELECT body FROM comment_revisions WHERE body LIKE '%closed without merging%'")).length).toBe(1);
     // the dead end that in_review would have been: same rev cannot get a second submission_prs row, a revision can
-    expect((await me(id, "revise", { payload: { ...payload(), data: { _class: "E118Amendment", entries: [{ country_or_area: { en: "Aland" }, company_name: "Acme Telecom 2" }] } } })).status).toBe(200);
+    expect((await me(id, "revise", { payload: { ...payload(), data: { _class: "E118Amendment", entries: [{ country_or_area: { en: "Aland" }, company_name: "Acme Telecom 2", issue_id_number: "89 358 01" }] } } })).status).toBe(200);
     expect((await adm(id, "start-review")).status).toBe(200);
     const a = await adm(id, "approve", EDITOR, { target_edition: 1351 });
     expect(a.status).toBe(200);

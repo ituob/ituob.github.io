@@ -45,7 +45,7 @@ test("text amendments retain generated nested/unknown-field and envelope validat
 test("structured ADD/SUP retain entry presence, company, schema and country requirements", () => {
   for (const action_type of ["ADD", "SUP"] as const) {
     const payload = { type: action_type, data: { _class: "E118Amendment", entries: [
-      { country_or_area: { en: "Aland" }, company_name: "Acme Telecom" },
+      { country_or_area: { en: "Aland" }, company_name: "Acme Telecom", issue_id_number: "89 358 01" },
     ] } };
     assert.deepEqual(validate({ register_id: "E118_IIN", action_type, payload }), []);
     assert.deepEqual(registerKeysOf("E118_IIN", payload), ["Aland"]);
@@ -54,11 +54,10 @@ test("structured ADD/SUP retain entry presence, company, schema and country requ
   assert.ok(errors({ type: "ADD", data: { _class: "E118Amendment", entries: [{ company_name: "Acme" }] } }, "E118_IIN").some((e) => e.path === "data.entries[0].country_or_area"));
 });
 
-test("specialized NNP/RR251/ListVIII entry schemas and country binding remain usable", () => {
+test("specialized NNP/RR251 entry schemas and country binding remain usable", () => {
   for (const [id, cls, entry] of [
     ["NNP", "NNPAmendment", { country_or_area: { en: "Aland" } }],
     ["RR.25.1", "RR251Amendment", { country_or_area: { en: "Aland" } }],
-    ["R_SP_LN.VIII", "ListVIIIAmendment", { country: "Aland", name: "Station" }],
   ] as const) {
     const payload = { type: "ADD", data: { _class: cls, entries: [entry] } };
     assert.deepEqual(validateClass(cls, payload.data), []);
@@ -87,4 +86,76 @@ test("actual submission write path denies unscoped member text before any databa
   await assert.rejects(createSubmission(noDatabaseAccess as never, { userId: "itu", roles: ["itu-editor"], memberStateId: null }, {
     register_id: "NNP", slug: "other", action_type: "ADD", payload: text(),
   }), (error: unknown) => error instanceof ValidationFailed && error.errors[0]?.path === "slug");
+});
+
+
+test("E164_CC uses its catalog fallback identity without inventing a country attribute", () => {
+  for (const action_type of ACTION_TYPES) {
+    const payload = { type: action_type, data: { _class: "E164CCAmendment", entries: [{ cc_ic: "+883 5100", applicant: "Example network" }] } };
+    assert.deepEqual(validate({ register_id: "E164_CC", slug: "e164-cc", action_type, payload }), []);
+    assert.deepEqual(registerKeysOf("E164_CC", payload), []);
+    const unkeyed = { ...payload, data: { ...payload.data, entries: [{ applicant: "Example network" }] } };
+    assert.ok(validate({ register_id: "E164_CC", action_type, payload: unkeyed }).some(e => e.code === "required" && e.path === "data.entries[0].cc_ic" && e.message.includes("cc_ic")));
+  }
+});
+
+test("country authority cannot substitute for a missing register identity", () => {
+  for (const [id, cls, key] of [
+    ["E118_IIN", "E118Amendment", "issue_id_number"],
+    ["DP", "DPAmendment", "country_code"],
+    ["E212_MNC", "E212MNCAmendment", "mcc_mnc_codes"],
+    ["E218_TRCC", "E218TRCCAmendment", "tmcc_code"],
+    ["M1400_ICC", "M1400Amendment", "carrier_code"],
+  ] as const) {
+    for (const action_type of ACTION_TYPES) {
+      const entry = { country_or_area: { en: "Aland" }, ...(id === "E118_IIN" ? { company_name: "Acme" } : {}) };
+      const payload = { type: action_type, data: { _class: cls, entries: [entry] } };
+      assert.deepEqual(registerKeysOf(id, payload), ["Aland"]);
+      assert.ok(validate({ register_id: id, action_type, payload }).some(e => e.path === `data.entries[0].${key}` && e.code === "required"), `${id}/${action_type}`);
+      assert.deepEqual(validate({ register_id: id, action_type, payload: { ...payload, data: { ...payload.data, entries: [{ ...entry, [key]: "123" }] } } }), [], `${id}/${action_type}`);
+    }
+  }
+});
+
+test("catalog composite identities match replay's partial-key and multilingual semantics", () => {
+  const context = { register_id: "F32_TDI", action_type: "ADD" as const };
+  const payload = (entry: unknown) => ({ type: "ADD", data: { _class: "F32TDIAmendment", entries: [entry] } });
+  assert.deepEqual(validate({ ...context, payload: payload({ country_or_area: { fr: "Aland" } }) }), []);
+  assert.ok(validate({ ...context, payload: payload({ country_or_area: { en: " " }, network_code: " ", office_code: "" }) }).some(e => e.code === "required"));
+  assert.ok(validate({ ...context, payload: payload({ country_or_area: { xx: "Aland" } }) }).some(e => e.code === "required"));
+  assert.ok(validate({ ...context, payload: payload({ network_code: "AA" }) }).some(e => e.path === "data.entries[0].country_or_area" && e.code === "required"));
+});
+
+test("ListVIII reports its unrepresentable canonical identity while authorized text remains valid", () => {
+  const payload = { type: "ADD", data: { _class: "ListVIIIAmendment", entries: [{ country: "Aland", name: "Station" }] } };
+  assert.deepEqual(validateClass("ListVIIIAmendment", payload.data), []);
+  assert.deepEqual(registerKeysOf("R_SP_LN.VIII", payload), ["Aland"]);
+  assert.deepEqual(errors(payload, "R_SP_LN.VIII"), [{ path: "data._class", code: "mismatch", message: "Catalog identity (callsign) is not represented by ListVIIIAmendment; the catalog and model must be aligned before typed entries can be saved" }]);
+  assert.deepEqual(errors(text("R_SP_LN.VIII"), "R_SP_LN.VIII"), []);
+});
+
+test("structured registers cannot borrow another amendment's country or identity model", () => {
+  const payload = { type: "ADD", data: { _class: "NNPAmendment", entries: [{ country_or_area: { en: "Aland" } }] } };
+  assert.ok(errors(payload, "E118_IIN").some(e => e.code === "mismatch" && e.path === "data._class"));
+});
+
+test("country-less E164 member input fails closed before any database access", async () => {
+  const { createSubmission } = await import("../worker/lib/submissions.ts");
+  const { InvalidError } = await import("../worker/lib/membership.ts");
+  const db = new Proxy({}, { get() { throw new Error("unexpected database access"); } });
+  await assert.rejects(createSubmission(db as never, { userId: "member-A", roles: ["member-submitter"], memberStateId: "A" }, {
+    register_id: "E164_CC", slug: "e164-cc", action_type: "ADD", payload: { type: "ADD", data: { _class: "E164CCAmendment", entries: [{ cc_ic: "+883 5100", applicant: "Example" }] } },
+  }), error => error instanceof InvalidError && error.message.includes("no country/area key"));
+});
+
+
+test("unknown register identities fail closed, including object property names", () => {
+  const payload = { type: "ADD", data: { _class: "NNPAmendment", entries: [{ country_or_area: { en: "Aland" } }] } };
+  for (const cls of ["__proto__", "constructor", "UnknownAmendment"]) {
+    assert.ok(errors({ ...payload, data: { _class: cls, entries: [{}] } }, "E118_IIN").some(e => e.path === "data._class" && e.code === "enum"));
+  }
+  for (const id of ["UNKNOWN", "__proto__", "constructor", "toString"]) {
+    assert.ok(errors(payload, id).some(e => e.path === "register_id" && e.code === "unknown"));
+    assert.deepEqual(registerKeysOf(id, payload), []);
+  }
 });
