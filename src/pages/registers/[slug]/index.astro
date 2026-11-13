@@ -21,6 +21,7 @@ import RegisterYearArchive from "~/components/RegisterYearArchive.astro";
 import RegisterHistory from "~/components/RegisterHistory.astro";
 import IssueArchive from "~/components/IssueArchive.astro";
 import RegisterTable from "~/components/RegisterTable.astro";
+import PrintedRegisterContext from "~/components/PrintedRegisterContext.astro";
 import TextualAmendment from "~/components/TextualAmendment.astro";
 import StructuredAmendment from "~/components/StructuredAmendment.astro";
 import type { TextAmendment, PlaceholderAmendment, SequencedAmendment } from "~/lib/types";
@@ -324,6 +325,7 @@ if (isExternal) {
         {state && <RegisterTable state={state} keyField={manifest?.key_field ?? ""} />}
       </section>
 
+      <PrintedRegisterContext slug={slug!} />
       {manifest && state && state.history.length > 0 && (
         <RegisterHistory
           slug={slug!}
