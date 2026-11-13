@@ -46,12 +46,18 @@ jobs:
     - name: Verify committed wire types, validators and form description match the ontology
       run: git diff --exit-code -- src/lib/schema.generated.ts src/lib/schema.validators.generated.ts src/lib/form/class-description.generated.json
 
-    - name: Generate register snapshots
-      working-directory: data-ob
-      env:
-        BUNDLE_GEMFILE: ituob/Gemfile
-        SNAPSHOTS_OUT: ${{ github.workspace }}/data/snapshots
-      run: bundle exec ruby scripts/generate_register_snapshots.rb
+    - name: Project pinned authored data and generate register snapshots
+      run: |
+        python3 scripts/project-authored-data.py \
+          --data-root data --service-root data-ob \
+          --data-ref "$(git -C data rev-parse HEAD)" \
+          --service-ref "$(git -C data-ob rev-parse HEAD)" \
+          --snapshots-out data/snapshots \
+          --projection-root "$RUNNER_TEMP/ituob-site-projection"
+        echo "OB_DATA_ROOT=$RUNNER_TEMP/ituob-site-projection" >> "$GITHUB_ENV"
+
+    - name: Verify projection guards
+      run: python3 -m unittest discover -s scripts/tests -p test_project_authored_data.py
 
     - name: Install dependencies
       run: npm ci
@@ -71,6 +77,8 @@ jobs:
       run: npx vitest run --config vitest.providers.config.ts
     - name: Edition metadata SQL regression tests
       run: npx vitest run --config test/edition-metadata.config.ts
+    - name: General-message SQL and validator regression tests
+      run: npx vitest run --config test/general-messages.config.ts
 
     - name: Item history and textual action regression tests
       run: |
@@ -87,6 +95,15 @@ jobs:
 
     - name: Run TypeScript check
       run: npm run check
+
+    - name: Retain exact issue and dataset projection for parity audit
+      uses: actions/upload-artifact@v4
+      with:
+        name: authored-projection
+        path: |
+          ${{ runner.temp }}/ituob-site-projection/ob-issues
+          ${{ runner.temp }}/ituob-site-projection/datasets
+        if-no-files-found: error
 
     - name: Upload dist for Cloudflare deploys
       uses: actions/upload-artifact@v4
@@ -164,10 +181,18 @@ jobs:
     - uses: ruby/setup-ruby@v1
       with:
         ruby-version: '3.4'
+    - name: Read the exact projection validated by the build
+      uses: actions/download-artifact@v4
+      with:
+        name: authored-projection
+        path: ${{ runner.temp }}/ituob-site-projection
     - name: Run per-issue audit
       working-directory: data-ob
       env:
         BUNDLE_GEMFILE: ituob/Gemfile
+        ITU_OB_DATA_ROOT: ${{ github.workspace }}/data/issues
+        OB_ISSUES_OUT_PATH: ${{ runner.temp }}/ituob-site-projection/ob-issues
+        DATASETS_ROOT: ${{ runner.temp }}/ituob-site-projection/datasets
       run: |
         bundle install
         bundle exec ruby scripts/audit_per_issue.rb
@@ -175,6 +200,9 @@ jobs:
       working-directory: data-ob
       env:
         BUNDLE_GEMFILE: ituob/Gemfile
+        ITU_OB_DATA_ROOT: ${{ github.workspace }}/data/issues
+        OB_ISSUES_OUT_PATH: ${{ runner.temp }}/ituob-site-projection/ob-issues
+        DATASETS_ROOT: ${{ runner.temp }}/ituob-site-projection/datasets
       run: |
         bundle install
         bundle exec ruby scripts/validate_references.rb

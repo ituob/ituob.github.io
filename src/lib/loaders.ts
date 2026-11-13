@@ -19,6 +19,7 @@ import {
   memoize,
   join,
 } from "./fs";
+import { resolve, sep } from "node:path";
 import type {
   LoadedIssue,
   IssueMeta,
@@ -48,7 +49,9 @@ import {
  *  asset is absent — the corpus carries three of these (OB 1167-1170
  *  misc_communications). */
 export const loadGeneralAdoc = memoize((issueId: number, ref: string): string | null => {
-  const path = join(obIssuesRoot(), String(issueId), ref);
+  const issueRoot = resolve(obIssuesRoot(), String(issueId));
+  const path = resolve(issueRoot, ref);
+  if (!path.startsWith(issueRoot + sep) || !path.endsWith(".adoc")) return null;
   try {
     return readFileSync(path, "utf-8");
   } catch {

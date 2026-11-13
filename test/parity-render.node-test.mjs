@@ -21,6 +21,11 @@ test('public HTML preserves annexes, incompleteness, communications and the prin
     // An explicitly incomplete edition remains incomplete after adding content.
     mkdirSync(join(fixture, 'data-ob/ob-issues/669/general'), { recursive: true });
     writeFileSync(join(fixture, 'data-ob/ob-issues/669/general/running_annexes.yaml'), 'type: running_annexes\npayload: {}\n');
+    mkdirSync(join(fixture, 'data-ob/ob-issues/1351/misc_communications'), { recursive: true });
+    writeFileSync(join(fixture, 'data-ob/ob-issues/1351/meta.yaml'), 'id: 1351\npublication_date: 2026-12-01\ncutoff_date: 2026-11-15\n');
+    writeFileSync(join(fixture, 'data-ob/ob-issues/1351/misc_communications/001.yaml'), 'type: misc_communications\nob_issue_no: "1351"\ncontents: "New authored bulletin notice. <script>alert(1)</script>"\n');
+    writeFileSync(join(fixture, 'data-ob/secret.adoc'), 'SENSITIVE PROJECTION SECRET');
+    writeFileSync(join(fixture, 'data-ob/ob-issues/1351/misc_communications/002.yaml'), 'type: misc_communications\nob_issue_no: "1351"\ncontents: "../../secret.adoc"\n');
     symlinkSync(join(root, 'node_modules'), join(fixture, 'node_modules'));
     cpSync(join(root, 'tsconfig.json'), join(fixture, 'tsconfig.json'));
     writeFileSync(join(fixture, 'package.json'), '{"type":"module"}');
@@ -36,6 +41,11 @@ const state = { active_entries: [{ country: 'iso-3166:de', manufactures_htv: tru
     const result = spawnSync(process.execPath, [join(root, 'node_modules/astro/bin/astro.mjs'), 'build'], { cwd: fixture, encoding: 'utf8' });
     assert.equal(result.status, 0, result.stdout + result.stderr);
     const html = id => readFileSync(join(fixture, `dist/issues/${id}/index.html`), 'utf8');
+    const authored = html(1351);
+    assert.match(authored, /New authored bulletin notice\./);
+    assert.doesNotMatch(authored, /SENSITIVE PROJECTION SECRET/);
+    assert.match(authored, /&lt;script&gt;alert\(1\)&lt;\/script&gt;/);
+    assert.doesNotMatch(authored, /<script>alert\(1\)<\/script>/);
     const incomplete = html(669);
     assert.match(incomplete, /data below may not be complete yet/);
     assert.match(incomplete, /Annexes to this issue/);

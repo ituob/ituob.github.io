@@ -20,6 +20,9 @@ export interface Props {
 const { message, lang = "en" } = Astro.props;
 const doc = resolveContent(message.contents, lang);
 const nodes = doc?.content ?? [];
+const rawContents = message.contents as unknown;
+const textField = (message as unknown as { text?: unknown }).text;
+const plainText = typeof rawContents === "string" ? rawContents : typeof textField === "string" ? textField : null;
 const meta = MESSAGE_TYPE_METADATA[message.type] ?? {};
 const rec = (message as any).recommendation ?? meta.recommendation;
 const url = (message as any).url ?? meta.url;
@@ -41,6 +44,8 @@ const url = (message as any).url ?? meta.url;
   <div class="prose-bulletin">
     {nodes.map((node) => <ProseMirror node={node} />)}
   </div>
+) : plainText !== null ? (
+  <div class="prose-bulletin" style="white-space: pre-wrap;">{plainText}</div>
 ) : (
   <p style="color: var(--fg-subtle); font-style: italic;">No content available.</p>
 )}

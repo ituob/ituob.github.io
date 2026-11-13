@@ -18,6 +18,8 @@ import { StubMisconfigured, getAccessIdentity, getSession, takePendingSessionCoo
 import { type Route, body, json, str } from "./lib/http.ts";
 import { UpstreamError, ValidationFailed } from "./lib/submissions.ts";
 import { discussionRoutes } from "./discussion-routes.ts";
+import { generalMessageRoutes } from "./general-message-routes.ts";
+import { generalMessagePublicationRoutes } from "./general-message-publication-routes.ts";
 import { editionMetadataRoutes } from "./edition-metadata-routes.ts";
 import { editionMetadataPublicationRoutes } from "./edition-metadata-publication-routes.ts";
 import { translationRoutes } from "./translation-routes.ts";
@@ -32,6 +34,8 @@ const workflowAndAccountRoutes: Route[] = [
   ...discussionRoutes,
   ...translationRoutes,
   ...editionMetadataRoutes,
+  ...generalMessageRoutes,
+  ...generalMessagePublicationRoutes,
   ...editionMetadataPublicationRoutes,
   ...webhookRoutes,
   {
