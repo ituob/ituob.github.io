@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
 import EditionMetadata from './EditionMetadata.vue';
-import { api, canPlace, editionNumber, publicationNotice, type ComposerSubmission, type Edition, type EditionItem } from '../../lib/discussion-client';
-interface EditionDetail { edition: Edition; items: EditionItem[] }
+import { api, canPlace, canPublishEdition, generalMessageStatus, editionNumber, publicationNotice, type ComposerSubmission, type Edition, type EditionItem, type EditionGeneralMessage } from '../../lib/discussion-client';
+interface EditionDetail { edition: Edition; items: EditionItem[]; general_messages: EditionGeneralMessage[] }
 interface Pending { prNumber: number; url?: string; reason: string }
 const editions = ref<Edition[]>([]), submissions = ref<ComposerSubmission[]>([]), detail = ref<EditionDetail | null>(null);
 const number = ref<number | null>(null), busy = ref(false), loaded = ref(false), error = ref(''), notice = ref(''), pending = ref<Pending | null>(null);
@@ -59,9 +59,19 @@ onMounted(() => perform(refresh));
         <p v-if="metadataReview" role="status">Metadata {{ metadataReview.pending ? 'review pending' : 'merged' }} · PR {{ metadataReview.pr.pr_number ?? 'request reserved; retry to resume' }} <a v-if="pendingUrl(metadataReview.pr.pr_url || undefined)" :href="pendingUrl(metadataReview.pr.pr_url || undefined)" target="_blank" rel="noopener noreferrer">Inspect metadata PR</a></p>
       </div>
       <dl><dt>Frozen data revision</dt><dd>{{ detail.edition.freeze_sha || 'Not frozen' }}</dd><dt>Staging commit</dt><dd>{{ detail.edition.staging_commit || 'Not staged' }}</dd><dt>Publication recorded</dt><dd>{{ detail.edition.published_at || 'Not published' }}</dd></dl>
-      <p v-if="!detail.items.length">No items placed in this edition.</p>
+      <p>{{ detail.items.length }} register amendments · {{ detail.general_messages.length }} general messages</p>
+      <p v-if="!detail.items.length">No register amendments placed in this edition.</p>
       <ol><li v-for="item in detail.items" :key="item.submission_id">{{ item.slug }} · {{ item.action_type }} · {{ item.state }} · {{ item.submission_id }}<p>Patch: {{ item.path }} · Merged revision: {{ item.merge_sha || 'Unavailable' }}</p><button v-if="detail.edition.status === 'composing'" :disabled="busy" @click="remove(item.submission_id)">Remove from edition</button></li></ol>
-      <button v-if="['composing','staged'].includes(detail.edition.status) && detail.items.length" :disabled="busy" @click="publish">{{ pending ? 'Check staging and resume publication' : detail.edition.status === 'staged' ? 'Resume edition publication' : 'Publish edition through staging' }}</button>
+      <section aria-label="General messages in this edition"><h3>General messages</h3>
+        <p>Every general draft targeting this issue must be approved and its exact review PR merged before publication. General messages are frozen while an edition is composing.</p>
+        <p v-if="!detail.general_messages.length">No general messages target this edition.</p>
+        <ul><li v-for="message in detail.general_messages" :key="message.id">
+          <p>{{ message.type }} · {{ message.path }} · revision {{ message.revision }} · {{ generalMessageStatus(message.status) }}</p>
+          <a v-if="pendingUrl(message.pr_url || undefined)" :href="pendingUrl(message.pr_url || undefined)" target="_blank" rel="noopener noreferrer">Inspect general-message PR {{ message.pr_number }}</a>
+          <details v-if="message.content_yaml"><summary>Approved message contents</summary><pre>{{ message.content_yaml }}</pre></details>
+        </li></ul><a href="/admin/general/">Prepare and review general messages</a>
+      </section>
+      <button v-if="canPublishEdition(detail.edition, detail.items.length, detail.general_messages.length)" :disabled="busy" @click="publish">{{ pending ? 'Check staging and resume publication' : detail.edition.status === 'staged' ? 'Resume edition publication' : 'Publish edition through staging' }}</button>
     </section>
     <section><h2>Merged, unpublished submissions</h2><p v-if="loaded && !submissions.length && !error">No merged submissions are waiting for publication.</p><ul><li v-for="submission in submissions" :key="submission.id"><p>{{ submission.register_id }} · {{ submission.action_type }} · {{ submission.id }} · {{ submission.state }} · Target OB {{ submission.target_edition }}<span v-if="submission.edition"> · Placed in OB {{ submission.edition }}</span><span v-if="submission.revert_state && submission.revert_state !== 'closed'"> · Revert {{ submission.revert_state }}</span></p><button v-if="detail && canPlace(submission, detail.edition)" :disabled="busy" @click="place(submission)">Place in OB {{ detail.edition.ob_issue_no }}</button><a :href="`/admin/submissions/?id=${encodeURIComponent(submission.id)}`">Inspect submission</a></li></ul></section>
   </div>

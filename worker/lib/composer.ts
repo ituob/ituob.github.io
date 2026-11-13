@@ -3,6 +3,7 @@
 // verified webhook path) back to `merged` when an admin takes an item out of an edition. Every move
 // goes through `mutate`. All entry points require itu-admin; the routes are Access-guarded and no
 // member endpoint imports this file (source guards in test/submissions.test.ts).
+import { generalSelection, requireGeneralReviews, generalMergesForPublication, requireGeneralSelection, generalMessageSummary } from "./general-message-composition.ts";
 import { metadataMergeForPublication } from "./edition-metadata-publication.ts";
 import { auditStatements } from "./audit.ts";
 import { requireRole } from "./authz.ts";
@@ -88,7 +89,8 @@ export async function readEdition(db: D1Database, session: Session | null, no: n
       .bind(no)
       .all()
   ).results;
-  return { edition, items };
+  const generalMessages = await generalSelection(db, no);
+  return { edition, items, general_messages: generalMessages.map(message => generalMessageSummary(message, edition.status === "published")) };
 }
 
 // ---------------------------------------------------------------- editions
@@ -158,17 +160,19 @@ export async function removeItem(db: D1Database, session: Session | null, no: nu
       d
         .prepare(`DELETE FROM edition_items WHERE ob_issue_no=?1 AND submission_id=?2 AND EXISTS (SELECT 1 FROM submissions WHERE id=?2 AND version=?3)`)
         .bind(no, sub.id, v),
-      // An edition emptied by removals must not keep holding the single composing slot:
+      // An edition with no register or general content must release the composing slot:
       // it goes back to `open`, or, when another edition is already open, the empty row goes.
       d
         .prepare(
           `UPDATE editions SET status='open' WHERE ob_issue_no=?1 AND status='composing'
             AND NOT EXISTS (SELECT 1 FROM edition_items WHERE ob_issue_no=?1)
+            AND NOT EXISTS (SELECT 1 FROM general_messages WHERE ob_issue_no=?1)
             AND NOT EXISTS (SELECT 1 FROM editions WHERE status='open')`,
         )
         .bind(no),
       d
-        .prepare(`DELETE FROM editions WHERE ob_issue_no=?1 AND status='composing' AND NOT EXISTS (SELECT 1 FROM edition_items WHERE ob_issue_no=?1)`)
+        .prepare(`DELETE FROM editions WHERE ob_issue_no=?1 AND status='composing' AND NOT EXISTS (SELECT 1 FROM edition_items WHERE ob_issue_no=?1)
+          AND NOT EXISTS (SELECT 1 FROM general_messages WHERE ob_issue_no=?1)`)
         .bind(no),
     ],
   });
@@ -186,23 +190,41 @@ export async function publishEdition(db: D1Database, session: Session | null, no
   const s = admin(session);
   let ed = await getEdition(db, no);
   if (ed.status === "published") throw new ConflictError(`edition ${no} is already published`);
-  if (ed.status === "open") throw new ConflictError(`edition ${no} has nothing placed`);
   const itemQuery = `SELECT i.submission_id, i.position, s.state, p.merge_sha FROM edition_items i JOIN submissions s ON s.id=i.submission_id
     LEFT JOIN submission_prs p ON p.submission_id=s.id AND p.rev=(SELECT max(rev) FROM submission_prs WHERE submission_id=s.id)
     WHERE i.ob_issue_no=?1 ORDER BY i.position`;
   const items = (await db.prepare(itemQuery).bind(no)
     .all<{ submission_id: string; position: number; state: string; merge_sha: string | null }>()).results;
-  if (items.length === 0) throw new ConflictError(`edition ${no} has nothing placed`);
+  const generalMessages = await generalSelection(db, no);
+  if (items.length === 0 && generalMessages.length === 0) throw new ConflictError(`edition ${no} has nothing placed`);
   const bad = items.find((i) => i.state !== "scheduled" && i.state !== "published");
   if (bad) throw new ConflictError(`item ${bad.submission_id} is ${bad.state}, not scheduled`);
 
-  if (ed.status === "composing") {
+  if (ed.status === "open" || ed.status === "composing") {
+    requireGeneralReviews(no, generalMessages);
+    // Do not freeze an open general-only issue while local metadata still
+    // needs authoring/scheduling or its first review request to be completed.
+    const metadata = await db.prepare(`SELECT m.scheduled_at,p.pr_number FROM edition_metadata m
+      LEFT JOIN edition_metadata_prs p ON p.ob_issue_no=m.ob_issue_no AND p.revision=m.revision
+      WHERE m.ob_issue_no=?1`).bind(no).first<{ scheduled_at: string | null; pr_number: number | null }>();
+    if (metadata && (!metadata.scheduled_at || !metadata.pr_number))
+      throw new ConflictError("edition metadata must be scheduled and have a review PR before composition");
+    // A general-only edition starts open. Freeze before any upstream read or
+    // pin request so general authoring APIs cannot change its selected content.
+    await run(db, [
+      requireGeneralSelection(db, no, generalMessages),
+      db.prepare(`UPDATE editions SET status='composing' WHERE ob_issue_no=?1 AND status='open'`).bind(no),
+      ...(await auditStatements(db, [auditEdition(now(), s.userId, no, "edition.composing", { general_messages: generalMessages.map(message => ({ id: message.id, revision: message.revision })) })], { sql: "changes()=1", args: [] })),
+      requireEditionStatus(db, no, ["composing"]),
+    ]);
+    ed = await getEdition(db, no);
+    const generalMerges = await generalMergesForPublication(generalMessages, publisher);
     const metadataMerge = await metadataMergeForPublication(db, s, no, publisher);
     let bump;
     try {
       bump = await publisher.bumpDataPin({
         edition: no, idempotencyKey: `edition-${no}-pin`,
-        items: [...items.map((i) => ({ submissionId: i.submission_id, mergeSha: i.merge_sha })), ...(metadataMerge ? [metadataMerge] : [])],
+        items: [...items.map((i) => ({ submissionId: i.submission_id, mergeSha: i.merge_sha })), ...generalMerges, ...(metadataMerge ? [metadataMerge] : [])],
       });
     } catch (e) {
       throw new UpstreamError(`could not bump the data pin: ${String((e as Error).message)}`);
@@ -221,6 +243,7 @@ export async function publishEdition(db: D1Database, session: Session | null, no
                 AND current.state=json_extract(expected.value, '$.state')
                 AND current.merge_sha IS json_extract(expected.value, '$.merge_sha')
           ))`).bind(no, JSON.stringify(items), items.length),
+      requireGeneralSelection(db, no, generalMessages),
       db.prepare(`UPDATE editions SET status='staged', freeze_sha=?2, staging_commit=?3 WHERE ob_issue_no=?1 AND status='composing'`).bind(no, bump.freezeSha, bump.siteCommit),
       requireEditionStatusAfter(db, no),
       ...(await auditStatements(db, [auditEdition(t, s.userId, no, "edition.staged", { freeze_sha: bump.freezeSha, staging_commit: bump.siteCommit })])),
@@ -242,10 +265,13 @@ export async function publishEdition(db: D1Database, session: Session | null, no
   const t = now();
   await run(db, [
     db.prepare(`UPDATE editions SET status='published', published_at=?2 WHERE ob_issue_no=?1 AND status='staged'`).bind(no, t),
+    requireEditionStatusAfter(db, no, "published"),
     ...(await auditStatements(db, [auditEdition(t, s.userId, no, "edition.published", { published, freeze_sha: ed.freeze_sha })])),
   ]);
   return { edition: await getEdition(db, no), published };
 }
 
-/** Fails the batch unless the edition is now `staged` (the UPDATE just before it matched). */
-const requireEditionStatusAfter = (db: D1Database, no: number) => requireEditionStatus(db, no, ["staged"]);
+/** A concurrent publish must not reuse another request's successful transition. */
+const requireEditionStatusAfter = (db: D1Database, no: number, status: "staged" | "published" = "staged") =>
+  db.prepare(`INSERT INTO edition_items (ob_issue_no,submission_id,position)
+    SELECT ?1,'-',NULL WHERE changes()!=1 OR NOT EXISTS (SELECT 1 FROM editions WHERE ob_issue_no=?1 AND status=?2)`).bind(no,status);

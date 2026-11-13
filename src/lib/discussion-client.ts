@@ -13,6 +13,13 @@ export interface Notification { id: string; submission_id: string; kind: string;
 export interface Edition { ob_issue_no: number; status: 'open' | 'composing' | 'staged' | 'published'; freeze_sha: string | null; meta_pr: number | null; staging_commit: string | null; published_at: string | null }
 export interface ComposerSubmission { id: string; register_id: string; slug: string; action_type: string; state: string; target_edition: number; edition: number | null; revert_state: string | null; pr_number: number | null }
 export interface EditionItem { submission_id: string; position: number; state: string; slug: string; action_type: string; merge_sha: string | null; path: string }
+export interface EditionGeneralMessage { id: string; type: string; path: string; revision: number; approved_at: string | null; content_yaml: string | null; pr_number: number | null; pr_url: string | null; status: 'awaiting_approval' | 'awaiting_review' | 'review_reserved' | 'review_pr_created' | 'published' }
+export function canPublishEdition(edition: Edition, registerCount: number, generalCount: number): boolean {
+  return ['open', 'composing', 'staged'].includes(edition.status) && registerCount + generalCount > 0;
+}
+export function generalMessageStatus(status: EditionGeneralMessage['status']): string {
+  return { awaiting_approval: 'Awaiting administrator approval', awaiting_review: 'Awaiting publication review PR', review_reserved: 'Review request reserved; retry in general messages', review_pr_created: 'Review PR created; its merge is verified when publishing', published: 'Included in published issue' }[status];
+}
 export function submissionId(value: string): string {
   if (!/^[0-9A-Z]{26}$/.test(value)) throw new Error('Enter a 26-character submission identifier.');
   return value;
