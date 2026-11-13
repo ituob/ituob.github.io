@@ -54,7 +54,7 @@ async function save(submit = false) {
     if (Object.keys(inputErrors.value).length) throw new Error('Resolve invalid JSON fields before saving.');
     const payload = actionPayload(action.value, node.value, existing.value);
     const localErrors = payloadErrors(payload);
-    if (submit && localErrors.length) { errors.value = localErrors; throw new Error('Resolve the field errors before submitting.'); }
+    if (localErrors.length) { errors.value = localErrors; throw new Error('Resolve the field errors before saving. Your changes remain in this form.'); }
     let id = selected.value;
     if (creating.value) {
       const result = await api<{ submission: Submission }>('/api/me/submissions', 'POST', { register_id: registerId.value, slug: slug.value, action_type: action.value, payload, ...(correctsId.value ? { corrects_id: correctsId.value } : {}) });
@@ -66,7 +66,7 @@ async function save(submit = false) {
     // Load the durable draft first: a failed submit must still expose its saved id and errors.
     await load(id);
     if (submit) { await api(`/api/me/submissions/${id}/submit`, 'POST', {}); await load(id); }
-    await list(); notice.value = submit ? 'Submitted for review.' : 'Draft saved. Validation errors must be resolved before submission.';
+    await list(); notice.value = submit ? 'Submitted for review.' : 'Draft saved.';
   });
 }
 async function transition(verb: string) {

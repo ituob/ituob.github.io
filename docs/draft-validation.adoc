@@ -1,0 +1,26 @@
+= Durable draft validation
+
+A draft is a persisted register action, not a storage area for incomplete form
+input. Creation and draft edits run the existing validator chain before any
+submission, revision, review-state or audit write. This chain validates the
+RegisterChange envelope and concrete amendment/item using validators generated
+from the LML ontology, plus the existing register-specific rules. A failed write
+returns field errors and leaves the durable record unchanged. Country authority
+and the ITU-only text amendment restriction still apply on every payload write.
+
+The workspace validates the generated envelope and concrete amendment before
+saving as well as submitting. Invalid input remains in the local form; a server
+validation failure also preserves that form and reports its field errors. A
+successful save means a durable, validated revision exists. Previously stored
+invalid revisions remain readable, and submission revalidates them.
+
+These checks establish the schema boundary only. Generated TypeScript validation
+alone does not prove that the compiled Lutaml model can round-trip the YAML or
+that replay applies an action to a register correctly. The publication pipeline
+must separately exercise actual compiled-class round-trip and replay contracts;
+that CI evidence remains required for the full issue 101 criterion, “Nothing
+reaches a draft that cannot round-trip or replay.”
+
+Patch publication defaults to `ituob/itu-ob-data`, the authoritative data
+repository. An explicitly configured runtime target must also satisfy deployment
+preflight and repository allowlist controls.

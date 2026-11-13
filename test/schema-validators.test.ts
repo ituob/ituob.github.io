@@ -102,13 +102,14 @@ describe("the Worker submission path calls the generated validators", () => {
     expect(codes(errs)).toEqual(["type:data.entries[0].tel"]);
   });
 
-  it("a draft with ontology errors is stored with them, and submit refuses it with field pointers", async () => {
-    const id = await mkDraft({ type: "ADD", data: { _class: "E118Amendment", entries: [{ ...entry, company_name: 7, tel: "x", extra: true }] } });
-    const rev = await db().prepare("SELECT validation FROM submission_revisions WHERE submission_id=?1 AND rev=1").bind(id).first<{ validation: string }>();
-    expect(codes(JSON.parse(rev!.validation).stage1)).toEqual(["type:data.entries[0].company_name", "type:data.entries[0].tel", "unknown:data.entries[0].extra"]);
-    const r = await api("POST", `/api/me/submissions/${id}/submit`, { session: "member-A", body: {} });
+  it("rejects ontology errors at create with field pointers and no partial durable writes", async () => {
+    const tables = ["submissions", "submission_revisions", "review_state", "audit_log"];
+    const snapshot = () => Promise.all(tables.map(table => db().prepare(`SELECT * FROM ${table} ORDER BY rowid`).all().then(r => r.results)));
+    const before = await snapshot();
+    const r = await api("POST", "/api/me/submissions", { session: "member-A", body: body({ type: "ADD", data: { _class: "E118Amendment", entries: [{ ...entry, company_name: 7, tel: "x", extra: true }] } }) });
     expect(r.status).toBe(422);
     expect(codes(r.json.errors)).toEqual(["type:data.entries[0].company_name", "type:data.entries[0].tel", "unknown:data.entries[0].extra"]);
+    expect(await snapshot()).toEqual(before);
   });
 
   it("a payload in the stored corpus shape submits", async () => {

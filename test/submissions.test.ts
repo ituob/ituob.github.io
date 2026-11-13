@@ -70,7 +70,7 @@ describe("happy path", () => {
 
     expect(fake.requests).toHaveLength(1);
     const req = fake.requests[0]!;
-    expect(req.repo).toBe("ituob/service-publications-docs");
+    expect(req.repo).toBe("ituob/itu-ob-data");
     expect(req.path).toBe("ob-issues/1351/e118-iin/001-ADD.yaml");
     expect(req.branch).toMatch(/^rt-sub-1351-001-e118-iin-[0-9A-Z]{8}$/);
     expect(req.branch).toBe(`rt-sub-1351-001-e118-iin-${id.slice(-8)}`);
@@ -302,28 +302,50 @@ describe("country binding and authority", () => {
 });
 
 describe("validation stage 1", () => {
-  it("blank company_name: draft saves, submit returns actionable field errors, nothing transitions", async () => {
-    const id = await draft("member-A", payload([entry({ company_name: "  " })]));
-    const r = await me(id, "submit");
+  const durableSnapshot = async () => {
+    const tables = ["submissions", "submission_revisions", "review_state", "audit_log"];
+    return Promise.all(tables.map(table => db().prepare(`SELECT * FROM ${table} ORDER BY rowid`).all().then(r => r.results)));
+  };
+
+  it("rejects an invalid draft creation without any durable writes", async () => {
+    const before = await durableSnapshot();
+    const r = await api("POST", "/api/me/submissions", { session: "member-A", body: body(payload([entry({ company_name: "  " })])) });
     expect(r.status).toBe(422);
     expect(r.json.errors).toEqual([{ path: "data.entries[0].company_name", code: "required", message: "company_name is required" }]);
-    expect(await stateOf(id)).toBe("draft");
-    // fix it as a new revision and submit
-    expect((await api("PUT", `/api/me/submissions/${id}`, { session: "member-A", body: { payload: payload() } })).status).toBe(200);
+    expect(await durableSnapshot()).toEqual(before);
+    const id = await draft();
     expect((await me(id, "submit")).status).toBe(200);
-    expect(await count("SELECT count(*) n FROM submission_revisions WHERE submission_id=?1", id)).toBe(2);
   });
 
-  it("envelope errors: wrong class, type mismatch, SUP in the stored shape submits, LIR needs ITU", async () => {
-    const bad = await draft("member-A", { type: "DEL", data: { _class: "nope", entries: [entry()] } });
-    const r = await me(bad, "submit");
+  it("rejects invalid draft edits without changing payload, revision, version, history or audit", async () => {
+    const id = await draft();
+    const before = await durableSnapshot();
+    for (const [invalid, path] of [[payload([entry({ company_name: "" })]), "data.entries[0].company_name"], [payload([entry({ tel: "wrong type" })]), "data.entries[0].tel"]] as const) {
+      const r = await api("PUT", `/api/me/submissions/${id}`, { session: "member-A", body: { payload: invalid } });
+      expect(r.status).toBe(422);
+      expect(r.json.errors).toContainEqual(expect.objectContaining({ path }));
+      expect(await durableSnapshot()).toEqual(before);
+    }
+    const fixed = payload([entry({ company_name: "Revised Telecom" })]);
+    expect((await api("PUT", `/api/me/submissions/${id}`, { session: "member-A", body: { payload: fixed } })).status).toBe(200);
+    const sub = await db().prepare("SELECT current_rev,version FROM submissions WHERE id=?1").bind(id).first<any>();
+    expect(sub).toMatchObject({ current_rev: 2, version: 1 });
+    expect(await count("SELECT count(*) n FROM submission_revisions WHERE submission_id=?1", id)).toBe(2);
+    expect((await me(id, "submit")).status).toBe(200);
+  });
+
+  it("rejects envelope errors at creation; stored SUP shape submits and LIR needs ITU", async () => {
+    const before = await durableSnapshot();
+    const r = await api("POST", "/api/me/submissions", { session: "member-A", body: body({ type: "DEL", data: { _class: "nope", entries: [entry()] } }) });
     expect(r.status).toBe(422);
     expect(r.json.errors.map((e: any) => e.path).sort()).toEqual(["data._class", "type"]);
-    const sup = (await api("POST", "/api/me/submissions", { session: "member-A", body: { ...body(payload([entry()], "SUP")), action_type: "SUP" } })).json.submission.id;
-    // A stored SUP file carries the superseded entry as-is; the ontology has no superseded_by on an amendment.
-    expect((await me(sup, "submit")).status).toBe(200);
-    const withKey = (await api("POST", "/api/me/submissions", { session: "member-A", body: { ...body(payload([entry({ superseded_by: { x: 1 } })], "SUP")), action_type: "SUP" } })).json.submission.id;
-    expect((await me(withKey, "submit")).json.errors.map((e: any) => `${e.code}:${e.path}`)).toEqual(["unknown:data.entries[0].superseded_by"]);
+    const withKey = await api("POST", "/api/me/submissions", { session: "member-A", body: { ...body(payload([entry({ superseded_by: { x: 1 } })], "SUP")), action_type: "SUP" } });
+    expect(withKey.status).toBe(422);
+    expect(withKey.json.errors.map((e: any) => `${e.code}:${e.path}`)).toEqual(["unknown:data.entries[0].superseded_by"]);
+    expect(await durableSnapshot()).toEqual(before);
+    const sup = await api("POST", "/api/me/submissions", { session: "member-A", body: { ...body(payload([entry()], "SUP")), action_type: "SUP" } });
+    expect(sup.status).toBe(201);
+    expect((await me(sup.json.submission.id, "submit")).status).toBe(200);
     const lir = await api("POST", "/api/me/submissions", { session: "member-A", body: { ...body(), action_type: "LIR" } });
     expect(lir.status).toBe(403);
   });
@@ -339,10 +361,18 @@ describe("validation stage 1", () => {
 
   it("the validator chain is pluggable", async () => {
     const { setValidators, stage1 } = await import("../worker/lib/validation.ts");
+    const id = await draft();
     setValidators([stage1, () => [{ path: "data.entries[0].x", code: "enum", message: "plugged" }]]);
     try {
-      const id = await draft();
+      const before = await durableSnapshot();
+      const created = await api("POST", "/api/me/submissions", { session: "member-A", body: body() });
+      expect(created.status).toBe(422);
+      expect(created.json.errors.at(-1).message).toBe("plugged");
+      const edited = await api("PUT", `/api/me/submissions/${id}`, { session: "member-A", body: { payload: payload() } });
+      expect(edited.status).toBe(422);
+      expect(edited.json.errors.at(-1).message).toBe("plugged");
       expect((await me(id, "submit")).json.errors.at(-1).message).toBe("plugged");
+      expect(await durableSnapshot()).toEqual(before);
     } finally {
       setValidators(null);
     }

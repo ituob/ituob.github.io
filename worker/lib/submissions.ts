@@ -38,7 +38,7 @@ export interface Sub {
   updated_at: string;
 }
 
-export const DEFAULT_PATCH_REPO = "ituob/service-publications-docs";
+export const DEFAULT_PATCH_REPO = "ituob/itu-ob-data";
 const now = () => new Date().toISOString();
 const VALIDATOR_VERSION = "stage1-v2";
 
@@ -235,6 +235,7 @@ export async function createSubmission(db: D1Database, session: Session | null, 
   const id = ulid();
   const t = now();
   const errors = validate({ register_id: c.register_id, slug: c.slug, action_type: c.action_type, payload: c.payload });
+  if (errors.length) throw new ValidationFailed(errors);
   const rev = await revisionRow({ id }, 1, c.payload, errors, s.userId, t);
   const stmts = [
     db
@@ -275,13 +276,14 @@ async function newRevisionPayload(db: D1Database, s: Session, sub: Sub, b: Recor
   return payload as Record<string, unknown>;
 }
 
-/** Draft edit: a new immutable revision, no state change, audited. Invalid content is allowed in a draft. */
+/** Draft edit: a validated immutable revision, no state change, audited. */
 export async function editDraft(db: D1Database, session: Session | null, id: string, b: Record<string, unknown>) {
   const { s, sub } = await ownSub(db, session, id);
   if (sub.state !== "draft") throw new ConflictError(`illegal transition from ${sub.state}`);
   const payload = await newRevisionPayload(db, s, sub, b);
   const t = now();
   const errors = validate({ register_id: sub.register_id, slug: sub.slug, action_type: sub.action_type, payload });
+  if (errors.length) throw new ValidationFailed(errors);
   const rev = await revisionRow(sub, sub.current_rev + 1, payload, errors, s.userId, t);
   return mutate(db, sub, {
     from: ["draft"], to: "draft", actor: { kind: "user", id: s.userId }, auditAction: "submission.draft_edited",

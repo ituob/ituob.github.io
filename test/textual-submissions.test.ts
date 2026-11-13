@@ -17,6 +17,7 @@ const post = (id: string, move: string, session = "itu-editor", body = {}) =>
 const review = (id: string, move: string, body = {}) =>
   api("POST", `/api/admin/submissions/${id}/${move}`, { access: "itu-admin@example.test", body });
 let publisher: FakePatchPublisher;
+let fixtureAuditRows: number;
 beforeEach(async () => {
   await seedFixtures();
   await activateMember("member-A", "A");
@@ -25,6 +26,7 @@ beforeEach(async () => {
   await provisionItu("itu-admin", ["itu-admin"]);
   publisher = new FakePatchPublisher();
   setPublisher(publisher);
+  fixtureAuditRows = await count("audit_log");
 });
 afterEach(() => setPublisher(null));
 
@@ -37,11 +39,20 @@ describe("catalog text submissions", () => {
     expect((await post(draft.json.submission.id, "submit")).status).toBe(200);
   });
 
-  it("saves errors in drafts; validates edits/revisions, then opens a PR with the generated-schema text payload", async () => {
+  it("rejects invalid text before saving; validates edits/revisions, then opens a PR with the generated-schema text payload", async () => {
     const draft = await api("POST", "/api/me/submissions", { session: "itu-editor", body: textBody("NNP", "nnp", textPayload("NNP", " ")) });
-    expect(draft.status).toBe(201);
-    const id = draft.json.submission.id as string;
-    expect((await post(id, "submit")).json.errors).toContainEqual(expect.objectContaining({ path: "data.text", code: "required" }));
+    expect(draft.status).toBe(422);
+    expect(draft.json.errors).toContainEqual(expect.objectContaining({ path: "data.text", code: "required" }));
+    for (const table of ["submissions", "submission_revisions", "review_state", "audit_log"]) expect(await count(table)).toBe(table === "audit_log" ? fixtureAuditRows : 0);
+    const created = await api("POST", "/api/me/submissions", { session: "itu-editor", body: textBody() });
+    expect(created.status).toBe(201);
+    const id = created.json.submission.id as string;
+    const beforeEdit = await db().prepare("SELECT * FROM submissions WHERE id=?1").bind(id).first();
+    const badEdit = await api("PUT", `/api/me/submissions/${id}`, { session: "itu-editor", body: { payload: textPayload("NNP", " ") } });
+    expect(badEdit.status).toBe(422);
+    expect(badEdit.json.errors).toContainEqual(expect.objectContaining({ path: "data.text", code: "required" }));
+    expect(await db().prepare("SELECT * FROM submissions WHERE id=?1").bind(id).first()).toEqual(beforeEdit);
+    for (const table of ["submission_revisions", "review_state", "audit_log"]) expect(await count(table)).toBe(table === "audit_log" ? fixtureAuditRows + 1 : 1);
     expect((await api("PUT", `/api/me/submissions/${id}`, { session: "itu-editor", body: { payload: textPayload() } })).status).toBe(200);
     expect((await post(id, "submit")).status).toBe(200);
     expect((await review(id, "start-review")).status).toBe(200);
@@ -66,20 +77,18 @@ describe("catalog text submissions", () => {
       expect(response.json.errors).toEqual([expect.objectContaining({ path: body.register_id === "UNKNOWN" ? "register_id" : "slug" })]);
     }
     expect(await count("submissions")).toBe(0);
-    expect(await count("audit_log")).toBe(0);
+    expect(await count("audit_log")).toBe(fixtureAuditRows);
   });
 
-  it("rejects unknown classes, text on structured registers, and smuggled country entries at submit", async () => {
+  it("rejects unknown classes, text on structured registers, and smuggled country entries before saving", async () => {
     for (const body of [
       textBody("NNP", "nnp", { type: "ADD", data: { _class: "UnknownAmendment", text: "Other country" } }),
       textBody("E118_IIN", "e118-iin"),
       textBody("NNP", "nnp", { ...textPayload(), data: { ...textPayload().data, entries: [{ country_or_area: { en: "Aland" } }] } }),
     ]) {
       const draft = await api("POST", "/api/me/submissions", { session: "itu-editor", body });
-      expect(draft.status).toBe(201);
-      const id = draft.json.submission.id;
-      expect((await post(id, "submit")).status).toBe(422);
-      expect((await db().prepare("SELECT state FROM submissions WHERE id=?1").bind(id).first<any>()).state).toBe("draft");
+      expect(draft.status).toBe(422);
+      for (const table of ["submissions", "submission_revisions", "review_state", "audit_log"]) expect(await count(table)).toBe(table === "audit_log" ? fixtureAuditRows : 0);
     }
   });
 });
@@ -95,7 +104,7 @@ describe("text has no verifiable member country scope", () => {
       expect(response.json.errors).toEqual([expect.objectContaining({ path: "data", message: expect.stringContaining("country scope cannot be verified") })]);
     }
     expect(await count("submissions")).toBe(0);
-    expect(await count("audit_log")).toBe(0);
+    expect(await count("audit_log")).toBe(fixtureAuditRows);
   });
 
   it("cannot replace a bound typed draft with text at edit or revise", async () => {
