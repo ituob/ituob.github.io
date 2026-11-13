@@ -1,0 +1,8 @@
+---
+import Base from "~/layouts/Base.astro";
+import MembershipAccount from "~/components/account/MembershipAccount.vue";
+---
+<Base title="Your membership" breadcrumbs={[{ label: "Your account", href: "/me/" }, { label: "Membership" }]}>
+  <MembershipAccount client:load />
+  <noscript><p>Enable JavaScript to view or claim your membership.</p></noscript>
+</Base>

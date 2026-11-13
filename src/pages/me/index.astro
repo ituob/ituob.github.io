@@ -1,0 +1,8 @@
+---
+import Base from "~/layouts/Base.astro";
+import SessionAccount from "~/components/account/SessionAccount.vue";
+---
+<Base title="Your account" breadcrumbs={[{ label: "Your account" }]}>
+  <SessionAccount client:load />
+  <noscript><p>Enable JavaScript to view your session details. <a href="/auth/login?return_to=%2Fme%2F">Sign in through the identity service</a>.</p></noscript>
+</Base>
