@@ -1,0 +1,26 @@
+---
+import ProseMirror from "./ProseMirror.astro";
+import { loadPrintedContext, registerPrintedContext } from "../lib/printed-context";
+
+interface Props {
+  slug: string;
+  issue?: number;
+}
+const { slug, issue } = Astro.props;
+// These registers contain printed form labels and prose outside typed entries.
+const registers = new Set(["t35-na", "e218-trcc", "e164-cc"]);
+const groups = issue !== undefined
+  ? (slug === "e212-mnc" ? [{ issue, nodes: loadPrintedContext(issue, slug) }] : [])
+  : (registers.has(slug) ? registerPrintedContext(slug) : []);
+---
+{groups.some((group) => group.nodes.length > 0) && (
+  <aside class="prose-bulletin mt-6 mb-6">
+    {!issue && <h3>Printed amendment labels and notes</h3>}
+    {groups.map((group) => group.nodes.length > 0 && (
+      <section>
+        {!issue && <h4><a href={`/issues/${group.issue}/`}>OB No. {group.issue}</a></h4>}
+        {group.nodes.map((node) => <ProseMirror node={node} />)}
+      </section>
+    ))}
+  </aside>
+)}
