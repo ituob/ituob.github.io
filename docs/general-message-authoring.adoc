@@ -1,0 +1,23 @@
+= General-message authoring
+
+`/admin/general` lets ITU editors and administrators prepare canonical issue-message drafts. The form uses generated ontology descriptions and the server validates the class selected by the existing corpus classifier. The message itself is the YAML envelope; register amendment wrappers and identifiers are not used. Optional ontology fields and opaque nested legacy objects survive round trips.
+
+The API is Access guarded under `/api/admin/general-messages`. GET lists staff drafts; POST creates `{ob_issue_no,type,value}`. GET `/:id` reads a draft; POST `/:id` saves `{expected_revision,value}`. POST `/:id/approve` requires an ITU administrator and `{expected_revision}`. Approval snapshots exact YAML bytes for the approved revision. Subsequent edits clear approval and advance the optimistic revision, retaining the prior snapshot. A reserved publication request prevents further edits. Audit and state writes share a transaction.
+
+`generalMessageArtifact(db,id,expectedRevision)` returns `{id,ob_issue_no,type,class_name,path,revision,content}` for the current approved revision. The publisher must reserve these exact bytes in `general_message_prs` before any external request, require administrator authorization, check the authoritative base repository for path collisions, and open a reviewed PR. It must not write directly to the default branch. Publication and merge evidence belong to the publisher integration, not this draft API.
+
+New ordinary records receive `ob-issues/<issue>/<type>/<NNN>.yaml`; approved recommendations and running annexes use `general/approved_recommendations.yaml` and `general/running_annexes.yaml`. Sequence allocation is atomic within the draft database. Existing legacy Git files are not inventoried in D1: the publisher's base-repository collision check is required. This lane does not import or replace an existing remote record by path.
+
+== Coverage and remaining gaps
+
+Structured ontology fields are editable, including recommendation entries, running-annex links, nested telephone sections and communication dates. Plain prose is editable in string fields such as `GeneralMiscCommunications.text`/`contents`, `GeneralCustom.text`, and the other declared string attributes. `GeneralCustom.title` is an opaque Hash in the current generated schema and is preserved read-only.
+
+SANC creation and edits are unavailable: the corpus maps `sanc` to `GeneralSancs`, while the publishing service dispatches to `GeneralMessage`. The source model/dispatch must agree before typed SANC authoring can be accepted.
+
+Opaque Hash values, including multilingual ProseMirror documents, are preserved read-only. The editor does not provide ProseMirror authoring or a raw JSON substitute for prose. Hash-only telephone communication contents, `GeneralMid.contents`, generic callback contents, and legacy singleton payload Hashes still need an agreed ontology/editor representation before readable prose authoring parity can be claimed. Root fields `extra_links` and structured recommendation `items` follow the current generated schema; legacy singleton `payload` objects are preserved without conversion. Renderer support for each newly authored structured shape must be verified by the publishing service.
+
+== Focused evidence
+
+`npx vitest run --config test/general-messages.config.ts` runs real migration and transaction SQL with Node SQLite, generated-validator rejection, authorization, stale revision protection, approval snapshots, exact YAML artifacts, audit rollback, and reservation locks. Canonical OB 1331 fixtures in `test/fixtures/general-messages` are drawn from service corpus checkout `23ce60948c16dfa609080c453d6b7a2220933756` (proof checkout `proof-123`). The singleton fixtures are unchanged; the telephone fixture is the smallest complete communication and its containing section extracted from the canonical record, retaining its opaque ProseMirror data. `test/general-messages.test.ts` provides host workerd/D1 concurrency and preservation checks; these require the suite cleanup to delete general-message tables before users. Local workerd cannot start in the sandbox (listen EPERM); Node SQLite evidence is not a claim that D1 has run.
+
+Focused checks at implementation handoff: 18 Node SQL/validator tests passed; Worker TypeScript passed; Astro check 0 errors and 0 warnings (one existing Base layout hint). focused-quality: general-message validation, optimistic writes, approval snapshots and UI preservation contracts; no remaining in-scope finding. Integration must include the shared edition-number helper, SchemaNode opaqueReadonly support, route registration, publisher collision checks and D1 cleanup.

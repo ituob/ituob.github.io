@@ -1,5 +1,5 @@
 import { exports } from "cloudflare:workers";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { verifyChain } from "../worker/lib/audit.ts";
 import { FakePatchPublisher, setPublisher } from "../worker/lib/publisher.ts";
 import { reconcile } from "../worker/lib/reconciler.ts";
@@ -9,7 +9,7 @@ const SECRET = "test-webhook-secret";
 const EDITOR = "itu-editor@example.test";
 const ADMINU = "itu-admin@example.test";
 const MEMBER_A = "member-A@example.test";
-const payload = () => ({ type: "ADD", data: { _class: "E118Amendment", entries: [{ country_or_area: { en: "Aland" }, company_name: "Acme Telecom" }] } });
+const payload = () => ({ type: "ADD", data: { _class: "E118Amendment", entries: [{ country_or_area: { en: "Aland" }, company_name: "Acme Telecom", issue_id_number: "89 358 01" }] } });
 
 let fake: FakePatchPublisher;
 beforeEach(async () => {
@@ -47,14 +47,24 @@ async function hook(event: string, p: unknown) {
   );
   return { status: res.status, json: (await res.json().catch(() => null)) as any };
 }
-const closedEvent = (repo: string, branch: string, number: number, merged: boolean, base = "main") => ({
+const closedEvent = (repo: string, branch: string, number: number, merged: boolean, base = "main", headSha?: string) => ({
   action: "closed", repository: { full_name: repo },
-  pull_request: { number, merged, merge_commit_sha: merged ? "m".repeat(40) : null, head: { ref: branch, repo: { full_name: repo } }, base: { ref: base } },
+  pull_request: { number, merged, merge_commit_sha: merged ? "m".repeat(40) : null, head: { ref: branch, ...(headSha ? { sha: headSha } : {}), repo: { full_name: repo } }, base: { ref: base } },
 });
 
 /** draft -> ... -> pr_open (approval opens the PR through the fake). */
 async function toPrOpen(slug = "e118-iin", edition = 1351) {
-  const c = await api("POST", "/api/me/submissions", { session: "member-A", body: { register_id: "E118_IIN", slug, action_type: "ADD", payload: payload() } });
+  const targets: Record<string, { register_id: string; className: string; fields: object }> = {
+    "e118-iin": { register_id: "E118_IIN", className: "E118Amendment", fields: { company_name: "Acme Telecom", issue_id_number: "89 358 01" } },
+    "e212-mnc": { register_id: "E212_MNC", className: "E212MNCAmendment", fields: { mcc_mnc_codes: "999 99", networks: "Acme Telecom" } },
+    "e218-trcc": { register_id: "E218_TRCC", className: "E218TRCCAmendment", fields: { tmcc_code: "999" } },
+    "f32-tdi": { register_id: "F32_TDI", className: "F32TDIAmendment", fields: { network_code: "AA" } },
+  };
+  const target = targets[slug];
+  expect(target, `catalog fixture for ${slug}`).toBeDefined();
+  const data = { _class: target.className, entries: [{ country_or_area: { en: "Aland" }, ...target.fields }] };
+  const c = await api("POST", "/api/me/submissions", { session: "member-A", body: { register_id: target.register_id, slug, action_type: "ADD", payload: { type: "ADD", data } } });
+  expect(c.status, JSON.stringify(c.json)).toBe(201);
   const id = c.json.submission.id as string;
   expect((await me(id, "submit")).status).toBe(200);
   expect((await adm(id, "start-review")).status).toBe(200);
@@ -65,7 +75,7 @@ async function toPrOpen(slug = "e118-iin", edition = 1351) {
 /** ... -> merged through the real webhook. */
 async function toMerged(slug = "e118-iin", edition = 1351) {
   const r = await toPrOpen(slug, edition);
-  const h = await hook("pull_request", closedEvent(r.pr.repo, r.pr.branch, r.pr.pr_number, true));
+  const h = await hook("pull_request", closedEvent(r.pr.repo, r.pr.branch, r.pr.pr_number, true, "main", r.pr.commit_sha));
   expect(h.status).toBe(200);
   expect(await stateOf(r.id)).toBe("merged");
   return r;
@@ -169,16 +179,98 @@ describe("composer: merged -> scheduled -> published", () => {
 
   it("orders items by position and one edition composes at a time", async () => {
     const a = await toMerged("e118-iin");
-    const b = await toMerged("e164-cc");
+    const b = await toMerged("e212-mnc");
     await comp("POST", "/editions", ADMINU, { ob_issue_no: 1351 });
     await comp("POST", "/editions/1351/items", ADMINU, { submission_id: b.id });
     await comp("POST", "/editions/1351/items", ADMINU, { submission_id: a.id });
     expect((await comp("GET", "/editions/1351")).json.items.map((i: any) => [i.submission_id, i.position])).toEqual([[b.id, 1], [a.id, 2]]);
     // another edition cannot start composing
-    const c = await toMerged("e118-mnc", 1352);
+    const c = await toMerged("e218-trcc", 1352);
     await comp("POST", "/editions", ADMINU, { ob_issue_no: 1352 });
     expect((await comp("POST", "/editions/1352/items", ADMINU, { submission_id: c.id })).status).toBe(409);
     expect(await stateOf(c.id)).toBe("merged");
+  });
+
+  it("pending pin PRs and staging failures preserve placements until a confirmed deployment publishes once", async () => {
+    const a = await placed("e118-iin");
+    const b = await toMerged("e212-mnc");
+    await comp("POST", "/editions/1351/items", ADMINU, { submission_id: b.id });
+    // Capture actual D1 state, including attribution, notifications and audit before any pin request.
+    const snapshot = async () => ({
+      edition: await one("SELECT * FROM editions WHERE ob_issue_no=1351"),
+      items: await rows("SELECT * FROM edition_items ORDER BY position"),
+      submissions: await rows("SELECT * FROM submissions ORDER BY id"),
+      history: await rows("SELECT * FROM review_state ORDER BY id"),
+      audit: await rows("SELECT * FROM audit_log ORDER BY id"),
+      notifications: await rows("SELECT * FROM notifications ORDER BY id"),
+    });
+    const before = await snapshot();
+    const pending = { prNumber: 42, url: "https://github.invalid/site/pull/42", reason: "pin PR is open" };
+    const bump = vi.spyOn(fake, "bumpDataPin");
+    for (const reason of ["pin PR is open", "staging deployment is pending", "staging deployment failed", "pin PR was closed without merge"]) {
+      pending.reason = reason;
+      bump.mockResolvedValueOnce({ freezeSha: "unconfirmed-data", siteCommit: "unconfirmed-site", pending });
+      const res = await comp("POST", "/editions/1351/publish");
+      expect(res.status, reason).toBe(202);
+      expect(res.json.pending).toEqual(pending);
+      expect(res.json.published).toEqual([]);
+      expect([res.json.edition.status, res.json.edition.freeze_sha, res.json.edition.staging_commit, res.json.edition.published_at])
+        .toEqual(["composing", null, null, null]);
+      expect(await snapshot()).toEqual(before);
+    }
+    bump.mockRejectedValueOnce(new Error("GitHub read failed"));
+    expect((await comp("POST", "/editions/1351/publish")).status).toBe(502);
+    expect(await snapshot()).toEqual(before);
+    expect(bump.mock.calls).toHaveLength(5);
+    for (const [request] of bump.mock.calls) {
+      expect(request).toEqual({ edition: 1351, idempotencyKey: "edition-1351-pin", items: [
+        { submissionId: a.id, mergeSha: "m".repeat(40) },
+        { submissionId: b.id, mergeSha: "m".repeat(40) },
+      ] });
+    }
+    // Ready responses retain the existing ready-provider contract.
+    bump.mockRestore();
+    const ready = await comp("POST", "/editions/1351/publish");
+    expect([ready.status, ready.json.published, ready.json.pending]).toEqual([200, [a.id, b.id], undefined]);
+    expect([ready.json.edition.status, ready.json.edition.freeze_sha, ready.json.edition.staging_commit])
+      .toEqual(["published", "f1".padEnd(40, "0"), "s1".padEnd(40, "0")]);
+    expect(typeof ready.json.edition.published_at).toBe("string");
+    expect(await rows("SELECT * FROM edition_items ORDER BY position")).toEqual(before.items);
+    for (const id of [a.id, b.id]) {
+      expect(await stateOf(id)).toBe("published");
+      expect(await rows("SELECT actor_kind, actor_id FROM review_state WHERE submission_id=?1 AND to_state='published'", id))
+        .toEqual([{ actor_kind: "user", actor_id: "itu-admin" }]);
+      expect(await n("SELECT count(*) n FROM notifications WHERE submission_id=?1 AND kind='submission.published'", id)).toBeGreaterThan(0);
+    }
+    expect(await n("SELECT count(*) n FROM audit_log WHERE action='edition.staged'")).toBe(1);
+    expect(await n("SELECT count(*) n FROM audit_log WHERE action='edition.published'")).toBe(1);
+    expect(await n("SELECT count(*) n FROM audit_log WHERE action='composer.published'")).toBe(2);
+    const after = await snapshot();
+    expect((await comp("POST", "/editions/1351/publish")).status).toBe(409);
+    expect(await snapshot()).toEqual(after);
+    expect(fake.pinRequests).toHaveLength(1);
+    expect(await verifyChain(db())).toBeNull();
+  });
+
+  it.each(["add", "replace"])("rejects a ready pin when a concurrent %s changes placement", async (change) => {
+    const a = await placed("e118-iin");
+    const b = await toMerged("e212-mnc");
+    const bump = vi.spyOn(fake, "bumpDataPin").mockImplementationOnce(async () => {
+      if (change === "replace") expect((await comp("POST", `/editions/1351/items/${a.id}/remove`)).status).toBe(200);
+      expect((await comp("POST", "/editions/1351/items", ADMINU, { submission_id: b.id })).status).toBe(200);
+      return { freezeSha: "stale-freeze", siteCommit: "stale-site" };
+    });
+    const res = await comp("POST", "/editions/1351/publish");
+    expect(res.status).toBe(409);
+    bump.mockRestore();
+    expect(await one("SELECT status, freeze_sha, staging_commit, published_at FROM editions"))
+      .toEqual({ status: "composing", freeze_sha: null, staging_commit: null, published_at: null });
+    expect(await rows("SELECT submission_id, position FROM edition_items ORDER BY position"))
+      .toEqual(change === "add" ? [{ submission_id: a.id, position: 1 }, { submission_id: b.id, position: 2 }] : [{ submission_id: b.id, position: 1 }]);
+    expect([await stateOf(a.id), await stateOf(b.id)]).toEqual([change === "add" ? "scheduled" : "merged", "scheduled"]);
+    expect(await n("SELECT count(*) n FROM audit_log WHERE action IN ('edition.staged','composer.published','edition.published')")).toBe(0);
+    expect(await n("SELECT count(*) n FROM notifications WHERE kind='submission.published'")).toBe(0);
+    expect(await verifyChain(db())).toBeNull();
   });
 
   it("a failed pin bump publishes nothing and a retry publishes once", async () => {
@@ -194,7 +286,7 @@ describe("composer: merged -> scheduled -> published", () => {
 
   it("a publish interrupted after the bump resumes: staged edition, one item already published", async () => {
     const a = await placed("e118-iin");
-    const b = await toMerged("e164-cc");
+    const b = await toMerged("e212-mnc");
     await comp("POST", "/editions/1351/items", ADMINU, { submission_id: b.id });
     expect((await comp("POST", "/editions/1351/publish")).status).toBe(200);
     // Rewind to the interrupted shape by hand: edition staged, one item still scheduled.
@@ -219,11 +311,11 @@ describe("forbidden composer transitions: 409 and nothing written", () => {
     await me(rev, "submit");
     await adm(rev, "start-review");
     const open = await toPrOpen("e118-iin");
-    const wd = await toPrOpen("e164-cc");
+    const wd = await toPrOpen("e212-mnc");
     await adm(wd.id, "withdraw", ADMINU, { reason: "x" });
-    const merged = await toMerged("e118-mnc");
+    const merged = await toMerged("e218-trcc");
     await comp("POST", "/editions", ADMINU, { ob_issue_no: 1351 });
-    const sched = await toMerged("e164-mnc");
+    const sched = await toMerged("f32-tdi");
     expect((await comp("POST", "/editions/1351/items", ADMINU, { submission_id: sched.id })).status).toBe(200);
 
     const before = await counts();
@@ -251,7 +343,7 @@ describe("forbidden composer transitions: 409 and nothing written", () => {
     expect((await comp("POST", "/editions/7/publish")).status).toBe(404);
     const r = await toMerged();
     await comp("POST", "/editions/1351/items", ADMINU, { submission_id: r.id });
-    const x = await toMerged("e164-cc");
+    const x = await toMerged("e212-mnc");
     expect((await comp("POST", "/editions/1351/publish")).status).toBe(200);
     const before = await counts();
     expect((await comp("POST", "/editions/1351/publish")).status).toBe(409);
@@ -353,7 +445,7 @@ describe("revert path: merged -> (revert PR merged) -> withdrawn", () => {
     expect(await counts()).toEqual(before);
     expect(await stateOf(r.id)).toBe("published");
 
-    const body = (extra: object) => ({ register_id: "E118_IIN", slug: "e118-iin", action_type: "MOD", payload: payload(), ...extra });
+    const body = (extra: object) => ({ register_id: "E118_IIN", slug: "e118-iin", action_type: "MOD", payload: { ...payload(), type: "MOD" }, ...extra });
     const c = await api("POST", "/api/me/submissions", { session: "member-A", body: body({ corrects_id: r.id }) });
     expect(c.status).toBe(201);
     expect(c.json.submission.corrects_id).toBe(r.id);
@@ -363,7 +455,7 @@ describe("revert path: merged -> (revert PR merged) -> withdrawn", () => {
     expect((await api("POST", "/api/me/submissions", { session: "member-A", body: body({ corrects_id: c.json.submission.id }) })).status).toBe(409);
     expect((await api("POST", "/api/me/submissions", { session: "member-A", body: body({ corrects_id: "01J9XK2P0000000000000000ZZ" }) })).status).toBe(400);
     expect((await api("POST", "/api/me/submissions", { session: "member-A", body: body({ corrects_id: "nope" }) })).status).toBe(400);
-    expect((await api("POST", "/api/me/submissions", { session: "member-A", body: { ...body({ corrects_id: r.id }), register_id: "E164_CC" } })).status).toBe(400);
+    expect((await api("POST", "/api/me/submissions", { session: "member-A", body: { ...body({ corrects_id: r.id }), register_id: "E212_MNC", slug: "e212-mnc", payload: { type: "MOD", data: { _class: "E212MNCAmendment", entries: [{ country_or_area: { en: "Aland" }, mcc_mnc_codes: "999 99" }] } } } })).status).toBe(400);
   });
 
   it("a scheduled submission is taken out of its edition before it can be withdrawn", async () => {
@@ -376,6 +468,23 @@ describe("revert path: merged -> (revert PR merged) -> withdrawn", () => {
 });
 
 describe("reconciler: repairs a lost webhook, idempotently", () => {
+  it("will not repair a merged PR when the stored approved head differs from GitHub", async () => {
+    const r = await toPrOpen();
+    fake.mergePr(r.pr.pr_number);
+    await db().prepare("UPDATE submission_prs SET commit_sha=?2 WHERE submission_id=?1").bind(r.id, "f".repeat(40)).run();
+
+    const before = await counts();
+    const rejected = await reconcile(db(), fake);
+    expect(rejected.errors).toEqual([{ submission_id: r.id, error: "Pull request does not match the recorded approved head" }]);
+    expect(rejected.repaired).toEqual([]);
+    expect(await stateOf(r.id)).toBe("pr_open");
+    expect(await counts()).toEqual(before);
+
+    await db().prepare("UPDATE submission_prs SET commit_sha=?2 WHERE submission_id=?1").bind(r.id, r.pr.commit_sha).run();
+    expect((await reconcile(db(), fake)).repaired).toEqual([{ submission_id: r.id, kind: "pr.merged", from: "pr_open", to: "merged" }]);
+    expect(await stateOf(r.id)).toBe("merged");
+  });
+
   it("a PR merged upstream moves pr_open -> merged once; a second run and the late webhook change nothing", async () => {
     const r = await toPrOpen();
     fake.mergePr(r.pr.pr_number);
@@ -391,7 +500,7 @@ describe("reconciler: repairs a lost webhook, idempotently", () => {
     expect([rep2.repaired, rep2.errors, rep2.checked]).toEqual([[], [], 0]);
     expect(await counts()).toEqual(after1);
     // the lost webhook finally arrives: ignored, no second transition
-    const late = await hook("pull_request", closedEvent(r.pr.repo, r.pr.branch, r.pr.pr_number, true));
+    const late = await hook("pull_request", closedEvent(r.pr.repo, r.pr.branch, r.pr.pr_number, true, "main", r.pr.commit_sha));
     expect(late.status).toBe(202);
     expect(await counts()).toEqual(after1);
     expect(await verifyChain(db())).toBeNull();
@@ -399,8 +508,8 @@ describe("reconciler: repairs a lost webhook, idempotently", () => {
 
   it("repairs ci_failed too, a PR closed unmerged, and leaves open PRs and the Worker's own closes alone", async () => {
     const a = await toPrOpen("e118-iin");
-    const b = await toPrOpen("e164-cc");
-    const c = await toPrOpen("e118-mnc");
+    const b = await toPrOpen("e212-mnc");
+    const c = await toPrOpen("e218-trcc");
     await db().prepare("UPDATE submissions SET state='ci_failed' WHERE id=?1").bind(a.id).run();
     fake.mergePr(a.pr.pr_number);
     fake.closePr(b.pr.pr_number);
@@ -409,7 +518,7 @@ describe("reconciler: repairs a lost webhook, idempotently", () => {
     expect(rep.repaired.map((x) => `${x.kind}:${x.from}>${x.to}`).sort()).toEqual(["pr.closed:pr_open>changes_requested", "pr.merged:ci_failed>merged"]);
     expect(await stateOf(c.id)).toBe("pr_open");
 
-    const d = await toPrOpen("e118-cc");
+    const d = await toPrOpen("f32-tdi");
     await db().prepare("UPDATE submission_prs SET closing_at='t' WHERE submission_id=?1").bind(d.id).run();
     fake.closePr(d.pr.pr_number);
     expect((await reconcile(db(), fake)).repaired).toEqual([]);
@@ -447,7 +556,7 @@ describe("reconciler: repairs a lost webhook, idempotently", () => {
     expect((await reconcile(db(), fake)).repaired).toEqual([]);
     expect(await counts()).toEqual(after);
 
-    const s = await toMerged("e164-cc");
+    const s = await toMerged("e212-mnc");
     const w2 = await adm(s.id, "withdraw", ADMINU, { reason: "x" });
     fake.closePr(w2.json.revert.pr_number);
     expect((await reconcile(db(), fake)).repaired.map((x) => x.kind)).toEqual(["revert.closed"]);

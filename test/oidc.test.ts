@@ -3,7 +3,7 @@ import { env } from "cloudflare:workers";
 import worker from "../worker/index.ts";
 import { getAccessIdentity, getSession, ABSOLUTE_MS, GRACE_MS, IDLE_MS, ROTATE_MS } from "../worker/lib/session.ts";
 import { resetOidcCaches, b64url } from "../worker/lib/oidc.ts";
-import { ADMIN, activateMember, addUser, db, provisionItu, seedMembers } from "./helpers.ts";
+import { ADMIN, bootstrapAdmin, activateMember, addUser, db, provisionItu, seedMembers } from "./helpers.ts";
 import { CLIENT_ID, CLIENT_SECRET, ISSUER, MockIdp } from "./mock-idp.ts";
 
 const BASE: Record<string, unknown> = {
@@ -394,6 +394,7 @@ describe("authority comes from D1 per request", () => {
     expect(claim.status).toBe(201);
     expect((await b.whoami()).json.roles).toEqual([]); // pending is inert
     const id = (await claim.json<any>()).membershipId;
+    await bootstrapAdmin();
     const v = await worker.fetch(new Request(`http://localhost/api/admin/claims/${id}/verify`, { method: "POST", headers: { "X-Stub-Access": ADMIN, "Content-Type": "application/json", "Sec-Fetch-Site": "same-origin" }, body: "{}" }), { ...env, AUTH_MODE: "stub" } as any);
     expect(v.status).toBe(200);
     expect((await b.whoami()).json).toMatchObject({ roles: ["member-submitter"], memberStateId: "A" });
@@ -430,6 +431,7 @@ describe("Access stays the only trust path for admin routes", () => {
     expect((await b.fetch("/api/admin/anything-else")).status).toBe(403);
   });
   async function provisionItuSafe(user: string) {
+    await bootstrapAdmin();
     const stubEnv = { ...env, AUTH_MODE: "stub" } as any;
     const r = await worker.fetch(new Request("http://localhost/api/admin/itu-staff", { method: "POST", headers: { "X-Stub-Access": ADMIN, "Content-Type": "application/json", "Sec-Fetch-Site": "same-origin" }, body: JSON.stringify({ userId: user, roles: ["itu-admin"] }) }), stubEnv);
     expect(r.status).toBe(201);

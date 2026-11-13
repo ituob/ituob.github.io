@@ -8,7 +8,7 @@ import { activateMember, api, db, provisionItu, seedFixtures } from "./helpers.t
 const SECRET = "test-webhook-secret";
 const EDITOR = "itu-editor@example.test";
 const ADMINU = "itu-admin@example.test";
-const payload = () => ({ type: "ADD", data: { _class: "E118Amendment", entries: [{ country_or_area: { en: "Aland" }, company_name: "Acme Telecom" }] } });
+const payload = () => ({ type: "ADD", data: { _class: "E118Amendment", entries: [{ country_or_area: { en: "Aland" }, company_name: "Acme Telecom", issue_id_number: "89 358 01" }] } });
 
 let fake: FakePatchPublisher;
 beforeEach(async () => {
@@ -130,6 +130,33 @@ describe("only PRs we created", () => {
   });
 });
 
+describe("approved patch head integrity", () => {
+  it("ignores missing or changed close-event heads without changing state or audit, then accepts the recorded head", async () => {
+    const { id, pr } = await toPrOpen();
+    const before = {
+      state: await stateOf(id),
+      review: await one("SELECT count(*) n FROM review_state WHERE submission_id=?1", id),
+      audit: await one("SELECT count(*) n FROM audit_log WHERE submission_id=?1", id),
+      deliveries: await one("SELECT count(*) n FROM webhook_deliveries"),
+    };
+    const changed = prEvent(pr, { merged: true });
+    changed.pull_request.head.sha = "f".repeat(40);
+    expect((await hook("pull_request", changed)).status).toBe(202);
+    const missing = prEvent(pr, { merged: true });
+    delete (missing.pull_request.head as any).sha;
+    expect((await hook("pull_request", missing)).status).toBe(202);
+    expect({
+      state: await stateOf(id),
+      review: await one("SELECT count(*) n FROM review_state WHERE submission_id=?1", id),
+      audit: await one("SELECT count(*) n FROM audit_log WHERE submission_id=?1", id),
+      deliveries: await one("SELECT count(*) n FROM webhook_deliveries"),
+    }).toEqual(before);
+
+    expect((await hook("pull_request", prEvent(pr, { merged: true }))).json).toMatchObject({ status: "applied", to: "merged" });
+    expect(await stateOf(id)).toBe("merged");
+  });
+});
+
 describe("transitions", () => {
   it("merged: pr_open -> merged by github, merge_sha kept, proposer notified, system comment, audited", async () => {
     const { id, pr } = await toPrOpen();
@@ -156,7 +183,7 @@ describe("transitions", () => {
     expect((await rows("SELECT kind FROM notifications WHERE user_id='member-A' AND submission_id=?1", id)).map((n) => n.kind)).toContain("submission.changes_requested");
     expect((await rows("SELECT body FROM comment_revisions WHERE body LIKE '%closed without merging%'")).length).toBe(1);
     // the dead end that in_review would have been: same rev cannot get a second submission_prs row, a revision can
-    expect((await me(id, "revise", { payload: { ...payload(), data: { _class: "E118Amendment", entries: [{ country_or_area: { en: "Aland" }, company_name: "Acme Telecom 2" }] } } })).status).toBe(200);
+    expect((await me(id, "revise", { payload: { ...payload(), data: { _class: "E118Amendment", entries: [{ country_or_area: { en: "Aland" }, company_name: "Acme Telecom 2", issue_id_number: "89 358 01" }] } } })).status).toBe(200);
     expect((await adm(id, "start-review")).status).toBe(200);
     const a = await adm(id, "approve", EDITOR, { target_edition: 1351 });
     expect(a.status).toBe(200);
@@ -202,7 +229,7 @@ describe("transitions", () => {
     expect(JSON.parse((await one("SELECT checks FROM submission_prs WHERE submission_id=?1", id)).checks)).toMatchObject({ "run:Instance-data validation": "failure" });
     // editors and admins hear about it (design matrix), with the failing check named
     const n = await rows("SELECT user_id, payload FROM notifications WHERE kind='submission.ci_failed' AND submission_id=?1", id);
-    expect(n.map((x) => x.user_id).sort()).toEqual(["itu-admin", "itu-editor"]);
+    expect(n.map((x) => x.user_id).sort()).toEqual(["bootstrap-admin", "itu-admin", "itu-editor"]);
     expect(JSON.parse(n[0].payload).reason).toMatch(/Instance-data validation/);
     // a green suite does not recover while a recorded run is still failing
     expect((await hook("check_suite", suite(pr, "success"))).json).toMatchObject({ status: "applied", from: "ci_failed", to: "ci_failed" });

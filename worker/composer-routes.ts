@@ -34,11 +34,13 @@ export const composerRoutes: Route[] = [
     handler: async ({ env, access, params }) =>
       json({ ok: true, submission: await removeItem(env.DB, await ituSession(env, access!), editionNo(params[0]), params[1]!) }) },
   { method: "POST", pattern: re("/api/admin/composer/editions/(\\d+)/publish"), guard: "access",
-    handler: async ({ env, access, params }) =>
-      json({ ok: true, ...(await publishEdition(env.DB, await ituSession(env, access!), editionNo(params[0]), getPublisher())) }) },
+    handler: async ({ env, access, params }) => {
+      const result = await publishEdition(env.DB, await ituSession(env, access!), editionNo(params[0]), getPublisher(env));
+      return json({ ok: true, ...result }, result.pending ? 202 : 200);
+    } },
   { method: "POST", pattern: re("/api/admin/reconcile"), guard: "access",
     handler: async ({ env, access }) => {
       requireRole(await ituSession(env, access!), "itu-admin");
-      return json({ ok: true, ...(await reconcile(env.DB, getPublisher())) });
+      return json({ ok: true, ...(await reconcile(env.DB, getPublisher(env))) });
     } },
 ];

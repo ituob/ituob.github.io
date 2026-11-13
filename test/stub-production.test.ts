@@ -6,13 +6,19 @@ import { addUser, api, db, seedFixtures } from "./helpers.ts";
 const hdr = { "X-Stub-Session": "itu-admin", "X-Stub-Access": "a@b.c" };
 
 describe("the stub cannot run in production", () => {
-  it("no wrangler config sets AUTH_MODE, vars or the stub", () => {
+  it("deployment configs only enable OIDC authentication and never embed the development stub", () => {
     const configs = (env as any).WRANGLER_CONFIGS as Record<string, string>;
     const files = Object.keys(configs);
     expect(files).toEqual(expect.arrayContaining(["wrangler.jsonc", "wrangler.staging.jsonc"]));
     for (const f of files) {
       const text = configs[f]!;
-      expect(text, f).not.toMatch(/AUTH_MODE/);
+      const config = JSON.parse(text);
+      expect(config.vars?.AUTH_MODE, f).toBe("oidc");
+      for (const secret of ["OIDC_CLIENT_SECRET", "RESEND_API_KEY", "GITHUB_APP_PRIVATE_KEY", "GITHUB_WEBHOOK_SECRET"]) {
+        expect(config.vars, f).not.toHaveProperty(secret);
+        if (secret !== "OIDC_CLIENT_SECRET" || config.vars.OIDC_CLIENT_AUTH !== "none")
+          expect(config.secrets?.required, f).toContain(secret);
+      }
       expect(text, f).not.toMatch(/stub/i);
     }
   });
@@ -28,10 +34,10 @@ describe("the stub cannot run in production", () => {
 
   it("the Worker answers 500 (not a session) for stub config on a production host", async () => {
     await seedFixtures();
+    const before = (await db().prepare("SELECT * FROM memberships ORDER BY id").all()).results;
     const r = await api("POST", "/api/admin/itu-staff", { host: "www.ituob.org", headers: hdr, body: { userId: "itu-admin", roles: ["itu-admin"] } });
     expect(r.status).toBe(500);
-    const rows = await db().prepare("SELECT count(*) n FROM memberships").first<{ n: number }>();
-    expect(rows!.n).toBe(0);
+    expect((await db().prepare("SELECT * FROM memberships ORDER BY id").all()).results).toEqual(before);
     expect((await api("GET", "/api/whoami", { host: "www.ituob.org", headers: hdr })).status).toBe(500);
   });
 

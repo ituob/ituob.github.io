@@ -1,11 +1,3 @@
-// Production — www.ituob.org
-//
-// Worker-first: canonicalizes the apex, serves /api (Phase 1+), and
-// passes everything else to the ASSETS binding. See
-// docs/cloudflare-webapp.adoc.
-//
-// The ituob.org zone is on Cloudflare (pending nameserver activation);
-// the custom domain provisions its DNS record + certificate on deploy.
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "ituob-org",
@@ -13,14 +5,37 @@
   "compatibility_date": "2026-10-01",
   "workers_dev": false,
   "routes": [
-    { "pattern": "www.ituob.org", "custom_domain": true },
-    { "pattern": "ituob.org", "custom_domain": true }
+    {
+      "pattern": "www.ituob.org",
+      "custom_domain": true
+    },
+    {
+      "pattern": "ituob.org",
+      "custom_domain": true
+    }
   ],
-  "run_worker_first": true,
   "assets": {
     "directory": "./dist",
     "binding": "ASSETS",
     "html_handling": "auto-trailing-slash",
-    "not_found_handling": "404-page"
+    "not_found_handling": "404-page",
+    "run_worker_first": true
+  },
+  "vars": {
+    "AUTH_MODE": "oidc",
+    "OIDC_CLIENT_AUTH": "basic"
+  },
+  "secrets": {
+    "required": [
+      "OIDC_CLIENT_SECRET",
+      "RESEND_API_KEY",
+      "GITHUB_APP_PRIVATE_KEY",
+      "GITHUB_WEBHOOK_SECRET"
+    ]
+  },
+  "triggers": {
+    "crons": [
+      "*/5 * * * *"
+    ]
   }
 }

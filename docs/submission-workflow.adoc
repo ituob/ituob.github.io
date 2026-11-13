@@ -2,16 +2,12 @@
 :toc:
 :toclevels: 2
 
-Status: DESIGN, no code. Companion to `docs/cloudflare-webapp.adoc`
-(Phase 3) and `docs/discussion-notifications.adoc` (#104). Facts in
-this note were measured on 2026-11-11 against `ituob.github.io` @
-ac522eb, `service-publications-docs` @ 0651a679 and `itu-ob-data` @
-e17484b; anything not measured is marked *UNVERIFIED*.
+Status: implemented in the Worker, with hosted validation and end-to-end staging proof tracked separately. Companion to `docs/cloudflare-webapp.adoc` and `docs/discussion-notifications.adoc`. The repository survey below records the original baseline; the current contracts in the target-repository and source-of-truth sections supersede its proposed repository choice.
 
 == Hard invariants (inherited, restated so the design can be checked against them)
 
 . No code path writes to the patch repository's `main`. The Worker only
-  creates branches and opens pull requests. A human merges.
+  creates branches and opens pull requests. Merges follow repository checks, authorization and any active hold.
 . Approval = the Worker writes the YAML patch to a branch through the
   GitHub API and opens a PR, so the CI gate chain applies.
 . Corrections are new patches, never rewrites of history or of full
@@ -27,7 +23,7 @@ e17484b; anything not measured is marked *UNVERIFIED*.
 
 | The patch log that CI gates and that the pipeline reads is `ob-issues/{issue}/{slug}/{NNN}-{ACTION}.yaml` in *`ituob/service-publications-docs`*, not in `itu-ob-data`.
 | `ls itu-ob-data` has `issues/ lists/ recommendations/ reference-docs/`, no `ob-issues/`. `service-publications-docs/ob-issues/` holds 7,955 tracked files, 389 issues (max 1343).
-| #103 text ("a branch of itu-ob-data under `ob-issues/{issue}/{register}/`") names the wrong repo. See <<target-repo>>.
+| #103 requires authored patch PRs in `ituob/itu-ob-data`. The original survey found the validators in the service repo; the current pinned caller workflow bridges them. See <<target-repo>>.
 
 | `itu-ob-data` has no validation gate at all.
 | Its only workflow, `deploy.yml`, sends a `repository_dispatch` to `ituob/ituob.org` (a different repo) on push to `main`/`staging`. Every gate (`validate-ob-issues.yml`, `test.yml`) lives in `service-publications-docs`.
@@ -61,37 +57,16 @@ e17484b; anything not measured is marked *UNVERIFIED*.
 [[target-repo]]
 == Target repository for patch PRs
 
-*Recommendation: `ituob/service-publications-docs`*, path
-`ob-issues/{ob_issue_no}/{slug}/{NNN}-{ACTION}.yaml`. It is where the
-patch log is read from, where the gates run, and where the existing
-files already look exactly like what the Worker will write (checked:
-`ob-issues/1297/e212-mnc/001-ADD.yaml`, `type/date_requested/
-date_active/ob_issue_no/reference/identifier{code}/data{_class,entries,
-notes}`).
+The authoritative authored patch repository is `ituob/itu-ob-data`, as required by #103. `PATCH_REPO` defaults to that repository. Action files use `ob-issues/{ob_issue_no}/{slug}/{NNN}-{ACTION}.yaml`; issue metadata uses `ob-issues/{ob_issue_no}/meta.yaml`.
 
-The repo is a Worker configuration value (`PATCH_REPO`, default
-`ituob/service-publications-docs`), so the decision is reversible
-without code change. If Ronald insists on `itu-ob-data`, then that repo
-first needs the validate/test workflows ported to it, otherwise the PR
-is ungated and the second hard invariant is void.
+The data-repository caller pins both the service reusable workflow and its `service_ref` input to the same full commit SHA. The service workflow checks out the exact data head, stages all cumulative authored files byte-for-byte over its trusted historical baseline, and validates regenerated projections. The append-only check applies to previously authored paths; generated full-state writes are refused. See the service repository's `docs/authored-patch-validation.adoc` for the input and hash contract.
 
 [[source-of-truth]]
-== Source of truth: reconcile with the legacy feed
+== Source of truth and the historical baseline
 
-`build_ob_issues.rb` regenerates `ob-issues/{N}` from
-`itu-ob-data/issues/{N}` and overwrites. Two cases:
+Authored files are immutable inputs. The submission and metadata publishers create new owned branches and review PRs; they never edit full-state files or rewrite an existing canonical patch. `build_ob_issues.rb` is a legacy conversion tool and must not run over incoming authored inputs. The service gate stages exact blobs and regenerates only derived changes and snapshots.
 
-* A new submission-derived issue (>= 1351, or the open edition) has no
-  `itu-ob-data/issues/{N}` yet: no collision.
-* If the legacy editor (Darkod55's flow) also publishes edition N, the
-  script would `rm_rf` the submission patches in `ob-issues/N`.
-
-Rule for the design: *from the cut-over edition on, `ob-issues/{N}` is
-authored only by this workflow.* The cut-over edition is an explicit
-config (`CUTOVER_EDITION`); `build_ob_issues.rb` must refuse to touch
-editions >= it (a card for the pipeline, not for this note). Until that
-guard lands, the Worker refuses to open a PR for an edition for which
-`itu-ob-data/issues/{N}` exists on its `main` (one Contents API probe).
+The historical patch log still resides in the service repository at the baseline revision. Cumulative data-repository authored patches are overlaid without replacing historical bytes. This transitional overlay does not establish that the complete historical log has migrated to the canonical repository. Whole-program completion requires that migration and proof that the site consumes its authored inputs.
 
 [[projection]]
 == The projection gap (blocks the demo)

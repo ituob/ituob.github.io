@@ -1,0 +1,84 @@
+= Account and Cloudflare Access configuration
+
+== Separate identities
+
+`/me/` displays the identity-service account, current server-resolved roles
+and active Member State affiliation. `/me/membership/` lists the account's
+membership history and submits pending claims for ITU verification.
+Passwords, registration and recovery remain with the identity service.
+See `docs/identity-accounts.adoc` for OIDC configuration and its unverified
+provider assumptions. `AUTH_MODE=oidc` and a working configured provider
+are required for production account login; the loopback stub is development only.
+
+`/admin/members/` administers claims, ITU staff provisioning, Member State
+status and roster imports. These operations require a separately verified
+Cloudflare Access identity, regardless of the identity-service account's roles.
+The UI uses `/api/whoami`; every API authorization decision remains on the
+Worker. Hiding or enabling a client control grants no authority.
+
+== Configure Cloudflare Access
+
+. Create a self-hosted Access application for the deployed hostname's
+  `/admin/*`, `/api/admin/*` and `/api/ci/*` paths. Include both the page and
+  API namespaces in the policy so browser fetches carry the application token.
+. Restrict its Allow policy to the intended ITU administration group and
+  configure the organization's authentication/MFA requirements in Access.
+. Copy the application's Audience (AUD) tag from its additional settings.
+. Set Worker vars `ACCESS_TEAM_DOMAIN` to the team's HTTPS origin, such as
+  `https://<team>.cloudflareaccess.com`, and `ACCESS_AUD` to that exact AUD tag.
+  A bare `<team>.cloudflareaccess.com` hostname is also accepted. These values
+  identify the issuer and application; they are not signing secrets.
+. Configure production OIDC and the D1 binding/migrations independently.
+  Provision Access policies and Worker vars in each environment; staging
+  must use its own Access application's AUD tag.
+
+The verifier reads only `Cf-Access-Jwt-Assertion`. It accepts RS256 tokens
+with a matching signing `kid` from the configured team's
+`/cdn-cgi/access/certs` JWKS endpoint, a matching issuer and audience, a
+finite unexpired `exp`, and valid `nbf`/`iat` when present. It requires a
+non-empty signed email address; normal Access application tokens omit
+`email_verified`, but an explicitly present value must be `true`.
+It ignores the bare `Cf-Access-Authenticated-User-Email` header.
+Service tokens without an email cannot administer membership.
+
+JWKS is fetched on verification with a five-second timeout, without
+redirects or a persistent key cache. Current and previous published keys
+are selected by `kid`, allowing Cloudflare key rotation without redeployment.
+JWT-provided key URLs are never used. Missing/invalid configuration,
+malformed tokens, invalid signatures, expiry and upstream key failures all
+return no Access identity and protected routes deny access.
+
+Cloudflare's current validation contract is documented at
+https://developers.cloudflare.com/cloudflare-one/access-controls/applications/http-apps/authorization-cookie/validating-json/[Validate JWTs].
+
+== Administrative workflows
+
+* Claims: choose pending claims, inspect account and affiliation details,
+  enter an optional decision note, then verify or reject. Active claims
+  can be deactivated without removing historical contributions.
+* ITU staff: the user first signs in and supplies the account ID displayed
+  at `/me/`. Enter that exact ID and choose ITU editor and/or administrator.
+  The server enforces allowed roles and live-membership uniqueness.
+* Member State status: choose an active ID or enter an existing inactive
+  ID to reactivate it. Suspension and withdrawal block new submissions.
+* Roster: upload/paste a JSON array, preview added/changed/missing records,
+  then import. Changing the input invalidates the preview. Missing records
+  are reported and preserved; the import never deletes them. The server
+  remains the final validator. Roster preview is advisory: concurrent changes
+  may alter the eventual import result.
+
+Example roster input (replace all sample values with the approved roster):
+
+[source,json]
+----
+[{"id":"example-state","name":"Example State","register_key":"Example State","status":"active"}]
+----
+
+== Verification boundaries
+
+A repository metadata read for `ribosei/identity` was attempted during this
+implementation with `gh repo view ribosei/identity --json name,url`.
+The command failed with `error connecting to api.github.com`; this does
+not establish whether the private repository is accessible. Its registration,
+provider endpoints and deployment configuration remain unverified.
+No credentials or live identity settings are committed by these pages.

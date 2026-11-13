@@ -1,0 +1,47 @@
+= Membership administration and initial administrator
+
+Membership administration requires both a verified Cloudflare Access identity
+and an active ITU membership with the `itu-admin` role in D1. The Access email is
+resolved to the application's existing user record on each request. An editor,
+member, unknown identity, or deactivated administrator cannot list claims,
+verify or reject claims, deactivate memberships, import a roster, change member
+status, or grant staff roles. A member session cannot substitute for Access.
+
+Mutating human Access routes require the existing same-origin check before their
+handler runs. The signed GitHub webhook retains its separate public trust path.
+Submission review and composer handlers retain their own role requirements.
+
+== Initial administrator bootstrap
+
+There is no bootstrap HTTP endpoint, special Access email, or automatic first-user
+grant. An authorized deployment operator must bootstrap the first administrator
+through the target environment's D1 administrative connection. The intended person
+must first log in normally so that D1 contains their actual identity-provider
+subject in `users.id`. Independently verify that subject and its email against
+the intended Access identity before granting authority; do not use an arbitrary
+new subject or repoint another account's email.
+
+Use an authorized D1 batch with the following operations and actual bound values:
+
+. Read the existing `users` record by its verified subject and email, and confirm
+  it has no pending or active membership. If it already has one, resolve that
+  record through the authorized membership process before retrying.
+. Insert `memberships` with `user_id` equal to that subject, `kind='itu'`,
+  `member_id=NULL`, `status='active'`, and the current `created_at` and
+  `decided_at`. Record the authorization/ticket in `decision_note`.
+. Insert `user_roles` with that subject, `role='itu-admin'`, the current
+  `granted_at`, and `granted_by=NULL` for the initial operator bootstrap.
+. Insert `membership_events` with `event='provisioned'`, that subject,
+  the new membership ID, the current `at`, and detail recording
+  `access:null`, `roles:['itu-admin']`, and the bootstrap authorization.
+
+Apply these statements atomically and verify the resulting membership, role, and
+event records in the intended environment. Retain the operator's execution record.
+The person can then use their verified Access identity to administer subsequent
+memberships through the API. Removing the active ITU membership or its role
+revokes that API authority on the next request.
+
+Worker fixtures model this operator action using a separate real D1 bootstrap
+account. They do not bypass authorization in the router or grant authority from a
+request header. Production setup and the real authenticated acceptance run remain
+required deployment evidence.

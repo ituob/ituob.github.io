@@ -58,13 +58,13 @@ export const submissionRoutes: Route[] = [
     handler: async ({ request, env, access, params }) => {
       const sub = await approve(env.DB, await ituSession(env, access!), params[0]!, await body(request), env.PATCH_REPO ?? DEFAULT_PATCH_REPO);
       // The consumer runs after the approval is durable; a GitHub failure leaves pr_pending + last_error.
-      const pr = await openPr(env.DB, getPublisher(), sub.id);
+      const pr = await openPr(env.DB, getPublisher(env), sub.id);
       return json({ ok: true, submission: { ...sub, state: pr.state }, pr }, pr.error ? 202 : 200);
     } },
   { method: "POST", pattern: re(`/api/admin/submissions/${ID}/open-pr`), guard: "access",
     handler: async ({ env, access, params }) => {
       await ituSession(env, access!);
-      const pr = await openPr(env.DB, getPublisher(), params[0]!);
+      const pr = await openPr(env.DB, getPublisher(env), params[0]!);
       return json({ ok: true, pr }, pr.error ? 202 : 200);
     } },
   { method: "POST", pattern: re(`/api/admin/submissions/${ID}/withdraw`), guard: "access",
@@ -75,9 +75,9 @@ export const submissionRoutes: Route[] = [
       // stays `merged` (202) until that PR's merge arrives; anything earlier closes the open PR.
       const cur = await getSub(env.DB, params[0]!);
       if (cur.state === "merged" || cur.state === "published") {
-        const revert = await requestRevert(env.DB, session, cur.id, b, getPublisher());
+        const revert = await requestRevert(env.DB, session, cur.id, b, getPublisher(env));
         return json({ ok: true, submission: await getSub(env.DB, cur.id), revert }, 202);
       }
-      return json({ ok: true, submission: await adminWithdraw(env.DB, session, cur.id, b, getPublisher()) });
+      return json({ ok: true, submission: await adminWithdraw(env.DB, session, cur.id, b, getPublisher(env)) });
     } },
 ];

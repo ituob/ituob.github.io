@@ -12,28 +12,39 @@ import {
   verifyClaim,
   type RosterRow,
 } from "./lib/membership.ts";
-import { Forbidden } from "./lib/authz.ts";
+import { Forbidden, requireRole } from "./lib/authz.ts";
 import { sameOrigin } from "./lib/csrf.ts";
 import { StubMisconfigured, getAccessIdentity, getSession, takePendingSessionCookie } from "./lib/session.ts";
 import { type Route, body, json, str } from "./lib/http.ts";
 import { UpstreamError, ValidationFailed } from "./lib/submissions.ts";
 import { discussionRoutes } from "./discussion-routes.ts";
+import { generalMessageRoutes } from "./general-message-routes.ts";
+import { generalMessagePublicationRoutes } from "./general-message-publication-routes.ts";
+import { editionMetadataRoutes } from "./edition-metadata-routes.ts";
+import { editionMetadataPublicationRoutes } from "./edition-metadata-publication-routes.ts";
+import { translationRoutes } from "./translation-routes.ts";
 import { composerRoutes } from "./composer-routes.ts";
-import { submissionRoutes } from "./submission-routes.ts";
+import { ituSession, submissionRoutes } from "./submission-routes.ts";
 import { webhookRoutes } from "./webhook-routes.ts";
 import type { AccessIdentity, Env, Session } from "./lib/types.ts";
 
-const routes: Route[] = [
+const workflowAndAccountRoutes: Route[] = [
   ...submissionRoutes,
   ...composerRoutes,
   ...discussionRoutes,
+  ...translationRoutes,
+  ...editionMetadataRoutes,
+  ...generalMessageRoutes,
+  ...generalMessagePublicationRoutes,
+  ...editionMetadataPublicationRoutes,
   ...webhookRoutes,
   {
     method: "GET",
     pattern: /^\/api\/whoami$/,
     guard: "public",
-    handler: async ({ env, session }) => {
-      if (!session) return json({ ok: true, authenticated: false });
+    handler: async ({ request, env, session }) => {
+      const access = await getAccessIdentity(request, env);
+      if (!session) return json({ ok: true, authenticated: false, access });
       const u = await env.DB.prepare(`SELECT email, display_name FROM users WHERE id = ?1`)
         .bind(session.userId)
         .first<{ email: string | null; display_name: string | null }>();
@@ -44,8 +55,25 @@ const routes: Route[] = [
         user: { id: session.userId, displayName: u?.display_name ?? null, email: u?.email ?? null },
         roles: session.roles,
         memberStateId: session.memberStateId,
+        access,
       });
     },
+  },
+  {
+    method: "GET",
+    pattern: /^\/api\/members$/,
+    guard: "public",
+    handler: async ({ env }) => json({ ok: true, members: (await env.DB
+      .prepare("SELECT id, name, status FROM members WHERE status='active' ORDER BY name, id")
+      .all()).results }),
+  },
+  {
+    method: "GET",
+    pattern: /^\/api\/me\/membership$/,
+    guard: "session",
+    handler: async ({ env, session }) => json({ ok: true, memberships: (await env.DB
+      .prepare("SELECT id, kind, member_id, status, claim_note, decision_note, claimed_at FROM memberships WHERE user_id=?1 ORDER BY id DESC")
+      .bind(session!.userId).all()).results }),
   },
   // Member action, session-guarded. Reads ONLY memberId and note: a status,
   // role or user id in the body is ignored by construction.
@@ -61,7 +89,11 @@ const routes: Route[] = [
       return json({ ok: true, membershipId: id, status: "pending" }, 201);
     },
   },
-  // ITU admin surface, Access-guarded.
+];
+
+// This complete membership administration surface requires an active ITU admin
+// resolved from D1, in addition to Access authentication.
+const membershipAdminRoutes: Route[] = [
   {
     method: "GET",
     pattern: /^\/api\/admin\/claims$/,
@@ -130,6 +162,17 @@ const routes: Route[] = [
   },
 ];
 
+const routes: Route[] = [
+  ...workflowAndAccountRoutes,
+  ...membershipAdminRoutes.map((route): Route => ({
+    ...route,
+    handler: async (ctx) => {
+      requireRole(await ituSession(ctx.env, ctx.access!), "itu-admin");
+      return route.handler(ctx);
+    },
+  })),
+];
+
 /** Paths whose trust path is Access, even for GET. Unknown paths here still require Access. */
 const ACCESS_PREFIXES = ["/api/admin/", "/api/ci/"];
 
@@ -167,6 +210,7 @@ async function handleApiInner(request: Request, env: Env, url: URL): Promise<Res
       const access = await getAccessIdentity(request, env);
       if (!access) return json({ error: "forbidden" }, 403);
       if (!route) return json({ error: "not found" }, 404);
+      if (!readOnly && !sameOrigin(request)) return json({ error: "forbidden" }, 403);
       return await route.handler({ request, env, url, params: path.match(route.pattern)!.slice(1), session: null, access });
     }
     if (!route) return json({ error: "not found" }, 404);

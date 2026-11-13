@@ -7,7 +7,7 @@ import { ConflictError, InvalidError, NotFoundError } from "./membership.ts";
 import { type OpenedPr, type PatchPublisher, branchName } from "./publisher.ts";
 import type { Session } from "./types.ts";
 import { ulid } from "./ulid.ts";
-import { ACTION_TYPES, type ActionType, type FieldError, registerKeysOf, validate } from "./validation.ts";
+import { ACTION_TYPES, type ActionType, type FieldError, registerKeysOf, submissionTargetErrors, validate } from "./validation.ts";
 
 export class ValidationFailed extends Error {
   constructor(public errors: FieldError[]) {
@@ -38,9 +38,9 @@ export interface Sub {
   updated_at: string;
 }
 
-export const DEFAULT_PATCH_REPO = "ituob/service-publications-docs";
+export const DEFAULT_PATCH_REPO = "ituob/itu-ob-data";
 const now = () => new Date().toISOString();
-const VALIDATOR_VERSION = "stage1-v1";
+const VALIDATOR_VERSION = "stage1-v2";
 
 /** Actor on a transition: a user, or the system (queue consumer). */
 export type Actor = { kind: "user"; id: string } | { kind: "system"; id: null } | { kind: "github"; id: null };
@@ -197,8 +197,8 @@ function parseCreate(b: Record<string, unknown>) {
   const register_id = typeof b.register_id === "string" ? b.register_id : "";
   const slug = typeof b.slug === "string" ? b.slug : "";
   const action_type = b.action_type as ActionType;
-  if (!/^[A-Z0-9_]{1,40}$/.test(register_id)) throw new InvalidError("register_id required");
-  if (!/^[a-z0-9]+(-[a-z0-9]+)*$/.test(slug)) throw new InvalidError("slug must be lowercase kebab-case");
+  const targetErrors = submissionTargetErrors(register_id, slug);
+  if (targetErrors.length) throw new ValidationFailed(targetErrors);
   if (!ACTION_TYPES.includes(action_type)) throw new InvalidError("action_type must be one of " + ACTION_TYPES.join(","));
   if (!b.payload || typeof b.payload !== "object" || Array.isArray(b.payload)) throw new InvalidError("payload must be an object");
   const corrects_id = b.corrects_id === undefined || b.corrects_id === null ? null : String(b.corrects_id);
@@ -206,12 +206,24 @@ function parseCreate(b: Record<string, unknown>) {
   return { register_id, slug, action_type, payload: b.payload as Record<string, unknown>, corrects_id };
 }
 
-/** Country binding on every payload write. LIR (no entries) is ITU-staff only. */
+/** Country binding on every payload write. Unscoped text and LIR are ITU-staff only. */
 async function bind(db: D1Database, session: Session, register_id: string, action: ActionType, payload: unknown) {
+  const data = (payload as { data?: { _class?: unknown } } | null)?.data;
+  if (data?._class === "TextAmendment" && !isItu(session))
+    throw new ValidationFailed([{
+      path: "data", code: "mismatch",
+      message: "Text amendments require an ITU editor or administrator because their country scope cannot be verified",
+    }]);
   const keys = registerKeysOf(register_id, payload);
   if (action === "LIR" && !isItu(session)) throw new Forbidden();
   // ITU roles are not key-bound; authorizeEntries needs a non-empty list to be callable.
-  if (keys.length === 0 && !isItu(session)) throw new InvalidError("no country/area key found in the entries");
+  if (keys.length === 0 && !isItu(session)) {
+    // An invalid class cannot supply a country field. Return its schema errors
+    // rather than hiding them behind the valid-but-unscoped payload error.
+    const errors = validate({ register_id, action_type: action, payload });
+    if (errors.length) throw new ValidationFailed(errors);
+    throw new InvalidError("no country/area key found in the entries");
+  }
   return authorizeEntries(db, session, keys.length ? keys : ["-"]);
 }
 
@@ -228,7 +240,8 @@ export async function createSubmission(db: D1Database, session: Session | null, 
   }
   const id = ulid();
   const t = now();
-  const errors = validate({ register_id: c.register_id, action_type: c.action_type, payload: c.payload });
+  const errors = validate({ register_id: c.register_id, slug: c.slug, action_type: c.action_type, payload: c.payload });
+  if (errors.length) throw new ValidationFailed(errors);
   const rev = await revisionRow({ id }, 1, c.payload, errors, s.userId, t);
   const stmts = [
     db
@@ -269,13 +282,14 @@ async function newRevisionPayload(db: D1Database, s: Session, sub: Sub, b: Recor
   return payload as Record<string, unknown>;
 }
 
-/** Draft edit: a new immutable revision, no state change, audited. Invalid content is allowed in a draft. */
+/** Draft edit: a validated immutable revision, no state change, audited. */
 export async function editDraft(db: D1Database, session: Session | null, id: string, b: Record<string, unknown>) {
   const { s, sub } = await ownSub(db, session, id);
   if (sub.state !== "draft") throw new ConflictError(`illegal transition from ${sub.state}`);
   const payload = await newRevisionPayload(db, s, sub, b);
   const t = now();
-  const errors = validate({ register_id: sub.register_id, action_type: sub.action_type, payload });
+  const errors = validate({ register_id: sub.register_id, slug: sub.slug, action_type: sub.action_type, payload });
+  if (errors.length) throw new ValidationFailed(errors);
   const rev = await revisionRow(sub, sub.current_rev + 1, payload, errors, s.userId, t);
   return mutate(db, sub, {
     from: ["draft"], to: "draft", actor: { kind: "user", id: s.userId }, auditAction: "submission.draft_edited",
@@ -293,7 +307,7 @@ export async function submitDraft(db: D1Database, session: Session | null, id: s
     .first<{ payload_yaml: string }>();
   const payload = parsePayload(cur!.payload_yaml);
   await bind(db, s, sub.register_id, sub.action_type, payload); // authority re-checked at submit time
-  const errors = validate({ register_id: sub.register_id, action_type: sub.action_type, payload });
+  const errors = validate({ register_id: sub.register_id, slug: sub.slug, action_type: sub.action_type, payload });
   if (errors.length) throw new ValidationFailed(errors);
   return mutate(db, sub, { ...MOVES.submit, actor: { kind: "user", id: s.userId }, auditAction: "submission.state" });
 }
@@ -303,7 +317,7 @@ export async function reviseSubmission(db: D1Database, session: Session | null, 
   const { s, sub } = await ownSub(db, session, id);
   if (sub.state !== "changes_requested") throw new ConflictError(`illegal transition from ${sub.state}`);
   const payload = await newRevisionPayload(db, s, sub, b);
-  const errors = validate({ register_id: sub.register_id, action_type: sub.action_type, payload });
+  const errors = validate({ register_id: sub.register_id, slug: sub.slug, action_type: sub.action_type, payload });
   if (errors.length) throw new ValidationFailed(errors);
   const t = now();
   const rev = await revisionRow(sub, sub.current_rev + 1, payload, errors, s.userId, t);
@@ -381,7 +395,7 @@ export async function approve(db: D1Database, session: Session | null, id: strin
     .prepare(`SELECT payload_yaml FROM submission_revisions WHERE submission_id=?1 AND rev=?2`)
     .bind(sub.id, sub.current_rev)
     .first<{ payload_yaml: string }>();
-  const errors = validate({ register_id: sub.register_id, action_type: sub.action_type, payload: parsePayload(cur!.payload_yaml) });
+  const errors = validate({ register_id: sub.register_id, slug: sub.slug, action_type: sub.action_type, payload: parsePayload(cur!.payload_yaml) });
   if (errors.length) throw new ValidationFailed(errors);
 
   // Gaps in NNN are legal (design); a lost race burns one number, never reuses one.

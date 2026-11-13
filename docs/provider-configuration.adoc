@@ -1,0 +1,42 @@
+= GitHub publisher configuration
+
+== Design
+
+The publisher exchanges a short-lived RS256 App JWT for an installation token.
+It creates immutable commits before atomically creating a narrowly named branch;
+existing branches must match the request fingerprint, single-file change and bytes.
+Only review PRs change protected data/site branches. Replays reuse frozen commits.
+Publication remains pending until the pin PR merges and the exact merge commit has
+a successful staging deployment workflow and job. Missing evidence fails closed.
+
+Set `GITHUB_APP_ID`, secret `GITHUB_APP_PRIVATE_KEY` (PKCS8 PEM),
+`GITHUB_APP_INSTALLATION_ID`, explicit `PATCH_REPO` (`owner/repository`),
+`GITHUB_SITE_REPO`, and explicit `GITHUB_DATA_GITLINK` (`data` or `data-ob`).
+`GITHUB_STAGING_BRANCH` defaults to `staging`; it must not be main/master.
+Install the App on both repositories with Contents and Pull requests write,
+Actions read, and Metadata read. The Worker never merges PRs or pushes protected
+refs. Keep branch protections and deployment environment approvals enabled.
+
+The data repository is explicitly selected: no alternate patch log or inferred
+repository is used. Private keys and API response bodies are never returned in
+provider failures. Requests reject redirects and have a 15 second deadline.
+
+REST contracts: https://docs.github.com/en/rest/apps/apps[installation tokens],
+https://docs.github.com/en/rest/git/refs[atomic ref creation],
+https://docs.github.com/en/rest/git/trees[trees],
+https://docs.github.com/en/rest/pulls/pulls[pull requests], and
+https://docs.github.com/en/rest/actions/workflow-runs[workflow runs].
+
+The App must be the sole writer of `rt-sub-*` and `rt-publish-*` branches.
+Closing checks the PR's repository, base, owned commit, single action-file diff,
+and current branch SHA before deleting the ref. GitHub's ref deletion endpoint
+has no compare-and-swap option: repository rules must prevent other writers from
+racing the final deletion. Pin branches should be retained; retries also recover
+a merged pin PR's immutable head when GitHub auto-deletes its branch.
+
+Pin PR bodies retain a publication fingerprint of the ordered submission IDs and
+merge SHAs. Changing that placement requires resolving the existing publication;
+the Worker refuses to mark a different placement published from an old pin PR.
+A deployment is ready only for `.github/workflows/build-deploy.yml`, `push` on
+the configured staging branch, at the pin PR's exact merge SHA, with both the
+workflow and `deploy-cloudflare-staging` job completed successfully.

@@ -1,13 +1,15 @@
-// Submit-time validation, stage 1 (action envelope) — docs/submission-workflow.adoc "two stages".
+// Durable-write validation, stage 1 (action envelope) — docs/submission-workflow.adoc "two stages".
 //
 // The chain is [stage1, schemaStage]. stage1 is the hand-written action
-// envelope (key binding, per-action presence rules). schemaStage runs the
+// envelope (generated register identities and country binding, per-action presence rules). schemaStage runs the
 // validators GENERATED from the LML ontology (src/lib/schema.validators.generated.ts,
 // second output of service-publications-docs scripts/generate_ts_types.rb):
 // the same classes the Ruby gem compiles, so scalar types, collections, enums
 // and unknown keys are checked against the ontology, not a hand-kept table.
 // CI stays authoritative; this is the fast door check. The chain is PLUGGABLE.
 
+import { PUBLICATION_BY_ID, REGISTERS } from "../../src/lib/catalogs.ts";
+import { AMENDMENT_COUNTRY_FIELDS, AMENDMENT_ENTRY_FIELDS, REGISTER_IDENTITIES, type RegisterIdentity } from "../../src/lib/register-rules.generated.ts";
 import { AMENDMENT_CLASSES, validateClass } from "../../src/lib/schema.validators.generated.ts";
 
 export interface FieldError {
@@ -21,23 +23,26 @@ export type ActionType = (typeof ACTION_TYPES)[number];
 
 export interface ValidationContext {
   register_id: string;
+  slug?: string;
   action_type: ActionType;
   payload: unknown;
 }
 export type PayloadValidator = (ctx: ValidationContext) => FieldError[];
 
-/** Per-register rules. INTERIM hand-maintained table (gap: generate from messages.lml / schema-data.yaml). */
-export interface RegisterRules {
-  /** Entry field holding the country/area register_key, used for country binding. */
-  keyField: string;
-  /** Entry fields that must be non-empty for ADD/REP. */
-  requiredEntryFields: string[];
+/** Identity is catalog-defined. Country authority is independently model-defined. */
+export const rulesFor = (register_id: string): RegisterIdentity | undefined => Object.hasOwn(REGISTER_IDENTITIES, register_id) ? REGISTER_IDENTITIES[register_id] : undefined;
+
+// Existing product constraint, additional to the generated schema and identity.
+const requiredEntryFields: Readonly<Record<string, readonly string[]>> = { E118_IIN: ["company_name"] };
+
+/** IDs and filesystem destinations are catalog values, never a sanitized client path. */
+export function submissionTargetErrors(register_id: string, slug?: string): FieldError[] {
+  const target = PUBLICATION_BY_ID.get(register_id) ?? REGISTERS.find((r) => r.registerId === register_id);
+  if (!target) return [{ path: "register_id", code: "unknown", message: "register_id must name a catalog publication or register" }];
+  return slug !== undefined && target.slug !== slug
+    ? [{ path: "slug", code: "mismatch", message: `slug must be ${target.slug} for ${register_id}` }]
+    : [];
 }
-export const REGISTER_RULES: Record<string, RegisterRules> = {
-  E118_IIN: { keyField: "country_or_area", requiredEntryFields: ["company_name"] },
-};
-const DEFAULT_RULES: RegisterRules = { keyField: "country_or_area", requiredEntryFields: [] };
-export const rulesFor = (register_id: string): RegisterRules => REGISTER_RULES[register_id] ?? DEFAULT_RULES;
 
 const isObj = (v: unknown): v is Record<string, unknown> => !!v && typeof v === "object" && !Array.isArray(v);
 const blank = (v: unknown) =>
@@ -54,10 +59,23 @@ function keyOf(v: unknown): string | null {
   return null;
 }
 
+/** Match replay's canonical multilingual identity order, independent of member country lookup. */
+function identityPart(value: unknown): string | null {
+  if (typeof value === "string") return value.trim() || null;
+  if (!isObj(value)) return null;
+  for (const language of ["fr", "en", "es", "zh", "ru", "ar"]) {
+    const text = value[language];
+    if (typeof text === "string" && text.trim()) return text.trim();
+  }
+  return null;
+}
+
 /** Country keys derived server-side from the payload (never a client-supplied member id). */
 export function registerKeysOf(register_id: string, payload: unknown): string[] {
   const entries = isObj(payload) && isObj(payload.data) && Array.isArray(payload.data.entries) ? payload.data.entries : [];
-  const field = rulesFor(register_id).keyField;
+  const cls = isObj(payload) && isObj(payload.data) ? payload.data._class : null;
+  const field = typeof cls === "string" && Object.hasOwn(AMENDMENT_COUNTRY_FIELDS, cls) ? AMENDMENT_COUNTRY_FIELDS[cls] : null;
+  if (!rulesFor(register_id) || !field) return [];
   const keys: string[] = [];
   for (const e of entries) {
     const k = isObj(e) ? keyOf(e[field]) : null;
@@ -72,8 +90,8 @@ export function registerKeysOf(register_id: string, payload: unknown): string[] 
 // presence rules contradicted the ontology and are gone.
 const needsEntries: ReadonlySet<string> = new Set(["ADD", "REP", "MOD", "SUP", "DEL", "LIR"]);
 
-export const stage1: PayloadValidator = ({ register_id, action_type, payload }) => {
-  const errs: FieldError[] = [];
+export const stage1: PayloadValidator = ({ register_id, slug, action_type, payload }) => {
+  const errs: FieldError[] = submissionTargetErrors(register_id, slug);
   const req = (path: string, message: string) => errs.push({ path, code: "required", message });
   if (!isObj(payload)) return [{ path: "", code: "type", message: "payload must be an object" }];
   if (payload.type !== undefined && payload.type !== action_type)
@@ -83,10 +101,22 @@ export const stage1: PayloadValidator = ({ register_id, action_type, payload }) 
     return errs;
   }
   const d = payload.data;
-  if (typeof d._class !== "string" || !/^[A-Za-z0-9]+Amendment$/.test(d._class))
+  if (typeof d._class !== "string" || !AMENDMENT_CLASSES.includes(d._class))
     errs.push({ path: "data._class", code: blank(d._class) ? "required" : "enum", message: "data._class must name the register's *Amendment class" });
   if (d.notes !== undefined && !(Array.isArray(d.notes) && d.notes.every((n) => typeof n === "string")))
     errs.push({ path: "data.notes", code: "type", message: "data.notes must be a list of strings" });
+
+  // The ontology's TextAmendment has text/actions, not entry rows. Only
+  // explicitly textual publications may use it; all fields still pass schemaStage.
+  if (d._class === "TextAmendment") {
+    if (PUBLICATION_BY_ID.get(register_id)?.classification !== "textual")
+      errs.push({ path: "data._class", code: "mismatch", message: "TextAmendment requires a catalog textual publication" });
+    if (blank(d.dataset_code)) req("data.dataset_code", "dataset_code is required for a text amendment");
+    else if (d.dataset_code !== register_id)
+      errs.push({ path: "data.dataset_code", code: "mismatch", message: "dataset_code must equal register_id" });
+    if (blank(d.text)) req("data.text", "text is required for a text amendment");
+    return errs;
+  }
 
   if (needsEntries.has(action_type)) {
     if (!Array.isArray(d.entries) || d.entries.length === 0) {
@@ -94,12 +124,29 @@ export const stage1: PayloadValidator = ({ register_id, action_type, payload }) 
       return errs;
     }
     const rules = rulesFor(register_id);
+    if (!rules) return errs;
+    if (rules.amendmentClass && typeof d._class === "string" && AMENDMENT_CLASSES.includes(d._class) && d._class !== rules.amendmentClass)
+      errs.push({ path: "data._class", code: "mismatch", message: `data._class must be ${rules.amendmentClass} for ${register_id}` });
+    const countryField = typeof d._class === "string" && Object.hasOwn(AMENDMENT_COUNTRY_FIELDS, d._class) ? AMENDMENT_COUNTRY_FIELDS[d._class] : null;
+    const entryFields = typeof d._class === "string" && Object.hasOwn(AMENDMENT_ENTRY_FIELDS, d._class) ? AMENDMENT_ENTRY_FIELDS[d._class] : undefined;
+    const groups = [rules.keyFields, ...rules.fallbackKeyFields];
+    const representable = !entryFields || groups.some(group => group.some(field => entryFields.includes(field)));
+    if (!representable)
+      errs.push({ path: "data._class", code: "mismatch", message: `Catalog identity (${groups.map(group => group.join(" + ")).join(" or ")}) is not represented by ${d._class}; the catalog and model must be aligned before typed entries can be saved` });
     const full = action_type === "ADD" || action_type === "REP";
     d.entries.forEach((e, i) => {
       const at = `data.entries[${i}]`;
       if (!isObj(e)) return errs.push({ path: at, code: "type", message: "entry must be an object" });
-      if (keyOf(e[rules.keyField]) === null) req(`${at}.${rules.keyField}`, `${rules.keyField} is required`);
-      if (full) for (const f of rules.requiredEntryFields) if (blank(e[f])) req(`${at}.${f}`, `${f} is required`);
+      // Replay permits partial composite keys but requires at least one part;
+      // fallback groups are alternatives, never additional required fields.
+      if (representable && !groups.some(fields => fields.some(field => identityPart(e[field]) !== null))) {
+        const fields = groups.map(group => group.join(" + ")).join(" or ");
+        const field = groups.flat().find(candidate => entryFields?.includes(candidate)) ?? rules.keyFields[0];
+        req(`${at}.${field}`, `A register identity (${fields}) is required`);
+      }
+      if (countryField && keyOf(e[countryField]) === null)
+        req(`${at}.${countryField}`, `${countryField} is required`);
+      if (full) for (const f of requiredEntryFields[register_id] ?? []) if (blank(e[f])) req(`${at}.${f}`, `${f} is required`);
     });
   }
   return errs;

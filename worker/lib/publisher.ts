@@ -1,6 +1,6 @@
 // Approval -> branch -> PR, behind an interface (docs/submission-workflow.adoc
-// "Approval -> branch -> PR"). The real GitHub App client is not built here;
-// tests use FakePatchPublisher. NOTHING in this layer may target `main`.
+// "Approval -> branch -> PR"). Tests can override the configured GitHub App client.
+// Protected branches change only through reviewed pull requests.
 
 export interface OpenPatchPrRequest {
   repo: string;
@@ -11,6 +11,18 @@ export interface OpenPatchPrRequest {
   title: string;
   body: string;
   idempotencyKey: string;
+}
+import { classify } from "../../src/lib/form/corpus.ts";
+
+export interface OpenGeneralMessagePrRequest extends OpenPatchPrRequest {
+  edition: number;
+  revision: number;
+  messageId: string;
+  messageType: string;
+}
+export interface OpenMetadataPrRequest extends OpenPatchPrRequest {
+  edition: number;
+  revision: number;
 }
 export interface OpenedPr {
   prNumber: number;
@@ -46,16 +58,22 @@ export interface PinBump {
   freezeSha: string;
   /** The site-repo commit that moved the gitlink. */
   siteCommit: string;
+  /** The pin PR or its staging checks are not complete; never publish yet. */
+  pending?: { prNumber: number; url: string; reason: string };
 }
 export interface PatchPublisher {
   /** Idempotent per `idempotencyKey`: a replay returns the same PR, never a second. */
   openPatchPr(req: OpenPatchPrRequest): Promise<OpenedPr>;
+  openMetadataPr(req: OpenMetadataPrRequest): Promise<OpenedPr>;
+  openGeneralMessagePr(req: OpenGeneralMessagePrRequest): Promise<OpenedPr>;
+  getGeneralMessagePullRequest(req: { repo: string; prNumber: number; expectedHeadSha?: string }): Promise<PullRequestState>;
+  getMetadataPullRequest(req: { repo: string; prNumber: number; expectedHeadSha?: string }): Promise<PullRequestState>;
   /** Close the PR and delete the Worker-created branch (never merges, never touches other refs). */
   closePatchPr(req: { repo: string; branch: string; prNumber: number }): Promise<void>;
   /** A PR (never a push to main) that deletes `path`. Idempotent per `idempotencyKey`. */
   openRevertPr(req: OpenRevertPrRequest): Promise<OpenedPr>;
   /** Read-only: the reconciler's view of a PR we created. */
-  getPullRequest(req: { repo: string; prNumber: number }): Promise<PullRequestState>;
+  getPullRequest(req: { repo: string; prNumber: number; expectedHeadSha?: string }): Promise<PullRequestState>;
   /** Publication is a pin bump (the data-ob gitlink on the site repo). Idempotent per key. */
   bumpDataPin(req: PinBumpRequest): Promise<PinBump>;
 }
@@ -73,30 +91,38 @@ export function assertPatchBranch(branch: string): void {
   if (!PATCH_BRANCH.test(branch)) throw new Error(`refusing branch ${JSON.stringify(branch)}: only rt-sub-* patch branches are writable`);
 }
 
+export const MESSAGE_BRANCH = /^rt-msg-[1-9]\d*-[0-9A-Z]{26}-r[1-9]\d*$/;
+export function assertMessageRequest(req: OpenGeneralMessagePrRequest): void {
+  if (!Number.isSafeInteger(req.edition) || req.edition < 1 || !Number.isSafeInteger(req.revision) || req.revision < 1 || !/^[0-9A-Z]{26}$/.test(req.messageId) || req.branch !== `rt-msg-${req.edition}-${req.messageId}-r${req.revision}`) throw new Error("Invalid general message destination");
+  const prefix = `ob-issues/${req.edition}/`;
+  const relative = req.path.startsWith(prefix) ? req.path.slice(prefix.length) : "";
+  const singleton = ["running_annexes", "approved_recommendations"].includes(req.messageType);
+  if (singleton ? relative !== `general/${req.messageType}.yaml` : !new RegExp(`^${req.messageType}/(?!000)[0-9]{3}\\.yaml$`).test(relative)) throw new Error("Invalid general message path");
+  if (classify(relative, { type: req.messageType })?.role !== "general") throw new Error("Unknown general message type");
+}
+
+export const METADATA_BRANCH = /^rt-meta-[1-9]\d*-r[1-9]\d*$/;
+export function assertMetadataRequest(req: OpenMetadataPrRequest): void {
+  if (!Number.isSafeInteger(req.edition) || req.edition < 1 || !Number.isSafeInteger(req.revision) || req.revision < 1 || req.branch !== `rt-meta-${req.edition}-r${req.revision}` || req.path !== `ob-issues/${req.edition}/meta.yaml`) throw new Error("Invalid edition metadata destination");
+}
+
 export function branchName(issue: number, seq: number, slug: string, submissionId: string): string {
   const nnn = String(seq).padStart(3, "0");
   const s = slug.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
   return `rt-sub-${issue}-${nnn}-${s}-${submissionId.slice(-8)}`;
 }
 
-/** Real GitHub App implementation: a stub until the App exists (account setup, see design note). */
-export class GitHubAppPatchPublisher implements PatchPublisher {
-  async openPatchPr(_req: OpenPatchPrRequest): Promise<OpenedPr> {
-    throw new PublisherNotConfigured();
-  }
-  async closePatchPr(): Promise<void> {
-    throw new PublisherNotConfigured();
-  }
-  async openRevertPr(_req: OpenRevertPrRequest): Promise<OpenedPr> {
-    throw new PublisherNotConfigured();
-  }
-  async getPullRequest(): Promise<PullRequestState> {
-    throw new PublisherNotConfigured();
-  }
-  async bumpDataPin(_req: PinBumpRequest): Promise<PinBump> {
-    throw new PublisherNotConfigured();
-  }
+export interface PublisherConfig {
+  GITHUB_APP_ID?: string;
+  GITHUB_APP_PRIVATE_KEY?: string;
+  GITHUB_APP_INSTALLATION_ID?: string;
+  PATCH_REPO?: string;
+  GITHUB_SITE_REPO?: string;
+  GITHUB_DATA_GITLINK?: string;
+  GITHUB_STAGING_BRANCH?: string;
 }
+export { GitHubAppPatchPublisher } from "./github-publisher.ts";
+import { GitHubAppPatchPublisher } from "./github-publisher.ts";
 
 /** The base branch the FAKE reports for a PR (a read-side value: nothing here writes to it). */
 const FAKE_BASE = "main";
@@ -114,6 +140,9 @@ export class FakePatchPublisher implements PatchPublisher {
 
   async openPatchPr(req: OpenPatchPrRequest): Promise<OpenedPr> {
     assertPatchBranch(req.branch);
+    return this.open(req);
+  }
+  private async open(req: OpenPatchPrRequest): Promise<OpenedPr> {
     this.requests.push(req);
     if (this.failNext > 0) {
       this.failNext--;
@@ -127,6 +156,18 @@ export class FakePatchPublisher implements PatchPublisher {
     if (this.afterCreate) await this.afterCreate(pr);
     return pr;
   }
+  async openMetadataPr(req: OpenMetadataPrRequest): Promise<OpenedPr> {
+    assertMetadataRequest(req);
+    return this.open(req);
+  }
+  getMetadataPullRequest(req: { repo: string; prNumber: number; expectedHeadSha?: string }): Promise<PullRequestState> {
+    return this.getPullRequest(req);
+  }
+  openGeneralMessagePr(req: OpenGeneralMessagePrRequest): Promise<OpenedPr> {
+    assertMessageRequest(req);
+    return this.open(req);
+  }
+  getGeneralMessagePullRequest(req: { repo: string; prNumber: number; expectedHeadSha?: string }): Promise<PullRequestState> { return this.getPullRequest(req); }
   async closePatchPr(req: { repo: string; branch: string; prNumber: number }): Promise<void> {
     assertPatchBranch(req.branch);
     if (this.failClose) throw new Error("GitHub 502 on close");
@@ -161,8 +202,10 @@ export class FakePatchPublisher implements PatchPublisher {
     this.revertByKey.set(req.idempotencyKey, pr);
     return pr;
   }
-  async getPullRequest(req: { repo: string; prNumber: number }): Promise<PullRequestState> {
+  async getPullRequest(req: { repo: string; prNumber: number; expectedHeadSha?: string }): Promise<PullRequestState> {
     if (this.failGet) throw new Error("GitHub 502 on read");
+    const opened = [...this.byKey.values(), ...this.revertByKey.values()].find(pr => pr.prNumber === req.prNumber);
+    if (req.expectedHeadSha !== undefined && opened?.commitSha !== req.expectedHeadSha) throw new Error("Pull request does not match the recorded approved head");
     return this.pullStates.get(req.prNumber) ?? { state: "open", merged: false, mergeSha: null, baseRef: FAKE_BASE };
   }
   /** Test helper: GitHub now reports this PR merged. */
@@ -189,10 +232,10 @@ export class FakePatchPublisher implements PatchPublisher {
 }
 
 let override: PatchPublisher | null = null;
-/** Test seam / future wiring point. Production resolves the (unconfigured) App client. */
+/** Test seam. Production resolves the explicitly configured App client. */
 export function setPublisher(p: PatchPublisher | null) {
   override = p;
 }
-export function getPublisher(): PatchPublisher {
-  return override ?? new GitHubAppPatchPublisher();
+export function getPublisher(config?: PublisherConfig): PatchPublisher {
+  return override ?? new GitHubAppPatchPublisher(config);
 }
