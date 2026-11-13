@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { activateMember, api, db, seedFixtures } from "./helpers.ts";
+import { ADMIN, activateMember, api, db, seedFixtures } from "./helpers.ts";
 
 beforeEach(async () => {
   await seedFixtures();
@@ -22,6 +22,17 @@ describe("membership screen read contracts", () => {
     expect(response.json.memberships).toHaveLength(1);
     expect(response.json.memberships[0]).toMatchObject({ kind: "member", member_id: "A", status: "active" });
     expect(response.json.memberships.some((m: { member_id: string }) => m.member_id === "B")).toBe(false);
+  });
+
+  it("keeps administrative claim reads behind the D1 admin role even with an Access identity", async () => {
+    for (const access of ["member-A@example.test", "unaffiliated@example.test", "unknown@example.test"]) {
+      const response = await api("GET", "/api/admin/claims?status=active", { access });
+      expect(response.status).toBe(403);
+      expect(response.json).not.toHaveProperty("claims");
+    }
+    const response = await api("GET", "/api/admin/claims?status=active", { access: ADMIN });
+    expect(response.status).toBe(200);
+    expect(response.json.claims.map((c: { user_id: string }) => c.user_id).sort()).toEqual(["member-A", "member-B"]);
   });
 
   it("reports Access separately without promoting it to a member session", async () => {

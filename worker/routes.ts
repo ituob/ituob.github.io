@@ -12,18 +12,18 @@ import {
   verifyClaim,
   type RosterRow,
 } from "./lib/membership.ts";
-import { Forbidden } from "./lib/authz.ts";
+import { Forbidden, requireRole } from "./lib/authz.ts";
 import { sameOrigin } from "./lib/csrf.ts";
 import { StubMisconfigured, getAccessIdentity, getSession, takePendingSessionCookie } from "./lib/session.ts";
 import { type Route, body, json, str } from "./lib/http.ts";
 import { UpstreamError, ValidationFailed } from "./lib/submissions.ts";
 import { discussionRoutes } from "./discussion-routes.ts";
 import { composerRoutes } from "./composer-routes.ts";
-import { submissionRoutes } from "./submission-routes.ts";
+import { ituSession, submissionRoutes } from "./submission-routes.ts";
 import { webhookRoutes } from "./webhook-routes.ts";
 import type { AccessIdentity, Env, Session } from "./lib/types.ts";
 
-const routes: Route[] = [
+const workflowAndAccountRoutes: Route[] = [
   ...submissionRoutes,
   ...composerRoutes,
   ...discussionRoutes,
@@ -79,7 +79,11 @@ const routes: Route[] = [
       return json({ ok: true, membershipId: id, status: "pending" }, 201);
     },
   },
-  // ITU admin surface, Access-guarded.
+];
+
+// This complete membership administration surface requires an active ITU admin
+// resolved from D1, in addition to Access authentication.
+const membershipAdminRoutes: Route[] = [
   {
     method: "GET",
     pattern: /^\/api\/admin\/claims$/,
@@ -148,6 +152,17 @@ const routes: Route[] = [
   },
 ];
 
+const routes: Route[] = [
+  ...workflowAndAccountRoutes,
+  ...membershipAdminRoutes.map((route): Route => ({
+    ...route,
+    handler: async (ctx) => {
+      requireRole(await ituSession(ctx.env, ctx.access!), "itu-admin");
+      return route.handler(ctx);
+    },
+  })),
+];
+
 /** Paths whose trust path is Access, even for GET. Unknown paths here still require Access. */
 const ACCESS_PREFIXES = ["/api/admin/", "/api/ci/"];
 
@@ -185,6 +200,7 @@ async function handleApiInner(request: Request, env: Env, url: URL): Promise<Res
       const access = await getAccessIdentity(request, env);
       if (!access) return json({ error: "forbidden" }, 403);
       if (!route) return json({ error: "not found" }, 404);
+      if (!readOnly && !sameOrigin(request)) return json({ error: "forbidden" }, 403);
       return await route.handler({ request, env, url, params: path.match(route.pattern)!.slice(1), session: null, access });
     }
     if (!route) return json({ error: "not found" }, 404);

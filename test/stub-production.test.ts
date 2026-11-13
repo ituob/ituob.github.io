@@ -34,10 +34,10 @@ describe("the stub cannot run in production", () => {
 
   it("the Worker answers 500 (not a session) for stub config on a production host", async () => {
     await seedFixtures();
+    const before = (await db().prepare("SELECT * FROM memberships ORDER BY id").all()).results;
     const r = await api("POST", "/api/admin/itu-staff", { host: "www.ituob.org", headers: hdr, body: { userId: "itu-admin", roles: ["itu-admin"] } });
     expect(r.status).toBe(500);
-    const rows = await db().prepare("SELECT count(*) n FROM memberships").first<{ n: number }>();
-    expect(rows!.n).toBe(0);
+    expect((await db().prepare("SELECT * FROM memberships ORDER BY id").all()).results).toEqual(before);
     expect((await api("GET", "/api/whoami", { host: "www.ituob.org", headers: hdr })).status).toBe(500);
   });
 
