@@ -1,0 +1,64 @@
+= Edition metadata and issue dates
+
+The staff editor authors `IssueMetadata` using the generated ontology and nested
+author/contact form. `EditionMetadata.vue` accepts an `issueNo` numeric prop and
+emits `saved` with the durable draft after saving or scheduling. The integrator
+mounts it in the composer and registers `editionMetadataRoutes` in the API router.
+
+Routes (Access authentication, server-resolved ITU role, and router same-origin
+enforcement on mutations):
+
+* `GET /api/admin/composer/editions/{N}/metadata` returns `{ok:true,draft}`;
+  `draft` is null before the first save.
+* `POST` at the same path accepts `{metadata,expected_revision}`. Use zero only
+  to create a draft. ITU administrators and editors may save. Invalid generated
+  fields, nested types, mismatched `id`, impossible/non-ISO dates and cutoff after
+  publication return field errors (422), before any durable write.
+* `POST .../metadata/schedule` accepts `{expected_revision}` and requires an ITU
+  administrator. The saved metadata must include the matching issue `id`,
+  `publication_date` and `cutoff_date`. Dates use exact `YYYY-MM-DD` calendar values;
+  equal cutoff/publication dates are valid. Scheduling is local publication
+  intent; it neither opens a PR nor marks an edition published.
+
+The `edition_metadata` store is independent of the composer's one-open-edition
+constraint, so multiple future editions can have scheduled dates. Saves increment
+the revision and clear scheduling. Scheduling increments the revision once;
+repeating it with the current revision is idempotent. Stale writes return 409.
+Each successful mutation and its hash-chained audit entry share a D1 batch;
+constraint failure rolls both back. Frozen editions cannot be edited or newly
+scheduled. A metadata PR reservation also prevents saves, even if the external
+PR response has not yet been recorded. There is no implicit cancellation/unlock.
+
+`metadataArtifact(db,N,expectedRevision?)` is an internal publisher interface.
+It requires scheduled metadata, revalidates the schema/dates, and returns:
+
+[source,typescript]
+----
+{
+  ob_issue_no: number,
+  revision: number,
+  path: `ob-issues/${N}/meta.yaml`,
+  content: string, // deterministic YAML, object keys sorted, array order retained
+  publication_date: string,
+  cutoff_date: string
+}
+----
+
+Publish only those exact bytes through a reviewed PR in canonical `itu-ob-data`.
+Never write the default branch directly. The integrating publisher must reserve
+`edition_metadata_prs` before its outbound call, guarded by an atomic check that
+the artifact revision is still current and scheduled. Reserve `repo`, `branch`,
+`path`, `content_yaml` with `(ob_issue_no,revision)`; persist `pr_number`,
+`commit_sha`, `pr_url` after the response. Retries reuse the reserved revision and
+bytes. Provider failure must remain observable. `editions.meta_pr` may mirror the
+PR number but PR creation alone cannot advance publication: staging must verify
+the PR is merged, exact bytes match, and its merge commit is included in the
+frozen data revision. Scheduler intent must not be confused with automatic
+publication or deployment.
+
+Focused local SQL checks:
+`npx vitest run --config test/edition-metadata.config.ts`.
+These run the real migrations/SQL in Node SQLite with a transactional D1 adapter;
+they do not establish workerd or D1 compatibility. Actual D1 regressions:
+`npx vitest run test/edition-metadata.test.ts`. The host runner must also exercise
+the registered routes and mounted composer after integration.
