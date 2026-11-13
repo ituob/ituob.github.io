@@ -34,6 +34,8 @@ export interface RegisterState {
   lapse_reasons?: Record<string, unknown>;
   deleted_keys: string[];
   history: ChangeHistoryEntry[];
+  /** Canonical replay key → oldest-first events; absent in older snapshots. */
+  key_history?: Record<string, ChangeHistoryEntry[]>;
 }
 
 export interface RegisterManifest {
