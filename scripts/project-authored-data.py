@@ -58,7 +58,9 @@ def project(data_root, service_root, data_ref, service_ref, snapshots_out, proje
         subprocess.run(["tar", "-xf", str(archive), "-C", str(overlay)], check=True)
         snapshots = temporary / "snapshots"
         env = dict(os.environ, BUNDLE_GEMFILE=str(overlay / "ituob/Gemfile"),
-                   SNAPSHOTS_OUT=str(snapshots))
+                   SNAPSHOTS_OUT=str(snapshots),
+                   OB_ISSUES_OUT_PATH=str(overlay / "ob-issues"),
+                   ITU_OB_DATA_ROOT=str(data_root / "issues"))
 
         def run(*command, capture=False):
             result = subprocess.run(command, cwd=overlay, env=env, check=True,
@@ -78,6 +80,7 @@ def project(data_root, service_root, data_ref, service_ref, snapshots_out, proje
                 "--base-ref", data_ref, "--data-ref", data_ref)
             if json.loads(manifest.read_text()).get("messages"):
                 run(sys.executable, str(helper), "validate-messages", *stage_args)
+            run("bundle", "exec", "ruby", "scripts/validate_data_lml.rb", "--all")
             run("bundle", "exec", "ruby", "scripts/migrate_actions_to_changes.rb")
 
         result = run("bundle", "exec", "ruby", "scripts/generate_register_snapshots.rb", capture=True)

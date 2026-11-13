@@ -38,11 +38,14 @@ committed service tree into a temporary directory, ignoring uncommitted service
 code. Python 3, Git, tar, Ruby and Bundler are required; the Ruby dependencies
 are those of the pinned `data-ob/ituob/Gemfile` and lockfile. The helper sets
 `BUNDLE_GEMFILE` to the temporary service's Gemfile and `SNAPSHOTS_OUT` to a
-temporary output directory. Installed gems must remain available to Bundler
+temporary output directory. It also sets `OB_ISSUES_OUT_PATH` to the overlay's
+`ob-issues` directory and `ITU_OB_DATA_ROOT` to the canonical checkout's `issues`
+directory. Installed gems must remain available to Bundler
 outside the original checkout (as with the existing CI bundle installation).
 
 When `data` contains authored `ob-issues/` files, the pinned service must provide
-`scripts/stage_authored_patches.py`, `scripts/migrate_actions_to_changes.rb`
+`scripts/stage_authored_patches.py`, `scripts/validate_data_lml.rb`,
+`scripts/migrate_actions_to_changes.rb`
 and `scripts/generate_register_snapshots.rb`. Service commit
 `fc626fc7110db64653f82e7c0c226fd8c38330d0` provides that contract; use that
 commit or a reviewed descendant implementing the same interface.
@@ -57,6 +60,14 @@ When the staging manifest contains general messages, the helper first runs the
 pinned service's `validate-messages` command against that manifest and overlay.
 This requires a service revision implementing general-message staging and model
 validation; older revisions reject general-message paths during staging.
+Service commit `751319a91c15459ca15f414a4591a3de008497d0` adds that
+general-message contract.
+Before migration or snapshot generation, it runs the pinned service's
+`bundle exec ruby scripts/validate_data_lml.rb --all` against the full staged
+overlay. A site PR can pin an arbitrary data SHA, so this compiled model gate is
+required even if the data acceptance workflow normally validates merged input.
+Unknown modeled fields, missing validators and nonzero validator exits fail
+before projection and preserve previous site output.
 It then regenerates only derived register changes and snapshots from the
 historical corpus plus authored overlay. It never calls `build_ob_issues.rb`,
 rewrites canonical amendments, or derives patches from full register state.
@@ -82,4 +93,6 @@ For an alternate pinned service checkout, set `PROJECTION_SERVICE_ROOT`.
 It checks cumulative input, exact bytes, historical preservation, exact refs,
 missing trusted helpers, uncommitted service code, dirty canonical inputs,
 projection failure, post-replay mutation and rescued generator errors. It does
-not repeat the complete historical corpus build.
+not repeat the complete historical corpus build. The fixture migration requires
+a successful preceding full model gate; invalid model and missing/failed
+validator cases assert that previous output and canonical inputs survive.

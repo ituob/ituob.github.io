@@ -37,7 +37,16 @@ class ProjectionTest(unittest.TestCase):
         self.write(self.service, "ob-issues/1/meta.yaml", "historical metadata\n")
         self.write(self.service, "ob-issues/1/test/001-ADD.yaml", "historical amendment\n")
         self.write(self.service, "datasets/changes.json", '["committed baseline"]')
+        self.write(self.service, "scripts/validate_data_lml.rb", '''raise 'full validation required' unless ARGV == ['--all']
+raise 'wrong corpus root' unless File.realpath(ENV.fetch('OB_ISSUES_OUT_PATH')) == File.realpath('ob-issues')
+raise 'wrong source root' unless ENV.fetch('ITU_OB_DATA_ROOT').end_with?('/data/issues')
+paths = Dir[File.join(ENV.fetch('OB_ISSUES_OUT_PATH'), '*', 'test', '*.yaml')]
+raise 'staged input missing' if paths.length < 2
+raise 'unknown model field' if paths.any? { |p| File.read(p).include?('unknown_model_field:') }
+File.write('.model-validated', 'valid')
+''')
         self.write(self.service, "scripts/migrate_actions_to_changes.rb", '''require 'json'
+raise 'model validation must precede projection' unless File.exist?('.model-validated')
 paths = Dir['ob-issues/*/test/*.yaml'].sort
 File.write('datasets/changes.json', JSON.generate(paths.map { |p| File.binread(p) }))
 ''')
@@ -107,6 +116,7 @@ puts 'Snapshots: 1 registers, 1 files written, 0 skipped, 0 errors'
     def test_historical_only_uses_committed_changes_without_helper_or_migration(self):
         (self.service / "scripts/stage_authored_patches.py").unlink()
         (self.service / "scripts/migrate_actions_to_changes.rb").unlink()
+        (self.service / "scripts/validate_data_lml.rb").unlink()
         self.service_ref = self.commit(self.service)
         self.assertEqual(self.run_projection(), "historical-only")
         self.assertEqual(json.loads((self.out / "current.json").read_text()), ["committed baseline"])
@@ -153,6 +163,34 @@ puts 'Snapshots: 1 registers, 1 files written, 0 skipped, 0 errors'
         self.assertEqual((self.out / "current.json").read_text(), '["previous"]')
         self.assertFalse(self.projected.exists())
         self.assert_inputs_preserved()
+
+    def test_invalid_model_fails_before_projection_and_preserves_output(self):
+        self.authored(2, "type: ADD\nunknown_model_field: rejected\n")
+        self.write(self.out, "current.json", '["previous"]')
+        with self.assertRaises(subprocess.CalledProcessError) as caught:
+            self.run_projection()
+        self.assertIn("scripts/validate_data_lml.rb", caught.exception.cmd)
+        self.assertEqual((self.out / "current.json").read_text(), '["previous"]')
+        self.assertFalse(self.projected.exists())
+        self.assert_inputs_preserved()
+
+    def test_missing_or_failed_validator_fails_closed(self):
+        self.authored(2, "type: ADD\n")
+        self.write(self.out, "current.json", '["previous"]')
+        for validator in (None, "exit 7\n"):
+            with self.subTest(validator=validator):
+                path = self.service / "scripts/validate_data_lml.rb"
+                if validator is None:
+                    path.unlink()
+                else:
+                    path.write_text(validator)
+                self.service_ref = self.commit(self.service)
+                with self.assertRaises(subprocess.CalledProcessError) as caught:
+                    self.run_projection()
+                self.assertIn("scripts/validate_data_lml.rb", caught.exception.cmd)
+                self.assertEqual((self.out / "current.json").read_text(), '["previous"]')
+                self.assertFalse(self.projected.exists())
+                self.assert_inputs_preserved()
 
     def test_post_projection_mutation_is_rejected(self):
         self.authored(2, "type: ADD\n")
