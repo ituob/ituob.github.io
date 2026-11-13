@@ -70,7 +70,7 @@ class GitHub {
     }
     if (suffix.startsWith("/git/refs/")) { this.refs.delete(decodeURIComponent(suffix.slice(16))); return respond(null, 204); }
     if (suffix.startsWith("/compare/")) {
-      if (site || suffix.endsWith(`...${C}`)) return respond({ files: [{ filename: site ? "data-ob" : this.entries.get(C)?.path ?? path, status: this.entries.get(C)?.sha === null ? "removed" : "added" }] });
+      if (site || this.commits.get(suffix.split("...").at(-1)!)?.parents?.length) return respond({ files: [{ filename: site ? "data-ob" : this.entries.get(C)?.path ?? path, status: this.entries.get(C)?.sha === null ? "removed" : "added" }] });
       return respond({ status: this.compareStatus });
     }
     if (suffix.startsWith("/contents/")) {
@@ -230,6 +230,9 @@ describe("edition metadata PR protocol", () => {
     expect(api.calls.filter(c => c.method === "PATCH")).toEqual([]);
     expect((await client.getMetadataPullRequest({ repo: req.repo, prNumber: first.prNumber })).state).toBe("open");
     await expect(client.getPullRequest({ repo: req.repo, prNumber: first.prNumber })).rejects.toThrow(/refusing branch/);
+    api.commits.set(D, { ...api.commits.get(C), sha: D });
+    api.prs[0].head.sha = D;
+    await expect(client.getMetadataPullRequest({ repo: req.repo, prNumber: first.prNumber, expectedHeadSha: C })).rejects.toThrow("Pull request does not match");
   });
   it("rejects protected refs, action paths, wrong issues and revisions before network", async () => {
     const api = new GitHub();
@@ -263,6 +266,9 @@ describe("general message PR protocol", () => {
     expect((await client.getGeneralMessagePullRequest({ repo: req.repo, prNumber: first.prNumber })).state).toBe("open");
     await expect(client.getMetadataPullRequest({ repo: req.repo, prNumber: first.prNumber })).rejects.toThrow(/metadata branch/);
     expect(api.calls.filter(c => c.method === "PATCH")).toEqual([]);
+    api.commits.set(D, { ...api.commits.get(C), sha: D });
+    api.prs[0].head.sha = D;
+    await expect(client.getGeneralMessagePullRequest({ repo: req.repo, prNumber: first.prNumber, expectedHeadSha: C })).rejects.toThrow("Pull request does not match");
   });
   it("rejects mixed issues, unknown types, full-state paths, protected refs and invalid sequence before network", async () => {
     const api = new GitHub();

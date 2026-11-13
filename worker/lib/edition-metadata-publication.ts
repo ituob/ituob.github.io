@@ -73,7 +73,7 @@ export async function readMetadataReview(db: D1Database, session: Session | null
   if (!stored) throw new NotFoundError("no metadata review has been prepared");
   if (stored.pr_number === null) return { pr: stored, pending: true, state: null };
   try {
-    const state = await publisher.getMetadataPullRequest({ repo: stored.repo, prNumber: stored.pr_number });
+    const state = await publisher.getMetadataPullRequest({ repo: stored.repo, prNumber: stored.pr_number, expectedHeadSha: stored.commit_sha ?? "" });
     return { pr: stored, pending: !state.merged, state };
   } catch (error) { throw new UpstreamError(error instanceof Error ? error.message : "metadata PR unavailable"); }
 }

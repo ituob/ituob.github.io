@@ -79,6 +79,8 @@ jobs:
       run: npx vitest run --config test/edition-metadata.config.ts
     - name: General-message SQL and validator regression tests
       run: npx vitest run --config test/general-messages.config.ts
+    - name: General-message composition regression tests
+      run: npx vitest run --config test/general-message-composition.config.ts
 
     - name: Item history and textual action regression tests
       run: |

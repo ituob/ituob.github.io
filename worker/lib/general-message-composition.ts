@@ -40,7 +40,7 @@ export async function generalMergesForPublication(messages: GeneralSelection[], 
   const merges: {submissionId:string; mergeSha:string}[]=[];
   for(const message of messages) {
     let state;
-    try { state=await publisher.getGeneralMessagePullRequest({repo:message.repo!,prNumber:message.pr_number!}); }
+    try { state=await publisher.getGeneralMessagePullRequest({repo:message.repo!,prNumber:message.pr_number!,expectedHeadSha:message.commit_sha!}); }
     catch(error) { throw new UpstreamError(`could not verify general message ${message.id}: ${error instanceof Error ? error.message : String(error)}`); }
     if(!state.merged || !state.mergeSha) throw new ConflictError(`general message ${message.id} review PR must be merged before publication`);
     merges.push({submissionId:`general-${message.id}-r${message.revision}`,mergeSha:state.mergeSha});

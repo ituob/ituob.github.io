@@ -97,8 +97,9 @@ describe("general-message edition composition",()=>{
     const message=await general();
     await saveMetadata(db,admin,1400,{metadata:{id:1400,publication_date:"2027-01-01",cutoff_date:"2026-12-31"},expected_revision:0});
     await scheduleMetadata(db,admin,1400,1);const artifact=await metadataArtifact(db,1400,2);
-    sqlite.prepare("INSERT INTO edition_metadata_prs(ob_issue_no,revision,repo,branch,path,content_yaml,pr_number,commit_sha) VALUES (1400,2,'ituob/data','rt-meta-1400-r2',?,?,22,'meta-head')").run(artifact.path,artifact.content);
-    fake.mergePr(22,"m".repeat(40));const id=await register();
+    const metadataPr = await fake.openMetadataPr({ repo:"ituob/data",branch:"rt-meta-1400-r2",path:artifact.path,content:artifact.content,edition:1400,revision:2,title:"Metadata",body:"Review",idempotencyKey:"meta-1400-r2" });
+    sqlite.prepare("INSERT INTO edition_metadata_prs(ob_issue_no,revision,repo,branch,path,content_yaml,pr_number,commit_sha) VALUES (1400,2,'ituob/data','rt-meta-1400-r2',?,?,?,?)").run(artifact.path,artifact.content,metadataPr.prNumber,metadataPr.commitSha);
+    fake.mergePr(metadataPr.prNumber,"m".repeat(40));const id=await register();
     const result=await publishEdition(db,admin,1400,fake);
     expect(result.published).toEqual([id]);expect(state(id)).toBe("published");
     expect(fake.pinRequests[0].items).toEqual([{submissionId:id,mergeSha:"r".repeat(40)},{submissionId:`general-${message.id}-r1`,mergeSha:"g".repeat(40)},{submissionId:"edition-1400-metadata-r2",mergeSha:"m".repeat(40)}]);

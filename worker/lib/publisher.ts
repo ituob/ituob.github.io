@@ -66,14 +66,14 @@ export interface PatchPublisher {
   openPatchPr(req: OpenPatchPrRequest): Promise<OpenedPr>;
   openMetadataPr(req: OpenMetadataPrRequest): Promise<OpenedPr>;
   openGeneralMessagePr(req: OpenGeneralMessagePrRequest): Promise<OpenedPr>;
-  getGeneralMessagePullRequest(req: { repo: string; prNumber: number }): Promise<PullRequestState>;
-  getMetadataPullRequest(req: { repo: string; prNumber: number }): Promise<PullRequestState>;
+  getGeneralMessagePullRequest(req: { repo: string; prNumber: number; expectedHeadSha?: string }): Promise<PullRequestState>;
+  getMetadataPullRequest(req: { repo: string; prNumber: number; expectedHeadSha?: string }): Promise<PullRequestState>;
   /** Close the PR and delete the Worker-created branch (never merges, never touches other refs). */
   closePatchPr(req: { repo: string; branch: string; prNumber: number }): Promise<void>;
   /** A PR (never a push to main) that deletes `path`. Idempotent per `idempotencyKey`. */
   openRevertPr(req: OpenRevertPrRequest): Promise<OpenedPr>;
   /** Read-only: the reconciler's view of a PR we created. */
-  getPullRequest(req: { repo: string; prNumber: number }): Promise<PullRequestState>;
+  getPullRequest(req: { repo: string; prNumber: number; expectedHeadSha?: string }): Promise<PullRequestState>;
   /** Publication is a pin bump (the data-ob gitlink on the site repo). Idempotent per key. */
   bumpDataPin(req: PinBumpRequest): Promise<PinBump>;
 }
@@ -160,14 +160,14 @@ export class FakePatchPublisher implements PatchPublisher {
     assertMetadataRequest(req);
     return this.open(req);
   }
-  getMetadataPullRequest(req: { repo: string; prNumber: number }): Promise<PullRequestState> {
+  getMetadataPullRequest(req: { repo: string; prNumber: number; expectedHeadSha?: string }): Promise<PullRequestState> {
     return this.getPullRequest(req);
   }
   openGeneralMessagePr(req: OpenGeneralMessagePrRequest): Promise<OpenedPr> {
     assertMessageRequest(req);
     return this.open(req);
   }
-  getGeneralMessagePullRequest(req: { repo: string; prNumber: number }): Promise<PullRequestState> { return this.getPullRequest(req); }
+  getGeneralMessagePullRequest(req: { repo: string; prNumber: number; expectedHeadSha?: string }): Promise<PullRequestState> { return this.getPullRequest(req); }
   async closePatchPr(req: { repo: string; branch: string; prNumber: number }): Promise<void> {
     assertPatchBranch(req.branch);
     if (this.failClose) throw new Error("GitHub 502 on close");
@@ -202,8 +202,10 @@ export class FakePatchPublisher implements PatchPublisher {
     this.revertByKey.set(req.idempotencyKey, pr);
     return pr;
   }
-  async getPullRequest(req: { repo: string; prNumber: number }): Promise<PullRequestState> {
+  async getPullRequest(req: { repo: string; prNumber: number; expectedHeadSha?: string }): Promise<PullRequestState> {
     if (this.failGet) throw new Error("GitHub 502 on read");
+    const opened = [...this.byKey.values(), ...this.revertByKey.values()].find(pr => pr.prNumber === req.prNumber);
+    if (req.expectedHeadSha !== undefined && opened?.commitSha !== req.expectedHeadSha) throw new Error("Pull request does not match the recorded approved head");
     return this.pullStates.get(req.prNumber) ?? { state: "open", merged: false, mergeSha: null, baseRef: FAKE_BASE };
   }
   /** Test helper: GitHub now reports this PR merged. */

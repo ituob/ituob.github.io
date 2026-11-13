@@ -48,7 +48,7 @@ export const generalMessagePublicationRoutes: Route[] = [
     if (!stored) throw new NotFoundError("no general-message review has been prepared");
     if (stored.pr_number === null) return json({ ok: true, pr: stored, pending: true, state: null });
     try {
-      const state = await getPublisher(env).getGeneralMessagePullRequest({ repo: stored.repo, prNumber: stored.pr_number });
+      const state = await getPublisher(env).getGeneralMessagePullRequest({ repo: stored.repo, prNumber: stored.pr_number, expectedHeadSha: stored.commit_sha ?? "" });
       return json({ ok: true, pr: stored, pending: !state.merged, state });
     } catch (error) { throw new UpstreamError(error instanceof Error ? error.message : "general-message review unavailable"); }
   } },

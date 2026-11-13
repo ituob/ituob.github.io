@@ -184,14 +184,14 @@ export class GitHubAppPatchPublisher implements PatchPublisher {
   }
   openPatchPr(req: OpenPatchPrRequest): Promise<OpenedPr> { return this.open(req, false); }
   openMetadataPr(req: OpenMetadataPrRequest): Promise<OpenedPr> { return this.open(req, false, "metadata"); }
-  getMetadataPullRequest(req: { repo: string; prNumber: number }): Promise<PullRequestState> { return this.readPullRequest(req, "metadata"); }
+  getMetadataPullRequest(req: { repo: string; prNumber: number; expectedHeadSha?: string }): Promise<PullRequestState> { return this.readPullRequest(req, "metadata"); }
   openGeneralMessagePr(req: OpenGeneralMessagePrRequest): Promise<OpenedPr> { return this.open(req, false, "message"); }
-  getGeneralMessagePullRequest(req: { repo: string; prNumber: number }): Promise<PullRequestState> { return this.readPullRequest(req, "message"); }
+  getGeneralMessagePullRequest(req: { repo: string; prNumber: number; expectedHeadSha?: string }): Promise<PullRequestState> { return this.readPullRequest(req, "message"); }
   openRevertPr(req: OpenRevertPrRequest): Promise<OpenedPr> { return this.open(req, true); }
-  async getPullRequest(req: { repo: string; prNumber: number }): Promise<PullRequestState> {
+  async getPullRequest(req: { repo: string; prNumber: number; expectedHeadSha?: string }): Promise<PullRequestState> {
     return this.readPullRequest(req, "patch");
   }
-  private async readPullRequest(req: { repo: string; prNumber: number }, kind: "patch" | "metadata" | "message"): Promise<PullRequestState> {
+  private async readPullRequest(req: { repo: string; prNumber: number; expectedHeadSha?: string }, kind: "patch" | "metadata" | "message"): Promise<PullRequestState> {
     const repo = this.dataRepo(req.repo);
     const pr = await this.request(`${repo}/pulls/${this.prNumber(req.prNumber)}`);
     if (kind === "metadata") {
@@ -199,7 +199,7 @@ export class GitHubAppPatchPublisher implements PatchPublisher {
     } else if (kind === "message") {
       if (!MESSAGE_BRANCH.test(pr.head.ref)) throw new Error("Unowned general message branch");
     } else assertPatchBranch(pr.head.ref);
-    this.validatePr(pr, repo, pr.head.ref, (await this.defaultRef(repo)).ref, pr.head.sha);
+    this.validatePr(pr, repo, pr.head.ref, (await this.defaultRef(repo)).ref, req.expectedHeadSha ?? pr.head.sha);
     await this.verifyOwnedPatch(repo, pr.head.ref, pr.head.sha, kind);
     return { state: pr.state, merged: pr.merged === true, mergeSha: pr.merged ? requireSha(pr.merge_commit_sha) : null, baseRef: pr.base.ref };
   }
