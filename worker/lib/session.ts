@@ -1,4 +1,5 @@
 import { resolveAuthority } from "./authority.ts";
+import { verifyAccessIdentity } from "./access.ts";
 import { isLoopbackHost } from "./host.ts";
 import { oidcConfig, randomToken, sha256b64url } from "./oidc.ts";
 import type { AccessIdentity, Env, Session } from "./types.ts";
@@ -144,16 +145,15 @@ export async function getSession(request: Request, env: Env): Promise<Session | 
 
 /**
  * Access seam: the verified Cf-Access-Jwt-Assertion identity. Verification
- * against the team JWKS needs the Access application (not available), so only
- * the loopback stub (`X-Stub-Access: <email>`) yields an identity; otherwise
- * null, which fails closed.
+ * against the configured team JWKS is required outside the loopback stub.
+ * Neither a bare email header nor an ordinary member session grants Access.
  */
 export async function getAccessIdentity(
   request: Request,
   env: Env,
 ): Promise<AccessIdentity | null> {
   guardStubConfig(request, env);
-  if (!stubEnabled(request, env)) return null;
+  if (!stubEnabled(request, env)) return verifyAccessIdentity(request, env);
   const email = request.headers.get("X-Stub-Access");
   return email ? { email } : null;
 }

@@ -46,6 +46,8 @@ export interface PinBump {
   freezeSha: string;
   /** The site-repo commit that moved the gitlink. */
   siteCommit: string;
+  /** The pin PR or its staging checks are not complete; never publish yet. */
+  pending?: { prNumber: number; url: string; reason: string };
 }
 export interface PatchPublisher {
   /** Idempotent per `idempotencyKey`: a replay returns the same PR, never a second. */

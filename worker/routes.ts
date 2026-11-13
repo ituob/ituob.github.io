@@ -32,8 +32,9 @@ const routes: Route[] = [
     method: "GET",
     pattern: /^\/api\/whoami$/,
     guard: "public",
-    handler: async ({ env, session }) => {
-      if (!session) return json({ ok: true, authenticated: false });
+    handler: async ({ request, env, session }) => {
+      const access = await getAccessIdentity(request, env);
+      if (!session) return json({ ok: true, authenticated: false, access });
       const u = await env.DB.prepare(`SELECT email, display_name FROM users WHERE id = ?1`)
         .bind(session.userId)
         .first<{ email: string | null; display_name: string | null }>();
@@ -44,8 +45,25 @@ const routes: Route[] = [
         user: { id: session.userId, displayName: u?.display_name ?? null, email: u?.email ?? null },
         roles: session.roles,
         memberStateId: session.memberStateId,
+        access,
       });
     },
+  },
+  {
+    method: "GET",
+    pattern: /^\/api\/members$/,
+    guard: "public",
+    handler: async ({ env }) => json({ ok: true, members: (await env.DB
+      .prepare("SELECT id, name, status FROM members WHERE status='active' ORDER BY name, id")
+      .all()).results }),
+  },
+  {
+    method: "GET",
+    pattern: /^\/api\/me\/membership$/,
+    guard: "session",
+    handler: async ({ env, session }) => json({ ok: true, memberships: (await env.DB
+      .prepare("SELECT id, kind, member_id, status, claim_note, decision_note, claimed_at FROM memberships WHERE user_id=?1 ORDER BY id DESC")
+      .bind(session!.userId).all()).results }),
   },
   // Member action, session-guarded. Reads ONLY memberId and note: a status,
   // role or user id in the body is ignored by construction.

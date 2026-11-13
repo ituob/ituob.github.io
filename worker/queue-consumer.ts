@@ -34,7 +34,7 @@ async function deliver(env: Env, id: string): Promise<boolean> {
   if (n.suppressed) return skip("skipped:suppressed", "skipped_suppressed");
   const mail = renderEmail(n);
   try {
-    const r = await getEmailSender().send({ to: n.email, subject: mail.subject, text: mail.text, idempotencyKey: n.id });
+    const r = await getEmailSender(env).send({ to: n.email, subject: mail.subject, text: mail.text, idempotencyKey: n.id });
     await env.DB.batch([
       env.DB.prepare(`UPDATE notifications SET email_status='sent', email_provider_id=?2, email_sent_at=?3, email_attempts=email_attempts+1, email_reason=NULL WHERE id=?1`).bind(id, r.id, new Date().toISOString()),
       count(env, "sent"),

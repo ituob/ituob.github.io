@@ -265,6 +265,7 @@ export async function readThread(db: D1Database, session: Session | null, submis
   const revs = (await db.prepare(`SELECT r.* FROM comment_revisions r JOIN comments c ON c.id=r.comment_id WHERE c.submission_id=?1 ORDER BY r.comment_id, r.rev`).bind(sub.id).all<any>()).results;
   const admin = hasRole(s, "itu-admin");
   return {
+    viewer_user_id: s.userId,
     discussion_closed: !!sub.discussion_closed,
     comments: rows.map((c) => {
       const hide = c.deleted_at && !admin;

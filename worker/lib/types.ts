@@ -5,6 +5,12 @@ export interface Env {
   DB: D1Database;
   /** "stub" enables the local stub; anything else (including unset) fails closed. */
   AUTH_MODE?: string;
+  /** Cloudflare Access team hostname and application audience; both required. */
+  ACCESS_TEAM_DOMAIN?: string;
+  ACCESS_AUD?: string;
+  /** Queue-consumer-only email credentials; never exposed to browser assets. */
+  RESEND_API_KEY?: string;
+  MAIL_FROM?: string;
   // OIDC relying party (AUTH_MODE="oidc"). Required: ISSUER, CLIENT_ID, and
   // CLIENT_SECRET (a Worker secret) unless OIDC_CLIENT_AUTH="none". All optional
   // knobs map to assumptions A1-A11 in docs/identity-accounts.adoc. No defaults
