@@ -4,6 +4,7 @@
 require 'csv'
 require 'digest'
 require 'fileutils'
+require 'find'
 require 'json'
 require 'set'
 require 'tmpdir'
@@ -37,10 +38,14 @@ module ParityEvidence
       ParityEvidence.rows << {
         deployed: relative, local: local.delete_prefix('build/'), label: label,
         coverage: report.coverage,
-        verdict: exclusion ? 'cross-listed' : (report.coverage >= 0.95 ? 'pass' : 'fail'),
+        verdict: if exclusion
+                   'cross-listed'
+                 else
+                   (report.coverage >= 0.95 ? 'pass' : 'fail')
+                 end,
         exclusion: exclusion,
         deployed_sha256: Digest::SHA256.hexdigest(deployed_html),
-        local_sha256: Digest::SHA256.hexdigest(actual_html),
+        local_sha256: Digest::SHA256.hexdigest(actual_html)
       }
       report
     end
@@ -62,14 +67,24 @@ module ParityEvidence
   end
 end
 
-reference = File.expand_path(ENV.fetch('DEPLOYED_SITE'))
+reference = File.realpath(ENV.fetch('DEPLOYED_SITE'))
 build = File.expand_path(ENV.fetch('LOCAL_DIST'))
 output = File.expand_path(ENV.fetch('OUTPUT_DIR', File.join(__dir__, '../docs/parity/printed-labels-notes')))
 canonical = File.expand_path('../data-ob/scripts/parity_report.rb', __dir__)
 FileUtils.mkdir_p(output)
 
 Dir.mktmpdir('printed-labels-parity-') do |directory|
-  File.symlink(reference, File.join(directory, 'reference'))
+  # Pathname#find does not descend through a symlinked root directory.
+  # Use real directories and read-only file links so the canonical walker
+  # visits the same complete tree without copying the HTML contents.
+  Find.find(reference) do |source|
+    target = File.join(directory, 'reference', source.delete_prefix(reference).delete_prefix('/'))
+    if File.directory?(source)
+      FileUtils.mkdir_p(target)
+    elsif File.file?(source)
+      File.symlink(source, target)
+    end
+  end
   File.symlink(build, File.join(directory, 'build'))
   Dir.chdir(directory) do
     ENV['DEPLOYED_SITE'] = 'reference'
@@ -90,11 +105,12 @@ Dir.mktmpdir('printed-labels-parity-') do |directory|
         deployed: relative, local: nil, label: label, coverage: 0.0,
         verdict: 'missing', exclusion: CROSS_LISTED_PAGES[relative],
         deployed_sha256: Digest::SHA256.file(File.join('reference', relative)).hexdigest,
-        local_sha256: nil,
+        local_sha256: nil
       }
       relative
     end
     rows = ParityEvidence.rows.sort_by { |row| row[:deployed] }
+    raise 'No classified variants found' if rows.empty?
     raise 'Variant collection mismatch' unless rows.map { |row| row[:deployed] } == classified.sort
 
     included = rows.reject { |row| row[:exclusion] }
@@ -102,12 +118,15 @@ Dir.mktmpdir('printed-labels-parity-') do |directory|
       schema_version: 1, threshold: 0.95, classified_variants: rows.length,
       included_variants: included.length, excluded_variants: rows.length - included.length,
       local_pages: rows.map { |row| row[:label] }.uniq.length,
-      variants: rows,
+      variants: rows
     }
     File.write(File.join(output, 'parity_variants.json'), "#{JSON.pretty_generate(payload)}\n")
     CSV.open(File.join(output, 'parity_variants.csv'), 'w') do |csv|
       csv << %w[deployed local label coverage verdict exclusion deployed_sha256 local_sha256]
-      rows.each { |row| csv << row.values_at(:deployed, :local, :label, :coverage, :verdict, :exclusion, :deployed_sha256, :local_sha256) }
+      rows.each do |row|
+        csv << row.values_at(:deployed, :local, :label, :coverage, :verdict, :exclusion, :deployed_sha256,
+                             :local_sha256)
+      end
     end
     puts "#{included.count { |row| row[:coverage] >= 0.95 }}/#{included.length} included variants pass"
     exit 1 unless included.all? { |row| row[:coverage] >= 0.95 && row[:verdict] == 'pass' }
