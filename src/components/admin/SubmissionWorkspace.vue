@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue';
 import { parseYaml } from '../../lib/form/yaml-io';
+import { submissionFieldDiff } from '../../lib/submission-diff';
 import { blankState, toFormState, type FormNode } from '../../lib/form/model';
 import { actionPayload, actionTypes, amendmentClasses, api, ApiError, payloadErrors, revisionErrors } from '../../lib/admin-client';
 import type { SchemaIssue } from '../../lib/schema.validators.generated';
@@ -20,6 +21,14 @@ const reason = ref(''), edition = ref<number | null>(null), override = ref(false
 const creating = ref(props.create), correctsId = ref('');
 const prefix = computed(() => props.admin ? '/api/admin/submissions' : '/api/me/submissions');
 const editable = computed(() => creating.value || (!props.admin && ['draft', 'changes_requested'].includes(detail.value?.submission.state ?? '')));
+function revisionChanges(revision: Revision) {
+  const revisions = detail.value?.revisions ?? [];
+  const index = revisions.findIndex(item => item.rev === revision.rev);
+  if (index < 0) return [];
+  const before = index === 0 ? undefined : parseYaml(revisions[index - 1]!.payload_yaml);
+  const after = parseYaml(revision.payload_yaml);
+  return submissionFieldDiff(before, after);
+}
 async function perform(work: () => Promise<void>) {
   busy.value = true; error.value = ''; notice.value = ''; errors.value = [];
   try { await work(); } catch (e) { error.value = e instanceof Error ? e.message : 'Request failed'; if (e instanceof ApiError) errors.value = e.errors; }
@@ -124,10 +133,16 @@ onMounted(() => perform(async () => { await list(); const id = new URLSearchPara
       </fieldset>
       <template v-if="detail"><h3>Publication status</h3><p v-if="detail.pr">PR {{ detail.pr.pr_number ?? 'pending' }} · {{ detail.pr.pr_state }}<span v-if="detail.pr.last_error" class="error"> · {{ detail.pr.last_error }}</span></p><p v-else>No publication PR yet.</p>
       <h3>Review history</h3><ol><li v-for="(event, i) in detail.history" :key="i">{{ event.at }}: {{ event.from_state || 'new' }} → {{ event.to_state }}<span v-if="event.reason"> — {{ event.reason }}</span></li></ol>
-      <h3>Revision history</h3><details v-for="revision in detail.revisions" :key="revision.rev"><summary>Revision {{ revision.rev }} · {{ revision.created_at }}</summary><pre>{{ revision.payload_yaml }}</pre></details></template>
+      <h3>Revision history</h3><details v-for="revision in detail.revisions" :key="revision.rev"><summary>Revision {{ revision.rev }} · {{ revision.created_at }}</summary>
+        <h4>Field changes {{ revision.rev === detail.revisions[0]?.rev ? '(new proposal)' : `from revision ${revision.rev - 1}` }}</h4>
+        <p v-if="!revisionChanges(revision).length">No field changes.</p>
+        <table v-else><thead><tr><th scope="col">Field</th><th scope="col">Before</th><th scope="col">After</th></tr></thead><tbody><tr v-for="change in revisionChanges(revision)" :key="change.path"><th scope="row"><code>{{ change.path }}</code></th><td><pre>{{ change.before }}</pre></td><td><pre>{{ change.after }}</pre></td></tr></tbody></table>
+        <details><summary>Raw revision YAML</summary><pre>{{ revision.payload_yaml }}</pre></details>
+      </details></template>
     </section>
   </div>
 </template>
 <style scoped>
 .workspace { max-width: 72rem; margin: 2rem auto; } fieldset { border: 1px solid #9baaba; padding: 1rem; margin: 1rem 0; } label { display: block; margin: .75rem 0; } input, select, textarea, button { border: 1px solid #7c8b9c; border-radius: .2rem; padding: .4rem; max-width: 100%; } button { margin: .25rem; cursor: pointer; } textarea { display: block; width: 100%; } button:disabled { opacity: .55; cursor: default; } .error { color: #a51b27; } pre { white-space: pre-wrap; overflow-wrap: anywhere; } :deep(.schema-field) { margin: .75rem 0; padding-left: .75rem; border-left: 2px solid #d5dce3; } :deep(textarea) { display: block; width: 100%; border: 1px solid #7c8b9c; padding: .4rem; } :deep(.field-path) { display: block; font-size: .8rem; }
+table { width: 100%; border-collapse: collapse; } th, td { border: 1px solid #9baaba; padding: .4rem; text-align: left; vertical-align: top; } td pre { margin: 0; }
 </style>
