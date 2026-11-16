@@ -11,6 +11,9 @@ interface Submission { id: string; register_id: string; slug: string; action_typ
 interface Revision { rev: number; payload_yaml: string; validation: string; created_at: string }
 interface Detail { ok: true; submission: Submission; revisions: Revision[]; history: { from_state: string; to_state: string; reason: string | null; at: string }[]; pr: { pr_number: number | null; pr_state: string; last_error: string | null } | null }
 const rows = ref<Submission[]>([]), detail = ref<Detail | null>(null);
+const reviewIds = ref<string[]>([]);
+const reviewResults = ref<{ id: string; success: boolean; message: string }[]>([]);
+const reviewCount = computed(() => props.admin ? rows.value.filter(row => row.state === 'submitted' && reviewIds.value.includes(row.id)).length : 0);
 const selected = ref(''), registerId = ref(''), slug = ref(''), action = ref(actionTypes[0] ?? 'ADD'), className = ref(amendmentClasses[0] ?? 'TextAmendment');
 const node = ref<FormNode>(blankState(className.value));
 const existing = ref<Record<string, unknown>>({});
@@ -34,7 +37,33 @@ async function perform(work: () => Promise<void>) {
   try { await work(); } catch (e) { error.value = e instanceof Error ? e.message : 'Request failed'; if (e instanceof ApiError) errors.value = e.errors; }
   finally { busy.value = false; }
 }
-async function list() { const result = await api<{ submissions: Submission[] }>(`${prefix.value}${filter.value ? `?state=${encodeURIComponent(filter.value)}` : ''}`); rows.value = result.submissions; }
+async function list() {
+  const result = await api<{ submissions: Submission[] }>(`${prefix.value}${filter.value ? `?state=${encodeURIComponent(filter.value)}` : ''}`);
+  rows.value = result.submissions;
+  reviewIds.value = reviewIds.value.filter(id => props.admin && rows.value.some(row => row.id === id && row.state === 'submitted'));
+}
+async function startSelectedReviews() {
+  if (!props.admin || busy.value || !reviewCount.value) return;
+  await perform(async () => {
+    reviewResults.value = [];
+    // Refresh eligibility before sending; the server still authorizes every transition.
+    await list();
+    const ids = [...new Set(reviewIds.value)];
+    for (const id of ids) {
+      if (!props.admin || !reviewIds.value.includes(id) || !rows.value.some(row => row.id === id && row.state === 'submitted')) continue;
+      try {
+        await api(`/api/admin/submissions/${encodeURIComponent(id)}/start-review`, 'POST', {});
+        rows.value = rows.value.map(row => row.id === id ? { ...row, state: 'in_review' } : row);
+        reviewIds.value = reviewIds.value.filter(value => value !== id);
+        reviewResults.value.push({ id, success: true, message: 'Review started.' });
+      } catch (e) {
+        reviewResults.value.push({ id, success: false, message: e instanceof Error ? e.message : 'Request failed' });
+      }
+    }
+    await list();
+    if (reviewResults.value.some(result => result.success && result.id === selected.value)) await load(selected.value);
+  });
+}
 async function load(id: string) {
   const result = await api<Detail>(`${prefix.value}/${encodeURIComponent(id)}`);
   const rev = result.revisions.find(r => r.rev === result.submission.current_rev);
@@ -97,9 +126,14 @@ onMounted(() => perform(async () => { await list(); const id = new URLSearchPara
     <fieldset :disabled="busy"><legend>Submissions</legend>
       <label>State filter <select v-model="filter" @change="perform(list)"><option value="">All states</option><option v-for="state in ['draft','submitted','in_review','changes_requested','approved','pr_pending','pr_open','ci_failed','merged','published','withdrawn','rejected']" :key="state">{{ state }}</option></select></label>
       <button @click="perform(list)">Refresh</button><button v-if="!admin" @click="start">New proposal</button>
+      <button v-if="admin" :disabled="!reviewCount" @click="startSelectedReviews">Start review for selected ({{ reviewCount }})</button>
       <p v-if="!rows.length && !busy && !error">No submissions found.</p>
-      <ul><li v-for="row in rows" :key="row.id"><button @click="perform(() => load(row.id))">{{ row.register_id }} · {{ row.action_type }} · {{ row.state }} · {{ row.id }}<span v-if="row.affiliation_kind === 'member'"> · Member State: {{ row.affiliation_member_name || row.affiliation_member_id }}</span><span v-else-if="row.affiliation_kind === 'itu'"> · ITU</span></button></li></ul>
+      <ul><li v-for="row in rows" :key="row.id"><label v-if="admin && row.state === 'submitted'"><input v-model="reviewIds" type="checkbox" :value="row.id" />Select {{ row.id }} for review</label><button @click="perform(() => load(row.id))">{{ row.register_id }} · {{ row.action_type }} · {{ row.state }} · {{ row.id }}<span v-if="row.affiliation_kind === 'member'"> · Member State: {{ row.affiliation_member_name || row.affiliation_member_id }}</span><span v-else-if="row.affiliation_kind === 'itu'"> · ITU</span></button></li></ul>
     </fieldset>
+    <section v-if="admin && reviewResults.length" aria-label="Bulk review results" aria-live="polite">
+      <h2>Bulk review results</h2>
+      <ul><li v-for="result in reviewResults" :key="result.id" :class="{ error: !result.success }">{{ result.id }}: {{ result.message }}</li></ul>
+    </section>
     <section v-if="creating || detail">
       <h2>{{ creating ? 'New action proposal' : `${detail?.submission.id} — ${detail?.submission.state}` }}</h2>
       <p v-if="detail?.submission.affiliation_kind">Submitted affiliation: {{ detail.submission.affiliation_kind === 'itu' ? 'ITU' : `Member State: ${detail.submission.affiliation_member_name || detail.submission.affiliation_member_id}` }}</p>
