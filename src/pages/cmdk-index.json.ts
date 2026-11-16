@@ -2,9 +2,10 @@ import type { APIRoute } from "astro";
 import { listIssueIds, loadIssue, listDatasetSlugs, loadDatasetMetadata, loadRegisterCatalog, loadRecommendationCatalog } from "~/lib/loaders";
 import { PUBLICATION_BY_SLUG } from "~/lib/catalogs";
 import { slugifyRecCode } from "~/lib/format";
+import { groupPublications, loadPublications, editionLabel } from "~/lib/publications";
 
 interface CmdkEntry {
-  kind: "issue" | "register" | "dataset" | "recommendation" | "page";
+  kind: "issue" | "register" | "dataset" | "recommendation" | "download" | "page";
   label: string;
   href: string;
   meta?: string;
@@ -57,12 +58,24 @@ export const GET: APIRoute = () => {
     });
   }
 
+  for (const group of groupPublications(loadPublications().entries)) {
+    for (const ed of group.editions) {
+      entries.push({
+        kind: "download",
+        label: editionLabel(ed),
+        href: `/downloads/#dl-${ed.standard}`,
+        meta: `PDF ${ed.entries.map((e) => e.language).join(" ")} · ${ed.status === "itu-adopted" ? "official" : "candidate"}`,
+      });
+    }
+  }
+
   const pages: CmdkEntry[] = [
     { kind: "page", label: "Homepage", href: "/", boost: 100 },
     { kind: "page", label: "Issue archive", href: "/issues/", boost: 80 },
     { kind: "page", label: "Datasets", href: "/datasets/", boost: 70 },
     { kind: "page", label: "Registers", href: "/registers/", boost: 70 },
     { kind: "page", label: "Recommendations", href: "/recommendations/", boost: 60 },
+    { kind: "page", label: "Downloads", href: "/downloads/", boost: 60 },
     { kind: "page", label: "Message types", href: "/types/", boost: 50 },
     { kind: "page", label: "About", href: "/about/", boost: 30 },
   ];
