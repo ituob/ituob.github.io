@@ -34,20 +34,33 @@ class ProjectionTest(unittest.TestCase):
         self.write(self.data, "README.md", "canonical\n")
         self.data_ref = self.commit(self.data)
         self.write(self.service, "scripts/stage_authored_patches.py", self.stager)
+        self.write(self.service, "scripts/historical_patch_baseline.json",
+                   '{"source_ref":"751319a91c15459ca15f414a4591a3de008497d0","files":[]}\n')
         self.write(self.service, "ob-issues/1/meta.yaml", "historical metadata\n")
-        self.write(self.service, "ob-issues/1/test/001-ADD.yaml", "historical amendment\n")
+        self.write(self.service, "ob-issues/1/e118-iin/001-ADD.yaml", "historical amendment\n")
         self.write(self.service, "datasets/changes.json", '["committed baseline"]')
         self.write(self.service, "scripts/validate_data_lml.rb", '''raise 'full validation required' unless ARGV == ['--all']
 raise 'wrong corpus root' unless File.realpath(ENV.fetch('OB_ISSUES_OUT_PATH')) == File.realpath('ob-issues')
 raise 'wrong source root' unless ENV.fetch('ITU_OB_DATA_ROOT').end_with?('/data/issues')
-paths = Dir[File.join(ENV.fetch('OB_ISSUES_OUT_PATH'), '*', 'test', '*.yaml')]
+paths = Dir[File.join(ENV.fetch('OB_ISSUES_OUT_PATH'), '*', '*', '*.yaml')]
 raise 'staged input missing' if paths.length < 2
 raise 'unknown model field' if paths.any? { |p| File.read(p).include?('unknown_model_field:') }
 File.write('.model-validated', 'valid')
 ''')
         self.write(self.service, "scripts/migrate_actions_to_changes.rb", '''require 'json'
+require 'fileutils'
 raise 'model validation must precede projection' unless File.exist?('.model-validated')
-paths = Dir['ob-issues/*/test/*.yaml'].sort
+paths = Dir['ob-issues/*/*/*.yaml'].sort
+paths.each do |path|
+  issue = path.split('/')[1]
+  register = path.split('/')[2]
+  seq, action = File.basename(path).match(/\\A(\\d{3})-(ADD|SUP|REP|LIR|MOD|DEL|SEED)\\.yaml\\z/).captures
+  key = "#{issue}-#{seq.rjust(4, '0')}"
+  filename = "%04d-%04d-%s-%s.yaml" % [issue.to_i, seq.to_i, action, key]
+  target = File.join('datasets', register, 'changes', filename)
+  FileUtils.mkdir_p(File.dirname(target))
+  File.binwrite(target, File.binread(path))
+end
 File.write('datasets/changes.json', JSON.generate(paths.map { |p| File.binread(p) }))
 ''')
         self.write(self.service, "scripts/generate_register_snapshots.rb", '''require 'json'
@@ -84,7 +97,7 @@ puts 'Snapshots: 1 registers, 1 files written, 0 skipped, 0 errors'
 
     def authored(self, issue, payload):
         self.write(self.data, f"ob-issues/{issue}/meta.yaml", f"issue: {issue}\n")
-        self.write(self.data, f"ob-issues/{issue}/test/001-ADD.yaml", payload)
+        self.write(self.data, f"ob-issues/{issue}/e118-iin/001-ADD.yaml", payload)
         self.data_ref = self.commit(self.data)
 
     def run_projection(self, **overrides):
@@ -107,10 +120,26 @@ puts 'Snapshots: 1 registers, 1 files written, 0 skipped, 0 errors'
         self.assertEqual(self.run_projection(), "authored projection")
         self.assertEqual(json.loads((self.out / "current.json").read_text()),
                          ["historical amendment\n", first.decode(), second.decode()])
-        self.assertEqual((self.projected / "ob-issues/2/test/001-ADD.yaml").read_bytes(), first)
-        self.assertEqual((self.projected / "ob-issues/3/test/001-ADD.yaml").read_bytes(), second)
-        self.assertEqual((self.projected / "ob-issues/1/test/001-ADD.yaml").read_bytes(),
+        self.assertEqual((self.projected / "ob-issues/2/e118-iin/001-ADD.yaml").read_bytes(), first)
+        self.assertEqual((self.projected / "ob-issues/3/e118-iin/001-ADD.yaml").read_bytes(), second)
+        self.assertEqual((self.projected / "ob-issues/1/e118-iin/001-ADD.yaml").read_bytes(),
                          b"historical amendment\n")
+        self.assert_inputs_preserved()
+
+    def test_authored_patch_reaches_change_record_and_generated_snapshot(self):
+        patch = b"# exact authored patch\r\ntype: ADD\r\n"
+        self.authored(2, patch)
+
+        self.assertEqual(self.run_projection(), "authored projection")
+        record = self.projected / "datasets/e118-iin/changes/0002-0001-ADD-2-0001.yaml"
+        self.assertEqual(record.read_bytes(), patch)
+        self.assertEqual(
+            json.loads((self.out / "current.json").read_text()),
+            ["historical amendment\n", patch.decode()],
+        )
+        self.assertEqual(
+            (self.projected / "ob-issues/2/e118-iin/001-ADD.yaml").read_bytes(), patch
+        )
         self.assert_inputs_preserved()
 
     def test_historical_only_uses_committed_changes_without_helper_or_migration(self):
@@ -148,7 +177,7 @@ puts 'Snapshots: 1 registers, 1 files written, 0 skipped, 0 errors'
 
     def test_dirty_authored_input_fails(self):
         self.authored(2, "type: ADD\n")
-        self.write(self.data, "ob-issues/2/test/001-ADD.yaml", "changed bytes\n")
+        self.write(self.data, "ob-issues/2/e118-iin/001-ADD.yaml", "changed bytes\n")
         with self.assertRaises(subprocess.CalledProcessError):
             self.run_projection()
         self.assertFalse(self.out.exists())
@@ -195,7 +224,7 @@ puts 'Snapshots: 1 registers, 1 files written, 0 skipped, 0 errors'
     def test_post_projection_mutation_is_rejected(self):
         self.authored(2, "type: ADD\n")
         target = self.service / "scripts/generate_register_snapshots.rb"
-        target.write_text(target.read_text() + "File.write('ob-issues/2/test/001-ADD.yaml', 'corrupted')\n")
+        target.write_text(target.read_text() + "File.write('ob-issues/2/e118-iin/001-ADD.yaml', 'corrupted')\n")
         self.service_ref = self.commit(self.service)
         with self.assertRaises(subprocess.CalledProcessError):
             self.run_projection()
