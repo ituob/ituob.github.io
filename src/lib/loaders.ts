@@ -210,8 +210,8 @@ export function loadIssues(ids: number[]): (LoadedIssue | null)[] {
  *
  * Walks every issue from the earliest up to `issueId`, reads each
  * issue's `annexes.yaml`, and accumulates the state: for each
- * annexed publication, tracks its most recent annex OB number
- * and the position_on date recorded by that annex event.
+ * annexed publication, tracks the OB number where it was first
+ * annexed and the most recent position_on date.
  *
  * Memoized per-issue — the full sweep is O(n) once.
  */
@@ -244,7 +244,7 @@ export function computeRunningAnnexes(issueId: number): RunningAnnexEntry[] {
     for (const [pubId, info] of Object.entries(annexes)) {
       annexCount++;
       const existing = state.get(pubId);
-      if (!existing || id > existing.annexed_in) {
+      if (!existing) {
         state.set(pubId, {
           pubId,
           slug: pubId,

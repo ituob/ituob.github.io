@@ -54,14 +54,37 @@ test("the evidence and instructions use portable paths", () => {
   }
 });
 
-test("the remaining date-policy follow-up does not defer the fixed annex chronology", () => {
+test("the final annex loader is the source that was built and scored", () => {
+  const path = "src/lib/loaders.ts";
+  const actual = createHash("sha256").update(readFileSync(new URL(`../${path}`, import.meta.url))).digest("hex");
+  const build = JSON.parse(read("build_inputs.json"));
+  const audit = JSON.parse(read("parity_variants.json"));
+  assert.equal(build.status, "success");
+  assert.equal(actual, build.source_sha256[path], "final loader must match the successful build");
+  assert.equal(actual, audit.source_sha256[path], "final loader must match the scored source");
+});
+
+test("unconfirmed annex policy is deferred with two printed-publication examples", () => {
+  const draft = read("annex-follow-up.md");
+  assert.match(read("README.md"), /^### Annex chronology: deferred/m);
+  for (const publication of ["E118_IIN", "E212_MNC"]) assert.ok(draft.includes(`| ${publication} |`));
+  assert.match(draft, /15 November 2023/);
+  assert.match(draft, /31 December 2023/);
+  assert.match(draft, /position_on/);
+  assert.match(draft, /unconfirmed/);
+  const reproduction = read("annex-follow-up-regressions.md");
+  assert.ok(reproduction.includes("test/running-annexes.test.mjs"));
+  assert.ok(reproduction.includes("test/running-annexes-render.test.mjs"));
+});
+
+test("the deferred chronology and date policy have an actionable follow-up draft", () => {
   const draft = read("annex-follow-up.md");
   for (const url of [
     "https://github.com/ituob/ituob.github.io/issues/100",
     "https://github.com/ituob/ituob.github.io/pull/111",
     "https://github.com/ituob/ituob.github.io/issues/61",
   ]) assert.ok(draft.includes(url), url);
-  assert.match(draft, /This follow-up no longer defers annex-number selection/);
+  assert.match(draft, /QA's literal OB 1296 annex-row requirement remains open/);
   assert.match(draft, /2023-11-14T23:00:00\.000Z/);
   assert.match(draft, /14\.XI\.2023/);
   assert.match(draft, /E\.118/);
