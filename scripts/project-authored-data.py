@@ -60,7 +60,11 @@ def project(data_root, service_root, data_ref, service_ref, snapshots_out, proje
         env = dict(os.environ, BUNDLE_GEMFILE=str(overlay / "ituob/Gemfile"),
                    SNAPSHOTS_OUT=str(snapshots),
                    OB_ISSUES_OUT_PATH=str(overlay / "ob-issues"),
-                   ITU_OB_DATA_ROOT=str(data_root / "issues"))
+                   ITU_OB_DATA_ROOT=str(data_root / "issues"),
+                   # The pinned service's snapshot script requires ituob/* files but
+                   # not ituob.rb, so Ituob::DataRoot's autoload is never registered.
+                   # Load the entry point from the same overlay until the service does.
+                   RUBYOPT=f"-I{overlay / 'ituob/lib'} -rituob")
 
         def run(*command, capture=False):
             result = subprocess.run(command, cwd=overlay, env=env, check=True,
