@@ -58,7 +58,7 @@ async function toPrOpen(slug = "e118-iin", edition = 1351) {
     "e118-iin": { register_id: "E118_IIN", className: "E118Amendment", fields: { company_name: "Acme Telecom", issue_id_number: "89 358 01" } },
     "e212-mnc": { register_id: "E212_MNC", className: "E212MNCAmendment", fields: { mcc_mnc_codes: "999 99", networks: "Acme Telecom" } },
     "e218-trcc": { register_id: "E218_TRCC", className: "E218TRCCAmendment", fields: { tmcc_code: "999" } },
-    "f32-tdi": { register_id: "F32_TDI", className: "F32TDIAmendment", fields: { network_code: "AA" } },
+    "f32-tdi": { register_id: "F32_TDI", className: "F32TDIAmendment", fields: { office_code: "AA" } },
   };
   const target = targets[slug];
   expect(target, `catalog fixture for ${slug}`).toBeDefined();

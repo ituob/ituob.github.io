@@ -5,6 +5,7 @@ import * as Vue from 'vue';
 import * as client from '../admin-client';
 import * as model from './model';
 import * as yamlIo from './yaml-io';
+import * as submissionDiff from '../submission-diff';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { actionPayload, actionTypes, amendmentClasses, api, ApiError, initialValue, payloadErrors, revisionErrors } from '../admin-client';
 import { description } from './description';
@@ -71,7 +72,7 @@ function workspace() {
   const { descriptor } = parse(readFileSync(filename, 'utf8'));
   const source = compileScript(descriptor, { id: 'workspace-test' }).content;
   const js = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 } }).outputText;
-  const modules: Record<string, unknown> = { vue: Vue, '../../lib/admin-client': client, '../../lib/form/model': model, '../../lib/form/yaml-io': yamlIo, './SchemaNode.vue': {} };
+  const modules: Record<string, unknown> = { vue: Vue, '../../lib/admin-client': client, '../../lib/form/model': model, '../../lib/form/yaml-io': yamlIo, '../../lib/submission-diff': submissionDiff, './SchemaNode.vue': {} };
   const result = { exports: {} as any };
   new Function('require', 'module', 'exports', js)((name: string) => {
     if (!(name in modules)) throw new Error(`Unexpected component import: ${name}`);

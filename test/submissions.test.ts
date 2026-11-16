@@ -93,9 +93,9 @@ describe("happy path", () => {
     const id = await draft();
     const s = await db().prepare("SELECT proposer_id,affiliation_kind,affiliation_member_id FROM submissions WHERE id=?1").bind(id).first<any>();
     expect(s).toEqual({ proposer_id: "member-A", affiliation_kind: "member", affiliation_member_id: "A" });
-    const listed = await api("GET", "/api/me/submissions", { session: "member-A" });
+    const listed = await api("GET", "/api/me/submissions", { session: "member-A", headers: { "Sec-Fetch-Site": "same-origin" } });
     expect(listed.json.submissions.find((row: any) => row.id === id)).toMatchObject({ affiliation_member_name: "Aland (Republic)" });
-    const detail = await api("GET", `/api/me/submissions/${id}`, { session: "member-A" });
+    const detail = await api("GET", `/api/me/submissions/${id}`, { session: "member-A", headers: { "Sec-Fetch-Site": "same-origin" } });
     expect(detail.json.submission).toMatchObject({ affiliation_member_id: "A", affiliation_member_name: "Aland (Republic)" });
   });
 
@@ -364,7 +364,7 @@ describe("validation stage 1", () => {
     const invalid = ccPayload({ applicant: "Unkeyed network" });
     const badCreate = await api("POST", "/api/me/submissions", { session: "itu-editor", body: { register_id: "E164_CC", slug: "e164-cc", action_type: "ADD", payload: invalid } });
     expect(badCreate.status).toBe(422);
-    expect(badCreate.json.errors).toContainEqual(expect.objectContaining({ path: "data.entries[0].cc_ic", code: "required", message: expect.stringContaining("cc_ic") }));
+    expect(badCreate.json.errors).toContainEqual(expect.objectContaining({ path: "data.entries[0].country_code", code: "required", message: expect.stringContaining("cc_ic") }));
     const badEdit = await api("PUT", `/api/me/submissions/${id}`, { session: "itu-editor", body: { payload: invalid } });
     expect(badEdit.status).toBe(422);
     expect(await durableSnapshot()).toEqual(before);
