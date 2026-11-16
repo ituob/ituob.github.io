@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { test } from "node:test";
+import { parse } from "yaml";
 
 // Run after npm run build; these assertions exercise the actual page hooks.
 const dist = process.env.SITE_DIST ?? fileURLToPath(new URL("../dist/", import.meta.url));
@@ -28,6 +29,17 @@ test("issue 1296 prints both E.212 definitions and preserves the typed entry onc
 });
 
 
-test("issue 669 prints its incomplete-data notice", () => {
-  assert.ok(/data below may not be complete yet/.test(text(page("issues/669"))), "Incomplete edition notice is printed");
+for (const [id, incomplete] of [[669, true], [955, false], [1125, false], [1296, false], [1343, false]]) {
+  test(`issue ${id} preview banner agrees with the real completeness data`, () => {
+    const dataRoot = process.env.PARITY_OB_DATA_ROOT ?? fileURLToPath(new URL("../data-ob/", import.meta.url));
+    const meta = parse(readFileSync(join(dataRoot, "ob-issues", String(id), "meta.yaml"), "utf8"));
+    assert.equal(meta.incomplete === true, incomplete, "source completeness flag");
+    const html = page(`issues/${id}`);
+    assert.equal(html.includes("incomplete-banner"), incomplete, "rendered banner");
+    assert.equal(/data below may not be complete yet/.test(text(html)), incomplete, "rendered notice");
+  });
+}
+
+test("register source context is explicitly historical", () => {
+  assert.match(text(page("registers/e164-cc")), /Historical printed amendment labels and notes/);
 });
