@@ -255,6 +255,69 @@ export interface EntryWire {
   _class?: string;
 }
 
+export interface F32CompletenessReportWire {
+  source_uri?: string;
+  source_sha256?: string;
+  candidate_source?: string;
+  candidate_rows?: number;
+  candidate_context_rows?: number;
+  matching_keys?: string[];
+  missing?: F32OfficeDifferenceWire[];
+  extra?: F32OfficeDifferenceWire[];
+  different?: F32OfficeDifferenceWire[];
+  countries?: F32CountryCompletenessWire[];
+}
+
+export interface F32CountryCompletenessWire {
+  country?: string;
+  matching?: number;
+  missing?: number;
+  extra?: number;
+  different?: number;
+}
+
+export interface F32OfficeDifferenceWire {
+  country?: string;
+  office_code?: string;
+  expected?: F32TDIEntryWire;
+  actual?: F32TDIEntryWire;
+  reason?: string;
+}
+
+export interface F32PrintedPageWire {
+  number?: number;
+  text?: string;
+}
+
+export interface F32SeedContextWire {
+  kind?: string;
+  ob_issue_no?: number;
+  entry?: F32TDIEntryWire;
+  source_uri?: string;
+  source_page?: number;
+  source_path?: string;
+  source_row?: number;
+  related_office_code?: string;
+  network_codes?: string[];
+  continuation_target?: F32TDIEntryWire;
+  explanation?: string;
+}
+
+export interface F32SeedPublicationWire {
+  _class?: string;
+  source_uri?: string;
+  source_sha256?: string;
+  source_position_on?: string;
+  source_path?: string;
+  seed_sha256?: string;
+  source_row_count?: number;
+  source_complete?: boolean;
+  legacy_rows?: F32TDIEntryWire[];
+  pages?: F32PrintedPageWire[];
+  allocations?: F32TDIEntryWire[];
+  contexts?: F32SeedContextWire[];
+}
+
 export interface F32TDIActionWire {
   action_type?: string;
   position?: string;
@@ -286,6 +349,7 @@ export interface F32TDIEntryWire {
   telegraph_office_name?: MultilingualStringWire;
   office_code?: string;
   office_code_note?: MultilingualStringWire;
+  network_codes?: string[];
   subarea?: MultilingualStringWire;
 }
 
@@ -755,6 +819,7 @@ export interface RegisterChangeWire {
 export interface RegisterEditionWire {
   provenance?: ProjectionProvenanceWire;
   items?: EntryWire[];
+  source_contexts?: F32SeedContextWire[];
   lapsed_keys?: string[];
   deleted_keys?: string[];
   key_history?: KeyHistoryEntryWire[];

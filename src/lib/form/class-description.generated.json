@@ -1777,12 +1777,406 @@
           "collection": false
         },
         {
+          "name": "network_codes",
+          "wire": "network_codes",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": true
+        },
+        {
           "name": "subarea",
           "wire": "subarea",
           "type": "MultilingualString",
           "kind": "class",
           "required": false,
           "collection": false
+        }
+      ]
+    },
+    "F32OfficeDifference": {
+      "attributes": [
+        {
+          "name": "country",
+          "wire": "country",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "office_code",
+          "wire": "office_code",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "expected",
+          "wire": "expected",
+          "type": "F32TDIEntry",
+          "kind": "class",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "actual",
+          "wire": "actual",
+          "type": "F32TDIEntry",
+          "kind": "class",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "reason",
+          "wire": "reason",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        }
+      ]
+    },
+    "F32CountryCompleteness": {
+      "attributes": [
+        {
+          "name": "country",
+          "wire": "country",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "matching",
+          "wire": "matching",
+          "type": "Integer",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "missing",
+          "wire": "missing",
+          "type": "Integer",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "extra",
+          "wire": "extra",
+          "type": "Integer",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "different",
+          "wire": "different",
+          "type": "Integer",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        }
+      ]
+    },
+    "F32CompletenessReport": {
+      "attributes": [
+        {
+          "name": "source_uri",
+          "wire": "source_uri",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "source_sha256",
+          "wire": "source_sha256",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "candidate_source",
+          "wire": "candidate_source",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "candidate_rows",
+          "wire": "candidate_rows",
+          "type": "Integer",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "candidate_context_rows",
+          "wire": "candidate_context_rows",
+          "type": "Integer",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "matching_keys",
+          "wire": "matching_keys",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": true
+        },
+        {
+          "name": "missing",
+          "wire": "missing",
+          "type": "F32OfficeDifference",
+          "kind": "class",
+          "required": false,
+          "collection": true
+        },
+        {
+          "name": "extra",
+          "wire": "extra",
+          "type": "F32OfficeDifference",
+          "kind": "class",
+          "required": false,
+          "collection": true
+        },
+        {
+          "name": "different",
+          "wire": "different",
+          "type": "F32OfficeDifference",
+          "kind": "class",
+          "required": false,
+          "collection": true
+        },
+        {
+          "name": "countries",
+          "wire": "countries",
+          "type": "F32CountryCompleteness",
+          "kind": "class",
+          "required": false,
+          "collection": true
+        }
+      ]
+    },
+    "F32PrintedPage": {
+      "attributes": [
+        {
+          "name": "number",
+          "wire": "number",
+          "type": "Integer",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "text",
+          "wire": "text",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        }
+      ]
+    },
+    "F32SeedContext": {
+      "attributes": [
+        {
+          "name": "kind",
+          "wire": "kind",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "ob_issue_no",
+          "wire": "ob_issue_no",
+          "type": "Integer",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "entry",
+          "wire": "entry",
+          "type": "F32TDIEntry",
+          "kind": "class",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "source_uri",
+          "wire": "source_uri",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "source_page",
+          "wire": "source_page",
+          "type": "Integer",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "source_path",
+          "wire": "source_path",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "source_row",
+          "wire": "source_row",
+          "type": "Integer",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "related_office_code",
+          "wire": "related_office_code",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "network_codes",
+          "wire": "network_codes",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": true
+        },
+        {
+          "name": "continuation_target",
+          "wire": "continuation_target",
+          "type": "F32TDIEntry",
+          "kind": "class",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "explanation",
+          "wire": "explanation",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        }
+      ]
+    },
+    "F32SeedPublication": {
+      "attributes": [
+        {
+          "name": "_class",
+          "wire": "_class",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false,
+          "default": "F32SeedPublication"
+        },
+        {
+          "name": "source_uri",
+          "wire": "source_uri",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "source_sha256",
+          "wire": "source_sha256",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "source_position_on",
+          "wire": "source_position_on",
+          "type": "Date",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "source_path",
+          "wire": "source_path",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "seed_sha256",
+          "wire": "seed_sha256",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "source_row_count",
+          "wire": "source_row_count",
+          "type": "Integer",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "source_complete",
+          "wire": "source_complete",
+          "type": "Boolean",
+          "kind": "primitive",
+          "required": false,
+          "collection": false,
+          "default": false
+        },
+        {
+          "name": "legacy_rows",
+          "wire": "legacy_rows",
+          "type": "F32TDIEntry",
+          "kind": "class",
+          "required": false,
+          "collection": true
+        },
+        {
+          "name": "pages",
+          "wire": "pages",
+          "type": "F32PrintedPage",
+          "kind": "class",
+          "required": false,
+          "collection": true
+        },
+        {
+          "name": "allocations",
+          "wire": "allocations",
+          "type": "F32TDIEntry",
+          "kind": "class",
+          "required": false,
+          "collection": true
+        },
+        {
+          "name": "contexts",
+          "wire": "contexts",
+          "type": "F32SeedContext",
+          "kind": "class",
+          "required": false,
+          "collection": true
         }
       ]
     },
@@ -4917,6 +5311,14 @@
           "name": "items",
           "wire": "items",
           "type": "Entry",
+          "kind": "class",
+          "required": false,
+          "collection": true
+        },
+        {
+          "name": "source_contexts",
+          "wire": "source_contexts",
+          "type": "F32SeedContext",
           "kind": "class",
           "required": false,
           "collection": true
