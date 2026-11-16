@@ -554,14 +554,20 @@ export async function readSubmission(db: D1Database, session: Session | null, id
   const revisions = (await db.prepare(`SELECT rev,payload_yaml,payload_sha,validation,created_by,created_at FROM submission_revisions WHERE submission_id=?1 ORDER BY rev`).bind(id).all()).results;
   const history = (await db.prepare(`SELECT from_state,to_state,actor_id,actor_kind,reason,rev,at FROM review_state WHERE submission_id=?1 ORDER BY id`).bind(id).all()).results;
   const pr = await db.prepare(`SELECT repo,branch,path,pr_number,pr_state,attempts,last_error FROM submission_prs WHERE submission_id=?1 ORDER BY rev DESC LIMIT 1`).bind(id).first();
-  return { submission: sub, revisions, history, pr };
+  const affiliation = sub.affiliation_member_id
+    ? await db.prepare(`SELECT name FROM members WHERE id=?1`).bind(sub.affiliation_member_id).first<{ name: string }>()
+    : null;
+  return { submission: { ...sub, affiliation_member_name: affiliation?.name ?? null }, revisions, history, pr };
 }
 
 export async function listSubmissions(db: D1Database, session: Session | null, state: string | null, all: boolean) {
   const s = requireUser(session);
   if (all && !isItu(s)) throw new Forbidden();
-  const where = [all ? "1=1" : "proposer_id = ?1"];
+  const where = [all ? "1=1" : "s.proposer_id = ?1"];
   const args: unknown[] = all ? [] : [s.userId];
-  if (state) { args.push(state); where.push(`state = ?${args.length}`); }
-  return (await db.prepare(`SELECT * FROM submissions WHERE ${where.join(" AND ")} ORDER BY created_at, id`).bind(...args).all()).results;
+  if (state) { args.push(state); where.push(`s.state = ?${args.length}`); }
+  return (await db.prepare(`SELECT s.*, m.name AS affiliation_member_name FROM submissions s
+                            LEFT JOIN members m ON m.id=s.affiliation_member_id
+                            WHERE ${where.join(" AND ")}
+                            ORDER BY s.created_at, s.id`).bind(...args).all()).results;
 }

@@ -147,6 +147,16 @@ describe("event emission", () => {
 });
 
 describe("comments, mentions, prefs", () => {
+  it("shows the roster name for a comment's snapshotted Member State affiliation", async () => {
+    const id = await draft();
+    const created = await say(id, "member-A", "Aland comment");
+    expect(created.json.comment).toMatchObject({ affiliation_kind: "member", affiliation_member_id: "A", affiliation_member_name: "Aland (Republic)" });
+    const thread = await api("GET", `/api/me/submissions/${id}/comments`, { session: "member-A", headers: SAME });
+    expect(thread.json.comments[0]).toMatchObject({ affiliation_member_id: "A", affiliation_member_name: "Aland (Republic)" });
+    const history = await api("GET", `/api/me/submissions/${id}/history`, { session: "member-A", headers: SAME });
+    expect(history.json.comments[0]).toMatchObject({ affiliation_member_id: "A", affiliation_member_name: "Aland (Republic)" });
+  });
+
   it("a mention notifies the mentioned account; none silences email but keeps the inbox row", async () => {
     const id = await draft();
     await me(id, "submit");

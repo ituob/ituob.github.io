@@ -3,7 +3,7 @@ export { api };
 export interface CommentRevision { comment_id: string; rev: number; body: string; mentions: string; created_at: string }
 export interface DiscussionComment {
   id: string; parent_id: string | null; root_id: string; author_id: string; kind: string;
-  affiliation_kind: string | null; affiliation_member_id: string | null; current_rev: number;
+  affiliation_kind: string | null; affiliation_member_id: string | null; affiliation_member_name?: string | null; current_rev: number;
   deleted_at: string | null; delete_reason: string | null; created_at: string;
   anchor_rev: number | null; anchor_path: string | null; anchor_line: number | null; anchor_quote: string | null;
   revisions: CommentRevision[];

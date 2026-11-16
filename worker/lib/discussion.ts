@@ -255,13 +255,19 @@ async function rawComment(db: D1Database, submissionId: string, id: string): Pro
   return c;
 }
 async function getComment(db: D1Database, id: string) {
-  return db.prepare(`SELECT c.*, r.body, r.mentions FROM comments c JOIN comment_revisions r ON r.comment_id=c.id AND r.rev=c.current_rev WHERE c.id=?1`).bind(id).first();
+  return db.prepare(`SELECT c.*, m.name AS affiliation_member_name, r.body, r.mentions
+                     FROM comments c
+                     JOIN comment_revisions r ON r.comment_id=c.id AND r.rev=c.current_rev
+                     LEFT JOIN members m ON m.id=c.affiliation_member_id
+                     WHERE c.id=?1`).bind(id).first();
 }
 
 /** Thread view: tombstoned bodies are hidden except from itu-admin; history (below) keeps them for all involved parties. */
 export async function readThread(db: D1Database, session: Session | null, submissionId: string) {
   const { s, sub } = await readableSub(db, session, submissionId);
-  const rows = (await db.prepare(`SELECT * FROM comments WHERE submission_id=?1 ORDER BY created_at, id`).bind(sub.id).all<any>()).results;
+  const rows = (await db.prepare(`SELECT c.*, m.name AS affiliation_member_name FROM comments c
+                                  LEFT JOIN members m ON m.id=c.affiliation_member_id
+                                  WHERE c.submission_id=?1 ORDER BY c.created_at, c.id`).bind(sub.id).all<any>()).results;
   const revs = (await db.prepare(`SELECT r.* FROM comment_revisions r JOIN comments c ON c.id=r.comment_id WHERE c.submission_id=?1 ORDER BY r.comment_id, r.rev`).bind(sub.id).all<any>()).results;
   const admin = hasRole(s, "itu-admin");
   return {
@@ -277,7 +283,9 @@ export async function readThread(db: D1Database, session: Session | null, submis
 /** Complete history for any involved party: all comments with every revision and tombstone, transitions, discussion log, the caller's own notifications. */
 export async function readHistory(db: D1Database, session: Session | null, submissionId: string) {
   const { s, sub } = await readableSub(db, session, submissionId);
-  const comments = (await db.prepare(`SELECT * FROM comments WHERE submission_id=?1 ORDER BY created_at, id`).bind(sub.id).all<any>()).results;
+  const comments = (await db.prepare(`SELECT c.*, m.name AS affiliation_member_name FROM comments c
+                                      LEFT JOIN members m ON m.id=c.affiliation_member_id
+                                      WHERE c.submission_id=?1 ORDER BY c.created_at, c.id`).bind(sub.id).all<any>()).results;
   const revisions = (await db.prepare(`SELECT r.* FROM comment_revisions r JOIN comments c ON c.id=r.comment_id WHERE c.submission_id=?1 ORDER BY r.comment_id, r.rev`).bind(sub.id).all()).results;
   const transitions = (await db.prepare(`SELECT from_state,to_state,actor_id,actor_kind,reason,rev,at FROM review_state WHERE submission_id=?1 ORDER BY id`).bind(sub.id).all()).results;
   const discussion = (await db.prepare(`SELECT closed,actor_id,reason,at FROM discussion_state_log WHERE submission_id=?1 ORDER BY id`).bind(sub.id).all()).results;

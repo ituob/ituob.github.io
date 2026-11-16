@@ -6,7 +6,7 @@ defineEmits<{ reply: [comment: DiscussionComment]; edit: [comment: DiscussionCom
 <template>
   <article :id="`comment-${comment.id}`" :aria-label="`Comment by ${comment.author_id}`">
     <p><strong>{{ comment.kind === 'system' ? 'System' : comment.author_id }}</strong> · {{ comment.created_at }} · Revision {{ comment.current_rev }}
-      <span v-if="comment.affiliation_kind"> · {{ comment.affiliation_kind === 'itu' ? 'ITU' : 'Member delegation' }}<span v-if="comment.affiliation_member_id">: {{ comment.affiliation_member_id }}</span></span>
+      <span v-if="comment.affiliation_kind"> · {{ comment.affiliation_kind === 'itu' ? 'ITU' : 'Member State' }}<span v-if="comment.affiliation_member_id">: {{ comment.affiliation_member_name || comment.affiliation_member_id }}</span></span>
     </p>
     <p v-if="comment.parent_id">Reply to <a :href="`#comment-${comment.parent_id}`">{{ comment.parent_id }}</a></p>
     <p v-if="comment.anchor_path || comment.anchor_line">On submission revision {{ comment.anchor_rev }}: {{ comment.anchor_path || 'document' }}<span v-if="comment.anchor_line">, line {{ comment.anchor_line }}</span></p>

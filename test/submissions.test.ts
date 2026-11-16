@@ -93,6 +93,10 @@ describe("happy path", () => {
     const id = await draft();
     const s = await db().prepare("SELECT proposer_id,affiliation_kind,affiliation_member_id FROM submissions WHERE id=?1").bind(id).first<any>();
     expect(s).toEqual({ proposer_id: "member-A", affiliation_kind: "member", affiliation_member_id: "A" });
+    const listed = await api("GET", "/api/me/submissions", { session: "member-A" });
+    expect(listed.json.submissions.find((row: any) => row.id === id)).toMatchObject({ affiliation_member_name: "Aland (Republic)" });
+    const detail = await api("GET", `/api/me/submissions/${id}`, { session: "member-A" });
+    expect(detail.json.submission).toMatchObject({ affiliation_member_id: "A", affiliation_member_name: "Aland (Republic)" });
   });
 
   it("allocates distinct NNN per (edition, slug)", async () => {

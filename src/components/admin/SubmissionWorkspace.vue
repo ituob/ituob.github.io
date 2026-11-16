@@ -6,7 +6,7 @@ import { actionPayload, actionTypes, amendmentClasses, api, ApiError, payloadErr
 import type { SchemaIssue } from '../../lib/schema.validators.generated';
 import SchemaNode from './SchemaNode.vue';
 const props = withDefaults(defineProps<{ admin?: boolean; create?: boolean; translation?: boolean; registers?: { register_id: string; slug: string; label: string }[] }>(), { registers: () => [] });
-interface Submission { id: string; register_id: string; slug: string; action_type: string; state: string; current_rev: number }
+interface Submission { id: string; register_id: string; slug: string; action_type: string; state: string; current_rev: number; affiliation_kind?: string; affiliation_member_id?: string | null; affiliation_member_name?: string | null }
 interface Revision { rev: number; payload_yaml: string; validation: string; created_at: string }
 interface Detail { ok: true; submission: Submission; revisions: Revision[]; history: { from_state: string; to_state: string; reason: string | null; at: string }[]; pr: { pr_number: number | null; pr_state: string; last_error: string | null } | null }
 const rows = ref<Submission[]>([]), detail = ref<Detail | null>(null);
@@ -89,10 +89,11 @@ onMounted(() => perform(async () => { await list(); const id = new URLSearchPara
       <label>State filter <select v-model="filter" @change="perform(list)"><option value="">All states</option><option v-for="state in ['draft','submitted','in_review','changes_requested','approved','pr_pending','pr_open','ci_failed','merged','published','withdrawn','rejected']" :key="state">{{ state }}</option></select></label>
       <button @click="perform(list)">Refresh</button><button v-if="!admin" @click="start">New proposal</button>
       <p v-if="!rows.length && !busy && !error">No submissions found.</p>
-      <ul><li v-for="row in rows" :key="row.id"><button @click="perform(() => load(row.id))">{{ row.register_id }} · {{ row.action_type }} · {{ row.state }} · {{ row.id }}</button></li></ul>
+      <ul><li v-for="row in rows" :key="row.id"><button @click="perform(() => load(row.id))">{{ row.register_id }} · {{ row.action_type }} · {{ row.state }} · {{ row.id }}<span v-if="row.affiliation_kind === 'member'"> · Member State: {{ row.affiliation_member_name || row.affiliation_member_id }}</span><span v-else-if="row.affiliation_kind === 'itu'"> · ITU</span></button></li></ul>
     </fieldset>
     <section v-if="creating || detail">
       <h2>{{ creating ? 'New action proposal' : `${detail?.submission.id} — ${detail?.submission.state}` }}</h2>
+      <p v-if="detail?.submission.affiliation_kind">Submitted affiliation: {{ detail.submission.affiliation_kind === 'itu' ? 'ITU' : `Member State: ${detail.submission.affiliation_member_name || detail.submission.affiliation_member_id}` }}</p>
       <p v-if="detail"><a :href="`/me/discussions/?id=${encodeURIComponent(detail.submission.id)}${admin ? '&review=1' : ''}`">Discussion and review history</a></p>
       <p>This editor authors one action patch. Publication identifiers and edition metadata are assigned at approval.</p>
       <fieldset :disabled="busy || !creating"><legend>Action identity</legend>
