@@ -67,7 +67,7 @@ interface CmdkItem {
   _score?: number;
 }
 
-const KINDS = ["issue", "register", "dataset", "recommendation", "page"];
+const KINDS = ["issue", "register", "dataset", "recommendation", "download", "page"];
 
 const open = ref(false);
 const visible = ref(false);
