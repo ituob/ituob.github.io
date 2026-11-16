@@ -11,8 +11,10 @@
     "types": ["node"],
     "target": "ES2022",
     "module": "ESNext",
-    "moduleResolution": "Bundler"
+    "moduleResolution": "Bundler",
+    "allowImportingTsExtensions": true,
+    "noEmit": true
   },
-  "include": ["src", "scripts", "*.d.ts", "astro.config.mjs"],
+  "include": ["src", "scripts", "tests", "*.d.ts", "astro.config.mjs"],
   "exclude": ["dist", "node_modules"]
 }

@@ -9,7 +9,9 @@
  * Pure Node module (no Astro / alias imports) so it runs under `node --test`.
  *
  * Manifest path: `DOWNLOADS_MANIFEST` env var (absolute, or relative to the
- * project root), default `src/data/publications-manifest.fixture.json`.
+ * project root), default `src/data/publications-manifest.json`
+ * (the pipeline drop location; absent until spd#89 publishes, so nothing is
+ * listed). Test fixtures live in tests/fixtures and are never a default..
  * Manifest shape: a JSON array of entries, or `{ "publications": [...] }`.
  */
 import { readFileSync, existsSync } from "node:fs";
@@ -57,9 +59,10 @@ export interface LoadResult {
 export const CANDIDATE_LABEL = "Generated from the patch log, pending ITU adoption";
 export const ADOPTED_LABEL = "Official ITU publication";
 export const DOWNLOADS_URL_PREFIX = "/downloads/";
-export const DEFAULT_MANIFEST_RELATIVE = "src/data/publications-manifest.fixture.json";
+export const DEFAULT_MANIFEST_RELATIVE = "src/data/publications-manifest.json";
 
 const SHA256_RE = /^[0-9a-f]{64}$/;
+const SLUG_RE = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 const LANG_RE = /^[a-z]{2,3}(-[A-Za-z0-9]+)?$/;
 const STATUSES: readonly string[] = ["candidate", "itu-adopted"];
 
@@ -76,7 +79,8 @@ export function defaultManifestPath(env: Record<string, string | undefined> = pr
 
 /** A safe relative path: no absolute, scheme, backslash, empty or `..` segments. */
 export function isSafeRelativePath(p: string): boolean {
-  if (!p || p.startsWith("/") || p.includes("\\") || /^[a-z][a-z0-9+.-]*:/i.test(p)) return false;
+  // eslint-disable-next-line no-control-regex
+  if (!p || /[\u0000-\u001f\u007f?#%]/.test(p) || p.startsWith("/") || p.includes("\\") || /^[a-z][a-z0-9+.-]*:/i.test(p)) return false;
   return p.split("/").every((seg) => seg !== "" && seg !== "." && seg !== "..");
 }
 
@@ -101,9 +105,9 @@ export function parseEntry(raw: unknown): PublicationEntry | string {
   if (as_of_issue === null) return `${standard}/${language}: invalid as_of_issue`;
   if (!sha256 || !SHA256_RE.test(sha256)) return `${standard}/${language}: invalid sha256`;
   if (typeof r.status !== "string" || !STATUSES.includes(r.status)) return `${standard}/${language}: invalid status`;
-  if (!path || !isSafeRelativePath(path)) return `${standard}/${language}: unsafe or missing path`;
+  if (!path || !isSafeRelativePath(path) || !/\.pdf$/i.test(path)) return `${standard}/${language}: unsafe path (must be a relative .pdf)`;
   const slugs = r.register_slugs;
-  if (!Array.isArray(slugs) || slugs.some((s) => typeof s !== "string" || s === "")) {
+  if (!Array.isArray(slugs) || slugs.some((s) => typeof s !== "string" || !SLUG_RE.test(s))) {
     return `${standard}/${language}: invalid register_slugs`;
   }
   return {
@@ -127,6 +131,7 @@ export function parseManifest(text: string): LoadResult {
   const entries: PublicationEntry[] = [];
   const rejected: string[] = [];
   const seen = new Set<string>();
+  const paths = new Set<string>();
   for (const raw of list) {
     const parsed = parseEntry(raw);
     if (typeof parsed === "string") {
@@ -138,7 +143,12 @@ export function parseManifest(text: string): LoadResult {
       rejected.push(`${parsed.standard}/${parsed.language}: duplicate edition ${parsed.edition_year}`);
       continue;
     }
+    if (paths.has(parsed.path)) {
+      rejected.push(`${parsed.standard}/${parsed.language}: duplicate path ${parsed.path}`);
+      continue;
+    }
     seen.add(key);
+    paths.add(parsed.path);
     entries.push(parsed);
   }
   return { entries, rejected };

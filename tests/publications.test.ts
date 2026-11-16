@@ -2,11 +2,13 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { join, resolve } from "node:path";
 import {
   CANDIDATE_LABEL, ADOPTED_LABEL, defaultManifestPath, groupPublications, isSafeRelativePath,
   loadPublications, parseManifest, pdfHref, statusPresentation,
 } from "../src/lib/publications.ts";
+
+const FIXTURE = resolve(import.meta.dirname, "fixtures/publications-manifest.json");
 
 const base = {
   standard: "E.212", title: "T", edition_year: 2026, language: "en", as_of_issue: 1170,
@@ -14,7 +16,7 @@ const base = {
 };
 
 test("fixture loads: 2 candidate + 1 itu-adopted, nothing rejected", () => {
-  const { entries, rejected } = loadPublications();
+  const { entries, rejected } = loadPublications(FIXTURE);
   assert.deepEqual(rejected, []);
   assert.equal(entries.filter((e) => e.status === "candidate").length, 2);
   assert.equal(entries.filter((e) => e.status === "itu-adopted").length, 1);
@@ -27,7 +29,8 @@ test("manifest path is configurable via DOWNLOADS_MANIFEST", () => {
   writeFileSync(file, JSON.stringify([{ ...base, standard: "Q.708" }]));
   assert.equal(defaultManifestPath({ DOWNLOADS_MANIFEST: file }), file);
   assert.deepEqual(loadPublications(defaultManifestPath({ DOWNLOADS_MANIFEST: file })).entries.map((e) => e.standard), ["Q.708"]);
-  assert.match(defaultManifestPath({}), /publications-manifest\.fixture\.json$/);
+  assert.match(defaultManifestPath({}), /src\/data\/publications-manifest\.json$/);
+  assert.equal(defaultManifestPath({ DOWNLOADS_MANIFEST: "tests/fixtures/publications-manifest.json" }), FIXTURE);
 });
 
 test("missing manifest file yields an empty list", () => {
@@ -111,4 +114,38 @@ test("an explicitly configured but missing manifest is an error, not an empty pa
   } finally {
     delete process.env.DOWNLOADS_MANIFEST;
   }
+});
+
+test("default manifest location lists nothing and never falls back to the fixture", () => {
+  const saved = process.env.DOWNLOADS_MANIFEST;
+  delete process.env.DOWNLOADS_MANIFEST;
+  try {
+    assert.doesNotMatch(defaultManifestPath(), /fixture/);
+    assert.deepEqual(loadPublications(), { entries: [], rejected: [] });
+  } finally {
+    if (saved !== undefined) process.env.DOWNLOADS_MANIFEST = saved;
+  }
+});
+
+test("path must be a plain relative .pdf: extension, query, NUL, control chars", () => {
+  for (const p of ["x.txt", "x.pdf?q=1", "x.pdf#frag", "x\u0000.pdf", "x\n.pdf", "x%2e.pdf", "x.pdf.exe", "pdf"]) {
+    const { entries, rejected } = parseManifest(JSON.stringify([{ ...base, path: p }]));
+    assert.equal(entries.length, 0, JSON.stringify(p));
+    assert.equal(rejected.length, 1, JSON.stringify(p));
+  }
+  assert.equal(parseManifest(JSON.stringify([{ ...base, path: "a/B.PDF" }])).entries.length, 1);
+});
+
+test("two entries may not share a PDF path, even across languages", () => {
+  const { entries, rejected } = parseManifest(JSON.stringify([base, { ...base, language: "fr" }]));
+  assert.equal(entries.length, 1);
+  assert.match(rejected[0]!, /duplicate path/);
+});
+
+test("register_slugs must be slug-shaped", () => {
+  for (const slugs of [["a/../b"], ["A"], [" x"], ["a b"], ["-a"], ["a--b"], [1]]) {
+    const { entries } = parseManifest(JSON.stringify([{ ...base, register_slugs: slugs }]));
+    assert.equal(entries.length, 0, JSON.stringify(slugs));
+  }
+  assert.equal(parseManifest(JSON.stringify([{ ...base, register_slugs: [] }])).entries.length, 1);
 });
