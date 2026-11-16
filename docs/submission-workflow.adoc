@@ -620,11 +620,12 @@ pointer says. This makes the published/unpublished distinction exact.
   `staged` and records `staging_commit`.
   This is a write to the *site's* `staging` branch, not to the patch
   repo's `main`; the site's `main` is untouched.
-. *Preview.* The composer shows deep links to the changed registers on
-  `https://staging-www.ituob.org/registers/{slug}` and the
-  `at-{N}` snapshot (the generator writes `at-{N}.json` per issue that
-  touched a register; the exact page URL for `at-{N}` is
-  *UNVERIFIED*, pinned by the demo script). An admin reviews them.
+. *Preview.* After the edition is staged, the composer shows same-origin
+  links for each changed register: `/registers/{slug}/` and the point-in-time
+  page `/registers/{slug}/at/{N}/`. These resolve to the staging site during
+  preview and the production site after publication. The route is defined by
+  `src/pages/registers/[slug]/at/[ob_issue]/index.astro`; the composer hides
+  these links before the projection is built. An admin reviews them.
 . *Publish.* "Publish" opens a PR on the site repo (`staging` -> `main`,
   or the data-ob bump onto `main`), merged by a human, then production
   deploys through the existing gated production job. On the production
