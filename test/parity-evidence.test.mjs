@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { test } from "node:test";
+import { createHash } from "node:crypto";
 import { parse } from "yaml";
 
 const directory = new URL("../docs/parity/printed-labels-notes/", import.meta.url);
@@ -13,6 +14,10 @@ test("the attached gate and every classified variant prove the four-type parity 
   assert.equal(evidence.threshold, 0.95);
   assert.equal(evidence.local_pages, 429);
   assert.equal(evidence.classified_variants, evidence.variants.length);
+  for (const [path, sha] of Object.entries(evidence.source_sha256)) {
+    const actual = createHash("sha256").update(readFileSync(new URL(`../${path}`, import.meta.url))).digest("hex");
+    assert.equal(actual, sha, `${path}: evidence belongs to the current source`);
+  }
   const included = evidence.variants.filter((row) => !row.exclusion);
   assert.equal(included.length, evidence.included_variants);
   assert.equal(evidence.excluded_variants, 2, "only the canonical cross-listed exceptions are excluded");
