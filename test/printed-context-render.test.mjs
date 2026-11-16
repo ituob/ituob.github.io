@@ -29,11 +29,11 @@ test("issue 1296 prints both E.212 definitions and preserves the typed entry onc
 });
 
 
-for (const [id, incomplete] of [[669, true], [955, false], [1125, false], [1296, false], [1343, false]]) {
+for (const [id, metadataIncomplete, incomplete] of [[669, true, true], [955, false, false], [1075, true, false], [1125, false, false], [1296, false, false], [1343, false, false]]) {
   test(`issue ${id} preview banner agrees with the real completeness data`, () => {
     const dataRoot = process.env.PARITY_OB_DATA_ROOT ?? fileURLToPath(new URL("../data-ob/", import.meta.url));
     const meta = parse(readFileSync(join(dataRoot, "ob-issues", String(id), "meta.yaml"), "utf8"));
-    assert.equal(meta.incomplete === true, incomplete, "source completeness flag");
+    assert.equal(meta.incomplete === true, metadataIncomplete, "source metadata marker");
     const html = page(`issues/${id}`);
     assert.equal(html.includes("incomplete-banner"), incomplete, "rendered banner");
     assert.equal(/data below may not be complete yet/.test(text(html)), incomplete, "rendered notice");

@@ -68,4 +68,3 @@ test("retains both additional E.212 definitions on OB 1296", () => {
   assert.doesNotMatch(notes, /iWay AG|Bouygues Telecom/);
   assert.deepEqual(loadPrintedContext(1296, "unknown-register"), []);
 });
-

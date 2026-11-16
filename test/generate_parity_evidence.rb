@@ -67,6 +67,39 @@ module ParityEvidence
 
     private
 
+    # Same descendant text leaves as XPath, without libxml2's node sorting.
+    def node_text(node)
+      text_parts(node).join(' ').gsub(/\s+/, ' ').strip
+    end
+
+    def spaced_text(node)
+      text_parts(node).join(' ')
+    end
+
+    def text_parts(root)
+      return [] if ([root] + root.ancestors.to_a).any? { |node| hidden_text?(node) }
+
+      parts = []
+      stack = root.children.to_a.reverse
+      until stack.empty?
+        node = stack.pop
+        collect_text_node(node, parts, stack) unless hidden_text?(node)
+      end
+      parts
+    end
+
+    def hidden_text?(node)
+      %w[script style].include?(node.name)
+    end
+
+    def collect_text_node(node, parts, stack)
+      if node.text? || node.cdata?
+        parts << node.content
+      else
+        stack.concat(node.children.to_a.reverse)
+      end
+    end
+
     # Equivalent to normalize-and-any?, cached per immutable input set.
     def href_matches_any?(href, actual_hrefs)
       normalized = normalize_external_href(href)

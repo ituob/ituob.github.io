@@ -63,3 +63,44 @@ test("cached link membership is identical to the canonical method, including inp
   const result = spawnSync(ruby, ["-e", code], { cwd: root, encoding: "utf8" });
   assert.equal(result.status, 0, result.stderr);
 });
+
+
+test("an existing local page produces a scored, hashed variant", () => fixture((directory) => {
+  const html = "<main><h1>Printed bulletin</h1><p>Applicant labels and explanatory notes.</p></main>";
+  writeFileSync(join(directory, "reference/index.html"), html);
+  writeFileSync(join(directory, "build/index.html"), html);
+  const result = generate(directory);
+  assert.equal(result.status, 0, result.stdout + result.stderr);
+  const evidence = JSON.parse(readFileSync(join(directory, "output/parity_variants.json"), "utf8"));
+  assert.equal(evidence.classified_variants, 1);
+  assert.equal(evidence.included_variants, 1);
+  assert.equal(evidence.local_pages, 1);
+  assert.equal(evidence.variants[0].deployed, "index.html");
+  assert.equal(evidence.variants[0].local, "index.html");
+  assert.equal(evidence.variants[0].coverage, 1);
+  assert.equal(evidence.variants[0].verdict, "pass");
+  assert.equal(evidence.variants[0].local_sha256, evidence.variants[0].deployed_sha256);
+}));
+
+
+test("descendant text traversal matches canonical XPath ordering and exclusions", () => {
+  const code = `
+    require './test/generate_parity_evidence'
+    require './data-ob/ituob/lib/ituob/auditors/content_parity'
+    klass = Ituob::Auditors::ContentParity
+    klass.prepend(ParityEvidence::Comparisons)
+    auditor = klass.new
+    doc = Nokogiri::HTML('<html><head><style>hidden</style></head><body><main>Before<h1>Title</h1><p>A <em>nested</em> note<br>after break</p><script>hidden</script><table><tr><td>Left</td><td>Right</td></tr></table><!--ignored--><p>Unicode: é 日 &amp; spacing</p></main><script><span>hidden</span></script></body></html>')
+    roots = [doc, *doc.css('*').to_a]
+    roots << Nokogiri::XML('<root>A<![CDATA[B]]><nested>C</nested>D</root>').root
+    %i[node_text spaced_text].each do |name|
+      replacement = auditor.method(name)
+      canonical = replacement.super_method
+      roots.each do |root|
+        raise "changed text for #{name}/#{root.name}" unless replacement.call(root) == canonical.call(root)
+      end
+    end
+  `;
+  const result = spawnSync(ruby, ["-e", code], { cwd: root, encoding: "utf8" });
+  assert.equal(result.status, 0, result.stderr);
+});
