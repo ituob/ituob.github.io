@@ -54,14 +54,16 @@ test("the evidence and instructions use portable paths", () => {
   }
 });
 
-test("the removed annex chronology has an actionable follow-up draft", () => {
+test("the remaining date-policy follow-up does not defer the fixed annex chronology", () => {
   const draft = read("annex-follow-up.md");
   for (const url of [
     "https://github.com/ituob/ituob.github.io/issues/100",
     "https://github.com/ituob/ituob.github.io/pull/111",
     "https://github.com/ituob/ituob.github.io/issues/61",
   ]) assert.ok(draft.includes(url), url);
-  assert.match(draft, /71083bf9696f1c11f280fcc87585b0ce6463bde2/);
+  assert.match(draft, /This follow-up no longer defers annex-number selection/);
+  assert.match(draft, /2023-11-14T23:00:00\.000Z/);
+  assert.match(draft, /14\.XI\.2023/);
   assert.match(draft, /E\.118/);
   assert.match(draft, /E\.212/);
   assert.match(draft, /position_on/);
