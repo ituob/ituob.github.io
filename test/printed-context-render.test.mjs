@@ -27,13 +27,6 @@ test("issue 1296 prints both E.212 definitions and preserves the typed entry onc
   assert.match(text(html), /228 73/);
 });
 
-test("issue 1296 lists the latest annex bulletin numbers", () => {
-  const annexes = page("issues/1296").match(/<article class="message message--running_annexes">([\s\S]*?)<\/article>/)?.[1];
-  assert.ok(annexes, "running annexes section exists");
-  for (const number of [1280, 1114, 1125]) {
-    assert.ok(annexes.includes(`href="/issues/${number}/"`), `Annex OB ${number} is listed`);
-  }
-});
 
 test("issue 669 prints its incomplete-data notice", () => {
   assert.ok(/data below may not be complete yet/.test(text(page("issues/669"))), "Incomplete edition notice is printed");

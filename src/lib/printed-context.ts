@@ -33,7 +33,7 @@ export function printedContext(nodes: ProseMirrorNode[], represented: unknown, f
   const result: ProseMirrorNode[] = [];
   const add = (node: ProseMirrorNode) => {
     const key = normalized(textOf(node));
-    if (!/[\p{L}\p{N}]/u.test(key) || seen.has(key) || known.some((value) => value.includes(key))) return;
+    if (!/[\p{L}\p{N}]/u.test(key) || seen.has(key) || known.includes(key)) return;
     seen.add(key);
     result.push(node);
   };

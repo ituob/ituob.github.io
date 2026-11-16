@@ -15,7 +15,7 @@ const groups = issue !== undefined
 ---
 {groups.some((group) => group.nodes.length > 0) && (
   <aside class="prose-bulletin mt-6 mb-6">
-    {!issue && <h3>Printed amendment labels and notes</h3>}
+    {!issue && <h3>Historical printed amendment labels and notes</h3>}
     {groups.map((group) => group.nodes.length > 0 && (
       <section>
         {!issue && <h4><a href={`/issues/${group.issue}/`}>OB No. {group.issue}</a></h4>}

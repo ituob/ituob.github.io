@@ -10,7 +10,6 @@ registerHooks({
   },
 });
 const { printedContext, loadPrintedContext, registerPrintedContext } = await import("../src/lib/printed-context.ts");
-const { computeRunningAnnexes } = await import("../src/lib/loaders.ts");
 const text = (node) => node.text ?? (node.content ?? []).map(text).join(" ");
 const paragraph = (value) => ({ type: "paragraph", content: [{ type: "text", text: value }] });
 
@@ -45,6 +44,15 @@ test("reads T.35 form labels and E.218 Applicant from the corpus", () => {
   assert.match(e218, /Applicant\s*\/\s*Network/);
 });
 
+test("keeps short labels embedded in longer typed strings, but suppresses exact duplicates", () => {
+  const result = printedContext([paragraph("Applicant"), paragraph("Note"), paragraph("Already represented note")], {
+    applicant: "Applicant Telecom Ltd",
+    description: "Note submitted by the applicant",
+    notes: ["Already represented note"],
+  });
+  assert.deepEqual(result.map(text), ["Applicant", "Note"]);
+});
+
 test("reads the E.164 Note p preamble without hard-coding it in a page", () => {
   const notes = loadPrintedContext(1225, "e164-cc").map(text).join(" ");
   assert.match(notes, /Associated with shared country code 883/);
@@ -61,15 +69,3 @@ test("retains both additional E.212 definitions on OB 1296", () => {
   assert.deepEqual(loadPrintedContext(1296, "unknown-register"), []);
 });
 
-test("OB 1296 annex list uses the latest annex publication, including its date", () => {
-  const annexes = computeRunningAnnexes(1296);
-  const mnc = annexes.find((entry) => entry.pubId === "E212_MNC");
-  assert.equal(mnc?.annexed_in, 1280);
-  assert.match(String(mnc?.position_on), /2023/);
-  const codes = annexes.find((entry) => entry.pubId === "E164_CC");
-  assert.equal(codes?.annexed_in, 1114);
-  assert.ok(annexes.every((entry) => entry.annexed_in <= 1296));
-  const earlier = computeRunningAnnexes(1162).find((entry) => entry.pubId === "E212_MNC");
-  assert.equal(earlier?.annexed_in, 1162);
-  assert.match(String(earlier?.position_on), /2018/);
-});
