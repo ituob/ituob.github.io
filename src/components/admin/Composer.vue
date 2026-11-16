@@ -2,6 +2,7 @@
 import { onMounted, ref } from 'vue';
 import EditionMetadata from './EditionMetadata.vue';
 import { api, canPlace, canPublishEdition, generalMessageStatus, editionNumber, publicationNotice, type ComposerSubmission, type Edition, type EditionItem, type EditionGeneralMessage } from '../../lib/discussion-client';
+import { composerPreviewLinks } from '../../lib/composer-preview';
 interface EditionDetail { edition: Edition; items: EditionItem[]; general_messages: EditionGeneralMessage[] }
 interface Pending { prNumber: number; url?: string; reason: string }
 const editions = ref<Edition[]>([]), submissions = ref<ComposerSubmission[]>([]), detail = ref<EditionDetail | null>(null);
@@ -61,7 +62,7 @@ onMounted(() => perform(refresh));
       <dl><dt>Frozen data revision</dt><dd>{{ detail.edition.freeze_sha || 'Not frozen' }}</dd><dt>Staging commit</dt><dd>{{ detail.edition.staging_commit || 'Not staged' }}</dd><dt>Publication recorded</dt><dd>{{ detail.edition.published_at || 'Not published' }}</dd></dl>
       <p>{{ detail.items.length }} register amendments · {{ detail.general_messages.length }} general messages</p>
       <p v-if="!detail.items.length">No register amendments placed in this edition.</p>
-      <ol><li v-for="item in detail.items" :key="item.submission_id">{{ item.slug }} · {{ item.action_type }} · {{ item.state }} · {{ item.submission_id }}<p>Patch: {{ item.path }} · Merged revision: {{ item.merge_sha || 'Unavailable' }}</p><button v-if="detail.edition.status === 'composing'" :disabled="busy" @click="remove(item.submission_id)">Remove from edition</button></li></ol>
+      <ol><li v-for="item in detail.items" :key="item.submission_id">{{ item.slug }} · {{ item.action_type }} · {{ item.state }} · {{ item.submission_id }}<p>Patch: {{ item.path }} · Merged revision: {{ item.merge_sha || 'Unavailable' }}</p><p v-if="composerPreviewLinks(item.slug, detail.edition.ob_issue_no, detail.edition.status)"><a :href="composerPreviewLinks(item.slug, detail.edition.ob_issue_no, detail.edition.status)?.current">Preview current register</a> · <a :href="composerPreviewLinks(item.slug, detail.edition.ob_issue_no, detail.edition.status)?.atIssue">Preview OB {{ detail.edition.ob_issue_no }} snapshot</a></p><button v-if="detail.edition.status === 'composing'" :disabled="busy" @click="remove(item.submission_id)">Remove from edition</button></li></ol>
       <section aria-label="General messages in this edition"><h3>General messages</h3>
         <p>Every general draft targeting this issue must be approved and its exact review PR merged before publication. General messages are frozen while an edition is composing.</p>
         <p v-if="!detail.general_messages.length">No general messages target this edition.</p>
