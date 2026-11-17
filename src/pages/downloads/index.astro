@@ -32,7 +32,7 @@ const knownRegisters = new Set(REGISTERS.map((r) => r.slug));
         ITU-T {g.standard}
       </h2>
       {g.editions.map((ed) => (
-        <article class="mb-6 pb-4" style="border-bottom: 1px solid var(--border, currentColor);" data-edition={`${ed.standard}-${ed.edition_year}`} data-status={ed.status}>
+        <article class="mb-6 pb-4" style="border-bottom: 1px solid var(--border, currentColor);" data-edition={`${ed.standard}-${ed.edition_year}`} data-edition-article data-status={ed.status}>
           <h3 style="font-size: var(--step-1); font-weight: 600;">
             {ed.title} <span class="num" style="color: var(--fg-muted);">({ed.edition_year} edition)</span>
           </h3>
@@ -53,7 +53,7 @@ const knownRegisters = new Set(REGISTERS.map((r) => r.slug));
           <ul class="mt-3 flex flex-wrap gap-2" aria-label="Language editions">
             {ed.entries.map((e) => (
               <li>
-                <a href={pdfHref(e)} download class="inline-flex items-center gap-2 px-3 py-1 rounded no-underline" style="border: 1px solid var(--accent); font-family: var(--font-sans); font-size: var(--step--1);" lang={e.language} title={`SHA-256 ${e.sha256}`}>
+                <a href={pdfHref(e)} download data-file data-standard={e.standard} data-edition-year={e.edition_year} data-language={e.language} data-sha256={e.sha256} class="inline-flex items-center gap-2 px-3 py-1 rounded no-underline" style="border: 1px solid var(--accent); font-family: var(--font-sans); font-size: var(--step--1);" lang={e.language} title={`SHA-256 ${e.sha256}`}>
                   <span class="uppercase font-semibold">{e.language}</span>
                   <span style="color: var(--fg-muted);">PDF · as of OB No. {e.as_of_issue}</span>
                 </a>
@@ -65,3 +65,37 @@ const knownRegisters = new Set(REGISTERS.map((r) => r.slug));
     </section>
   ))}
 </Base>
+
+<script>
+  // ITU adoption overlay (#106). The page is built as "candidate"; an edition is
+  // upgraded only when a live adoption record matches every file's sha256.
+  // Any failure leaves the candidate wording in place.
+  import { editionAdopted, type AdoptionKey } from "~/lib/adoption";
+  (async () => {
+    try {
+      const res = await fetch("/api/publications/adoptions", { credentials: "omit" });
+      if (!res.ok) return;
+      const records = ((await res.json()) as { adoptions: AdoptionKey[] }).adoptions;
+      document.querySelectorAll<HTMLElement>("[data-edition-article]").forEach((article) => {
+        const files = [...article.querySelectorAll<HTMLElement>("[data-file]")].map((a) => ({
+          standard: a.dataset.standard ?? "",
+          edition_year: Number(a.dataset.editionYear),
+          language: a.dataset.language ?? "",
+          sha256: a.dataset.sha256 ?? "",
+        }));
+        if (!editionAdopted(files, records)) return;
+        const box = article.querySelector<HTMLElement>(".download-status");
+        const label = box?.querySelector<HTMLElement>(".download-label");
+        if (!box || !label) return;
+        label.textContent = box.dataset.adoptedLabel ?? "";
+        label.style.borderColor = "var(--accent)";
+        label.style.color = "var(--accent)";
+        box.querySelector(".download-disclaimer")?.remove();
+        box.dataset.status = "itu-adopted";
+        article.dataset.status = "itu-adopted";
+      });
+    } catch {
+      /* stay candidate */
+    }
+  })();
+</script>

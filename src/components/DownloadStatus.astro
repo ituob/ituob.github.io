@@ -5,7 +5,7 @@
  *               site's unofficial-data disclaimer wording.
  * itu-adopted -> presented as the official publication.
  */
-import { statusPresentation, type PublicationStatus } from "~/lib/publications";
+import { ADOPTED_LABEL, statusPresentation, type PublicationStatus } from "~/lib/publications";
 
 interface Props {
   status: PublicationStatus;
@@ -13,12 +13,12 @@ interface Props {
 const { status } = Astro.props;
 const p = statusPresentation(status);
 ---
-<div class="download-status" data-status={status}>
-  <p class="inline-block px-2 py-0.5 rounded font-semibold" style={`font-family: var(--font-sans); font-size: var(--step--1); border: 1px solid ${p.official ? "var(--accent)" : "var(--fg-subtle)"}; color: ${p.official ? "var(--accent)" : "var(--fg-muted)"};`}>
+<div class="download-status" data-status={status} data-adopted-label={ADOPTED_LABEL}>
+  <p class="download-label inline-block px-2 py-0.5 rounded font-semibold" style={`font-family: var(--font-sans); font-size: var(--step--1); border: 1px solid ${p.official ? "var(--accent)" : "var(--fg-subtle)"}; color: ${p.official ? "var(--accent)" : "var(--fg-muted)"};`}>
     {p.label}
   </p>
   {p.showDisclaimer && (
-    <p class="mt-1 italic" style="color: var(--fg-subtle); font-family: var(--font-sans); font-size: var(--step--1);">
+    <p class="download-disclaimer mt-1 italic" style="color: var(--fg-subtle); font-family: var(--font-sans); font-size: var(--step--1);">
       This is not an official ITU resource. The data has not been validated. Refer to the
       <a href="https://www.itu.int/itu-t/bulletin/" rel="external" class="underline hover:text-[var(--accent)]">official ITU Operational Bulletin</a>
       for authoritative content.
