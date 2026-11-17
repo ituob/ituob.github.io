@@ -215,7 +215,7 @@ async function bind(db: D1Database, session: Session, register_id: string, actio
       message: "Text amendments require an ITU editor or administrator because their country scope cannot be verified",
     }]);
   const keys = registerKeysOf(register_id, payload);
-  if (action === "LIR" && !isItu(session)) throw new Forbidden();
+  if ((action === "LIR" || action === "SEED") && !isItu(session)) throw new Forbidden();
   // ITU roles are not key-bound; authorizeEntries needs a non-empty list to be callable.
   if (keys.length === 0 && !isItu(session)) {
     // An invalid class cannot supply a country field. Return its schema errors
@@ -227,7 +227,15 @@ async function bind(db: D1Database, session: Session, register_id: string, actio
   return authorizeEntries(db, session, keys.length ? keys : ["-"]);
 }
 
-export async function createSubmission(db: D1Database, session: Session | null, b: Record<string, unknown>): Promise<Sub> {
+/** SEED is the only full-state action: ITU staff only, and only while the register's replayed state is empty. */
+export type EmptyRegisterCheck = (slug: string) => Promise<boolean>;
+async function requireEmptyRegister(action: ActionType, slug: string, isEmpty?: EmptyRegisterCheck) {
+  if (action !== "SEED") return;
+  if (!isEmpty) throw new UpstreamError("register state cannot be checked; a SEED is refused");
+  if (!(await isEmpty(slug))) throw new ConflictError(`register ${slug} already has state; change it with ADD, REP or SUP actions, not a SEED`);
+}
+
+export async function createSubmission(db: D1Database, session: Session | null, b: Record<string, unknown>, isEmpty?: EmptyRegisterCheck): Promise<Sub> {
   const s = requireUser(session);
   const c = parseCreate(b);
   const snap = await bind(db, s, c.register_id, c.action_type, c.payload);
@@ -242,6 +250,7 @@ export async function createSubmission(db: D1Database, session: Session | null, 
   const t = now();
   const errors = validate({ register_id: c.register_id, slug: c.slug, action_type: c.action_type, payload: c.payload });
   if (errors.length) throw new ValidationFailed(errors);
+  await requireEmptyRegister(c.action_type, c.slug, isEmpty);
   const rev = await revisionRow({ id }, 1, c.payload, errors, s.userId, t);
   const stmts = [
     db
@@ -384,9 +393,10 @@ export function finalYaml(sub: Sub, edition: number, seq: number, payloadYaml: s
  * happens afterwards in openPr (the "queue consumer"), so a GitHub outage never
  * un-approves anything.
  */
-export async function approve(db: D1Database, session: Session | null, id: string, b: Record<string, unknown>, repo: string) {
+export async function approve(db: D1Database, session: Session | null, id: string, b: Record<string, unknown>, repo: string, isEmpty?: EmptyRegisterCheck) {
   const s = reviewer(session);
   const sub = await getSub(db, id);
+  await requireEmptyRegister(sub.action_type, sub.slug, isEmpty);
   const detail = selfReview(s, sub, b);
   if (sub.state !== "in_review") throw new ConflictError(`illegal transition from ${sub.state}`);
   const edition = b.target_edition;

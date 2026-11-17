@@ -35,6 +35,10 @@ export interface Env {
   GITHUB_APP_PRIVATE_KEY?: string;
   GITHUB_APP_INSTALLATION_ID?: string;
   GITHUB_SITE_REPO?: string;
+  /** Read-only token for repository reads (register state, existing messages). Unset: reads fail closed. */
+  GITHUB_READ_TOKEN?: string;
+  /** Repository holding register snapshots and canonical messages; default ituob/itu-ob-data. */
+  GITHUB_DATA_REPO?: string;
   GITHUB_DATA_GITLINK?: string;
   GITHUB_STAGING_BRANCH?: string;
   /** GitHub webhook secret (Worker secret). Unset: /api/github/webhook fails closed with 503. */

@@ -5,8 +5,7 @@ import { AMENDMENT_COUNTRY_FIELDS, REGISTER_IDENTITIES } from '../register-rules
  * The list is never written anywhere as state. It is compared with the register's current replayed
  * state and turned into a patch series: ADD for new keys, REP for changed rows (the complete new row),
  * SUP for keys that disappeared (the key, plus the country field the validator requires).
- * An empty register needs the one full-state action, SEED, which the submission API does not accept
- * yet; that case is reported as `blocked` so it can never be mistaken for a submittable series.
+ * An empty register is established by a single SEED (staff-only, enforced by the server).
  */
 export interface PlannedAction {
   type: 'ADD' | 'REP' | 'SUP' | 'SEED';
@@ -16,7 +15,7 @@ export interface ImportPlan {
   actions: PlannedAction[];
   added: number; replaced: number; superseded: number; unchanged: number;
   errors: { row: number | null; message: string }[];
-  /** Why the series cannot be submitted, or null when every action can go through review. */
+  /** Reserved: a reason the series cannot be submitted, or null when every action can go through review. */
   blocked: string | null;
 }
 type Row = Record<string, unknown>;
@@ -63,9 +62,10 @@ export function planImport(registerId: string, current: Row[], imported: unknown
   for (const row of current) { const key = entryKey(registerId, row); if (key !== null) now.set(key, row); }
 
   if (now.size === 0) {
-    plan.blocked = 'The register has no current state. Establishing it needs a SEED action, which the submission API does not accept yet.';
+    // One SEED carries the whole initial state: it is the only full-state action and replay seeds once.
+    // The server accepts it from ITU staff only, and only while the register is still empty.
     plan.added = next.size;
-    for (const part of chunks([...next.values()], size)) plan.actions.push({ type: 'SEED', data: { _class: cls, entries: part } });
+    plan.actions.push({ type: 'SEED', data: { _class: cls, entries: [...next.values()] } });
     return plan;
   }
   const adds: Row[] = [], reps: Row[] = [], sups: Row[] = [];

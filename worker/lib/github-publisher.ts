@@ -7,7 +7,7 @@ class GitHubFailure extends Error {
   constructor(readonly status: number) { super(`GitHub publisher request failed (${status})`); }
 }
 const shaPattern = /^[a-f0-9]{40}$/;
-const actionPath = /^ob-issues\/[1-9]\d*\/[a-z0-9]+(?:-[a-z0-9]+)*\/\d{3}-(?:ADD|SUP|REP|LIR|MOD|DEL)\.yaml$/;
+const actionPath = /^ob-issues\/[1-9]\d*\/[a-z0-9]+(?:-[a-z0-9]+)*\/\d{3}-(?:ADD|SUP|REP|LIR|MOD|DEL|SEED)\.yaml$/;
 const repoPattern = /^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/;
 const encode = encodeURIComponent;
 function base64(bytes: Uint8Array): string {

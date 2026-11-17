@@ -35,10 +35,11 @@ describe('bulk import emits a patch series, never state', () => {
     expect(planImport('NOPE', current, [row('A')]).errors).toHaveLength(1);
     expect(planImport('E118_IIN', current, [row('A'), 3]).actions).toEqual([]);
   });
-  it('plans a SEED for an empty register but marks the series blocked', () => {
-    const plan = planImport('E118_IIN', [], [row('A'), row('B')]);
-    expect(plan.actions.map(a => a.type)).toEqual(['SEED']);
-    expect(plan.blocked).toMatch(/SEED/);
+  it('plans one unblocked SEED with every row for an empty register, never chunked', () => {
+    const plan = planImport('E118_IIN', [], [row('A'), row('B'), row('C')], { chunkSize: 2 });
+    expect(plan.actions.map(a => [a.type, a.data.entries.length])).toEqual([['SEED', 3]]);
+    expect(plan.blocked).toBeNull();
+    expect(payloadErrors({ type: 'SEED', data: plan.actions[0]!.data })).toEqual([]);
   });
   it('identity uses the first available field group and trims parts', () => {
     expect(entryKey('E118_IIN', { issue_id_number: ' 89 1 ' })).toBe('89 1');
