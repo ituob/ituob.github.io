@@ -115,7 +115,7 @@ export function stringifyYamlPreservingSource(value: unknown, sourceYaml?: strin
     // Block scalars and block collections own their terminating newline. Keep
     // that separator, and the file's original final-newline convention.
     if (isScalar(node) && (node.type === "BLOCK_LITERAL" || node.type === "BLOCK_FOLDED")) {
-      const headerComment = original.split(/\r?\n/, 1)[0].match(/[ \t]+#.*$/)?.[0];
+      const headerComment = original.split(/\r?\n/, 1)[0]?.match(/[ \t]+#.*$/)?.[0];
       if (headerComment) text += headerComment;
     }
     if (original.endsWith("\n")) text += original.endsWith("\r\n") ? "\r\n" : "\n";

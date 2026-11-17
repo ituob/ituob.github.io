@@ -56,7 +56,19 @@ jobs:
           --projection-root "$RUNNER_TEMP/ituob-site-projection"
         echo "OB_DATA_ROOT=$RUNNER_TEMP/ituob-site-projection" >> "$GITHUB_ENV"
 
+    # Projection fixtures exercise authored staging even when the production
+    # ontology pin predates that helper. Keep their helper source explicit.
+    - name: Check out projection test helper
+      uses: actions/checkout@v4
+      with:
+        repository: ituob/service-publications-docs
+        ref: 30ef6d28e97635cb7c5549bdf619ef988efda5f0
+        path: .projection-test-service
+        persist-credentials: false
+
     - name: Verify projection guards
+      env:
+        PROJECTION_SERVICE_ROOT: ${{ github.workspace }}/.projection-test-service
       run: python3 -m unittest discover -s scripts/tests -p test_project_authored_data.py
 
     - name: Install dependencies
