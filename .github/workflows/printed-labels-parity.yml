@@ -1,0 +1,184 @@
+name: Printed labels page parity
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  page-parity:
+    # This evidence run belongs to PR #111, including manual retries.
+    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.number == 111
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Free runner disk and require 12 GiB
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc "${AGENT_TOOLSDIRECTORY:?}"
+          df -h | tee "$RUNNER_TEMP/disk-headroom.txt"
+          free_kib=$(df -Pk "$GITHUB_WORKSPACE" | awk 'NR==2 {print $4}')
+          if [ "$free_kib" -lt 12582912 ]; then
+            error="Insufficient runner disk: ${free_kib} KiB free; require at least 12582912 KiB (12 GiB)."
+            echo "::error::$error"
+            echo "$error" >> "$RUNNER_TEMP/disk-headroom.txt"
+            cat "$RUNNER_TEMP/disk-headroom.txt" >> "$GITHUB_STEP_SUMMARY"
+            exit 1
+          fi
+
+      - name: Resolve PR head
+        id: pr
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const pr = context.payload.pull_request ??
+              (await github.rest.pulls.get({...context.repo, pull_number: 111})).data;
+            if (pr.head.repo.full_name !== context.repo.owner + '/' + context.repo.repo) {
+              throw new Error('This write-enabled evidence job requires a branch in this repository');
+            }
+            core.setOutput('head', pr.head.sha);
+
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.pr.outputs.head }}
+          submodules: recursive
+
+      - name: Check out OB 1350 normalized corpus
+        uses: actions/checkout@v4
+        with:
+          repository: ituob/service-publications-docs
+          ref: ff37cb471a8da399bd12d29bc3a334c080c7f7fe
+          path: fixtures/normalized
+
+      - name: Check out legacy site reference
+        uses: actions/checkout@v4
+        with:
+          repository: ituob/ituob.github.io
+          ref: a95ab19139e0c65271178c44362f60b48f7eed8c
+          path: fixtures/legacy
+
+      - name: Check out OB 1350 source corpus
+        uses: actions/checkout@v4
+        with:
+          repository: ituob/itu-ob-data
+          ref: e17484be9f11d6a44d2f5c2ffc3d3e0813ffe62f
+          path: fixtures/legacy/data
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '16'
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.1'
+          working-directory: fixtures/legacy
+          bundler-cache: true
+      - name: Build Jekyll reference
+        working-directory: fixtures/legacy
+        env:
+          JEKYLL_ENV: production
+        run: |
+          npm ci --no-audit --no-fund
+          bundle exec jekyll build --trace --destination "$RUNNER_TEMP/reference" 2>&1 | tee "$RUNNER_TEMP/jekyll-build.log"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.4'
+      - name: Install scorer and snapshot dependencies
+        working-directory: data-ob
+        env:
+          BUNDLE_GEMFILE: ituob/Gemfile
+        run: bundle install
+      - name: Generate register snapshots
+        working-directory: data-ob
+        env:
+          BUNDLE_GEMFILE: ituob/Gemfile
+          SNAPSHOTS_OUT: ${{ github.workspace }}/data/snapshots
+        run: bundle exec ruby scripts/generate_register_snapshots.rb
+      - name: Install site dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Configure full Astro build with OB 1350 data
+        run: |
+          mkdir -p "$RUNNER_TEMP/parity-report"
+          node --input-type=module <<'JS'
+          import fs from 'node:fs';
+          import path from 'node:path';
+          const root = process.cwd();
+          const configuration = `import base from ${JSON.stringify(path.join(root, 'astro.config.mjs'))};
+          export default {...base, vite: {...base.vite, define: {...base.vite.define,
+            'import.meta.env.OB_DATA_ROOT': JSON.stringify(${JSON.stringify(path.join(root, 'fixtures/normalized'))}),
+            'import.meta.env.ITU_OB_DATA_ROOT': JSON.stringify(${JSON.stringify(path.join(root, 'fixtures/legacy/data'))})
+          }}};`;
+          const config = path.join(process.env.RUNNER_TEMP, 'astro.parity.config.mjs');
+          fs.writeFileSync(config, configuration);
+          fs.appendFileSync(process.env.GITHUB_ENV, `AUDIT_CONFIG=${path.relative(root, config)}\n`);
+          JS
+      - name: Build full Astro site and record its inputs
+        run: |
+          node test/actions-build-inputs.mjs capture "$RUNNER_TEMP/parity-report/build_inputs.json"
+          npm run build -- --config "$AUDIT_CONFIG" 2>&1 | tee "$RUNNER_TEMP/astro-build.log"
+          node test/actions-build-inputs.mjs finalize "$RUNNER_TEMP/parity-report/build_inputs.json"
+          npm run check
+      - name: Score every Jekyll variant with the canonical gate
+        id: score
+        env:
+          BUNDLE_GEMFILE: data-ob/ituob/Gemfile
+          DEPLOYED_SITE: ${{ runner.temp }}/reference
+          LOCAL_DIST: ${{ github.workspace }}/dist
+          OUTPUT_DIR: ${{ runner.temp }}/parity-report
+        run: bundle exec ruby test/generate_parity_evidence.rb
+      - name: Check scored evidence and real rendered pages
+        env:
+          BUNDLE_GEMFILE: data-ob/ituob/Gemfile
+          PARITY_OB_DATA_ROOT: ${{ github.workspace }}/fixtures/normalized
+          SITE_DIST: ${{ github.workspace }}/dist
+        run: |
+          cp "$RUNNER_TEMP/parity-report/"* docs/parity/printed-labels-notes/
+          bundle exec node --experimental-strip-types --test test/printed-context.test.mjs test/parity-evidence-generator.test.mjs test/parity-evidence.test.mjs test/printed-context-render.test.mjs test/actions-build-inputs.test.mjs
+      - name: Publish Actions summary
+        if: always()
+        run: |
+          echo "PR #111 source: $PR_HEAD" >> "$GITHUB_STEP_SUMMARY"
+          if [ -f "$RUNNER_TEMP/parity-report/parity_report.md" ]; then
+            cat "$RUNNER_TEMP/parity-report/parity_report.md" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo 'No page score report was produced; see the failed step and uploaded logs.' >> "$GITHUB_STEP_SUMMARY"
+          fi
+        env:
+          PR_HEAD: ${{ steps.pr.outputs.head }}
+      - name: Upload score reports and diagnostic logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: printed-labels-parity-${{ github.run_id }}-${{ github.run_attempt }}
+          retention-days: 7
+          path: |
+            ${{ runner.temp }}/parity-report/
+            ${{ runner.temp }}/disk-headroom.txt
+            ${{ runner.temp }}/jekyll-build.log
+            ${{ runner.temp }}/astro-build.log
+      - name: Post score from this Actions run on PR 111
+        if: always()
+        uses: actions/github-script@v7
+        env:
+          PR_HEAD: ${{ steps.pr.outputs.head }}
+          RUN_STATUS: ${{ job.status }}
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+            const run = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+            const report = path.join(process.env.RUNNER_TEMP, 'parity-report/parity_report.md');
+            const disk = path.join(process.env.RUNNER_TEMP, 'disk-headroom.txt');
+            const result = fs.existsSync(report) ? fs.readFileSync(report, 'utf8') :
+              'No score report was produced. See the failed step.\n\n' + (fs.existsSync(disk) ? fs.readFileSync(disk, 'utf8') : '');
+            await github.rest.issues.createComment({...context.repo, issue_number: 111,
+              body: `Page parity for PR #111 at ${process.env.PR_HEAD || 'unresolved head'}: [Actions run and artifacts](${run})\n\nValidation status before posting: ${process.env.RUN_STATUS}.\n\n${result}`});

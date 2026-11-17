@@ -55,6 +55,40 @@ missing pages, or any below-threshold variant fail validation.
 
 ## Inputs and reproduction
 
+### GitHub Actions (preferred)
+
+The `Printed labels page parity` workflow is prepared for PR #111. Once the lane
+publishes it, a PR update starts the job. Retry that run using its run ID:
+
+```sh
+gh run rerun RUN_ID --repo ituob/ituob.github.io
+```
+
+The job first removes preinstalled .NET, Android, GHC, and hosted tool-cache
+files, then requires 12 GiB of free runner disk. It resolves PR #111's head,
+checks out the fixed fixture revisions below, generates snapshots, and builds
+the full site. The Jekyll reference uses its original Ruby 3.1/Node 16 setup;
+the Astro build and scorer use Ruby 3.4/Node 22. The canonical score gate,
+build-input checks, and actual rendered-page specs must all pass.
+
+The job posts its result and run link on PR #111, writes the canonical report
+to the Actions summary, and uploads the reports, per-variant scores, build
+receipt, and diagnostic logs as a seven-day artifact. Those failure steps also
+run after a failed build or disk check, so the measured free space and exact
+error remain available. Runner output is temporary and is not copied into the
+repository by hand.
+
+The hosted workflow has not yet run: its files must be published by the lane.
+Dispatch before publication returned `HTTP 404: workflow printed-labels-parity.yml
+not found on the default branch`. A PR update triggers the new workflow without
+requiring a dispatchable copy on main. The optional workflow-dispatch entry is
+available once the workflow is registered on the default branch.
+The passing results above are the completed local validation, not an Actions
+result. A local fallback is permitted only if the hosted job cannot obtain
+enough disk; report that job's exact disk error on the PR before falling back.
+
+### Local reproduction
+
 The OB 1350 audit corpus is separate from the lane's pinned corpus, which ends at
 OB 1343. The original pinned-corpus comparison had 407/429 passes, including seven
 missing issues; that is not a before/after comparison of this patch.
