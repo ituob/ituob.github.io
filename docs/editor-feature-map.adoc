@@ -139,7 +139,7 @@ string attribute or it cannot be authored.
 [cols="1,4,3,4,1,1",options="header"]
 |===
 | ID | Editor feature | Editor ref | Web app ref | PR | Status
-| G1 | Create or edit a service publication: id (uppercase, fixed after create), title (translatable), authoritative URL, recommendation | `publication-editor/index.tsx`, `meta.tsx` | `/admin/catalog` (`CatalogEntryEditor.vue`, `worker/lib/catalog-entries.ts`): review PR against `catalogs/registers.yaml` in the catalog repository; `src/lib/catalogs.ts` stays hand-maintained | this PR | IN PR (see docs/catalog-authoring.adoc)
+| G1 | Create or edit a service publication: id (uppercase, fixed after create), title (translatable), authoritative URL, recommendation | `publication-editor/index.tsx`, `meta.tsx` | `/admin/catalog` (`CatalogEntryEditor.vue`, `worker/lib/catalog-entries.ts`): review PR against `catalogs/registers.yaml` in the catalog repository; `src/lib/catalogs.ts` stays hand-maintained | #120 | IN PR (see docs/catalog-authoring.adoc)
 | G2 | Dataset specification designer | `publication-editor/dataset.tsx` | none | n/a | DROPPED (compiled register schemas replace it)
 | G3 | Delete publication | `publication-editor/index.tsx:356-362` | n/a | n/a | DROPPED (legacy shows "temporarily unavailable")
 | G4 | Field validators with a message list; Commit disabled while invalid | `form-validation/index.tsx` | generated validators client and server: `schema.validators.generated.ts`, `worker/lib/validation.ts`, `admin-client.ts payloadErrors` | #108, #110 | IN PR
