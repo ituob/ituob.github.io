@@ -3,10 +3,13 @@ import type { IssueMetadataWire } from '../schema.generated';
 const clone = <T>(value: T): T => structuredClone(value);
 
 /** The source only counts for an edition that comes after it: the page hands over the latest published edition,
- * which is not the predecessor of an earlier (or the same) edition number. A source without an id is trusted. */
+ * which is not the predecessor of an earlier (or the same) edition number. The source must name itself with a
+ * positive whole-number id below `no`; a missing, textual, fractional, zero, negative or structured id is not a
+ * predecessor, so nothing is inherited from it. */
 export function previousEdition(no: number, previous: IssueMetadataWire | null | undefined): IssueMetadataWire | null {
   if (!previous || typeof previous !== 'object') return null;
-  return typeof previous.id === 'number' && previous.id >= no ? null : previous;
+  const id: unknown = previous.id;
+  return Number.isSafeInteger(id) && (id as number) > 0 && (id as number) < no ? previous : null;
 }
 
 /**

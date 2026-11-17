@@ -113,6 +113,11 @@ describe("repository reader", () => {
     expect(await registerIsEmpty(empty({ file: false, dir: true }), REPO, "e118-iin")).toBe(false);
     expect(await registerIsEmpty(empty({ file: false }, { [`${REPO}:datasets/1161-E.118/changes/0001-ADD.yaml`]: "x" }), REPO, "e118-iin")).toBe(false);
   });
+  it("fails closed when the directory is listed twice, whatever the order of the entries", async () => {
+    const dup = (first: boolean, second: boolean) => `datasets:\n- directory: 1161-E.118\n  has_data_file: ${first}\n  has_data_directory: false\n- directory: 1161-E.118\n  has_data_file: ${second}\n  has_data_directory: false\n`;
+    for (const [a, b] of [[false, true], [true, false], [false, false], [true, true]] as const)
+      await expect(registerIsEmpty(empty({ file: false }, { [`${REPO}:datasets.yaml`]: dup(a, b) }), REPO, "e118-iin")).rejects.toThrow(RepoReadFailed);
+  });
   it("fails closed on a missing, malformed or unreadable answer instead of reading it as empty", async () => {
     // The old default read snapshots/<slug>/current.json from itu-ob-data, which 404s everywhere: a 404 meant "empty".
     await expect(registerIsEmpty(new FakeRepoReader(), REPO, "e118-iin")).rejects.toThrow(RepoReadFailed);

@@ -1,16 +1,16 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
-import { api, ApiError, payloadErrors } from '../../lib/admin-client';
+import { api, ApiError } from '../../lib/admin-client';
 import { parseYaml } from '../../lib/form/yaml-io';
 import { planImport, type ImportPlan } from '../../lib/form/bulk-import';
 const props = defineProps<{ registers: { register_id: string; slug: string; label: string }[] }>();
 const registerId = ref(props.registers[0]?.register_id ?? ''), text = ref('');
-const plan = ref<ImportPlan | null>(null), problems = ref<string[]>([]), busy = ref(false), error = ref('');
+const plan = ref<ImportPlan | null>(null), busy = ref(false), error = ref('');
 const results = ref<{ index: number; ok: boolean; message: string }[]>([]);
 const register = computed(() => props.registers.find(r => r.register_id === registerId.value));
-const submittable = computed(() => !!plan.value && !plan.value.blocked && plan.value.actions.length > 0 && !problems.value.length);
+const submittable = computed(() => !!plan.value && !plan.value.blocked && plan.value.actions.length > 0);
 async function preview() {
-  busy.value = true; error.value = ''; results.value = []; plan.value = null; problems.value = [];
+  busy.value = true; error.value = ''; results.value = []; plan.value = null;
   try {
     const response = await fetch(`/admin/bulk-state/${encodeURIComponent(register.value?.slug ?? '')}.json`);
     if (!response.ok) throw new Error('Current register state is unavailable.');
@@ -18,7 +18,6 @@ async function preview() {
     let imported: unknown;
     try { imported = parseYaml(text.value); } catch (e) { throw new Error(`The list is not valid YAML or JSON: ${e instanceof Error ? e.message : e}`); }
     const next = planImport(registerId.value, current, imported);
-    next.actions.forEach((action, i) => { for (const issue of payloadErrors({ type: action.type, data: action.data })) problems.value.push(`Action ${i + 1} ${action.type}: ${issue.path}: ${issue.message}`); });
     plan.value = next;
   } catch (e) { error.value = e instanceof Error ? e.message : 'Preview failed'; }
   finally { busy.value = false; }
@@ -50,7 +49,7 @@ async function createDrafts() {
     <section v-if="plan" aria-label="Preview">
       <h2>Preview</h2>
       <ul v-if="plan.errors.length" role="alert"><li v-for="(e, i) in plan.errors" :key="i">{{ e.row === null ? '' : `Row ${e.row + 1}: ` }}{{ e.message }}</li></ul>
-      <ul v-if="problems.length" role="alert"><li v-for="(p, i) in problems" :key="i">{{ p }}</li></ul>
+      <p v-if="plan.errors.length" role="alert">{{ plan.errors.length }} {{ plan.errors.length === 1 ? 'problem' : 'problems' }} found. Nothing can be submitted until the list is fixed.</p>
       <p v-if="plan.blocked" role="alert">{{ plan.blocked }}</p>
       <p v-if="!plan.errors.length">{{ plan.added }} added · {{ plan.replaced }} replaced · {{ plan.superseded }} superseded · {{ plan.unchanged }} unchanged · {{ plan.actions.length }} proposals</p>
       <ol><li v-for="(a, i) in plan.actions" :key="i">{{ a.type }} · {{ a.data.entries.length }} entries</li></ol>

@@ -31,4 +31,12 @@ describe('new-edition defaults', () => {
     expect(previousEdition(900, previous)).toBeNull();
     expect(previousEdition(1331, previous)).toBe(previous);
   });
+  it('refuses a source whose id is not a positive whole number below the edition', () => {
+    for (const id of ['1500', 1399.5, 0, -1, {}, [1500], null, undefined, Number.NaN, 2 ** 60]) {
+      const source = { ...(previous as object), id } as never;
+      expect(previousEdition(1400, source), String(id)).toBeNull();
+      expect(inheritedMetadata(1400, source), String(id)).toEqual({ id: 1400 });
+    }
+    expect(previousEdition(1400, { ...(previous as object), id: 1399 } as never)).not.toBeNull();
+  });
 });

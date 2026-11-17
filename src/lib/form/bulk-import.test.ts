@@ -72,4 +72,34 @@ describe('bulk import emits a patch series, never state', () => {
     expect(typed.filter(id => planImport(id, [], [{ x: 1 }]).errors[0]?.message.includes('not a catalog register')).sort())
       .toEqual(['E164_NOTE_N', 'E164_NOTE_O', 'E164_NOTE_PQ', 'E212_SHARED_MCC']);
   });
+
+describe('the plan is checked by the server validator before it is offered', () => {
+  const mnc = (code: string, country?: string) => ({ mcc_mnc_codes: code, networks: `Net ${code}`, ...(country ? { country_or_area: { en: country } } : {}) });
+  it('rejects, per row, a row the server would refuse (E.212 row without a country), and plans no action', () => {
+    const plan = planImport('E212_MNC', [], [mnc('412 01', 'Afghanistan'), mnc('276 01'), mnc('276 03')]);
+    expect(plan.actions).toEqual([]);
+    expect(plan.errors.map(e => e.row)).toEqual([1, 2]);
+    expect(plan.errors[0]!.message).toContain('country_or_area is required');
+  });
+  it('does not carry the previous row\'s country forward: the neighbour above a continuation row is another country', () => {
+    const plan = planImport('E212_MNC', [], [mnc('412 88', 'Afghanistan'), mnc('276 01'), mnc('276 02', 'Albania')]);
+    expect(plan.errors.map(e => e.row)).toEqual([1]);
+  });
+  it('applies to ADD and REP as well as SEED', () => {
+    const have = [mnc('412 01', 'Afghanistan')];
+    expect(planImport('E212_MNC', have, [...have, mnc('276 01')]).errors.map(e => e.row)).toEqual([1]);
+    expect(planImport('E212_MNC', have, [{ ...have[0]!, country_or_area: undefined }]).errors.map(e => e.row)).toEqual([0]);
+  });
+  it('reports a mistyped field once per row with the server message (T.35 manufactures_htv)', () => {
+    const ok = { country: 'iso-3166:bw', administration_name: 'A', manufactures_htv: false, assignment_authority: [] };
+    const plan = planImport('T35_NA', [], [ok, { ...ok, country: 'iso-3166:de', manufactures_htv: 'yes' }]);
+    expect(plan.actions).toEqual([]);
+    expect(plan.errors).toEqual([{ row: 1, message: expect.stringContaining('manufactures_htv must be a boolean') }]);
+  });
+  it('still plans a valid import, and every planned action passes the server validator', () => {
+    const plan = planImport('E212_MNC', [], [mnc('412 01', 'Afghanistan'), mnc('276 02', 'Albania')]);
+    expect(plan.errors).toEqual([]);
+    expect(plan.actions.map(a => a.type)).toEqual(['SEED']);
+  });
+});
 });

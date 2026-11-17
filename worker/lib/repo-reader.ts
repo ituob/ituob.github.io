@@ -82,7 +82,10 @@ export async function registerIsEmpty(reader: RepoReader, repo: string, slug: st
   try { index = parseYaml(text); } catch { throw new RepoReadFailed("datasets.yaml is not valid YAML"); }
   const datasets = index && typeof index === "object" ? (index as { datasets?: unknown }).datasets : null;
   if (!Array.isArray(datasets)) throw new RepoReadFailed("datasets.yaml has no datasets list");
-  const entry = datasets.find(d => d && typeof d === "object" && (d as { directory?: unknown }).directory === dir) as { has_data_file?: unknown; has_data_directory?: unknown } | undefined;
+  const listed = datasets.filter(d => d && typeof d === "object" && (d as { directory?: unknown }).directory === dir) as { has_data_file?: unknown; has_data_directory?: unknown }[];
+  // Replay and the index are keyed by directory; two entries cannot both be right, so neither is trusted.
+  if (listed.length > 1) throw new RepoReadFailed(`datasets.yaml lists ${dir} more than once`);
+  const entry = listed[0];
   if (!entry) throw new RepoReadFailed(`datasets.yaml does not list ${dir}`);
   if (typeof entry.has_data_file !== "boolean" || typeof entry.has_data_directory !== "boolean") throw new RepoReadFailed(`datasets.yaml has no data flags for ${dir}`);
   if (entry.has_data_file || entry.has_data_directory) return false;
