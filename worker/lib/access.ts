@@ -10,6 +10,35 @@ export interface AccessConfig {
 
 type SigningKey = JsonWebKey & { kid?: string };
 
+function encode(bytes: Uint8Array): string {
+  return btoa(String.fromCharCode(...bytes)).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+}
+
+const JWKS_TTL_MS = 10 * 60 * 1000;
+const JWKS_MISS_REFETCH_MS = 30 * 1000;
+const jwksCache = new Map<string, { keys: SigningKey[]; at: number }>();
+/** Test hook: drop all cached key sets. */
+export function clearAccessKeyCache(): void {
+  jwksCache.clear();
+}
+
+async function fetchKeys(origin: string, fetcher: typeof fetch): Promise<SigningKey[] | null> {
+  const response = await fetcher(`${origin}/cdn-cgi/access/certs`, { redirect: "error", signal: AbortSignal.timeout(5000) });
+  if (!response.ok) return null;
+  const jwks = await response.json() as { keys?: SigningKey[] };
+  if (!Array.isArray(jwks.keys)) return null;
+  jwksCache.set(origin, { keys: jwks.keys, at: Date.now() });
+  return jwks.keys;
+}
+
+/** Cached per team origin; an unknown kid refetches at most once per JWKS_MISS_REFETCH_MS. */
+async function keysFor(origin: string, kid: string, fetcher: typeof fetch): Promise<SigningKey[] | null> {
+  const hit = jwksCache.get(origin);
+  const age = hit ? Date.now() - hit.at : Infinity;
+  if (hit && age < JWKS_TTL_MS && (hit.keys.some((k) => k.kid === kid) || age < JWKS_MISS_REFETCH_MS)) return hit.keys;
+  return fetchKeys(origin, fetcher);
+}
+
 function decode(segment: string): Uint8Array<ArrayBuffer> {
   if (!/^[A-Za-z0-9_-]+$/.test(segment)) throw new Error("invalid base64url");
   const binary = atob(segment.replace(/-/g, "+").replace(/_/g, "/"));
@@ -61,18 +90,16 @@ export async function verifyAccessPrincipal(
       principal = { email: claims.email };
     }
 
-    const response = await fetcher(`${issuer.origin}/cdn-cgi/access/certs`, {
-      redirect: "error", signal: AbortSignal.timeout(5000),
-    });
-    if (!response.ok) return null;
-    const jwks = await response.json() as { keys?: SigningKey[] };
-    if (!Array.isArray(jwks.keys)) return null;
-    const matches = jwks.keys.filter((k) => k.kid === header.kid && k.kty === "RSA"
+    const signature = decode(signaturePart);
+    if (encode(signature) !== signaturePart) return null; // non-canonical base64url
+    const keys = await keysFor(issuer.origin, header.kid, fetcher);
+    if (!keys) return null;
+    const matches = keys.filter((k) => k.kid === header.kid && k.kty === "RSA"
       && (k.alg === undefined || k.alg === "RS256") && (k.use === undefined || k.use === "sig")
       && (k.key_ops === undefined || k.key_ops.includes("verify")));
     if (matches.length !== 1) return null;
     const key = await crypto.subtle.importKey("jwk", matches[0]!, { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" }, false, ["verify"]);
-    const valid = await crypto.subtle.verify("RSASSA-PKCS1-v1_5", key, decode(signaturePart), new TextEncoder().encode(`${headerPart}.${payloadPart}`));
+    const valid = await crypto.subtle.verify("RSASSA-PKCS1-v1_5", key, signature, new TextEncoder().encode(`${headerPart}.${payloadPart}`));
     return valid ? principal : null;
   } catch {
     // Malformed tokens, unavailable keys and cryptographic errors all fail closed.

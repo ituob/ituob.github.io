@@ -52,7 +52,7 @@ describe("the stub cannot run in production", () => {
   });
 
   it("loopback allow-list is exact", () => {
-    expect(["localhost", "127.0.0.1", "[::1]", "a.localhost"].every(isLoopbackHost)).toBe(true);
-    expect(["ituob.org", "www.ituob.org", "localhost.ituob.org", "xlocalhost", "127.0.0.1.evil.com"].some(isLoopbackHost)).toBe(false);
+    expect(["localhost", "127.0.0.1", "[::1]"].every(isLoopbackHost)).toBe(true);
+    expect(["ituob.org", "www.ituob.org", "localhost.ituob.org", "xlocalhost", "127.0.0.1.evil.com", "a.localhost", "evil.localhost"].some(isLoopbackHost)).toBe(false);
   });
 });

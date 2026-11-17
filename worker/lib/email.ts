@@ -38,7 +38,7 @@ export class HttpEmailSender implements EmailSender {
     private readonly url: string,
     private readonly apiKey: string,
     private readonly from: string,
-    private readonly fetcher: typeof fetch = fetch,
+    private readonly fetcher: typeof fetch = (...a) => fetch(...a),
   ) {}
   async send(msg: EmailMessage): Promise<{ id: string }> {
     const res = await this.fetcher(this.url, {
@@ -55,7 +55,7 @@ export class HttpEmailSender implements EmailSender {
     if (!res.ok) throw new Error(`email provider ${res.status}`);
     const body = (await res.json().catch(() => null)) as { id?: unknown } | null;
     if (!body || typeof body.id !== "string" || !body.id) throw new Error("email provider response lacked an id");
-    return { id: body.id };
+    return { id: body.id.slice(0, 200) };
   }
 }
 
@@ -82,20 +82,39 @@ let override: EmailSender | null = null;
 export function setEmailSender(s: EmailSender | null) {
   override = s;
 }
+/** https only, no userinfo, no loopback/IP-literal/single-label host; returns the normalized URL or null. */
+export function safeHttpsEndpoint(raw: string | undefined): string | null {
+  try {
+    const u = new URL((raw ?? "").trim());
+    const h = u.hostname;
+    if (u.protocol !== "https:" || u.username || u.password) return null;
+    if (!h.includes(".") || h === "localhost" || h.endsWith(".localhost") || h.startsWith("[") || /^[\d.]+$/.test(h)) return null;
+    return u.toString();
+  } catch {
+    return null;
+  }
+}
+
+/** Strip URL query strings, bearer tokens and the configured API key from text bound for storage or logs. */
+export function redactSecrets(text: string, ...secrets: (string | undefined)[]): string {
+  let out = text.replace(/(https?:\/\/[^\s"'<>?#]*)[?#][^\s"'<>]*/gi, "$1?[redacted]").replace(/Bearer\s+[^\s"']+/gi, "Bearer [redacted]");
+  for (const s of secrets) if (s && s.trim().length >= 4) out = out.split(s.trim()).join("[redacted]");
+  return out;
+}
+
 /**
  * Config-selected provider. EMAIL_PROVIDER="log" -> LogEmailSender; "http" ->
  * HttpEmailSender (needs EMAIL_API_URL https, EMAIL_API_KEY, MAIL_FROM);
  * anything else, or incomplete config, -> UnconfiguredEmailSender (fails closed).
  */
-export function getEmailSender(env?: Env, fetcher: typeof fetch = fetch): EmailSender {
+export function getEmailSender(env?: Env, fetcher?: typeof fetch): EmailSender {
   if (override) return override;
   if (env?.EMAIL_PROVIDER === "log") return new LogEmailSender();
-  if (env?.EMAIL_PROVIDER === "http" && env.EMAIL_API_KEY && env.MAIL_FROM && env.EMAIL_API_URL) {
-    try {
-      if (new URL(env.EMAIL_API_URL).protocol === "https:") {
-        return new HttpEmailSender(env.EMAIL_API_URL, env.EMAIL_API_KEY, env.MAIL_FROM, fetcher);
-      }
-    } catch { /* invalid URL: fall through, fail closed */ }
+  if (env?.EMAIL_PROVIDER === "http") {
+    const key = env.EMAIL_API_KEY?.trim();
+    const from = env.MAIL_FROM?.trim();
+    const url = safeHttpsEndpoint(env.EMAIL_API_URL);
+    if (key && from && url) return new HttpEmailSender(url, key, from, fetcher);
   }
   return new UnconfiguredEmailSender();
 }

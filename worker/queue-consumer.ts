@@ -1,5 +1,5 @@
 // The ONLY module that talks to the email provider (design invariant 1).
-import { getEmailSender } from "./lib/email.ts";
+import { getEmailSender, redactSecrets } from "./lib/email.ts";
 import { renderEmail, emailAllowed, type Level } from "./lib/notify.ts";
 import type { NotifyMessage } from "./lib/outbox.ts";
 import type { Env } from "./lib/types.ts";
@@ -22,6 +22,10 @@ async function deliver(env: Env, id: string): Promise<boolean> {
     .bind(id)
     .first<any>();
   if (!n || (n.email_status !== "queued" && n.email_status !== "failed")) return false; // already sent/skipped: redelivery is a no-op
+  if (n.email_provider_id) { // a provider already accepted this notification: never send twice
+    await env.DB.prepare(`UPDATE notifications SET email_status='sent' WHERE id=?1`).bind(id).run();
+    return false;
+  }
   const skip = async (reason: string, metric: string) => {
     await env.DB.batch([
       env.DB.prepare(`UPDATE notifications SET email_status='skipped', email_reason=?2 WHERE id=?1`).bind(id, reason),
@@ -41,7 +45,7 @@ async function deliver(env: Env, id: string): Promise<boolean> {
     ]);
     return false;
   } catch (e) {
-    const msg = String((e as Error).message ?? e).slice(0, 300);
+    const msg = redactSecrets(String((e as Error).message ?? e), env.EMAIL_API_KEY, env.EMAIL_API_URL).slice(0, 300);
     const attempts = n.email_attempts + 1;
     const dead = attempts >= MAX_ATTEMPTS;
     await env.DB.batch([
