@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
-import { calendarDays, calendarMonthTitle, initialCalendarMonth, scheduleDateLabel, shiftCalendarMonth } from '../../lib/form/schedule-calendar';
+import { canShiftCalendarMonth, calendarDays, calendarMonthTitle, initialCalendarMonth, scheduleDateLabel, shiftCalendarMonth } from '../../lib/form/schedule-calendar';
 
 const props = defineProps<{ cutoffDate: unknown; publicationDate: unknown }>();
 const month = ref(initialCalendarMonth(props.cutoffDate, props.publicationDate));
@@ -9,6 +9,10 @@ watch(() => [props.cutoffDate, props.publicationDate], () => {
 });
 const title = computed(() => calendarMonthTitle(month.value));
 const days = computed(() => calendarDays(month.value, props.cutoffDate, props.publicationDate));
+const grid = computed(() => {
+  const leading = days.value.length ? new Date(`${days.value[0]!.date}T00:00:00Z`).getUTCDay() : 0;
+  return Array.from({ length: 42 }, (_, index) => days.value[index - leading] ?? null);
+});
 const cutoffLabel = computed(() => scheduleDateLabel(props.cutoffDate));
 const publicationLabel = computed(() => scheduleDateLabel(props.publicationDate));
 const weekdays = [
@@ -23,18 +27,20 @@ function move(offset: number) { month.value = shiftCalendarMonth(month.value, of
   <section class="schedule-calendar" aria-label="Selected issue dates calendar">
     <h4>Selected dates</h4>
     <nav aria-label="Calendar month">
-      <button type="button" @click="move(-1)" :aria-label="`Previous month before ${title}`">Previous month</button>
+      <button type="button" @click="move(-1)" :disabled="!canShiftCalendarMonth(month, -1)" :aria-label="`Previous month before ${title}`">Previous month</button>
       <strong aria-live="polite">{{ title }}</strong>
-      <button type="button" @click="move(1)" :aria-label="`Next month after ${title}`">Next month</button>
+      <button type="button" @click="move(1)" :disabled="!canShiftCalendarMonth(month, 1)" :aria-label="`Next month after ${title}`">Next month</button>
     </nav>
     <table>
       <caption>{{ title }}</caption>
       <thead><tr><th v-for="weekday in weekdays" :key="weekday.short" scope="col"><abbr :title="weekday.full">{{ weekday.short }}</abbr></th></tr></thead>
       <tbody>
         <tr v-for="week in 6" :key="week">
-          <td v-for="day in days.slice((week - 1) * 7, week * 7)" :key="day.date" :class="{ outside: !day.inMonth, cutoff: day.cutoff, publication: day.publication }">
+          <td v-for="(day, index) in grid.slice((week - 1) * 7, week * 7)" :key="day?.date ?? `blank-${week}-${index}`" :class="{ outside: day && !day.inMonth, cutoff: day?.cutoff, publication: day?.publication }">
+            <template v-if="day">
             <time :datetime="day.date" :aria-label="`${day.date}${day.cutoff ? ', cutoff date' : ''}${day.publication ? ', publication date' : ''}`">{{ day.day }}</time>
             <span v-if="day.cutoff">Cutoff</span><span v-if="day.publication">Publication</span>
+            </template>
           </td>
         </tr>
       </tbody>

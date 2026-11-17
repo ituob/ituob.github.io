@@ -8,6 +8,8 @@ export interface CalendarDay extends YearMonth {
   cutoff: boolean;
   publication: boolean;
 }
+export const MIN_CALENDAR_YEAR = 0;
+export const MAX_CALENDAR_YEAR = 9999;
 
 function utcDate(year: number, month: number, day: number): Date {
   const date = new Date(0);
@@ -36,8 +38,17 @@ export function scheduleDateLabel(value: unknown): string {
 }
 
 export function shiftCalendarMonth(value: YearMonth, offset: number): YearMonth {
-  const date = utcDate(value.year, value.month - 1 + offset, 1);
+  const year = Math.min(MAX_CALENDAR_YEAR, Math.max(MIN_CALENDAR_YEAR, Math.trunc(value.year)));
+  const month = Math.min(12, Math.max(1, Math.trunc(value.month)));
+  const date = utcDate(year, month - 1 + Math.trunc(offset), 1);
+  if (date.getUTCFullYear() < MIN_CALENDAR_YEAR) return { year: MIN_CALENDAR_YEAR, month: 1 };
+  if (date.getUTCFullYear() > MAX_CALENDAR_YEAR) return { year: MAX_CALENDAR_YEAR, month: 12 };
   return { year: date.getUTCFullYear(), month: date.getUTCMonth() + 1 };
+}
+
+export function canShiftCalendarMonth(value: YearMonth, offset: number): boolean {
+  const next = shiftCalendarMonth(value, offset);
+  return next.year !== value.year || next.month !== value.month;
 }
 
 export function calendarMonthTitle(value: YearMonth): string {
@@ -46,15 +57,18 @@ export function calendarMonthTitle(value: YearMonth): string {
 }
 
 export function calendarDays(value: YearMonth, cutoff: unknown, publication: unknown): CalendarDay[] {
-  const first = utcDate(value.year, value.month - 1, 1);
-  const gridStart = utcDate(value.year, value.month - 1, 1 - first.getUTCDay());
+  const year = Math.min(MAX_CALENDAR_YEAR, Math.max(MIN_CALENDAR_YEAR, Math.trunc(value.year)));
+  const month = Math.min(12, Math.max(1, Math.trunc(value.month)));
+  const first = utcDate(year, month - 1, 1);
+  const gridStart = utcDate(first.getUTCFullYear(), first.getUTCMonth(), 1 - first.getUTCDay());
   const cutoffDate = parseScheduleDate(cutoff)?.date;
   const publicationDate = parseScheduleDate(publication)?.date;
   return Array.from({ length: 42 }, (_, index) => {
     const date = utcDate(gridStart.getUTCFullYear(), gridStart.getUTCMonth(), gridStart.getUTCDate() + index);
     const year = date.getUTCFullYear(), month = date.getUTCMonth() + 1, day = date.getUTCDate();
     const key = `${String(year).padStart(4, '0')}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-    return { year, month, day, date: key, inMonth: month === value.month && year === value.year,
+    if (year < MIN_CALENDAR_YEAR || year > MAX_CALENDAR_YEAR) return null;
+    return { year, month, day, date: key, inMonth: month === first.getUTCMonth() + 1 && year === first.getUTCFullYear(),
       cutoff: key === cutoffDate, publication: key === publicationDate };
-  });
+  }).filter((day): day is CalendarDay => day !== null);
 }

@@ -23,10 +23,15 @@ document's. Everything here is on branch `claude-a/101-editor-parity`, stacked o
 
 PR #124 supplies D7/D14/D15/D18 schema changes. This branch does not duplicate
 its regeneration. It retains imported YAML source in D1 through form saves and
-approval: unchanged values reuse the repository bytes; edits serialize validated
-values, and reverting restores the source bytes. Complete corpus assertions cover
+approval: unchanged values reuse the repository bytes; edits patch the changed
+YAML value ranges while retaining unrelated source bytes, and reverting restores
+the source bytes. Archived breaker regressions cover comments, quotes, CRLF,
+missing final newlines, Unicode and real-record single-field edits. Unsupported
+source syntax is rejected rather than falling back to whole-document serialization.
+Complete corpus assertions cover
 SANC 124, telephone_service_2 377, custom 105 and mid 6 records (telephone_service
-has none). B6 adds a UTC month calendar driven by the current form dates;
+has none). B6 adds a UTC month calendar driven by the current form dates,
+bounded to schema-supported years 0000 through 9999;
 B10 inline help covers general messages, scheduling and amendments.
 `docs/editor-feature-map.adoc` records the updated row statuses.
 
