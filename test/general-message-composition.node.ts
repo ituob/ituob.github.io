@@ -2,16 +2,21 @@ import { readFileSync } from "node:fs";
 import { DatabaseSync } from "node:sqlite";
 import { beforeEach, afterEach, describe, expect, it, vi } from "vitest";
 import { approveGeneralMessage, createGeneralMessage, generalMessageArtifact, saveGeneralMessage } from "../worker/lib/general-messages.ts";
-import { openEdition, publishEdition, readEdition, removeItem } from "../worker/lib/composer.ts";
+import { openEdition, publishEdition as publishStaged, readEdition, removeItem, stageEdition } from "../worker/lib/composer.ts";
 import { generalSelection, requireGeneralReviews } from "../worker/lib/general-message-composition.ts";
 import { metadataArtifact, saveMetadata, scheduleMetadata } from "../worker/lib/edition-metadata.ts";
 import { FakePatchPublisher } from "../worker/lib/publisher.ts";
+/** Both admin clicks in order: Stage, then Publish once staging is confirmed. */
+const publishEdition: typeof publishStaged = async (d, a, n, f) => {
+  const staged = await stageEdition(d, a, n, f);
+  return staged.pending ? staged : publishStaged(d, a, n, f);
+};
 import { verifyChain } from "../worker/lib/audit.ts";
 import { ConflictError } from "../worker/lib/membership.ts";
 import { UpstreamError } from "../worker/lib/submissions.ts";
 import { Forbidden } from "../worker/lib/authz.ts";
 import type { Session } from "../worker/lib/types.ts";
-import { canPublishEdition, generalMessageStatus } from "../src/lib/discussion-client.ts";
+import { canStageEdition, generalMessageStatus } from "../src/lib/discussion-client.ts";
 
 // Runs the real SQL/migrations transactionally in SQLite. Host workerd/D1 tests remain separate.
 function sqliteDb() {
@@ -191,8 +196,8 @@ describe("general-message edition composition",()=>{
   });
   it("enables general-only composer publication without claiming unverified reviews merged",()=>{
     const open={ob_issue_no:1400,status:"open" as const,freeze_sha:null,meta_pr:null,staging_commit:null,published_at:null};
-    expect(canPublishEdition(open,0,1)).toBe(true);expect(canPublishEdition(open,0,0)).toBe(false);
-    expect(canPublishEdition({...open,status:"published"},0,1)).toBe(false);expect(canPublishEdition({...open,status:"composing"},1,0)).toBe(true);
+    expect(canStageEdition(open,0,1)).toBe(true);expect(canStageEdition({...open,status:"staged"},1,0)).toBe(false);expect(canStageEdition(open,0,0)).toBe(false);
+    expect(canStageEdition({...open,status:"published"},0,1)).toBe(false);expect(canStageEdition({...open,status:"composing"},1,0)).toBe(true);
     expect(generalMessageStatus("review_pr_created")).toContain("merge is verified when publishing");
   });
 });

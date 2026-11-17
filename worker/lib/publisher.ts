@@ -87,6 +87,19 @@ export interface PinBump {
   /** The pin PR or its staging checks are not complete; never publish yet. */
   pending?: { prNumber: number; url: string; reason: string };
 }
+export interface PromotionRequest {
+  edition: number;
+  /** The data-repo commit the staged pin carries; the promotion must carry exactly this. */
+  freezeSha: string;
+  /** Deterministic per edition: a replay returns the same promotion PR, never a second. */
+  idempotencyKey: string;
+}
+export interface Promotion {
+  /** The production (default branch) commit of the merged promotion once it is deployed. */
+  siteCommit: string;
+  /** The promotion PR is open, unmerged, or its production deployment is not complete; never publish yet. */
+  pending?: { prNumber: number; url: string; reason: string };
+}
 export interface PatchPublisher {
   /** Idempotent per `idempotencyKey`: a replay returns the same PR, never a second. */
   openPatchPr(req: OpenPatchPrRequest): Promise<OpenedPr>;
@@ -106,6 +119,11 @@ export interface PatchPublisher {
   getPullRequest(req: { repo: string; prNumber: number; expectedHeadSha?: string }): Promise<PullRequestState>;
   /** Publication is a pin bump (the data-ob gitlink on the site repo). Idempotent per key. */
   bumpDataPin(req: PinBumpRequest): Promise<PinBump>;
+  /**
+   * Publish step: opens (never merges) the staging -> default-branch PR on the site repo and reports
+   * `pending` until a human merged it and the production deployment of that exact commit succeeded.
+   */
+  promoteToProduction(req: PromotionRequest): Promise<Promotion>;
 }
 
 /** A catalog request that cannot produce an active review change. */
@@ -277,6 +295,18 @@ export class FakePatchPublisher implements PatchPublisher {
   closePr(prNumber: number) {
     this.pullStates.set(prNumber, { state: "closed", merged: false, mergeSha: null, baseRef: FAKE_BASE });
   }
+  readonly promotionRequests: PromotionRequest[] = [];
+  private promotionByKey = new Map<string, Promotion>();
+  /** Fake never merges anything: it only records the request and answers as a deployed promotion. */
+  async promoteToProduction(req: PromotionRequest): Promise<Promotion> {
+    this.promotionRequests.push(req);
+    const hit = this.promotionByKey.get(req.idempotencyKey);
+    if (hit) return hit;
+    const done = { siteCommit: `p${this.promotionByKey.size + 1}`.padEnd(40, "0") };
+    this.promotionByKey.set(req.idempotencyKey, done);
+    return done;
+  }
+
   async bumpDataPin(req: PinBumpRequest): Promise<PinBump> {
     this.pinRequests.push(req);
     if (this.failNextPin > 0) {

@@ -633,6 +633,17 @@ pointer says. This makes the published/unpublished distinction exact.
   `edition_items` submission `published`, edition `published`,
   sends the `issue published` notification (#104) and writes audit rows.
 
+*Implementation (two admin clicks).* `POST /api/admin/composer/editions/{N}/stage`
+runs the Freeze and Stage steps (`stageEdition`); `POST .../publish` runs the
+Publish step (`publishEdition`) and is refused with 409 unless the edition is
+`staged`. Both require the `itu-admin` role (403 otherwise) and write
+`audit_log` rows (`edition.staged`, `composer.published`, `edition.published`
+with the production commit). The Worker only opens PRs (`bumpDataPin` into
+`staging`, `promoteToProduction` from `staging` into the default branch); a
+human merges them and the existing production job deploys. Nothing in the
+Worker merges or pushes to a protected branch; tests use the fake publisher
+and a fake GitHub transport only.
+
 Because a pin bump is "all or nothing", two editions can never be staged
 together; `editions.status` enforces at most one in `composing`/`staged`.
 
