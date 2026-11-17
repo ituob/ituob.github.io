@@ -57,50 +57,50 @@ function replaceItem(index: number, child: FormNode) {
 }
 </script>
 <template>
-  <fieldset v-if="node.kind === 'object'" :disabled="readonly" class="schema-object">
+  <fieldset v-if="node.kind === 'object'" :disabled="readonly" class="admin-form admin-fieldset schema-object">
     <legend>{{ node.className }}</legend>
-    <div v-for="field in node.fields" :key="field.attr.wire" class="schema-field">
+    <div v-for="field in node.fields" :key="field.attr.wire" class="admin-field schema-field">
       <strong>{{ field.attr.wire }}{{ field.attr.required ? ' (required)' : '' }}</strong>
       <span v-if="field.attr.wire === '_class'">: {{ node.className }}</span>
       <template v-else>
-        <button v-if="field.node === null" type="button" @click="emit('change', setField(node, field.attr.name, initialValue(field.attr)))">Add {{ field.attr.wire }}</button>
+        <button class="admin-button" v-if="field.node === null" type="button" @click="emit('change', setField(node, field.attr.name, initialValue(field.attr)))">Add {{ field.attr.wire }}</button>
         <template v-else>
           <SchemaNode :node="field.node" :path="`${path || 'data'}.${field.attr.wire}`" :readonly="readonly" :translation="translation" :opaque-readonly="opaqueReadonly" :prose="prose" @change="replaceField(field.attr.name, $event)" @invalid="(path, message) => emit('invalid', path, message)" />
-          <button type="button" @click="emit('change', clearField(node, field.attr.name)); emit('invalid', `${path || 'data'}.${field.attr.wire}`, '')">Remove {{ field.attr.wire }}</button>
+          <button class="admin-button" type="button" @click="emit('change', clearField(node, field.attr.name)); emit('invalid', `${path || 'data'}.${field.attr.wire}`, '')">Remove {{ field.attr.wire }}</button>
         </template>
       </template>
       <TranslationAssist v-if="translation && !readonly && englishSource && ['fr','es','ar','ru','zh'].includes(field.attr.wire)"
         :source="englishSource" from="en" :to="field.attr.wire"
         @apply="emit('change', setField(node, field.attr.name, { kind: 'leaf', type: 'String', value: $event }))" />
     </div>
-    <p v-if="Object.keys(node.extras).length">Additional stored fields are preserved: {{ Object.keys(node.extras).join(', ') }}.</p>
+    <p class="admin-help" v-if="Object.keys(node.extras).length">Additional stored fields are preserved: {{ Object.keys(node.extras).join(', ') }}.</p>
   </fieldset>
-  <fieldset v-else-if="node.kind === 'list'" :disabled="readonly">
+  <fieldset class="admin-form admin-fieldset" v-else-if="node.kind === 'list'" :disabled="readonly">
     <legend>{{ path }} ({{ node.items.length }} items)</legend>
     <div v-for="(item, index) in node.items" :key="`${epoch}:${index}`">
       <SchemaNode :node="item" :path="`${path}[${index}]`" :readonly="readonly" :translation="translation" :opaque-readonly="opaqueReadonly" :prose="prose" @change="replaceItem(index, $event)" @invalid="itemInvalid" />
-      <button type="button" :disabled="index === 0 || hasPending" @click="emit('change', moveItem(node, index, -1)); emit('invalid', path || 'data', '')">Move item {{ index + 1 }} up</button>
-      <button type="button" :disabled="index === node.items.length - 1 || hasPending" @click="emit('change', moveItem(node, index, 1)); emit('invalid', path || 'data', '')">Move item {{ index + 1 }} down</button>
-      <button type="button" @click="removeAt(node, index)">Remove item {{ index + 1 }}</button>
+      <button class="admin-button" type="button" :disabled="index === 0 || hasPending" @click="emit('change', moveItem(node, index, -1)); emit('invalid', path || 'data', '')">Move item {{ index + 1 }} up</button>
+      <button class="admin-button" type="button" :disabled="index === node.items.length - 1 || hasPending" @click="emit('change', moveItem(node, index, 1)); emit('invalid', path || 'data', '')">Move item {{ index + 1 }} down</button>
+      <button class="admin-button" type="button" @click="removeAt(node, index)">Remove item {{ index + 1 }}</button>
     </div>
-    <button type="button" @click="emit('change', appendItem(node, initialValue({ name: 'item', wire: 'item', type: node.itemType, kind: node.itemKind, collection: false, required: false })))">Add item</button>
+    <button class="admin-button" type="button" @click="emit('change', appendItem(node, initialValue({ name: 'item', wire: 'item', type: node.itemType, kind: node.itemKind, collection: false, required: false })))">Add item</button>
   </fieldset>
-  <label v-else class="schema-value">
+  <label v-else class="admin-form admin-field admin-label schema-value">
     <span class="field-path">{{ path }}</span>
-    <select v-if="description.enums[node.type]" :value="node.value" :disabled="readonly" @change="input">
+    <select class="admin-control" v-if="description.enums[node.type]" :value="node.value" :disabled="readonly" @change="input">
       <option v-for="option in description.enums[node.type]" :key="option" :value="option">{{ option }}</option>
     </select>
-    <input v-else-if="node.type === 'Boolean'" type="checkbox" :checked="node.value === true" :disabled="readonly" @change="input" />
-    <input v-else-if="['Integer', 'Float'].includes(node.type)" type="number" :step="node.type === 'Integer' ? 1 : 'any'" :value="node.value as number" :disabled="readonly" @input="input" />
+    <input class="admin-control" v-else-if="node.type === 'Boolean'" type="checkbox" :checked="node.value === true" :disabled="readonly" @change="input" />
+    <input class="admin-control" v-else-if="['Integer', 'Float'].includes(node.type)" type="number" :step="node.type === 'Integer' ? 1 : 'any'" :value="node.value as number" :disabled="readonly" @input="input" />
     <template v-else-if="prose && node.type === 'HashOrText' && (typeof node.value === 'string' || isLanguageProse(node.value))">
       <template v-if="typeof node.value === 'string'">
-        <textarea :value="node.value" :disabled="readonly" rows="5" @input="input" />
-        <button type="button" :disabled="readonly" @click="leaf({en: node.value})">Use language fields (current text becomes English)</button>
+        <textarea class="admin-control" :value="node.value" :disabled="readonly" rows="5" @input="input" />
+        <button class="admin-button" type="button" :disabled="readonly" @click="leaf({en: node.value})">Use language fields (current text becomes English)</button>
       </template>
       <template v-else>
-        <span v-for="language in PROSE_LANGUAGES" :key="language" class="prose-language">
+        <span v-for="language in PROSE_LANGUAGES" :key="language" class="admin-field prose-language">
           <span>{{ language }}</span>
-          <textarea v-if="languageValue(language) === undefined || typeof languageValue(language) === 'string'"
+          <textarea class="admin-control" v-if="languageValue(language) === undefined || typeof languageValue(language) === 'string'"
             :aria-label="`${path} ${language}`" :lang="language" :dir="language === 'ar' ? 'rtl' : 'auto'"
             :value="String(languageValue(language) ?? '')" :disabled="readonly" rows="5" @input="languageInput(language, $event)" />
           <span v-else>Stored rich text is preserved read-only.</span>
@@ -108,9 +108,11 @@ function replaceItem(index: number, child: FormNode) {
       </template>
     </template>
     <template v-else-if="node.value !== null && typeof node.value === 'object' && !(node.value instanceof YamlTimestamp)">
-      <template v-if="opaqueReadonly"><p>Stored content is preserved. This field is read-only.</p><pre>{{ JSON.stringify(node.value, null, 2) }}</pre></template>
-      <textarea v-else :value="JSON.stringify(node.value, null, 2)" :disabled="readonly" rows="5" @input="jsonInput" /><small>This field stores opaque structured data. Edit this field as JSON.</small><p v-if="jsonError" role="alert">{{ jsonError }}</p>
+      <template v-if="opaqueReadonly"><p class="admin-help">Stored content is preserved. This field is read-only.</p><pre>{{ JSON.stringify(node.value, null, 2) }}</pre></template>
+      <textarea class="admin-control" v-else :value="JSON.stringify(node.value, null, 2)" :disabled="readonly" rows="5" @input="jsonInput" /><small class="admin-help">This field stores opaque structured data. Edit this field as JSON.</small><p class="admin-error" v-if="jsonError" role="alert">{{ jsonError }}</p>
     </template>
-    <textarea v-else :value="node.value instanceof YamlTimestamp ? node.value.text : String(node.value ?? '')" :disabled="readonly" rows="3" @input="input" />
+    <textarea class="admin-control" v-else :value="node.value instanceof YamlTimestamp ? node.value.text : String(node.value ?? '')" :disabled="readonly" rows="3" @input="input" />
   </label>
 </template>
+
+<style src="../../styles/admin-forms.css"></style>
