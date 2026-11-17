@@ -1,0 +1,98 @@
+= Local country roster bootstrap (#105)
+
+== Source and authority
+
+`seeds/roster.sql` is generated from the git-pinned data-ob submodule's
+`datasets/country-names/data.yaml`: 142 country/area records at revision
+`ff37cb471a8da399bd12d29bc3a334c080c7f7fe`. Each stable source `key` becomes
+`members.id`; the trimmed English name becomes both `name` and `register_key`.
+The Worker extracts English country names from multilingual payloads.
+
+This dataset is a country/area vocabulary, *not an authoritative TSB membership
+list*. Every new row is therefore `suspended`: it cannot be claimed until an
+Access-authorized administrator verifies eligibility and explicitly activates it
+using `POST /api/admin/members/:id/status`. No membership identifiers, accession
+dates, ISO codes or active status are inferred. The epoch timestamps denote
+bootstrap data, not the date a country joined ITU.
+
+The ROA dataset describes operators/administrations (including contact details),
+not accounts or verified country memberships. It is not imported as users or
+memberships. There is no staff identity roster in data-ob. This seed inserts
+142 `members` and zero `users`, `memberships`, `user_roles` or
+`membership_events`; the schema already constrains the three supported roles.
+ITU staff provisioning remains the existing explicit admin flow for a user who
+has logged in; no default admin or credential is created.
+
+Country names differ across historical registers and ROA, and some registers
+use codes rather than country names. This bootstrap does not assert complete
+alias reconciliation across the 17 Entry classes. Unmatched country values
+remain ITU-only under the existing server authorization. A reviewed mapping and
+authoritative TSB list are still needed before enabling member submissions for
+all registers. This work does not include the admin UI in PR #110.
+
+== Generate and apply locally
+
+Initialize the pinned submodule and install dependencies first:
+
+[source,sh]
+----
+git submodule update --init data-ob
+npm ci
+node scripts/build-roster-seed.mjs
+# Review the seeds/roster.sql diff before applying it.
+npm run seed:roster
+----
+
+The npm command verifies the committed SQL matches the source, applies all
+schema migrations, then executes the seed with Wrangler's `--local` against
+`scripts/wrangler.roster-local.jsonc`. It accepts no arguments and never selects
+remote mode. Wrangler persists this tooling database in its local `.wrangler`
+state relative to the local config. It is separate from Vitest's isolated
+Miniflare database; worker tests apply the same SQL there. This config has no
+assets, queues, cron, routes or live database ID, and is never selected for deploy.
+
+The seed is separate from numbered schema migrations so it can be replayed
+explicitly after migrations. Ordering and timestamps are fixed; generation is
+byte-for-byte deterministic. `ON CONFLICT(id) DO NOTHING` preserves every existing
+row, including admin status changes, timestamps and historical foreign keys.
+No missing country is deleted. A conflicting register name fails rather than
+silently associating two country IDs.
+
+== Refresh
+
+After a reviewed data-ob pin update, regenerate the SQL and review the diff.
+The seed adds missing countries only. It intentionally does not apply renames,
+withdrawals or status changes to existing rows. For those, prepare a reviewed
+CSV for `scripts/roster-to-sql.mjs` or use the existing Access-protected roster
+import API with `dry_run=1` first (see `membership-roles.adoc`). Explicitly supply
+verified statuses; the existing CSV importer defaults omitted statuses to active.
+Never import operator contacts as staff identities or grant roles from a country
+list. Record membership decisions through the existing administration endpoints.
+
+== Future real D1: owner commands, NOT RUN
+
+No live D1 exists for this work. Follow `cloudflare-bindings.adoc` to provision
+resources separately and replace the placeholder database IDs before any remote
+operation. After review, the owner can run the following against staging first,
+then production. These commands are documented only; neither the seed script
+nor CI runs them.
+
+[source,sh]
+----
+# After the staging database exists and its example config has its real ID:
+npx wrangler d1 migrations apply ituob-org-staging-db --remote -c wrangler.staging.bindings.example.jsonc
+npx wrangler d1 execute ituob-org-staging-db --remote -c wrangler.staging.bindings.example.jsonc --file seeds/roster.sql
+
+# After reviewing staging, and after production provisioning:
+npx wrangler d1 migrations apply ituob-org-db --remote -c wrangler.bindings.example.jsonc
+npx wrangler d1 execute ituob-org-db --remote -c wrangler.bindings.example.jsonc --file seeds/roster.sql
+----
+
+== Verification
+
+`npm run test:worker` uses real local D1 in Miniflare/workerd. Roster tests compare
+generated and committed SQL, cover every country in the pinned source, apply the
+seed twice and compare full rows, preserve administrative changes, assert no
+identity grants, exercise schema/role constraints, and run the claim/verify and
+deactivation flow through the Worker against seeded countries. Access and login
+identity are test stubs; this is not evidence of live identity or Access setup.
