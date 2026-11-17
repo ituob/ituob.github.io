@@ -6,6 +6,7 @@ import {
   MESSAGE_TYPE_ORDER,
   GENERAL_TYPE_LABELS,
   PUBLICATION_BY_SLUG,
+  SUPPORTED_LANGUAGES,
   type GeneralMessageType,
   type Language,
 } from "~/lib/catalogs";
@@ -23,6 +24,11 @@ export function getStaticPaths() {
     const issue = loadIssue(id);
     if (!issue) continue;
     const langs = new Set<Language>();
+    // Legacy editions can declare a language while their prose falls back to English.
+    for (const language of SUPPORTED_LANGUAGES) {
+      const enabled = issue.meta.languages?.[language] as unknown;
+      if (enabled === true || enabled === "yes") langs.add(language);
+    }
     for (const m of issue.general.textual) {
       for (const l of availableLanguages(m)) langs.add(l);
     }

@@ -1,0 +1,13 @@
+---
+import LegacyMessageArchive from "~/components/LegacyMessageArchive.astro";
+import { legacyArchiveScopes } from "~/lib/legacy-archive-scopes";
+
+export function getStaticPaths() {
+  return legacyArchiveScopes.filter((scope) => scope.kind === "recommendation").map((scope) => ({
+    params: { code: scope.code, year: String(scope.year) }, props: { scope },
+  }));
+}
+
+const { scope } = Astro.props;
+---
+<LegacyMessageArchive scope={scope} />

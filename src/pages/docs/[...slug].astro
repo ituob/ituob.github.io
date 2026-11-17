@@ -1,0 +1,70 @@
+---
+import Base from "~/layouts/Base.astro";
+
+// Keep the published documentation URLs, including the documentation home page.
+export function getStaticPaths() {
+  const pages = import.meta.glob<string>("../../content/legacy-help/**/index.html", {
+    query: "?raw",
+    import: "default",
+    eager: true,
+  });
+  return Object.entries(pages).map(([path, html]) => {
+    const slug = path.split("/legacy-help/")[1]!.replace(/(^|\/)index\.html$/, "");
+    const title = html.match(/<h1>(.*?)<\/h1>/)?.[1] ?? "OB editor documentation";
+    return { params: { slug: slug || undefined }, props: { title, html } };
+  });
+}
+
+interface Props {
+  title: string;
+  html: string;
+}
+const { title, html } = Astro.props;
+---
+
+<Base
+  title={title}
+  description={`${title} — ITU OB Editor documentation.`}
+  breadcrumbs={[{ label: "OB editor documentation", href: "/docs/" }]}
+>
+  <article class="help-content prose-bulletin" set:html={html} />
+</Base>
+
+<style>
+  .help-content { max-width: 75ch; }
+  .help-content :global(h1) {
+    font-family: var(--font-display);
+    font-size: var(--step-4);
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 1em;
+  }
+  .help-content :global(h2),
+  .help-content :global(h3),
+  .help-content :global(h4) {
+    font-weight: 700;
+    margin: 1.5em 0 0.65em;
+  }
+  .help-content :global(h2) { font-size: var(--step-2); }
+  .help-content :global(h3) { font-size: var(--step-1); }
+  .help-content :global(ul),
+  .help-content :global(ol) { padding-left: 1.5em; margin: 0.8em 0; }
+  .help-content :global(ul) { list-style-type: disc; }
+  .help-content :global(ol) { list-style-type: decimal; }
+  .help-content :global(li) { margin: 0.55em 0; }
+  .help-content :global(.notes) {
+    border-left: 3px solid var(--accent);
+    padding-left: 1em;
+    margin: 1em 0;
+  }
+  .help-content :global(iframe) {
+    aspect-ratio: 16 / 9;
+    width: 100%;
+    border: 0;
+  }
+  .help-content :global(aside) {
+    margin-top: 2em;
+    border-top: 1px solid var(--border);
+    padding-top: 1em;
+  }
+</style>

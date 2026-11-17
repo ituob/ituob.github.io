@@ -47,7 +47,8 @@ it("authorizes country/service and area/network registers, refusing unscoped row
       register_id: register, slug, action_type: "ADD", payload: { type: "ADD", data: { _class: cls, entries } },
     } });
     expect((await send([{ ...identity, [field]: { en: "Algeria" } }])).status).toBe(201);
-    expect((await send([{ ...identity, [field]: { en: "Algeria" } }, identity])).status).toBe(400);
+    // Missing required country scope is rejected by schema validation before authorization.
+    expect((await send([{ ...identity, [field]: { en: "Algeria" } }, identity])).status).toBe(422);
     expect((await send([{ ...identity, [field]: { en: "Australia" } }])).status).toBe(403);
   }
 });

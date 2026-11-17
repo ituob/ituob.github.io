@@ -123,3 +123,11 @@ by its decision-required status.
 Focused checks cover exhaustive old-file preservation, a concrete issue redirect,
 home preservation, missing documentation, year archive semantics, and pinned input evidence.
 focused-quality: inventory script and focused assertions; no unresolved material finding.
+
+== Implemented compatibility follow-up
+
+The earlier findings above describe the pre-implementation assessment. See
+link:legacy-compatibility.adoc[implemented compatibility behavior and verification].
+The refreshed JSON now records installed redirects and exact archive targets.
+Run the inventory with `--test` to fail on any unresolved public route, missing
+concrete destination, or redirect chain. CI uses its current authored projection.
