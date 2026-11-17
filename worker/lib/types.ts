@@ -24,6 +24,16 @@ export interface Env {
   OIDC_ID_TOKEN_ALGS?: string;
   /** Patch repository for approval PRs (design D1); default ituob/service-publications-docs. */
   PATCH_REPO?: string;
+  /** Cloudflare Access team origin and application AUD (docs/access-configuration.adoc); both required outside stub mode. */
+  ACCESS_TEAM_DOMAIN?: string;
+  ACCESS_AUD?: string;
+  /** Comma-separated allowlist of signed Access service-token common_name IDs for /api/ci/*. */
+  ACCESS_CI_CLIENT_IDS?: string;
+  /** Email provider (queue consumer only): EMAIL_PROVIDER = "log" | "http"; see docs/email-configuration.adoc. */
+  EMAIL_PROVIDER?: string;
+  EMAIL_API_URL?: string;
+  EMAIL_API_KEY?: string;
+  MAIL_FROM?: string;
   /** GitHub webhook secret (Worker secret). Unset: /api/github/webhook fails closed with 503. */
   GITHUB_WEBHOOK_SECRET?: string;
   /** Notification carrier queue (`ituob-notify`); absent locally/unprovisioned: rows stay queued. */
@@ -41,3 +51,10 @@ export interface Session {
 export interface AccessIdentity {
   email: string;
 }
+
+/** Service principals are isolated from email-based administrative authority. */
+export interface AccessServicePrincipal {
+  kind: "service";
+  clientId: string;
+}
+export type AccessPrincipal = AccessIdentity | AccessServicePrincipal;
