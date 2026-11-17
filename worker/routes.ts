@@ -16,6 +16,7 @@ import { Forbidden, requireRole } from "./lib/authz.ts";
 import { sameOrigin } from "./lib/csrf.ts";
 import { StubMisconfigured, getAccessIdentity, getAccessServicePrincipal, getSession, takePendingSessionCookie } from "./lib/session.ts";
 import { type Route, body, json, str } from "./lib/http.ts";
+import { RepoReaderNotConfigured, RepoReadFailed } from "./lib/repo-reader.ts";
 import { UpstreamError, ValidationFailed } from "./lib/submissions.ts";
 import { discussionRoutes } from "./discussion-routes.ts";
 import { catalogRoutes } from "./catalog-routes.ts";
@@ -236,6 +237,8 @@ async function handleApiInner(request: Request, env: Env, url: URL): Promise<Res
     if (e instanceof NotFoundError) return json({ error: e.message }, 404);
     if (e instanceof ConflictError) return json({ error: e.message }, 409);
     if (e instanceof ValidationFailed) return json({ error: "validation failed", errors: e.errors }, 422);
+    if (e instanceof RepoReaderNotConfigured) return json({ error: e.message }, 503);
+    if (e instanceof RepoReadFailed) return json({ error: e.message }, 502);
     if (e instanceof UpstreamError) return json({ error: e.message }, 502);
     if (e instanceof InvalidError) return json({ error: e.message }, 400);
     if (e instanceof StubMisconfigured) return json({ error: "server misconfigured" }, 500);

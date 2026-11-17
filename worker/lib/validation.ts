@@ -18,7 +18,7 @@ export interface FieldError {
   message: string;
 }
 
-export const ACTION_TYPES = ["ADD", "SUP", "REP", "LIR", "MOD", "DEL"] as const;
+export const ACTION_TYPES = ["ADD", "SUP", "REP", "LIR", "MOD", "DEL", "SEED"] as const;
 export type ActionType = (typeof ACTION_TYPES)[number];
 
 export interface ValidationContext {
@@ -88,7 +88,7 @@ export function registerKeysOf(register_id: string, payload: unknown): string[] 
 // (measured over the corpus); the ontology has no `reason` or `superseded_by`
 // attribute on an amendment, so the old LIR-reason and SUP-superseded_by
 // presence rules contradicted the ontology and are gone.
-const needsEntries: ReadonlySet<string> = new Set(["ADD", "REP", "MOD", "SUP", "DEL", "LIR"]);
+const needsEntries: ReadonlySet<string> = new Set(["ADD", "REP", "MOD", "SUP", "DEL", "LIR", "SEED"]);
 
 export const stage1: PayloadValidator = ({ register_id, slug, action_type, payload }) => {
   const errs: FieldError[] = submissionTargetErrors(register_id, slug);
@@ -133,7 +133,7 @@ export const stage1: PayloadValidator = ({ register_id, slug, action_type, paylo
     const representable = !entryFields || groups.some(group => group.some(field => entryFields.includes(field)));
     if (!representable)
       errs.push({ path: "data._class", code: "mismatch", message: `Catalog identity (${groups.map(group => group.join(" + ")).join(" or ")}) is not represented by ${d._class}; the catalog and model must be aligned before typed entries can be saved` });
-    const full = action_type === "ADD" || action_type === "REP";
+    const full = action_type === "ADD" || action_type === "REP" || action_type === "SEED";
     d.entries.forEach((e, i) => {
       const at = `data.entries[${i}]`;
       if (!isObj(e)) return errs.push({ path: at, code: "type", message: "entry must be an object" });

@@ -17,10 +17,6 @@
     "not_found_handling": "404-page",
     "run_worker_first": true
   },
-  "vars": {
-    "AUTH_MODE": "oidc",
-    "OIDC_CLIENT_AUTH": "basic"
-  },
   "secrets": {
     "required": [
       "OIDC_CLIENT_SECRET",
@@ -29,9 +25,4 @@
       "GITHUB_WEBHOOK_SECRET"
     ]
   },
-  "triggers": {
-    "crons": [
-      "*/5 * * * *"
-    ]
-  }
 }

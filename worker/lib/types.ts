@@ -31,6 +31,10 @@ export interface Env {
   GITHUB_APP_PRIVATE_KEY?: string;
   GITHUB_APP_INSTALLATION_ID?: string;
   GITHUB_SITE_REPO?: string;
+  /** Read-only token for repository reads (register state, existing messages). Unset: reads fail closed. */
+  GITHUB_READ_TOKEN?: string;
+  /** Repository holding the register datasets and the ob-issues patch log; default ituob/service-publications-docs. */
+  GITHUB_DATA_REPO?: string;
   GITHUB_DATA_GITLINK?: string;
   GITHUB_STAGING_BRANCH?: string;
   /** Cloudflare Access team origin and application AUD (docs/access-configuration.adoc); both required outside stub mode. */
