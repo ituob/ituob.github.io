@@ -1,3 +1,4 @@
+import { PUBLICATION_BY_ID, REGISTERS } from "../../src/lib/catalogs.ts";
 import { parse, stringify } from "yaml";
 import { type AuditRow, auditStatements, sha256 } from "./audit.ts";
 import { Forbidden, authorizeEntries, hasRole, isItu } from "./authz.ts";
@@ -5,12 +6,12 @@ import { transitionNotifications } from "./notify.ts";
 import { systemCommentStatements } from "./system-comment.ts";
 import { ConflictError, InvalidError, NotFoundError } from "./membership.ts";
 import { type OpenedPr, type PatchPublisher, branchName } from "./publisher.ts";
-import type { Session } from "./types.ts";
+import type { Env, Session } from "./types.ts";
 import { ulid } from "./ulid.ts";
-import { ACTION_TYPES, type ActionType, type FieldError, registerKeysOf, submissionTargetErrors, validate } from "./validation.ts";
+import { ACTION_TYPES, type ActionType, type FieldError, registerKeysOf, submissionTargetErrors, rulesFor, registerStateFromSnapshot, validateWithWarnings, type ValidationContext } from "./validation.ts";
 
 export class ValidationFailed extends Error {
-  constructor(public errors: FieldError[]) {
+  constructor(public errors: FieldError[], public warnings: FieldError[] = []) {
     super("validation failed");
   }
 }
@@ -21,6 +22,7 @@ export type State =
   | "withdrawn" | "pr_pending" | "pr_open" | "ci_failed" | "merged" | "scheduled" | "published";
 
 export interface Sub {
+  warnings?: FieldError[];
   id: string;
   proposer_id: string;
   affiliation_kind: "itu" | "member";
@@ -40,7 +42,34 @@ export interface Sub {
 
 export const DEFAULT_PATCH_REPO = "ituob/itu-ob-data";
 const now = () => new Date().toISOString();
-const VALIDATOR_VERSION = "stage1-v2";
+const VALIDATOR_VERSION = "stage2-v1";
+type Assets = Env["ASSETS"];
+
+/** Deployed assets may lag the register; CI replay remains authoritative. */
+async function validateCurrent(assets: Assets | undefined, ctx: ValidationContext) {
+  let register_state;
+  const warnings: FieldError[] = [];
+  if (rulesFor(ctx.register_id)) {
+    const target = PUBLICATION_BY_ID.get(ctx.register_id) ?? REGISTERS.find(r => r.registerId === ctx.register_id);
+    try {
+      if (!assets || !target) throw new Error("snapshot unavailable");
+      const response = await assets.fetch(new Request(`https://www.ituob.org/data/snapshots/${target.slug}/current.json`));
+      if (!response.ok) throw new Error("snapshot unavailable");
+      const snapshot: unknown = await response.json();
+      if (!snapshot || typeof snapshot !== "object" || Array.isArray(snapshot)) throw new Error("invalid snapshot");
+      const data = snapshot as { active_entries?: unknown; lapsed_keys?: unknown };
+      if (!Array.isArray(data.active_entries) || !Array.isArray(data.lapsed_keys) ||
+          !data.active_entries.every(e => !!e && typeof e === "object" && !Array.isArray(e)) ||
+          !data.lapsed_keys.every(k => typeof k === "string")) throw new Error("invalid snapshot");
+      register_state = { ...registerStateFromSnapshot(ctx.register_id, data as { active_entries: unknown[]; lapsed_keys: string[] }), stale: true };
+      warnings.push({ path: "register_state", code: "unknown", message: "Deployed snapshot freshness cannot be verified; state conflicts are advisory. CI replay is authoritative." });
+    } catch {
+      warnings.push({ path: "register_state", code: "unknown", message: "Register snapshot unavailable or unreadable; only within-payload checks ran. CI replay is authoritative." });
+    }
+  }
+  const result = validateWithWarnings({ ...ctx, register_state });
+  return { errors: result.errors, warnings: [...warnings, ...result.warnings] };
+}
 
 /** Actor on a transition: a user, or the system (queue consumer). */
 export type Actor = { kind: "user"; id: string } | { kind: "system"; id: null } | { kind: "github"; id: null };
@@ -82,14 +111,14 @@ export function guardedInsert(db: D1Database, table: string, row: Record<string,
 }
 const guard = (id: string, v: number) => ({ sql: "EXISTS (SELECT 1 FROM submissions WHERE id = ?G1 AND version = ?G2)", args: [id, v] });
 
-function revisionRow(sub: { id: string }, rev: number, payload: unknown, errors: FieldError[], by: string, at: string) {
+function revisionRow(sub: { id: string }, rev: number, payload: unknown, errors: FieldError[], by: string, at: string, warnings: FieldError[] = []) {
   const payload_yaml = stringify(payload);
   return sha256(payload_yaml).then((payload_sha) => ({
     submission_id: sub.id,
     rev,
     payload_yaml,
     payload_sha,
-    validation: JSON.stringify({ stage1: errors, stage2: [], validator_version: VALIDATOR_VERSION, schema_sha: null }),
+    validation: JSON.stringify({ stage1: errors, stage2: [], warnings, validator_version: VALIDATOR_VERSION, schema_sha: null }),
     created_by: by,
     created_at: at,
   }));
@@ -207,7 +236,7 @@ function parseCreate(b: Record<string, unknown>) {
 }
 
 /** Country binding on every payload write. Unscoped text and LIR are ITU-staff only. */
-async function bind(db: D1Database, session: Session, register_id: string, action: ActionType, payload: unknown) {
+async function bind(db: D1Database, session: Session, register_id: string, action: ActionType, payload: unknown, assets?: Assets) {
   const data = (payload as { data?: { _class?: unknown } } | null)?.data;
   if (data?._class === "TextAmendment" && !isItu(session))
     throw new ValidationFailed([{
@@ -220,17 +249,17 @@ async function bind(db: D1Database, session: Session, register_id: string, actio
   if (keys.length === 0 && !isItu(session)) {
     // An invalid class cannot supply a country field. Return its schema errors
     // rather than hiding them behind the valid-but-unscoped payload error.
-    const errors = validate({ register_id, action_type: action, payload });
-    if (errors.length) throw new ValidationFailed(errors);
+    const { errors, warnings } = await validateCurrent(assets, { register_id, action_type: action, payload });
+    if (errors.length) throw new ValidationFailed(errors, warnings);
     throw new InvalidError("no country/area key found in the entries");
   }
   return authorizeEntries(db, session, keys.length ? keys : ["-"]);
 }
 
-export async function createSubmission(db: D1Database, session: Session | null, b: Record<string, unknown>): Promise<Sub> {
+export async function createSubmission(db: D1Database, session: Session | null, b: Record<string, unknown>, assets?: Assets): Promise<Sub> {
   const s = requireUser(session);
   const c = parseCreate(b);
-  const snap = await bind(db, s, c.register_id, c.action_type, c.payload);
+  const snap = await bind(db, s, c.register_id, c.action_type, c.payload, assets);
   // A published submission is corrected by a NEW submission that names it (design "Withdrawal and the undo story").
   if (c.corrects_id) {
     const target = await db.prepare(`SELECT state, register_id FROM submissions WHERE id=?1`).bind(c.corrects_id).first<{ state: State; register_id: string }>();
@@ -240,9 +269,9 @@ export async function createSubmission(db: D1Database, session: Session | null, 
   }
   const id = ulid();
   const t = now();
-  const errors = validate({ register_id: c.register_id, slug: c.slug, action_type: c.action_type, payload: c.payload });
-  if (errors.length) throw new ValidationFailed(errors);
-  const rev = await revisionRow({ id }, 1, c.payload, errors, s.userId, t);
+  const { errors, warnings } = await validateCurrent(assets, { register_id: c.register_id, slug: c.slug, action_type: c.action_type, payload: c.payload });
+  if (errors.length) throw new ValidationFailed(errors, warnings);
+  const rev = await revisionRow({ id }, 1, c.payload, errors, s.userId, t, warnings);
   const stmts = [
     db
       .prepare(
@@ -265,7 +294,7 @@ export async function createSubmission(db: D1Database, session: Session | null, 
     ])),
   ];
   await run(db, stmts);
-  return getSub(db, id);
+  return { ...await getSub(db, id), warnings };
 }
 
 async function ownSub(db: D1Database, session: Session | null, id: string): Promise<{ s: Session; sub: Sub }> {
@@ -275,30 +304,30 @@ async function ownSub(db: D1Database, session: Session | null, id: string): Prom
   return { s, sub };
 }
 
-async function newRevisionPayload(db: D1Database, s: Session, sub: Sub, b: Record<string, unknown>) {
+async function newRevisionPayload(db: D1Database, s: Session, sub: Sub, b: Record<string, unknown>, assets?: Assets) {
   const payload = b.payload;
   if (!payload || typeof payload !== "object" || Array.isArray(payload)) throw new InvalidError("payload must be an object");
-  await bind(db, s, sub.register_id, sub.action_type, payload);
+  await bind(db, s, sub.register_id, sub.action_type, payload, assets);
   return payload as Record<string, unknown>;
 }
 
 /** Draft edit: a validated immutable revision, no state change, audited. */
-export async function editDraft(db: D1Database, session: Session | null, id: string, b: Record<string, unknown>) {
+export async function editDraft(db: D1Database, session: Session | null, id: string, b: Record<string, unknown>, assets?: Assets) {
   const { s, sub } = await ownSub(db, session, id);
   if (sub.state !== "draft") throw new ConflictError(`illegal transition from ${sub.state}`);
-  const payload = await newRevisionPayload(db, s, sub, b);
+  const payload = await newRevisionPayload(db, s, sub, b, assets);
   const t = now();
-  const errors = validate({ register_id: sub.register_id, slug: sub.slug, action_type: sub.action_type, payload });
-  if (errors.length) throw new ValidationFailed(errors);
-  const rev = await revisionRow(sub, sub.current_rev + 1, payload, errors, s.userId, t);
-  return mutate(db, sub, {
+  const { errors, warnings } = await validateCurrent(assets, { register_id: sub.register_id, slug: sub.slug, action_type: sub.action_type, payload });
+  if (errors.length) throw new ValidationFailed(errors, warnings);
+  const rev = await revisionRow(sub, sub.current_rev + 1, payload, errors, s.userId, t, warnings);
+  return { ...await mutate(db, sub, {
     from: ["draft"], to: "draft", actor: { kind: "user", id: s.userId }, auditAction: "submission.draft_edited",
     noHistory: true, set: { current_rev: rev.rev }, rev: rev.rev, detail: { new_rev: rev.rev },
     extra: (d, v) => [guardedInsert(d, "submission_revisions", rev, sub.id, v)],
-  });
+  }), warnings };
 }
 
-export async function submitDraft(db: D1Database, session: Session | null, id: string) {
+export async function submitDraft(db: D1Database, session: Session | null, id: string, assets?: Assets) {
   const { s, sub } = await ownSub(db, session, id);
   if (!(MOVES.submit.from as readonly State[]).includes(sub.state)) throw new ConflictError(`illegal transition from ${sub.state}`);
   const cur = await db
@@ -306,26 +335,26 @@ export async function submitDraft(db: D1Database, session: Session | null, id: s
     .bind(sub.id, sub.current_rev)
     .first<{ payload_yaml: string }>();
   const payload = parsePayload(cur!.payload_yaml);
-  await bind(db, s, sub.register_id, sub.action_type, payload); // authority re-checked at submit time
-  const errors = validate({ register_id: sub.register_id, slug: sub.slug, action_type: sub.action_type, payload });
-  if (errors.length) throw new ValidationFailed(errors);
-  return mutate(db, sub, { ...MOVES.submit, actor: { kind: "user", id: s.userId }, auditAction: "submission.state" });
+  await bind(db, s, sub.register_id, sub.action_type, payload, assets); // authority re-checked at submit time
+  const { errors, warnings } = await validateCurrent(assets, { register_id: sub.register_id, slug: sub.slug, action_type: sub.action_type, payload });
+  if (errors.length) throw new ValidationFailed(errors, warnings);
+  return { ...await mutate(db, sub, { ...MOVES.submit, actor: { kind: "user", id: s.userId }, auditAction: "submission.state" }), warnings };
 }
 
 /** changes_requested -> submitted with a new revision; invalid content is refused and nothing is written. */
-export async function reviseSubmission(db: D1Database, session: Session | null, id: string, b: Record<string, unknown>) {
+export async function reviseSubmission(db: D1Database, session: Session | null, id: string, b: Record<string, unknown>, assets?: Assets) {
   const { s, sub } = await ownSub(db, session, id);
   if (sub.state !== "changes_requested") throw new ConflictError(`illegal transition from ${sub.state}`);
-  const payload = await newRevisionPayload(db, s, sub, b);
-  const errors = validate({ register_id: sub.register_id, slug: sub.slug, action_type: sub.action_type, payload });
-  if (errors.length) throw new ValidationFailed(errors);
+  const payload = await newRevisionPayload(db, s, sub, b, assets);
+  const { errors, warnings } = await validateCurrent(assets, { register_id: sub.register_id, slug: sub.slug, action_type: sub.action_type, payload });
+  if (errors.length) throw new ValidationFailed(errors, warnings);
   const t = now();
-  const rev = await revisionRow(sub, sub.current_rev + 1, payload, errors, s.userId, t);
-  return mutate(db, sub, {
+  const rev = await revisionRow(sub, sub.current_rev + 1, payload, errors, s.userId, t, warnings);
+  return { ...await mutate(db, sub, {
     ...MOVES.revise, actor: { kind: "user", id: s.userId }, auditAction: "submission.state",
     set: { current_rev: rev.rev }, rev: rev.rev,
     extra: (d, v) => [guardedInsert(d, "submission_revisions", rev, sub.id, v)],
-  });
+  }), warnings };
 }
 
 export async function withdrawOwn(db: D1Database, session: Session | null, id: string, reason: string | null) {
@@ -384,7 +413,7 @@ export function finalYaml(sub: Sub, edition: number, seq: number, payloadYaml: s
  * happens afterwards in openPr (the "queue consumer"), so a GitHub outage never
  * un-approves anything.
  */
-export async function approve(db: D1Database, session: Session | null, id: string, b: Record<string, unknown>, repo: string) {
+export async function approve(db: D1Database, session: Session | null, id: string, b: Record<string, unknown>, repo: string, assets?: Assets) {
   const s = reviewer(session);
   const sub = await getSub(db, id);
   const detail = selfReview(s, sub, b);
@@ -395,8 +424,8 @@ export async function approve(db: D1Database, session: Session | null, id: strin
     .prepare(`SELECT payload_yaml FROM submission_revisions WHERE submission_id=?1 AND rev=?2`)
     .bind(sub.id, sub.current_rev)
     .first<{ payload_yaml: string }>();
-  const errors = validate({ register_id: sub.register_id, slug: sub.slug, action_type: sub.action_type, payload: parsePayload(cur!.payload_yaml) });
-  if (errors.length) throw new ValidationFailed(errors);
+  const { errors, warnings } = await validateCurrent(assets, { register_id: sub.register_id, slug: sub.slug, action_type: sub.action_type, payload: parsePayload(cur!.payload_yaml) });
+  if (errors.length) throw new ValidationFailed(errors, warnings);
 
   // Gaps in NNN are legal (design); a lost race burns one number, never reuses one.
   const row = await db
