@@ -129,7 +129,7 @@ const TRUSTED_EVENTS = new Set(["push", "workflow_dispatch"]);
  * on `branch`, whose head repository is `repo` itself (never a fork, never a
  * pull_request run, whatever branch name it carries).
  */
-export function selectRun(runs: readonly RunInfo[], repo: string, branch: string): RunInfo | undefined {
+export function trustedRuns(runs: readonly RunInfo[], repo: string, branch: string): RunInfo[] {
   return runs
     .filter(
       (r) =>
@@ -138,5 +138,27 @@ export function selectRun(runs: readonly RunInfo[], repo: string, branch: string
         r.head_branch === branch &&
         r.head_repository?.full_name === repo,
     )
-    .sort((a, b) => Date.parse(b.created_at) - Date.parse(a.created_at))[0];
+    .sort((a, b) => Date.parse(b.created_at) - Date.parse(a.created_at));
+}
+
+export function selectRun(runs: readonly RunInfo[], repo: string, branch: string): RunInfo | undefined {
+  return trustedRuns(runs, repo, branch)[0];
+}
+
+/**
+ * Newest trusted run that actually has a live (non-expired) artifact named
+ * `name`. Runs without one (e.g. the producer workflow did not publish it yet)
+ * are skipped; `listArtifacts` errors propagate. At most `limit` runs are probed.
+ */
+export function selectRunWithArtifact(
+  runs: readonly RunInfo[],
+  repo: string,
+  branch: string,
+  name: string,
+  listArtifacts: (runId: number) => { name: string; expired: boolean }[],
+  limit = 20,
+): RunInfo | undefined {
+  return trustedRuns(runs, repo, branch)
+    .slice(0, limit)
+    .find((r) => listArtifacts(r.id).some((a) => a.name === name && !a.expired));
 }
