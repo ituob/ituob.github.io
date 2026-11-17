@@ -12,6 +12,7 @@
     "check": "astro check",
     "test": "node --experimental-strip-types --test tests/*.test.ts",
     "astro": "astro",
+    "dev:idp": "node scripts/mock-idp.mjs serve",
     "test:worker": "vitest run",
     "test:form": "vitest run --config vitest.form.config.ts",
     "typecheck:worker": "tsc -p worker/tsconfig.json",

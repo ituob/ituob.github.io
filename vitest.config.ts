@@ -52,7 +52,7 @@ export default defineConfig(async () => {
       include: ["test/**/*.test.ts"],
       // Protocol/host-config tests have a separate Node runner; D1 integration
       // stays here, inside workerd with real migrations and request handling.
-      exclude: ["test/deployment-config.test.ts", "test/publisher.test.ts", "test/access.test.ts", "test/email.test.ts"],
+      exclude: ["test/deployment-config.test.ts", "test/publisher.test.ts", "test/access.test.ts", "test/email.test.ts", "test/mock-idp-ignore.test.ts", "test/mock-idp-server.test.ts"],
       setupFiles: ["./test/setup.ts"],
     },
   };
