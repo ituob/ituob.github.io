@@ -87,11 +87,11 @@ describe("PDF adoption", () => {
 });
 
 describe("ADOPTION_APPROVERS (owner-set config)", () => {
-  const call = (approvers: string | undefined, access: string) =>
+  const call = (approvers: string | undefined, access: string, origin: string | null = "http://localhost") =>
     handleApi(
       new Request("http://localhost/api/admin/publications/adopt", {
         method: "POST",
-        headers: { "X-Stub-Access": access, "Content-Type": "application/json" },
+        headers: { "X-Stub-Access": access, "Content-Type": "application/json", ...(origin === null ? {} : { Origin: origin }) },
         body: JSON.stringify(file()),
       }),
       { ...env, ADOPTION_APPROVERS: approvers } as any,
@@ -106,7 +106,18 @@ describe("ADOPTION_APPROVERS (owner-set config)", () => {
     await addUser("owner-pick");
     await provisionItu("owner-pick", ["itu-editor"]);
     expect((await call("email:Owner-Pick@example.test", EDITOR)).status).toBe(403);
-    expect((await call("email:owner-pick@example.test", "owner-pick@example.test")).status).toBe(201);
+    expect((await call("email:Owner-Pick@example.test", "owner-pick@example.test")).status).toBe(201);
+  });
+  it("requires same-origin provenance even for an allowed approver", async () => {
+    for (const origin of [null, "https://other.example"]) {
+      expect((await call(`email:${EDITOR}`, EDITOR, origin)).status).toBe(403);
+    }
+    expect(await adoptions()).toEqual([]);
+    expect((await db().prepare("SELECT count(*) n FROM audit_log WHERE action LIKE 'publication.%'").first<any>()).n).toBe(0);
+  });
+  it("an email allowlist does not create an account for an unknown Access identity", async () => {
+    expect((await call("email:unknown@example.test", "unknown@example.test")).status).toBe(403);
+    expect(await adoptions()).toEqual([]);
   });
   it("a malformed value fails closed", async () => {
     expect(parseApprovers("role:itu-editor,bogus").roles.size).toBe(0);

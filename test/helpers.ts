@@ -1,5 +1,6 @@
 import { env, exports } from "cloudflare:workers";
 import { authorizeEntries, Forbidden } from "../worker/lib/authz.ts";
+import { provisionItuStaff } from "../worker/lib/membership.ts";
 import { getSession } from "../worker/lib/session.ts";
 
 export const db = () => env.DB;
@@ -22,6 +23,7 @@ export async function addUser(id: string) {
 export async function seedFixtures() {
   await seedMembers();
   for (const u of ["itu-admin", "itu-editor", "member-A", "member-B", "unaffiliated", "deactivated-member-A"]) await addUser(u);
+  await bootstrapAdmin();
 }
 
 export async function api(method: string, path: string, opts: { session?: string; access?: string; body?: unknown; host?: string; headers?: Record<string, string> } = {}) {
@@ -39,9 +41,19 @@ export async function api(method: string, path: string, opts: { session?: string
 }
 
 export const ADMIN = "admin@itu.example";
+export const BOOTSTRAP_ADMIN_ID = "bootstrap-admin";
+
+/** Operator bootstrap in real D1, never authority derived from an HTTP header. */
+export async function bootstrapAdmin() {
+  const existing = await db().prepare("SELECT id FROM users WHERE id=?1").bind(BOOTSTRAP_ADMIN_ID).first();
+  if (existing) return; // Do not silently restore an administrator revoked by a test.
+  await db().prepare("INSERT INTO users (id,email,created_at) VALUES (?1,?2,?3)").bind(BOOTSTRAP_ADMIN_ID, ADMIN, T).run();
+  await provisionItuStaff(db(), BOOTSTRAP_ADMIN_ID, ["itu-admin"], null);
+}
 
 /** claim -> admin verify, via the real endpoints. Returns membership id. */
 export async function activateMember(user: string, memberId: string) {
+  await bootstrapAdmin();
   const c = await api("POST", "/api/me/membership/claim", { session: user, body: { memberId, note: "TSB contact" } });
   if (c.status !== 201) throw new Error(`claim failed ${c.status}`);
   const v = await api("POST", `/api/admin/claims/${c.json.membershipId}/verify`, { access: ADMIN, body: {} });
@@ -50,6 +62,7 @@ export async function activateMember(user: string, memberId: string) {
 }
 
 export async function provisionItu(user: string, roles: string[]) {
+  await bootstrapAdmin();
   const r = await api("POST", "/api/admin/itu-staff", { access: ADMIN, body: { userId: user, roles } });
   if (r.status !== 201) throw new Error(`provision failed ${r.status}`);
   return r.json.membershipId as number;

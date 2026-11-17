@@ -159,6 +159,6 @@ export function renderEmail(n: { kind: string; payload: string; id: string; subm
   if (p.actor_name) lines.push(`By: ${p.actor_name}`);
   if (p.reason) lines.push(`Reason: ${p.reason}`);
   if (p.excerpt) lines.push(`Comment: ${p.excerpt}`);
-  lines.push(`Open: /submissions/${n.submission_id}`, "", "Change what you receive under notification preferences.");
+  lines.push(`Open: /me/discussions/?id=${encodeURIComponent(n.submission_id)}`, "", "Change what you receive under notification preferences.");
   return { subject: `[ITU OB] ${title}: ${n.kind}`, text: lines.join("\n") };
 }

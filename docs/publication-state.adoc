@@ -1,0 +1,30 @@
+= Edition publication state
+
+The composer treats a pin pull request as work in progress. A publisher response
+with `pending` returns HTTP 202, including its PR number, URL, and reason.
+The edition stays `composing`; its submissions stay `scheduled`. No freeze SHA,
+staging commit, publication time, publication audit, or publication notification
+is recorded while the pin PR is open, closed without merge, or awaiting a
+successful staging deployment.
+
+An administrator retries the same publish endpoint to resume. Every retry uses
+`edition-<number>-pin`, the existing ordered placements, and their merge SHAs.
+The publisher owns upstream idempotency and must only return a ready response
+when the merged pin and successful staging deployment cover those placements.
+A provider failure returns an upstream error and preserves the same local state.
+
+A ready response is checked against the selected placements, order, submission
+states, and merge SHAs in the same D1 transaction that stages the edition. A
+placement change during the provider request rejects the stale result with a
+conflict and preserves the current composition.
+
+Only a ready response may move the edition to `staged` and record the confirmed
+freeze SHA and staging commit. Existing submission transitions then publish each
+scheduled item with attribution, audit, and notifications. A partially completed
+local publication resumes from `staged` and skips submissions already published.
+Legacy test publishers without `pending` continue to represent ready responses.
+
+The real D1 regression cases in `test/composer.test.ts` cover pending retries,
+provider failure, preserved placements and attribution, and eventual publication.
+They require the Worker test runtime; passing static checks alone does not prove
+this flow or replace the real-provider staging acceptance run.

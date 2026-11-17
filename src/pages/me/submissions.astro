@@ -1,0 +1,7 @@
+---
+import Base from '../../layouts/Base.astro';
+import SubmissionWorkspace from '../../components/admin/SubmissionWorkspace.vue';
+import { listSnapshotSlugs, loadManifest } from '../../lib/snapshots';
+const registers = listSnapshotSlugs().flatMap(slug => { const m = loadManifest(slug); return m ? [{ slug, register_id: m.register_id, label: m.title.en ?? m.register_id }] : []; });
+---
+<Base title="My submissions"><h1>My submissions</h1><SubmissionWorkspace registers={registers} client:load /><noscript>Enable JavaScript to manage submissions.</noscript></Base>

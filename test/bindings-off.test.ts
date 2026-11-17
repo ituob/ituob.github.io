@@ -18,8 +18,8 @@ describe("unprovisioned bindings", () => {
     expect(redirect.headers.get("Location")).toBe("https://www.ituob.org/docs?a=1");
   });
 
-  it("returns a clear uncached 503 for API and auth when DB is absent", async () => {
-    for (const path of ["/api/whoami", "/api/github/webhook", "/auth", "/auth/login", "/auth/callback", "/auth/logout"]) {
+  it("returns a clear uncached 503 for API, auth and admin when DB is absent", async () => {
+    for (const path of ["/admin", "/admin/editor/", "/api/whoami", "/api/github/webhook", "/auth", "/auth/login", "/auth/callback", "/auth/logout"]) {
       const response = await worker.fetch(new Request(`https://www.ituob.org${path}`), staticEnv());
       expect(response.status, path).toBe(503);
       expect(response.headers.get("Cache-Control")).toBe("no-store");

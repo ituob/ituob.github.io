@@ -1,0 +1,8 @@
+---
+import Base from "~/layouts/Base.astro";
+import MembersAdmin from "~/components/account/MembersAdmin.vue";
+---
+<Base title="Membership administration" breadcrumbs={[{ label: "Administration", href: "/admin/" }, { label: "Members" }]}>
+  <MembersAdmin client:load />
+  <noscript><p>Enable JavaScript to administer membership and the Member State roster.</p></noscript>
+</Base>

@@ -1,0 +1,39 @@
+= Machine-translation assist (#101)
+
+Authors can request a machine suggestion from the ITU translation service while editing translated fields.
+This is a port of the legacy editor's `ITUTranslator` (`itu-ob-editor/src/renderer/machine-translation.tsx`).
+The only provider is `nmt.itu.int`; there is no fallback provider.
+
+== Route
+
+`POST /api/admin/translate`, guard `access`. Requires a Cloudflare Access identity that resolves (via `ituSession`) to a user with the `itu-admin` or `itu-editor` role, and the same-origin check `handleApi` applies to non-GET Access routes. Anything else is refused with 403 and no outbound connection is made.
+
+Request (JSON): `{ "text": "...", "from": "en", "to": "fr" }`
+
+Success (200): `{ "ok": true, "provider": "nmt.itu.int", "from": "en", "to": "fr", "text": "<translation>" }`
+
+Errors: 400 invalid input (non-string, empty, over limit, pair not allowed); 403 not authorised; 502 service unreachable, closed early, errored, timed out or replied with empty/non-text data. Error responses never contain a translation.
+
+== Protocol (as in the legacy source)
+
+Endpoint `wss://nmt.itu.int/marian_translate_<from><to>` (host fixed in code). One socket per request: the raw text is sent as a single text frame, the first text frame received is the translation, then the socket is closed. The worker connects with `fetch()` and an `Upgrade: websocket` header (`https:` scheme), then `response.webSocket.accept()`.
+
+== Limits
+
+* Pairs (from the legacy source: default language `en` into the other `AvailableLanguages`): `enfr enar enzh enru enes`.
+* Text: 1 to 2000 characters, non-blank.
+* Timeout: 10 seconds for connect plus reply.
+
+== Wiring (done by the owner of worker/routes.ts and the admin pages)
+
+. `worker/routes.ts`: `import { translationRoutes } from "./translation-routes.ts"` and spread it into `routes`. `/api/admin/` is already an Access prefix.
+. Mount `src/components/admin/TranslationAssist.vue` (props `source`, `from`, `to`; event `apply(text)`) next to a translated field. The parent sets the field only in its `apply` handler.
+. Egress: the Worker must be allowed to reach `nmt.itu.int` (no binding needed).
+
+== Tests
+
+`test/translation.test.ts` injects a fake socket through `setTranslationConnector`; no live network is used.
+
+== Known gap
+
+From the development host, `nmt.itu.int` resolved (156.106.193.6) but TCP/TLS connections timed out, so the live protocol was not observed end to end.

@@ -1,0 +1,52 @@
+= itu-ob-editor retirement: parity status
+:toc:
+
+Status delta against `docs/editor-feature-map.adoc` (on `main`, added by #115) for
+https://github.com/ituob/ituob.github.io/issues/101[#101]. Row IDs are that
+document's. Everything here is on branch `claude-a/101-editor-parity`, stacked on
+#110; nothing is shipped until #108, #110 and this PR merge.
+
+== Closed by this branch
+
+[cols="1,3,4",options="header"]
+|===
+| Row | Change | Evidence
+| D2 | An unreviewed general-message draft can be deleted (`POST /api/admin/general-messages/:id/delete`, stale-revision and role checked, audited). Approved (and not since edited), review-reserved and frozen-edition records are refused: removing published work is a reviewed revert, not an editor action. | `test/general-messages.node.ts` ("deletes an unreviewed draft")
+| B8 | A new edition's metadata form starts from the latest published edition's ISSN, languages and authors (with contacts). Dates and the `incomplete` flag are never inherited. The source applies only to an edition numbered after it: opening an older or the same edition does not inherit from the latest one. | `src/lib/form/edition-defaults.test.ts`
+| W2 (partial) | `/admin/bulk` takes a full external list, diffs it with the register's current replayed rows and emits a patch series of draft proposals: ADD (complete new row), REP (complete new row), SUP (key and country field; a row without the country field cannot be superseded and is reported before anything is submitted), chunked at 50 entries. Every action passes the client ontology validators before drafts are created and the server validates again. No full-state file is written. | `src/lib/form/bulk-import.test.ts`
+| D3 | `POST /api/admin/general-messages/import` opens an existing record at its canonical path (`generalBinding`: singletons under `general/`, others `<type>/NNN.yaml`) as a draft; the path is checked before the repository is read. The file is read through a `RepoReader` (`worker/lib/repo-reader.ts`), must validate as its class unchanged, and approval then yields a replacement of that file for review. The reader is a config-selected seam: `GitHubContentsReader` needs `GITHUB_READ_TOKEN` and the route returns 503 without one; tests use `FakeRepoReader`. | `test/general-messages.node.ts` (import), `test/seed-action.test.ts` (route, reader)
+| W2 SEED | A SEED is accepted from ITU staff only, only while the data repository proves the register empty (`datasets.yaml` in `ituob/service-publications-docs` lists its dataset with neither a data file nor a data directory, and `datasets/<dir>/changes/` is empty; any other answer, including a 404, fails closed), checked at create and again at approval, with at most one SEED in progress per register (rejected and withdrawn ones do not count), failing closed (503/502) when the reader is unavailable. `migrations/0004_seed_action.sql` rebuilds `submissions` with SEED in the CHECK (parking rows in a copy so it also applies to a database that already has submissions and revisions). The importer now emits one unblocked SEED for an empty register. | `test/seed-action.test.ts`, `bulk-import.test.ts`
+| C6 | Up/down buttons reorder list items (authors, contacts, any list). Moving is disabled while any field of the list holds invalid input; Remove discards that pending input and rebuilds the items. | `src/lib/form/move-item.test.ts`
+|===
+
+== Re-scoped
+
+* *E5, one amendment per publication per issue.* The legacy amendment bundled every
+  operation on a publication into one object, so "one per publication" was a
+  structural rule. A patch is one action (`ADD`, `REP`, `SUP` ...), and an issue
+  legitimately holds several per register, ordered by `seq`
+  (`worker/lib/composer.ts` `listMergedUnpublished`). A uniqueness check would reject
+  valid series, including the bulk import above. Status: DROPPED, superseded by per-action patches.
+
+== D7, D14, D15, D18 (telephone, custom title, SANC, mid)
+
+Done, depending on `service-publications-docs` PR #114 (typed `GeneralCustom.title`, `HashOrText` telephone and mid contents, `sanc` dispatch agreeing with the corpus classifier). `schema.generated.ts`, `schema.validators.generated.ts` and `class-description.generated.json` were regenerated from the #114 head (d956cdb8) with its generators; if #114 changes, regenerate. Covered by `src/lib/form/general.test.ts`.
+
+== Still blocking retirement
+
+[cols="1,3,3",options="header"]
+|===
+| Row | Why it is not done here | What unblocks it
+| F1, F2 | There is no annex class in `class-description.generated.json`. | Owner decision: add an annexes class, or retire `annexes.yaml` authoring and record that in #101.
+| G1 | Catalogs are code (`src/lib/catalogs.ts`). | Owner decision: a catalog form, or "publications are added in code" recorded in #101.
+| D3, W2 SEED (live proof) | Built against the fake reader only. Reading real data-repo files, the `datasets.yaml` / `changes/` directory-listing contract against the real `ituob/service-publications-docs`, and a GitHub replacement PR for an existing path were not exercised. | A provisioned read token and a run against the real repositories.
+| B6, B10, E4 | Calendar view, help links and the amendment header were not built: help-link targets are not known, and E4 needs annex data in the Worker. All are non-blocking. | n/a
+| Archive notice | The Electron repository (`ituob/itu-ob-editor`) is a separate repository. Its README pointer, and archiving it, are not changes to this site. | After the rows above are closed and the web editor is deployed.
+|===
+
+== Not run
+
+* The 0004 rebuild ran in miniflare's local D1, including on a database with submission and revision rows (foreign_key_check clean), not on remote D1.
+* No live deployment, Cloudflare Access or identity provider was used; the bulk importer
+  and metadata defaults were exercised by unit tests and `astro check`, not in a browser.
+* `astro build` was not run (shared disk).
