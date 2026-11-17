@@ -32,6 +32,11 @@ export const CLASSES: Readonly<Record<string, Readonly<Record<string, FieldSpec>
     "position_on": { kind: "date" },
     "notes": { kind: "string", many: true },
   },
+  "AnnexedPosition": {
+    "publication_id": { kind: "string" },
+    "position_on": { kind: "dateOrText" },
+    "datasets": { kind: "hash" },
+  },
   "Change": {
     "type": { kind: "string" },
     "identifier": { kind: "string" },
@@ -505,6 +510,9 @@ export const CLASSES: Readonly<Record<string, Readonly<Record<string, FieldSpec>
     "notes": { kind: "string" },
     "reclamation_date": { kind: "string" },
     "trial": { kind: "boolean" },
+  },
+  "IssueAnnexes": {
+    "positions": { kind: "class", ref: "AnnexedPosition", many: true },
   },
   "IssueAuthor": {
     "name": { kind: "string" },

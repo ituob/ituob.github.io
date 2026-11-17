@@ -8,6 +8,12 @@ export interface AmendmentWire {
   notes?: string[];
 }
 
+export interface AnnexedPositionWire {
+  publication_id?: string;
+  position_on?: string;
+  datasets?: Record<string, unknown>;
+}
+
 export interface ChangeWire {
   type?: string;
   identifier?: string;
@@ -539,6 +545,10 @@ export interface IptnEntryWire {
   notes?: string;
   reclamation_date?: string;
   trial?: boolean;
+}
+
+export interface IssueAnnexesWire {
+  positions?: AnnexedPositionWire[];
 }
 
 export interface IssueAuthorWire {

@@ -11,7 +11,9 @@
  *   ob-issues/<issue>/<register slug>/NNN-ACT.yaml    RegisterChange (envelope; data is the <X>Amendment)
  *   ob-issues/<issue>/<slug>/text.yaml                TextAmendment
  *
- * annexes.yaml and other general/* files are freeform and not form-driven.
+ *   ob-issues/<issue>/annexes.yaml                    IssueAnnexes (a mapping keyed by publication id; see form/annexes.ts)
+ *
+ * Other general/* files are freeform and not form-driven.
  */
 export const REGISTER_SLUGS = [
   "dp", "e118-iin", "e164-acn", "e164-cc", "e212-mnc", "e218-trcc", "f32-tdi", "f400-admd", "list-viii",
@@ -39,17 +41,17 @@ const GENERAL_DIRS = new Set([
   "service_restrictions", "telephone_service", "telephone_service_2",
 ]);
 
-export type Role = "metadata" | "general" | "register-change" | "text-amendment";
+export type Role = "metadata" | "general" | "annexes" | "register-change" | "text-amendment";
 
 export interface Classified {
   className: string;
   role: Role;
 }
 
-/** null = not a form-driven file (freeform annex snapshot, general prose). */
+/** null = not a form-driven file (general prose). */
 export function classify(rel: string, data: unknown): Classified | null {
   if (rel === "meta.yaml") return { className: "IssueMetadata", role: "metadata" };
-  if (rel === "annexes.yaml") return null;
+  if (rel === "annexes.yaml") return { className: "IssueAnnexes", role: "annexes" };
   if (rel === "general/running_annexes.yaml") return { className: "GeneralRunningAnnexes", role: "general" };
   if (rel === "general/approved_recommendations.yaml") return { className: "GeneralApprovedRecommendations", role: "general" };
   const m = /^([^/]+)\/([^/]+)\.yaml$/.exec(rel);

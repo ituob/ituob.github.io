@@ -33,7 +33,7 @@ async function perform(work: () => Promise<void>) {
   catch(e) { error.value = e instanceof Error ? e.message : 'General-message request failed'; if(e instanceof ApiError) errors.value = e.errors; }
   finally { busy.value = false; }
 }
-async function reload() { drafts.value = (await api<{drafts:GeneralMessage[]}>(endpoint)).drafts; }
+async function reload() { drafts.value = (await api<{drafts:GeneralMessage[]}>(endpoint)).drafts.filter(item => item.type !== 'annexes'); }
 async function save() {
   await perform(async () => {
     if(Object.keys(inputErrors.value).length) throw new Error('Resolve invalid fields before saving.');

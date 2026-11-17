@@ -1,0 +1,152 @@
+/**
+ * Authoring rules for an issue's annexes (`ob-issues/<n>/annexes.yaml`).
+ *
+ * One module, used by the admin form and by the Worker, so the browser and
+ * the server cannot disagree. Wire shape: a mapping of publication id to the
+ * annexed position, `{ position_on?, datasets? }`, or null when the position
+ * is not known. The ontology (IssueAnnexes / AnnexedPosition) describes the
+ * same data as a list; `toOntologyInstance` bridges the two so the generated
+ * validator checks the field types.
+ */
+import { validateClass } from "../schema.validators.generated.ts";
+
+export interface AnnexedPositionWire {
+  position_on?: string;
+  datasets?: Record<string, unknown>;
+}
+export type AnnexesWire = Record<string, AnnexedPositionWire | null>;
+export interface AnnexIssue {
+  path: string;
+  code: "required" | "type" | "enum" | "mismatch" | "unknown";
+  message: string;
+}
+
+export const ANNEX_TYPE = "annexes";
+export const MAX_ANNEXES = 200;
+export const MAX_PUBLICATION_ID = 200;
+
+const isObject = (v: unknown): v is Record<string, unknown> => !!v && typeof v === "object" && !Array.isArray(v);
+
+/** A real calendar date or a full ISO timestamp, as the corpus stores them. */
+export function isPositionDate(v: unknown): v is string {
+  if (typeof v !== "string") return false;
+  const m = /^(\d{4})-(\d{2})-(\d{2})(?:T(\d{2}):(\d{2}):(\d{2})(?:\.\d{1,9})?Z)?$/.exec(v);
+  if (!m) return false;
+  const [year, month, day] = [Number(m[1]), Number(m[2]), Number(m[3])];
+  const date = new Date(Date.UTC(year, month - 1, day));
+  if (date.getUTCFullYear() !== year || date.getUTCMonth() !== month - 1 || date.getUTCDate() !== day) return false;
+  return m[4] === undefined || (Number(m[4]) < 24 && Number(m[5]) < 60 && Number(m[6]) < 60);
+}
+
+/** The id is the YAML key: trimmed, printable, bounded. */
+export function publicationIdError(id: string): string | null {
+  if (id === "") return "publication id must not be empty";
+  if (id !== id.trim()) return "publication id must not start or end with a space";
+  if (id.length > MAX_PUBLICATION_ID) return `publication id must be at most ${MAX_PUBLICATION_ID} characters`;
+  // eslint-disable-next-line no-control-regex
+  if (/[\u0000-\u001f\u007f]/.test(id)) return "publication id must not contain control characters";
+  if (id === "__proto__") return "publication id is reserved";
+  return null;
+}
+
+/** Ontology view of the wire mapping: the entry list the generated schema describes. */
+export function toOntologyInstance(wire: Record<string, unknown>): { positions: Record<string, unknown>[] } {
+  return {
+    positions: Object.entries(wire).map(([id, entry]) => ({
+      publication_id: id,
+      ...(isObject(entry) && "position_on" in entry ? { position_on: entry.position_on } : {}),
+      ...(isObject(entry) && "datasets" in entry ? { datasets: entry.datasets } : {}),
+    })),
+  };
+}
+
+export function validateAnnexes(value: unknown): AnnexIssue[] {
+  if (!isObject(value)) return [{ path: "", code: "type", message: "annexes must be a mapping of publication id to position" }];
+  const errors: AnnexIssue[] = [];
+  const ids = Object.keys(value);
+  if (ids.length > MAX_ANNEXES) errors.push({ path: "", code: "type", message: `at most ${MAX_ANNEXES} annexed publications` });
+  const clean: Record<string, unknown> = {};
+  for (const id of ids) {
+    const at = JSON.stringify(id);
+    const idError = publicationIdError(id);
+    if (idError) { errors.push({ path: at, code: "type", message: idError }); continue; }
+    const entry = value[id];
+    if (entry === null) { clean[id] = entry; continue; }
+    if (!isObject(entry)) { errors.push({ path: id, code: "type", message: `${id}: position must be a mapping or null` }); continue; }
+    let ok = true;
+    for (const key of Object.keys(entry)) {
+      if (key !== "position_on" && key !== "datasets") { errors.push({ path: `${id}.${key}`, code: "unknown", message: `${id}.${key} is not an annex field` }); ok = false; }
+    }
+    if ("position_on" in entry && !isPositionDate(entry.position_on)) {
+      errors.push({ path: `${id}.position_on`, code: "type", message: `${id}.position_on must be a real date (YYYY-MM-DD) or ISO timestamp` });
+      ok = false;
+    }
+    if ("datasets" in entry && !isObject(entry.datasets)) {
+      errors.push({ path: `${id}.datasets`, code: "type", message: `${id}.datasets must be an object` });
+      ok = false;
+    }
+    if (ok) clean[id] = entry;
+  }
+  // Ontology-typed checks run over the entries that are structurally sound.
+  for (const issue of validateClass("IssueAnnexes", toOntologyInstance(clean))) errors.push(issue);
+  return errors;
+}
+
+/** What `position_on` holds, for a date input: always YYYY-MM-DD. */
+export function positionDay(position: string | undefined): string {
+  return position && isPositionDate(position) ? position.slice(0, 10) : "";
+}
+
+export interface AnnexIndexEntry { issue: number; publication_id: string; position_on: string | null }
+export interface AnnexCandidate {
+  id: string;
+  running: boolean;
+  /** Latest annexed position as of the issue, with the issue it was annexed to. */
+  position_on: string | null;
+  annexed_to: number | null;
+}
+
+/**
+ * Annexes in force at the start of `issue`: for every publication, its latest
+ * annex in an issue before `issue`. Newest issue first. Mirrors the editor's
+ * getRunningAnnexesForIssue; the issue being authored is excluded, so its own
+ * choices never shadow what it supersedes.
+ */
+export function runningAnnexes(index: readonly AnnexIndexEntry[], issue: number): AnnexCandidate[] {
+  const latest = new Map<string, AnnexIndexEntry>();
+  for (const entry of [...index].filter(e => e.issue < issue).sort((a, b) => a.issue - b.issue)) {
+    const previous = latest.get(entry.publication_id);
+    latest.set(entry.publication_id, { ...entry, position_on: entry.position_on ?? previous?.position_on ?? null });
+  }
+  return [...latest.values()]
+    .sort((a, b) => b.issue - a.issue || a.publication_id.localeCompare(b.publication_id))
+    .map(e => ({ id: e.publication_id, running: true, position_on: e.position_on, annexed_to: e.issue }));
+}
+
+/** Picker order: running annexes first (newest issue first), then every other known publication id. */
+export function pickerCandidates(index: readonly AnnexIndexEntry[], issue: number, query = ""): AnnexCandidate[] {
+  const running = runningAnnexes(index, issue);
+  const seen = new Set(running.map(c => c.id));
+  const others = [...new Set(index.map(e => e.publication_id))].filter(id => !seen.has(id)).sort((a, b) => a.localeCompare(b))
+    .map((id): AnnexCandidate => ({ id, running: false, position_on: null, annexed_to: null }));
+  const q = query.trim().toLowerCase();
+  return [...running, ...others].filter(c => q === "" || c.id.toLowerCase().includes(q));
+}
+
+/** Annex a publication: its position defaults to the one it already runs at. Never replaces an existing annex. */
+export function annexPublication(wire: AnnexesWire, id: string, running: readonly AnnexCandidate[]): AnnexesWire {
+  if (Object.hasOwn(wire, id)) return wire;
+  const position = running.find(c => c.id === id)?.position_on;
+  return { ...wire, [id]: position ? { position_on: position } : null };
+}
+export function removeAnnex(wire: AnnexesWire, id: string): AnnexesWire {
+  const { [id]: _removed, ...rest } = wire;
+  return rest;
+}
+/** Set, change or clear the annexed position; datasets already stored are kept. */
+export function setAnnexPosition(wire: AnnexesWire, id: string, position: string): AnnexesWire {
+  if (!Object.hasOwn(wire, id)) return wire;
+  const { position_on: _old, ...rest } = wire[id] ?? {};
+  const next = position === "" ? rest : { position_on: position, ...rest };
+  return { ...wire, [id]: Object.keys(next).length ? next : null };
+}

@@ -96,6 +96,10 @@ export function assertMessageRequest(req: OpenGeneralMessagePrRequest): void {
   if (!Number.isSafeInteger(req.edition) || req.edition < 1 || !Number.isSafeInteger(req.revision) || req.revision < 1 || !/^[0-9A-Z]{26}$/.test(req.messageId) || req.branch !== `rt-msg-${req.edition}-${req.messageId}-r${req.revision}`) throw new Error("Invalid general message destination");
   const prefix = `ob-issues/${req.edition}/`;
   const relative = req.path.startsWith(prefix) ? req.path.slice(prefix.length) : "";
+  if (req.messageType === "annexes") {
+    if (relative !== "annexes.yaml" || classify(relative, null)?.role !== "annexes") throw new Error("Invalid annexes path");
+    return;
+  }
   const singleton = ["running_annexes", "approved_recommendations"].includes(req.messageType);
   if (singleton ? relative !== `general/${req.messageType}.yaml` : !new RegExp(`^${req.messageType}/(?!000)[0-9]{3}\\.yaml$`).test(relative)) throw new Error("Invalid general message path");
   if (classify(relative, { type: req.messageType })?.role !== "general") throw new Error("Unknown general message type");

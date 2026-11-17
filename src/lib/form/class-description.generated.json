@@ -282,6 +282,46 @@
         }
       ]
     },
+    "AnnexedPosition": {
+      "attributes": [
+        {
+          "name": "publication_id",
+          "wire": "publication_id",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "position_on",
+          "wire": "position_on",
+          "type": "DateOrText",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "datasets",
+          "wire": "datasets",
+          "type": "Hash",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        }
+      ]
+    },
+    "IssueAnnexes": {
+      "attributes": [
+        {
+          "name": "positions",
+          "wire": "positions",
+          "type": "AnnexedPosition",
+          "kind": "class",
+          "required": false,
+          "collection": true
+        }
+      ]
+    },
     "IssueGeneral": {
       "attributes": [
         {

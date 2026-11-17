@@ -214,7 +214,7 @@ export class GitHubAppPatchPublisher implements PatchPublisher {
     if (kind === "message") {
       const match = /^rt-msg-([1-9]\d*)-([0-9A-Z]{26})-r([1-9]\d*)$/.exec(branch)!;
       const relative = filename.slice(`ob-issues/${match[1]}/`.length);
-      const type = relative.startsWith("general/") ? relative.slice(8, -5) : relative.split("/")[0];
+      const type = relative === "annexes.yaml" ? "annexes" : relative.startsWith("general/") ? relative.slice(8, -5) : relative.split("/")[0];
       try { assertMessageRequest({ edition: Number(match[1]), messageId: match[2], revision: Number(match[3]), messageType: type, branch, path: filename } as OpenGeneralMessagePrRequest); validPath = true; }
       catch { validPath = false; }
     }
