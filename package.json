@@ -14,7 +14,8 @@
     "astro": "astro",
     "test:worker": "vitest run",
     "test:form": "vitest run --config vitest.form.config.ts",
-    "typecheck:worker": "tsc -p worker/tsconfig.json"
+    "typecheck:worker": "tsc -p worker/tsconfig.json",
+    "check:bindings": "node scripts/check-bindings.mjs"
   },
   "dependencies": {
     "@astrojs/mdx": "^7.0.0",

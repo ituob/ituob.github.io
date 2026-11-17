@@ -3,8 +3,9 @@ import { readFileSync, readdirSync } from "node:fs";
 import { defineConfig } from "vitest/config";
 
 // Worker tests run in workerd via miniflare with a REAL local D1 (no mocks).
-// The test harness declares its own bindings: wrangler*.jsonc stay free of
-// any D1 binding or AUTH_MODE (see test/stub-production.test.ts).
+// The test harness declares its own bindings (local D1 + queue producer);
+// the deploy configs declare the real ones (docs/cloudflare-bindings.adoc,
+// npm run check:bindings) and must stay free of AUTH_MODE (test/stub-production.test.ts).
 export default defineConfig(async () => {
   const migrations = await readD1Migrations("./migrations");
   // The test runs inside workerd (no real fs), so hand it the deploy configs' text.

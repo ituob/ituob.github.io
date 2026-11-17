@@ -1,0 +1,61 @@
+= Cloudflare bindings: what the Worker needs and how to provision it
+:toc:
+
+The Worker (`worker/index.ts`) uses a D1 database, a notification queue, and a
+cron trigger. `wrangler.jsonc` (production) and `wrangler.staging.jsonc`
+declare them, with *placeholder* IDs, so the Worker builds and
+`wrangler deploy --dry-run` passes without touching Cloudflare. Nothing is
+created by the repository: the account owner provisions the resources below.
+
+== What is declared
+
+[cols="2,2,2,3"]
+|===
+| Binding / trigger | Production | Staging | Used by
+
+| `DB` (D1) | `ituob-org-db` | `ituob-org-staging-db` | every route; `migrations/`
+| `NOTIFY_Q` (queue producer) | `ituob-notify` | `ituob-notify-staging` | `flushOutbox` after a committed write
+| queue consumer | `ituob-notify` | `ituob-notify-staging` | `queue` export, `worker/queue-consumer.ts` (max 5 retries)
+| cron `*/5 * * * *` | yes | yes | `scheduled` export: outbox `sweep` (stale rows > 5 min) and `reconcile`
+|===
+
+Production and staging never share a database or queue.
+
+== Owner steps (paid / account actions; not run by CI or agents)
+
+[source,sh]
+----
+# Production
+npx wrangler d1 create ituob-org-db           # copy database_id into wrangler.jsonc
+npx wrangler queues create ituob-notify
+npx wrangler d1 migrations apply ituob-org-db --remote
+
+# Staging
+npx wrangler d1 create ituob-org-staging-db   # copy database_id into wrangler.staging.jsonc
+npx wrangler queues create ituob-notify-staging
+npx wrangler d1 migrations apply ituob-org-staging-db --remote -c wrangler.staging.jsonc
+----
+
+Replace the placeholder `database_id` (`00000000-0000-0000-0000-00000000000{0,1}`)
+in each config with the printed id and commit it. Until then a real deploy
+fails at the D1 binding, by design. Apply migrations before the first deploy
+that serves `/api`.
+
+== Deliberately not configured
+
+* Identity: no `AUTH_MODE`, no stub, no `OIDC_*`. With `AUTH_MODE` unset the
+  Worker fails closed (`test/stub-production.test.ts`). See
+  `docs/identity-accounts.adoc` for the vars and the client secret.
+* Email: no `EMAIL_*` keys. Set per `docs/email-configuration.adoc`; with no
+  provider the consumer fails closed (`UnconfiguredEmailSender`), so notification
+  rows are retried and nothing is sent. `EMAIL_PROVIDER=log` is the no-send mock.
+* Secrets (`GITHUB_WEBHOOK_SECRET`, `OIDC_CLIENT_SECRET`, `EMAIL_API_KEY`) are set
+  with `wrangler secret put`, never in these files.
+
+== Guard
+
+`npm run check:bindings` derives the bindings from `worker/lib/types.ts` (`Env`
+members typed `D1Database` / `Queue<...>`) and `worker/index.ts` (`queue`,
+`scheduled` exports) and fails if either config lacks the matching
+`d1_databases`, `queues.producers`, `queues.consumers` or `triggers.crons`
+entry, shares a resource across environments, or sets `AUTH_MODE`/stub.
