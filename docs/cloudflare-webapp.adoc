@@ -136,6 +136,9 @@ would reintroduce freeform authoring.)
 | machine-translation.tsx | MT assist | Same provider behind a Worker route (key stays server-side)
 |===
 
+The complete feature-by-feature mapping, with status per row and the list of
+gaps that block retiring the Electron app, is in `editor-feature-map.adoc`.
+
 The load-bearing invariant is now stronger than parser tolerance:
 editor output is valid **by construction** — forms bind to the typed
 classes (IssueMetadata, amendments/actions/entries, RegisterChange

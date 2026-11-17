@@ -1,0 +1,266 @@
+= itu-ob-editor to web app: feature-by-feature map
+:toc:
+:toclevels: 2
+
+Task 1 of https://github.com/ituob/ituob.github.io/issues/101[#101]. This file
+extends the Phase 4 table in `cloudflare-webapp.adoc` to a complete list; it
+does not replace the table's architecture statements (no ProseMirror, forms
+generated from the ontology, patches are the single source of truth).
+
+== Basis and how to read it
+
+[cols="2,5"]
+|===
+| Editor source | `ituob/itu-ob-editor` `74b1564` (master, 2025-04-10), read from `src/`: `main/`, `renderer/` (every window and widget), `models/`, plus the `@riboseinc/coulomb` hooks that `src/main/index.ts` configures. Features were taken from code (windows, IPC endpoints, forms, validators), not from the README.
+| Web app on `main` | `429298d` (read side: issue, register, recommendation and planned-issue pages; `worker/index.ts` stub only).
+| PR #108 | draft `feat/webapp-integration` at `016a78b`: Worker (identity, membership, submissions, validation, publisher seam, webhooks, composer API, discussion), `migrations/0001_init.sql`, `src/lib/form/` form model.
+| PR #110 | draft `codex/106-webapp-completion` at `db50ce2`, stacked on #108: all `/admin` and `/me` screens (`src/components/admin/`, `account/`, `discussion/`), general-message and edition-metadata Workers, translation route, GitHub publisher.
+|===
+
+Status values:
+
+* *DONE*: present on `main`.
+* *IN PR*: present in the named open draft PR, not merged. Nothing in a PR counts as shipped.
+* *MISSING*: no implementation found on `main`, #108 or #110. A note says whether it blocks retirement.
+* *DROPPED*: deliberately not carried, with the reason. Dropped rows never block retirement.
+
+"Present" means the code path was found and read; it does not mean it was run
+(see <<not-run>>).
+
+== 1. Shell, storage, sync, identity
+
+[cols="1,4,3,4,1,1",options="header"]
+|===
+| ID | Editor feature | Editor ref | Web app ref | PR | Status
+| A1 | Window set: home, issue-editor, publication-editor, batch-commit, settings; single instance | `renderer/index.tsx`, `main/index.ts:27-28` | `/admin/*`, `/me/*` pages | #110 | DROPPED (replaced by pages; each editor capability is mapped below)
+| A2 | Application menu | none defined: no `menuTemplate` or `Menu.buildFromTemplate` in `src/` (README's "Help menu, macOS only" has no code) | n/a | n/a | DROPPED (nothing to port)
+| A3 | Keyboard shortcuts | none: no accelerators or `globalShortcut` in `src/` | n/a | n/a | DROPPED
+| A4 | Local isomorphic-git clone of `itu-ob-data`, commit and push straight to master (no review) | coulomb `db/isogit-yaml`; `main/index.ts:36-45` | `worker/lib/submissions.ts`, `publisher.ts` (#108); `github-publisher.ts` (#110): branch + PR, never default branch | #108, #110 | IN PR
+| A5 | Manual sync, startup sync gate, offline mode, diverged-history dead-end screen | `widgets/sync-status.tsx`, `home/index.tsx:52-77`, coulomb `status.js` | none needed: no clone; conflicts become PR conflicts | n/a | DROPPED (web needs network; no offline mode planned)
+| A6 | Per-user settings: repo URL, git username, author name and email; password in OS keychain | coulomb `base.js` settings; `settings/index.tsx` | OIDC login: `worker/lib/oidc.ts`, `session.ts`, `auth-routes.ts` (#108); `/me` (#110) | #108, #110 | IN PR (identity provider contract not verified here)
+| A7 | Commit author attribution from settings | coulomb `getCurrentCommitterInformation` | session user and hash-chained `audit_log` (`migrations/0001_init.sql`) | #108 | IN PR
+| A8 | Settings buttons "Reset application data", "Enable DevTools" | `settings/index.tsx:12-28` | n/a | n/a | DROPPED (both IPC channels `clear-app-data` and `launch-devtools` have no listener: dead code)
+| A9 | Desktop packaging (dmg/mas/zip, win, linux), notarization, release workflow | `package.json` build, `.github/workflows` | Cloudflare deploy (`build-deploy.yml`) | n/a | DROPPED
+|===
+
+== 2. Home window and issue scheduler
+
+[cols="1,4,3,4,1,1",options="header"]
+|===
+| ID | Editor feature | Editor ref | Web app ref | PR | Status
+| B1 | Browse OB editions | `home/index.tsx` | `src/pages/issues/` | main | DONE
+| B2 | Browse recommendations (legacy says "not implemented yet"; no editor ever existed) | `home/index.tsx:96-100` | `src/pages/recommendations/` | main | DONE (read only)
+| B3 | Browse service publications | `publication-browser/index.tsx` | `src/pages/registers/`, `datasets/` | main | DONE (read only; editing is G1)
+| B4 | Upcoming issues with current/next/past status, cutoff and publication dates | `issue-scheduler/upcoming.tsx` | public: `src/components/PlannedIssues.astro` | main | DONE
+| B5 | Same list inside the admin tool | same | `Composer.vue` editions list | #110 | IN PR
+| B6 | Calendar month view with cutoff/publication highlighting | `issue-scheduler/index.tsx` | none: dates are typed as `YYYY-MM-DD` in `EditionMetadata.vue` | n/a | MISSING (convenience only; does not block)
+| B7 | Create/schedule a new issue: pick dates, enter edition number; id must be > 0 and not exist | `issue-scheduler/schedule-form.tsx`, `main/issue-manager.ts:162-190` | `Composer.vue` open edition, `worker/lib/edition-number.ts`, `edition-metadata.ts`, `EditionMetadata.vue` | #110 | IN PR
+| B8 | New issue inherits ISSN, languages and authors from `defaults/issue/meta.yaml` | `issue-manager.ts:158-190` | none: `EditionMetadata.vue` starts from `{ id }` only | n/a | MISSING (blocks parity: the masthead would be hand-typed every issue)
+| B9 | "Save defaults" IPC | `model-issues-save-defaults` | n/a | n/a | DROPPED (no UI ever called it)
+| B10 | Help buttons linking to `ituob.org/docs/...` (schedule, per message type, amend/annex) | `index.tsx:152`, `message-editor.tsx:54-62` | none on `/admin` pages | n/a | MISSING (does not block; add links or inline help)
+| B11 | Live refresh when another window changes an issue | `issue-scheduler/index.tsx:69-75` | n/a | n/a | DROPPED (single-page state; conflicts handled by revision checks, see C10)
+|===
+
+== 3. Issue editor: metadata
+
+[cols="1,4,3,4,1,1",options="header"]
+|===
+| ID | Editor feature | Editor ref | Web app ref | PR | Status
+| C1 | One window per issue with Settings, General Messages, Amendments, Annexes lists | `issue-editor/index.tsx:279-398` | no per-issue view: composer (`Composer.vue`), `/admin/general`, `/admin/editor` | #110 | IN PR (different shape: authoring is per message, assembly is per edition)
+| C2 | Explicit Commit per object; "up to date" state | `widgets/change-status.tsx`, `index.tsx:110-136` | Save draft / Submit in `SubmissionWorkspace.vue`; D1 drafts | #110 | IN PR
+| C3 | Meta: ISSN | `issue-editor/meta/index.tsx:28-52` | `IssueMetadata.issn` via `EditionMetadata.vue` | #110 | IN PR
+| C4 | Meta: publication and cutoff dates (legacy had no ordering check) | `meta/index.tsx:101-128` | `worker/lib/edition-metadata.ts`: ISO dates, cutoff <= publication | #110 | IN PR
+| C5 | Meta: authors with address and contacts (type, data, recommended); add and delete | `meta/authors.tsx` | `SchemaNode.vue` generic lists over `IssueAuthor`, `IssueContact` | #110 | IN PR
+| C6 | Drag-reorder authors and contacts | `widgets/dnd-sortable.tsx`, `meta/authors.tsx` | none: `SchemaNode.vue` lists only add and remove | n/a | MISSING (does not block)
+| C7 | Meta: languages (en required; fr, ar, zh, ru, es) | `meta/index.tsx:55-98`, `models/languages.ts` | `IssueMetadata.languages` is an opaque `Hash`, edited as a JSON textarea in `SchemaNode.vue` | #110 | IN PR (usable, not friendly)
+| C8 | "Current language" selector switching all fields | same | none: every language key of a `MultilingualString` is shown | n/a | DROPPED (3 of 396 issues use a non-en language)
+| C9 | Delete an issue; "malformed issue, delete" fallback | `meta/index.tsx:131-152`, `index.tsx:186-209` | none | n/a | DROPPED (an unmerged issue is not in the data repo; removing a published one is a reviewed revert, not an editor action)
+| C10 | Reload on external change; operation lock around commit | `index.tsx:42-62,110-116` | optimistic `expected_revision` with 409, in `worker/lib/edition-metadata.ts`, `general-messages.ts` | #110 | IN PR
+|===
+
+== 4. Issue editor: general messages
+
+The legacy add menu offers fourteen `Message` types
+(`models/messages/index.ts:24-38`). "Prose" below means the legacy ProseMirror
+document; the web decision is no ProseMirror, so a prose field needs a plain
+string attribute or it cannot be authored.
+
+[cols="1,4,3,4,1,1",options="header"]
+|===
+| ID | Editor feature | Editor ref | Web app ref | PR | Status
+| D1 | Add-message menu with fixed order and one-per-type guard for running_annexes, approved_recommendations, telephone_service(_2), service_restrictions, callback_procedures | `new-item-prompts/general-message.tsx`, `models/issues.ts:89-103,141-158` | `GeneralMessageEditor.vue` type picker; `src/lib/form/general.ts` paths (singletons `general/<type>.yaml`, others `<type>/NNN.yaml`); `migrations/0003_general_messages.sql` UNIQUE path | #110 | IN PR
+| D2 | Delete a message | `issue-editor/index.tsx:240-247` | none: general-message routes only create, save, approve, open review | n/a | MISSING (blocks: a wrong draft cannot be removed)
+| D3 | Edit a message that already exists in the issue | `message-forms/*` | none: `docs/general-message-authoring.adoc` says it does not import or replace an existing remote record by path | n/a | MISSING (blocks: legacy edited existing issue files)
+| D4 | running_annexes: `extra_links` list; running list derived read-only | `message-forms/running_annexes.tsx` | `GeneralRunningAnnexes.extra_links` in `GeneralMessageEditor.vue`; derived list `RunningAnnexes.astro` | #110, main | IN PR (authoring), DONE (derived display)
+| D5 | approved_recommendations: by, procedures, items (code, version) | `message-forms/approved_recommendations.tsx:28-190` | `GeneralApprovedRecommendations` via `SchemaNode.vue` | #110 | IN PR (card title lookup from the recommendation store is not reproduced; legacy date format mix is an open normalisation question)
+| D6 | telephone_service_2 structure: add and delete country/area sections, area details, add and delete dated communications | `message-forms/telephone_service_2.tsx` | `GeneralTelephoneService` > `GeneralTelephoneSection` > `GeneralTelephoneCommunication` via `SchemaNode.vue` | #110 | IN PR
+| D7 | telephone communication body text | `telephone_service_2.tsx:457-537` | `GeneralTelephoneCommunication.contents` is an opaque `Hash`, shown read-only (`opaqueReadonly`) | #110 | MISSING (blocks: 377 of 396 legacy issues carry this message; new text cannot be written)
+| D8 | telephone_service v1 | `message-forms/index.tsx` (renders "isn't supported yet") | n/a | n/a | DROPPED (0 corpus use, not creatable in legacy)
+| D9 | service_restrictions: items country, ob, page | `message-forms/service_restrictions.tsx` | `GeneralServiceRestrictions.items` | #110 | IN PR
+| D10 | callback_procedures (no content) | `message-forms/callback_procedures.tsx` | `GeneralCallbackProcedures` | #110 | IN PR
+| D11 | misc_communications prose | `message-forms/freeform.tsx` | `GeneralMiscCommunications.text` textarea | #110 | IN PR (rendering of newly authored shape unverified by the docs)
+| D12 | org_changes prose | same | `GeneralOrgChanges.text` textarea | #110 | IN PR (same caveat)
+| D13 | custom message: prose body | `message-forms/custom.tsx` | `GeneralCustom.text` textarea | #110 | IN PR
+| D14 | custom message: translatable title (legacy form always asks for one) | `custom.tsx` | `GeneralCustom.title` is an opaque `Hash`, read-only | #110 | MISSING (blocks: titles cannot be authored)
+| D15 | sanc (Q708 SANC) | freeform | `GeneralMessageEditor.vue` disables `sanc`: class and service dispatch disagree | #110 | MISSING (blocks: 124 legacy issues)
+| D16 | iptn | freeform | `GeneralIptn.entries` (structured rows) | #110 | IN PR
+| D17 | ipns | freeform | `GeneralIpns` (network, mcc_mnc, date, notes) | #110 | IN PR
+| D18 | mid | freeform | `GeneralMid.contents` is an opaque `Hash`, read-only | #110 | MISSING (6 legacy issues; decide: add a text attribute or drop)
+| D19 | ProseMirror freeform editor (marks, tables) | `issue-editor/freeform-contents.tsx` | none | n/a | DROPPED (decision record: no ProseMirror)
+|===
+
+== 5. Issue editor: amendments
+
+[cols="1,4,3,4,1,1",options="header"]
+|===
+| ID | Editor feature | Editor ref | Web app ref | PR | Status
+| E1 | Create an amendment to a publication (picker; disabled if already amended) | `new-item-prompts/amendment.tsx` | `SubmissionWorkspace.vue` register select + amendment class + action | #110 | IN PR
+| E2 | Edit entries as dataset changes (add, replace, move) with a review list of operations | `message-forms/amendment.tsx:26-165` | `RegisterChange` with ADD/REP/MOD/SUP/DEL/LIR (`admin-client.ts` excludes SEED); two-stage validation `worker/lib/validation.ts`, `schema.validators.generated.ts`; revision history | #108, #110 | IN PR
+| E3 | Prose amendment for a non-register publication (ProseMirror tables) | `amendment.tsx:42-49` | `TextAmendment.text` plain textarea, ITU staff only (`worker/lib/submissions.ts:212`); catalog must say textual (`validation.ts:111-113`) | #108, #110 | IN PR (see <<task4>>)
+| E4 | Amendment header: recommendation title, SP URL, "amending position of DATE annexed to OB n" or "never annexed" warning; `position_on` prefilled from the latest annex | `amendment.tsx:106-128`, `amendment.tsx` prompt | none: `position_on` is a typed `Date` leaf | n/a | MISSING (does not block)
+| E5 | One amendment per publication per issue | `issue-editor/index.tsx:271-274` | no check found: composer places by edition and state only (`canPlace`), only `register_key` is UNIQUE | n/a | MISSING (blocks until a validator exists or the rule is formally dropped)
+| E6 | Auto-fill datasets from the previous annex plus later amendments | `issue-manager.ts:98-115` | register replay on the site (SEED/ADD/SUP/REP/MOD/DEL/LIR) | main | DROPPED (replaced by replay)
+|===
+
+== 6. Annexes
+
+[cols="1,4,3,4,1,1",options="header"]
+|===
+| ID | Editor feature | Editor ref | Web app ref | PR | Status
+| F1 | Annex a publication to the issue (picker; running annexes first) | `new-item-prompts/annex.tsx`, `annexes/index.tsx` | none: no annex class in `class-description.generated.json`, no admin form | n/a | MISSING (blocks unless annexes.yaml is formally retired)
+| F2 | Set the annexed position date | `annexes/index.tsx:66-81` | none | n/a | MISSING (same decision as F1)
+| F3 | Annex dataset grid editor (typed fields, search, row add/move/delete) | `annexes/position-data.tsx` | none | n/a | DROPPED (registers replace datasets; 1 of 61 annex entries carried datasets)
+| F4 | Auto-fill annex datasets | `annexes/index.tsx:161-175` | replay | main | DROPPED
+| F5 | Display of annexes and running annexes on issue pages | n/a (published site) | `RunningAnnexes.astro` | main | DONE
+|===
+
+== 7. Service-publication editor
+
+[cols="1,4,3,4,1,1",options="header"]
+|===
+| ID | Editor feature | Editor ref | Web app ref | PR | Status
+| G1 | Create or edit a service publication: id (uppercase, fixed after create), title (translatable), authoritative URL, recommendation | `publication-editor/index.tsx`, `meta.tsx` | none: catalogs are code (`src/lib/catalogs.ts`), no admin form | n/a | MISSING (blocks, or the owner confirms new publications are added in code)
+| G2 | Dataset specification designer | `publication-editor/dataset.tsx` | none | n/a | DROPPED (compiled register schemas replace it)
+| G3 | Delete publication | `publication-editor/index.tsx:356-362` | n/a | n/a | DROPPED (legacy shows "temporarily unavailable")
+| G4 | Field validators with a message list; Commit disabled while invalid | `form-validation/index.tsx` | generated validators client and server: `schema.validators.generated.ts`, `worker/lib/validation.ts`, `admin-client.ts payloadErrors` | #108, #110 | IN PR
+|===
+
+== 8. Batch commit and publishing
+
+[cols="1,4,3,4,1,1",options="header"]
+|===
+| ID | Editor feature | Editor ref | Web app ref | PR | Status
+| H1 | List of uncommitted changes with open links | `batch-commit/index.tsx:29-44` | `/me/submissions`, `SubmissionWorkspace.vue` list with state filter | #110 | IN PR
+| H2 | Select a subset and commit with a message | `batch-commit/index.tsx:119-197` | submit per proposal; the composer groups merged patches into an edition (`Composer.vue`, `worker/lib/composer.ts`) | #108, #110 | IN PR
+| H3 | Discard changes | `batch-commit/index.tsx:152-176` | withdraw while draft, submitted or changes_requested (`submission-routes.ts`) | #108 | IN PR (withdraw, not delete)
+| H4 | Sync-paused warning; cross-window notify; IPC `remote-storage-trigger-*` | `batch-commit/index.tsx:161,187,204-209` | n/a | n/a | DROPPED (no sync; the two IPC calls have no listener)
+| H5 | Publish an issue: legacy pushes to master and the site build picks it up; the editor has no export, print or PDF function | none in `src/` | composer "publish through staging", metadata PR, GitHub publisher (`worker/lib/github-publisher.ts`, `edition-metadata-publication.ts`) | #110 | IN PR
+|===
+
+== 9. Machine translation, localization, validation
+
+[cols="1,4,3,4,1,1",options="header"]
+|===
+| ID | Editor feature | Editor ref | Web app ref | PR | Status
+| I1 | ITU machine translation of a translated-text field (`wss://nmt.itu.int/marian_translate_<pair>`; only caller is the dataset grid cell editor) | `machine-translation.tsx`, `position-data.tsx:654-698` | `TranslationAssist.vue`, `worker/translation-routes.ts`, `worker/lib/translation.ts`: suggest-only, ITU staff, 2000 chars; mounted for `MultilingualString` fields of the action editor | #110 | IN PR (live protocol not observed; the general-message editor does not mount it)
+| I2 | Content localizer (six languages, English fallback; UI strings are English only) | coulomb localizer, `models/languages.ts` | `MultilingualString` language keys shown directly | #110 | IN PR (content); UI i18n DROPPED
+| I3 | Error toasts with server error lists | `toaster.ts`, `index.tsx:123-129` | `role="alert"` error list with field paths in each workspace | #110 | IN PR
+|===
+
+== 10. Web-only requirements (no Electron equivalent)
+
+Counted separately; these come from the #101 text and the new workflow, not
+from parity.
+
+[cols="1,4,4,1,1",options="header"]
+|===
+| ID | Requirement | Web app ref | PR | Status
+| W1 | Valid-by-construction forms from the ontology; byte-stable YAML round trip | `src/lib/form/model.ts`, `yaml-io.ts`, `exact.ts`, `form.test.ts` | #108 | IN PR
+| W2 | Bulk import of an external full list as a SEED/patch series through PR review | none: `admin-client.ts` removes `SEED` from `actionTypes`; the design is in `docs/submission-workflow.adoc` only | n/a | MISSING (required by #101; legacy had no bulk import)
+| W3 | Accounts, roles, membership and country authority | `worker/lib/oidc.ts`, `membership.ts`, `authz.ts` (#108); `MembersAdmin.vue`, `MembershipAccount.vue` (#110) | #108, #110 | IN PR
+| W4 | Review workflow: submit, request changes, approve, PR, merge, revert | `worker/lib/submissions.ts`, `reconciler.ts`, `revert.ts`, `github-webhook.ts` | #108 | IN PR
+| W5 | Discussion, mentions, inbox, notification email | `worker/lib/discussion.ts`, `notify.ts`, `email.ts`; `Discussion.vue`, `Inbox.vue` | #108, #110 | IN PR
+| W6 | Edition composer for merged patches and general messages | `Composer.vue`, `worker/lib/composer.ts` | #108, #110 | IN PR
+|===
+
+[[task4]]
+== Task 4: do textual datasets stay textareas?
+
+*Yes for amendments, with four corrections to the issue text.*
+
+* A textual dataset is edited through `TextAmendment`, whose payload is
+  `dataset_code` plus `text` (a `String`) plus `position_on`, `notes` and
+  `actions[]`. `SchemaNode.vue` renders a `String` leaf as a `<textarea rows="3">`,
+  and `src/lib/form/ui.test.ts` asserts the payload `{ _class: 'TextAmendment', text }`
+  with a two-paragraph value. So the text body is a plain textarea, as designed.
+* The catalog marks seven publications `textual`, not five: rr251, bureaufax,
+  coast-stations, list-v, list-viii, nnp, e212-icc (`src/lib/catalogs.ts`). The
+  issue and Phase 4 list five. NNP also has typed entry classes, so it is
+  reachable both ways; list-viii is textual because its typed class lacks
+  `callsign` (`docs/draft-validation.adoc`). Update the issue text or the catalog.
+* The textarea is ITU staff only. A member session submitting `TextAmendment` is
+  refused (`worker/lib/submissions.ts:212`). A member state cannot amend a textual
+  register through the web app; the legacy editor had no such restriction.
+* The editor does not restrict the textarea to verbatim text: stage-2 checks only
+  that the register is textual (`worker/lib/validation.ts:111`). Size and
+  encoding limits are stated in `docs/submission-workflow.adoc:493` but were not
+  traced to code here.
+
+Related but separate: general-message prose (misc_communications, org_changes,
+custom) is also a textarea where the ontology has a `String` attribute (D11-D13).
+Where only a `Hash` exists (telephone communications, mid, custom title, sanc)
+nothing is editable, which is the main blocker below.
+
+== Blocks Electron retirement
+
+Retirement needs "no remaining unique capability" (#101 acceptance). Ordered by
+impact:
+
+. *Telephone communication text (D7).* 377 of 396 legacy issues carry it; the
+  field is read-only. Needs a plain-text attribute in the ontology plus form.
+. *sanc (D15), mid (D18), custom title (D14).* Authoring is unavailable or
+  read-only. Each needs a model fix or a recorded drop.
+. *Editing and deleting existing general messages (D2, D3).* Only new drafts can
+  be created; no replace-by-path, no delete.
+. *Annex authoring (F1, F2).* No class and no form. Decide: add an annexes class
+  and form, or retire `annexes.yaml` authoring and say so in #101.
+. *Service-publication create/edit (G1).* Same kind of decision: a form, or a
+  recorded "added in code" rule.
+. *New-issue defaults (B8).* Authors, ISSN and languages are retyped per issue.
+. *Bulk import / SEED (W2).* Required by #101, absent.
+. *One amendment per publication per issue (E5).* No enforcement found.
+
+Preconditions that are not features: #108 and #110 are open drafts, so every
+IN PR row above is unshipped until both merge; identity provider, D1, GitHub App
+and secret provisioning were not verified here.
+
+Not blocking: calendar view (B6), author reorder (C6), help links (B10), amendment
+header and `position_on` prefill (E4).
+
+[[not-run]]
+== Not run
+
+* No test, typecheck, build or deploy was run for #108 or #110. Status comes from
+  reading code on the two branch heads above; test counts quoted by those PRs'
+  own docs were not re-run.
+* The ITU translation service was not contacted; the PR's own doc says its live
+  protocol was not observed.
+* Whether newly authored general-message shapes render on the public site was not
+  checked.
+* The 21 legacy amendment targets were not individually matched to the 13
+  structured and 7 textual catalog entries.
+* The editor was read, not launched. Issue counts (377 telephone_service_2, 124 sanc,
+  6 mid, 88 custom, of 396 issues) were measured by grepping `issues/*/general.yaml`
+  in a local `itu-ob-data` checkout at `e17484b`, which was not fetched from origin.
+
+== Tally
+
+[cols="2,1"]
+|===
+| Status (legacy rows A1-I3, 72 rows; D4 counted as IN PR) | Count
+| DONE | 5
+| IN PR | 34
+| MISSING | 15
+| DROPPED | 18
+| Web-only rows W1-W6 (IN PR 5, MISSING 1) | 6
+|===
