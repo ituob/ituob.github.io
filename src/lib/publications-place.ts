@@ -120,6 +120,7 @@ export interface RunInfo {
   conclusion: string | null;
   created_at: string;
   head_repository: { full_name: string } | null;
+  workflow_id?: number;
 }
 
 const TRUSTED_EVENTS = new Set(["push", "workflow_dispatch"]);
@@ -138,27 +139,41 @@ export function trustedRuns(runs: readonly RunInfo[], repo: string, branch: stri
         r.head_branch === branch &&
         r.head_repository?.full_name === repo,
     )
-    .sort((a, b) => Date.parse(b.created_at) - Date.parse(a.created_at));
+    .sort((a, b) => timestamp(b.created_at) - timestamp(a.created_at));
 }
 
 export function selectRun(runs: readonly RunInfo[], repo: string, branch: string): RunInfo | undefined {
   return trustedRuns(runs, repo, branch)[0];
 }
 
-/**
- * Newest trusted run that actually has a live (non-expired) artifact named
- * `name`. Runs without one (e.g. the producer workflow did not publish it yet)
- * are skipped; `listArtifacts` errors propagate. At most `limit` runs are probed.
- */
+/** Invalid API dates sort behind every valid date. */
+function timestamp(value: string): number {
+  const parsed = Date.parse(value);
+  return Number.isNaN(parsed) ? -Infinity : parsed;
+}
+
+export interface ArtifactInfo {
+  name: string;
+  expired: boolean;
+  created_at: string;
+  workflow_run: { id: number } | null;
+}
+
+/** Select by artifact age, then verify its producer run before downloading. */
 export function selectRunWithArtifact(
-  runs: readonly RunInfo[],
+  artifacts: readonly ArtifactInfo[],
   repo: string,
   branch: string,
   name: string,
-  listArtifacts: (runId: number) => { name: string; expired: boolean }[],
-  limit = 20,
+  workflowId: number,
+  getRun: (runId: number) => RunInfo,
 ): RunInfo | undefined {
-  return trustedRuns(runs, repo, branch)
-    .slice(0, limit)
-    .find((r) => listArtifacts(r.id).some((a) => a.name === name && !a.expired));
+  const candidates = artifacts
+    .filter((a) => a.name === name && a.expired === false && Number.isSafeInteger(a.workflow_run?.id))
+    .sort((a, b) => timestamp(b.created_at) - timestamp(a.created_at));
+  for (const artifact of candidates) {
+    const run = getRun(artifact.workflow_run!.id);
+    if (run.workflow_id === workflowId && selectRun([run], repo, branch)) return run;
+  }
+  return undefined;
 }
