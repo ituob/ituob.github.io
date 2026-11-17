@@ -85,6 +85,17 @@ describe("exactness on the values that used to be lost", () => {
     const r = roundTrip("GeneralApprovedRecommendations", "type: approved_recommendations\npayload:\n  items:\n    'G.168 ': 2012-01-31 23:00:00.000000000 Z\n    G.993.2: '2015'\n");
     expect(r.diff).toBeNull();
   });
+  it("RegisterChange: HashOrList data keeps row-based action arrays editable and exact", () => {
+    const r = roundTrip("RegisterChange", "type: ADD\nidentifier: {code: sample}\ndata:\n  - {code: '999 99', name: Example}\n  - {code: '999 98', name: Another}\n");
+    expect(r.diff).toBeNull();
+    expect(r.diagnostics).toEqual([]);
+    expect(widgetFor(description.classes["RegisterChange"]!.attributes.find((a) => a.name === "data")!)).toBe("json");
+  });
+  it("RegisterChange: rejects invalid HashOrList array shapes without coercing them", () => {
+    const r = roundTrip("RegisterChange", "type: ADD\nidentifier: {code: sample}\ndata:\n  - {code: '999 99'}\n  - invalid\n");
+    expect(r.diff).toBeNull();
+    expect(r.diagnostics.map((d) => d.code)).toContain("shape");
+  });
   it("a map stored where the ontology says list is kept and reported, not coerced", () => {
     const r = roundTrip("GeneralApprovedRecommendations", "type: approved_recommendations\nitems:\n  G.168: x\n");
     expect(r.diff).toBeNull();

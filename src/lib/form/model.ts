@@ -24,7 +24,7 @@ export interface Diagnostic {
   message: string;
 }
 
-/** A value shown by one input (scalar, enum choice, or opaque Hash/HashOrText content). */
+/** A value shown by one input (scalar, enum choice, or opaque hash content). */
 export interface LeafNode {
   kind: "leaf";
   /** Declared ontology type, or "any" for an extra key. */
@@ -110,6 +110,9 @@ class Builder {
       return { kind: "leaf", type: attr.type, value };
     }
     if (Array.isArray(value)) {
+      if (attr.type === "HashOrList" && value.every(isPlainObject)) {
+        return { kind: "leaf", type: attr.type, value };
+      }
       this.diag(path, "shape", `${attr.type} stored as a list; kept as stored`);
       return { kind: "leaf", type: attr.type, value };
     }
@@ -133,7 +136,7 @@ class Builder {
       return leaf();
     }
     // primitive
-    if (attr.type === "Hash" || attr.type === "HashOrText") {
+    if (attr.type === "Hash" || attr.type === "HashOrText" || attr.type === "HashOrList") {
       if (isPlainObject(value)) {
         const named = value["_class"];
         // A Hash that names a known class is an instance of it (e.g. RegisterChange.data).
@@ -263,6 +266,7 @@ export function widgetFor(attr: AttributeDescription): Widget {
       return "date";
     case "Hash":
     case "HashOrText":
+    case "HashOrList":
       return "json";
     default:
       return "text";

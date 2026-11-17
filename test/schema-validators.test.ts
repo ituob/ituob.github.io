@@ -72,6 +72,13 @@ describe("generated validators: crafted bad inputs", () => {
     expect(codes(validateClass("GeneralMiscCommunications", { contents: 5 }))).toEqual(["type:contents"]);
   });
 
+  it("accepts RegisterChange HashOrList data as an object or a list of objects", () => {
+    const envelope = { type: "ADD", identifier: { code: "sample" } };
+    expect(validateClass("RegisterChange", { ...envelope, data: { code: "999 99" } })).toEqual([]);
+    expect(validateClass("RegisterChange", { ...envelope, data: [{ code: "999 99" }, { code: "999 98" }] })).toEqual([]);
+    expect(codes(validateClass("RegisterChange", { ...envelope, data: [{ code: "999 99" }, "invalid"] }))).toEqual(["type:data"]);
+  });
+
   it("is generated from the ontology: ActionType members and the required identifier are present", () => {
     expect(ENUMS.ActionType).toEqual(["ADD", "SUP", "REP", "LIR", "MOD", "DEL", "SEED"]);
     expect(CLASSES.RegisterChange.identifier).toMatchObject({ kind: "class", ref: "Identifier", required: true });

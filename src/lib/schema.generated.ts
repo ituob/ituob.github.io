@@ -800,12 +800,17 @@ export interface RR251EntryWire {
   subarea?: MultilingualStringWire;
 }
 
+export interface RegisterActionsWire {
+  provenance?: ProjectionProvenanceWire;
+  changes?: RegisterChangeWire[];
+}
+
 export interface RegisterChangeWire {
   type?: string;
   register?: string;
   identifier?: IdentifierWire;
   recommendation?: string;
-  data?: Record<string, unknown>;
+  data?: Record<string, unknown> | Record<string, unknown>[];
   ob_issue_no?: number;
   date_active?: string;
   date_requested?: string;

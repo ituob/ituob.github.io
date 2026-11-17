@@ -9,6 +9,7 @@
     "Time",
     "Hash",
     "HashOrText",
+    "HashOrList",
     "DateOrText"
   ],
   "enums": {
@@ -5154,7 +5155,7 @@
         {
           "name": "data",
           "wire": "data",
-          "type": "Hash",
+          "type": "HashOrList",
           "kind": "primitive",
           "required": false,
           "collection": false
@@ -5379,6 +5380,26 @@
           "name": "entries",
           "wire": "entries",
           "type": "KeyHistoryEntry",
+          "kind": "class",
+          "required": false,
+          "collection": true
+        }
+      ]
+    },
+    "RegisterActions": {
+      "attributes": [
+        {
+          "name": "provenance",
+          "wire": "provenance",
+          "type": "ProjectionProvenance",
+          "kind": "class",
+          "required": true,
+          "collection": false
+        },
+        {
+          "name": "changes",
+          "wire": "changes",
+          "type": "RegisterChange",
           "kind": "class",
           "required": false,
           "collection": true

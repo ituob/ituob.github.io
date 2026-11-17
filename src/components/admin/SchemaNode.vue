@@ -17,9 +17,10 @@ const englishSource = computed(() => {
 function jsonInput(event: Event) {
   try {
     const value = JSON.parse((event.target as HTMLTextAreaElement).value);
-    if (props.node.kind === 'leaf' && props.node.type === 'Hash' && (!value || typeof value !== 'object' || Array.isArray(value))) throw new Error('Enter a JSON object');
+    if (props.node.kind === 'leaf' && props.node.type === 'Hash' && (!value || typeof value !== 'object' || Array.isArray(value))) throw new Error('Use a JSON object.');
+    if (props.node.kind === 'leaf' && props.node.type === 'HashOrList' && (!value || typeof value !== 'object' || (Array.isArray(value) && !value.every(item => item && typeof item === 'object' && !Array.isArray(item))))) throw new Error('Use a JSON object or a list of objects.');
     leaf(value); jsonError.value = ''; emit('invalid', props.path ?? '', '');
-  } catch { jsonError.value = 'Enter a valid JSON object for this field.'; emit('invalid', props.path ?? '', jsonError.value); }
+  } catch (error) { jsonError.value = error instanceof Error && error.message.startsWith('Use ') ? error.message : 'Enter valid JSON for this field.'; emit('invalid', props.path ?? '', jsonError.value); }
 }
 function languageInput(language: string, event: Event) {
   if (props.node.kind === 'leaf') leaf(setProseLanguage(props.node.value, language, (event.target as HTMLTextAreaElement).value));
@@ -94,7 +95,7 @@ function replaceItem(index: number, child: FormNode) {
     </template>
     <template v-else-if="node.value !== null && typeof node.value === 'object' && !(node.value instanceof YamlTimestamp)">
       <template v-if="opaqueReadonly"><p>Stored content is preserved. This field is read-only.</p><pre>{{ JSON.stringify(node.value, null, 2) }}</pre></template>
-      <textarea v-else :value="JSON.stringify(node.value, null, 2)" :disabled="readonly" rows="5" @input="jsonInput" /><small>This field stores an opaque object. Edit this field as JSON.</small><p v-if="jsonError" role="alert">{{ jsonError }}</p>
+      <textarea v-else :value="JSON.stringify(node.value, null, 2)" :disabled="readonly" rows="5" @input="jsonInput" /><small>This field stores opaque structured data. Edit this field as JSON.</small><p v-if="jsonError" role="alert">{{ jsonError }}</p>
     </template>
     <textarea v-else :value="node.value instanceof YamlTimestamp ? node.value.text : String(node.value ?? '')" :disabled="readonly" rows="3" @input="input" />
   </label>

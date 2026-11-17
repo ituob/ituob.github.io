@@ -5,7 +5,7 @@
 
 export type FieldKind =
   | "string" | "integer" | "float" | "boolean" | "date" | "time"
-  | "hash" | "hashOrText" | "dateOrText" | "enum" | "class";
+  | "hash" | "hashOrText" | "hashOrList" | "dateOrText" | "enum" | "class";
 
 export interface FieldSpec {
   kind: FieldKind;
@@ -737,12 +737,16 @@ export const CLASSES: Readonly<Record<string, Readonly<Record<string, FieldSpec>
     "office_code_note": { kind: "class", ref: "MultilingualString" },
     "subarea": { kind: "class", ref: "MultilingualString" },
   },
+  "RegisterActions": {
+    "provenance": { kind: "class", ref: "ProjectionProvenance", required: true },
+    "changes": { kind: "class", ref: "RegisterChange", many: true },
+  },
   "RegisterChange": {
     "type": { kind: "enum", ref: "ActionType" },
     "register": { kind: "string" },
     "identifier": { kind: "class", ref: "Identifier", required: true },
     "recommendation": { kind: "string" },
-    "data": { kind: "hash" },
+    "data": { kind: "hashOrList" },
     "ob_issue_no": { kind: "integer" },
     "date_active": { kind: "string" },
     "date_requested": { kind: "string" },
@@ -851,6 +855,7 @@ const KIND_LABEL: Record<string, string> = {
   string: "a string", integer: "an integer", float: "a number", boolean: "a boolean",
   date: "an ISO date string (YYYY-MM-DD)", time: "a timestamp string", hash: "an object",
   hashOrText: "an object or a string", dateOrText: "a string", enum: "an enum member", class: "an object",
+  hashOrList: "an object or a list of objects",
 };
 
 function scalarOk(kind: FieldKind, v: unknown): boolean {
@@ -863,6 +868,7 @@ function scalarOk(kind: FieldKind, v: unknown): boolean {
     case "time": return typeof v === "string";
     case "hash": return isObj(v);
     case "hashOrText": return isObj(v) || typeof v === "string";
+    case "hashOrList": return isObj(v) || (Array.isArray(v) && v.every(isObj));
     case "dateOrText": return typeof v === "string";
     default: return false;
   }
