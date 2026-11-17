@@ -11,6 +11,11 @@ import {
 } from "./lib/submissions.ts";
 import type { AccessIdentity, Env, Session } from "./lib/types.ts";
 
+const submissionJson = (sub: Awaited<ReturnType<typeof createSubmission>>, status = 200) => {
+  const { warnings = [], ...submission } = sub;
+  return json({ ok: true, submission, warnings }, status);
+};
+
 const ID = "([0-9A-Z]{26})";
 const re = (s: string) => new RegExp(`^${s}$`);
 
@@ -29,15 +34,15 @@ export const submissionRoutes: Route[] = [
   { method: "GET", pattern: re("/api/me/submissions"), guard: "session",
     handler: async ({ env, session, url }) => json({ ok: true, submissions: await listSubmissions(env.DB, session, url.searchParams.get("state"), false) }) },
   { method: "POST", pattern: re("/api/me/submissions"), guard: "session",
-    handler: async ({ request, env, session }) => json({ ok: true, submission: await createSubmission(env.DB, session, await body(request)) }, 201) },
+    handler: async ({ request, env, session }) => submissionJson(await createSubmission(env.DB, session, await body(request), env.ASSETS), 201) },
   { method: "GET", pattern: re(`/api/me/submissions/${ID}`), guard: "session",
     handler: async ({ env, session, params }) => json({ ok: true, ...(await readSubmission(env.DB, session, params[0]!)) }) },
   { method: "PUT", pattern: re(`/api/me/submissions/${ID}`), guard: "session",
-    handler: async ({ request, env, session, params }) => json({ ok: true, submission: await editDraft(env.DB, session, params[0]!, await body(request)) }) },
+    handler: async ({ request, env, session, params }) => submissionJson(await editDraft(env.DB, session, params[0]!, await body(request), env.ASSETS)) },
   { method: "POST", pattern: re(`/api/me/submissions/${ID}/submit`), guard: "session",
-    handler: async ({ env, session, params }) => json({ ok: true, submission: await submitDraft(env.DB, session, params[0]!) }) },
+    handler: async ({ env, session, params }) => submissionJson(await submitDraft(env.DB, session, params[0]!, env.ASSETS)) },
   { method: "POST", pattern: re(`/api/me/submissions/${ID}/revise`), guard: "session",
-    handler: async ({ request, env, session, params }) => json({ ok: true, submission: await reviseSubmission(env.DB, session, params[0]!, await body(request)) }) },
+    handler: async ({ request, env, session, params }) => submissionJson(await reviseSubmission(env.DB, session, params[0]!, await body(request), env.ASSETS)) },
   { method: "POST", pattern: re(`/api/me/submissions/${ID}/withdraw`), guard: "session",
     handler: async ({ request, env, session, params }) => {
       const r = (await body(request)).reason;
@@ -56,7 +61,7 @@ export const submissionRoutes: Route[] = [
   })),
   { method: "POST", pattern: re(`/api/admin/submissions/${ID}/approve`), guard: "access",
     handler: async ({ request, env, access, params }) => {
-      const sub = await approve(env.DB, await ituSession(env, access!), params[0]!, await body(request), env.PATCH_REPO ?? DEFAULT_PATCH_REPO);
+      const sub = await approve(env.DB, await ituSession(env, access!), params[0]!, await body(request), env.PATCH_REPO ?? DEFAULT_PATCH_REPO, env.ASSETS);
       // The consumer runs after the approval is durable; a GitHub failure leaves pr_pending + last_error.
       const pr = await openPr(env.DB, getPublisher(env), sub.id);
       return json({ ok: true, submission: { ...sub, state: pr.state }, pr }, pr.error ? 202 : 200);
