@@ -1,5 +1,5 @@
-import { beforeAll, describe, expect, it, vi } from "vitest";
-import { verifyAccessIdentity, verifyAccessPrincipal } from "../worker/lib/access.ts";
+import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
+import { clearAccessKeyCache, verifyAccessIdentity, verifyAccessPrincipal } from "../worker/lib/access.ts";
 import { handleApi } from "../worker/routes.ts";
 import type { Env } from "../worker/lib/types.ts";
 
@@ -12,6 +12,8 @@ beforeAll(async () => {
   pair = await crypto.subtle.generateKey({ name: "RSASSA-PKCS1-v1_5", modulusLength: 2048, publicExponent: new Uint8Array([1, 0, 1]), hash: "SHA-256" }, true, ["sign", "verify"]);
   jwk = { ...await crypto.subtle.exportKey("jwk", pair.publicKey), kid: "current" } as JsonWebKey;
 });
+beforeEach(() => clearAccessKeyCache());
+afterEach(() => { vi.useRealTimers(); });
 async function token(overrides: Record<string, unknown> = {}, header: Record<string, unknown> = {}) {
   const now = Math.floor(Date.now() / 1000);
   const unsigned = `${encode({ alg: "RS256", kid: "current", ...header })}.${encode({ iss: issuer, aud: [config.ACCESS_AUD], exp: now + 600, nbf: now - 10, email: "admin@example.org", ...overrides })}`;
@@ -54,7 +56,9 @@ describe("Cloudflare Access signed identity", () => {
       expect(await verifyAccessIdentity(request(await token({}, header)), config, keys())).toBeNull();
     }
     const req = request(await token());
+    clearAccessKeyCache();
     expect(await verifyAccessIdentity(req, config, async () => Response.json({ keys: [jwk, jwk] }))).toBeNull();
+    clearAccessKeyCache();
     expect(await verifyAccessIdentity(req, config, async () => new Response("down", { status: 503 }))).toBeNull();
     expect(await verifyAccessIdentity(req, config, async () => { throw new Error("offline"); })).toBeNull();
   });
@@ -169,5 +173,48 @@ describe("Cloudflare Access CI service principals", () => {
     } finally {
       vi.unstubAllGlobals();
     }
+  });
+});
+
+describe("signature canonicality and JWKS caching", () => {
+  it("rejects every non-canonical base64url variant of a valid signature", async () => {
+    const signed = await token();
+    const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
+    let accepted = 0;
+    for (const c of alphabet) {
+      const variant = `${signed.slice(0, -1)}${c}`;
+      if (await verifyAccessIdentity(request(variant), config, keys())) accepted++;
+    }
+    expect(accepted).toBe(1); // only the canonical original
+    expect(await verifyAccessIdentity(request(`${signed}=`), config, keys())).toBeNull();
+  });
+  it("caches the JWKS per team domain across requests", async () => {
+    const f = keys();
+    for (let i = 0; i < 5; i++) expect(await verifyAccessIdentity(request(await token()), config, f)).not.toBeNull();
+    expect(f).toHaveBeenCalledTimes(1);
+  });
+  it("refetches an unknown kid at most once per interval, and again after it", async () => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    const f = keys();
+    await verifyAccessIdentity(request(await token()), config, f); // primes
+    for (let i = 0; i < 5; i++) expect(await verifyAccessIdentity(request(await token({}, { kid: "unknown" })), config, f)).toBeNull();
+    expect(f).toHaveBeenCalledTimes(1); // within the miss interval: no refetch storm
+    vi.setSystemTime(Date.now() + 31_000);
+    await verifyAccessIdentity(request(await token({}, { kid: "unknown" })), config, f);
+    await verifyAccessIdentity(request(await token({}, { kid: "unknown" })), config, f);
+    expect(f).toHaveBeenCalledTimes(2);
+  });
+  it("expires the cache after the TTL and does not cache failures", async () => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    const f = keys();
+    await verifyAccessIdentity(request(await token()), config, f);
+    vi.setSystemTime(Date.now() + 11 * 60_000);
+    await verifyAccessIdentity(request(await token({ exp: Math.floor(Date.now() / 1000) + 600, nbf: Math.floor(Date.now() / 1000) - 10 })), config, f);
+    expect(f).toHaveBeenCalledTimes(2);
+    clearAccessKeyCache();
+    const down = vi.fn<typeof fetch>(async () => new Response("x", { status: 503 }));
+    expect(await verifyAccessIdentity(request(await token()), config, down)).toBeNull();
+    expect(await verifyAccessIdentity(request(await token()), config, down)).toBeNull();
+    expect(down).toHaveBeenCalledTimes(2);
   });
 });
