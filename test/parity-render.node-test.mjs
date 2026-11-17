@@ -78,8 +78,8 @@ const state = { active_entries: [{ country: 'iso-3166:de', manufactures_htv: tru
     assert.match(authored, /Position amended originally published as annex to/);
     assert.match(authored, /href="https:\/\/www\.itu\.int\/pub\/T-SP-Q\.708A-2013">Authoritative resource<\/a>/);
     // Structured telephone/restriction branches retain the same metadata as prose.
-    assert.match(authored, /href="http:\/\/www\.itu\.int\/itu-t\/inr-nnp"[^>]*>Authoritative resource/);
-    assert.match(authored, /href="http:\/\/www\.itu\.int\/pub\/T-SP-SR\.1-2012"[^>]*>Authoritative resource/);
+    assert.equal((authored.match(/href="http:\/\/www\.itu\.int\/itu-t\/inr-nnp"[^>]*>Authoritative resource/g) ?? []).length, 4);
+    assert.equal((authored.match(/href="http:\/\/www\.itu\.int\/pub\/T-SP-SR\.1-2012"[^>]*>Authoritative resource/g) ?? []).length, 2);
     assert.doesNotMatch(authored, /SENSITIVE PROJECTION SECRET/);
     assert.match(authored, /&lt;script&gt;alert\(1\)&lt;\/script&gt;/);
     assert.doesNotMatch(authored, /<script>alert\(1\)<\/script>/);
