@@ -9,7 +9,7 @@
  * never a pull-request or fork run: those are unreviewed),
  * downloads its artifact with `gh`, verifies the checksums and places the files
  * (public/downloads for Astro to copy into dist, manifest into src/data).
- * No run or artifact yet: exit 0 with an empty listing, unless
+ * Newest such run that has a live artifact is used; none yet: exit 0 with an empty listing, unless
  * PUBLICATIONS_REQUIRED=true (which also fails on an empty manifest). A checksum
  * failure, a rejected manifest entry or a symlink always exits 1.
  * `verify-dist` re-checks dist/downloads against the manifest after the build.
@@ -22,7 +22,7 @@ import { execFileSync } from "node:child_process";
 import { mkdtempSync, readdirSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
-import { selectRun, verifyAndPlace, verifyDist, type RunInfo } from "../src/lib/publications-place.ts";
+import { selectRunWithArtifact, verifyAndPlace, verifyDist, type RunInfo } from "../src/lib/publications-place.ts";
 
 const root = process.cwd();
 const env = process.env;
@@ -52,18 +52,17 @@ function fetchAndPlace(): void {
   const { workflow_runs } = JSON.parse(
     gh(["api", `repos/${REPO}/actions/workflows/${WORKFLOW}/runs?branch=${encodeURIComponent(BRANCH)}&status=success&per_page=100`]),
   ) as { workflow_runs: RunInfo[] };
-  const run = selectRun(workflow_runs, REPO, BRANCH);
-  if (!run) none(`no successful push/workflow_dispatch ${WORKFLOW} run on ${REPO}@${BRANCH}`);
+  const run = selectRunWithArtifact(workflow_runs, REPO, BRANCH, ARTIFACT, (id) =>
+    (JSON.parse(gh(["api", `repos/${REPO}/actions/runs/${id}/artifacts?per_page=100`])) as {
+      artifacts: { name: string; expired: boolean }[];
+    }).artifacts,
+  );
+  if (!run) none(`WARNING: no successful push/workflow_dispatch ${WORKFLOW} run on ${REPO}@${BRANCH} has a "${ARTIFACT}" artifact yet`);
 
   const tmp = mkdtempSync(join(tmpdir(), "publications-"));
   try {
-    try {
-      gh(["run", "download", String(run.id), "-R", REPO, "-n", ARTIFACT, "-D", tmp]);
-    } catch (err) {
-      const text = String((err as { stderr?: string }).stderr ?? err);
-      if (/no valid artifacts|not found|expired/i.test(text)) none(`run ${run.id} has no usable "${ARTIFACT}" artifact`);
-      throw err;
-    }
+    // The artifact was just listed as live, so a download failure is real.
+    gh(["run", "download", String(run.id), "-R", REPO, "-n", ARTIFACT, "-D", tmp]);
     if (readdirSync(tmp).length === 0) none(`artifact "${ARTIFACT}" of run ${run.id} is empty`);
     const { placed } = verifyAndPlace(tmp, DOWNLOADS, MANIFEST_OUT);
     if (placed.length === 0) none(`artifact "${ARTIFACT}" of run ${run.id} lists no publications`);
