@@ -184,24 +184,60 @@ describe("the mock provider itself", () => {
   };
 
   it("refuses a redirect_uri off loopback, a wrong client and missing PKCE", async () => {
-    for (const over of [{ redirect_uri: "https://evil.example/cb" }, { client_id: "other" }, { code_challenge: "" }]) {
+    for (const over of [{ redirect_uri: "https://evil.example/cb" }, { client_id: "other" }, { code_challenge: "" }, { code_challenge_method: "plain" }, { code_challenge_method: "" }]) {
       expect((await idp.handle(new Request(await authorizeUrl({ ...over, persona: "member-aland" })))).status).toBe(400);
     }
   });
 
-  it("an authorization code is single use and bound to its PKCE verifier", async () => {
-    const u = await authorizeUrl({ persona: "member-aland" });
-    const cb = new URL((await idp.handle(new Request(u))).headers.get("Location")!);
-    const post = (code: string, verifier: string) =>
-      idp.handle(new Request(`${MOCK_ISSUER}/token`, {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded", Authorization: `Basic ${btoa(`${MOCK_CLIENT_ID}:${MOCK_CLIENT_SECRET}`)}` },
-        body: new URLSearchParams({ grant_type: "authorization_code", code, redirect_uri: u.searchParams.get("redirect_uri")!, code_verifier: verifier }),
-      }));
-    expect((await post(cb.searchParams.get("code")!, "wrong")).status).toBe(400);
-    expect((await post(cb.searchParams.get("code")!, "wrong")).status).toBe(400); // consumed even by the failed try
-    const bad = await idp.handle(new Request(`${MOCK_ISSUER}/token`, { method: "POST", headers: { Authorization: "Basic eDp5", "Content-Type": "application/x-www-form-urlencoded" }, body: "code=x" }));
+  const verifier = "v".repeat(43);
+  const challenge = async (value: string) => {
+    const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(value));
+    return btoa(String.fromCharCode(...new Uint8Array(digest))).replaceAll("+", "-").replaceAll("/", "_").replaceAll("=", "");
+  };
+  const issueCode = async (value = verifier) => {
+    const u = await authorizeUrl({ persona: "member-aland", code_challenge: await challenge(value) });
+    const response = await idp.handle(new Request(u));
+    expect(response.status).toBe(302);
+    return { code: new URL(response.headers.get("Location")!).searchParams.get("code")!, redirect: u.searchParams.get("redirect_uri")! };
+  };
+  const redeem = (issued: { code: string; redirect: string }, value: string | undefined = verifier, auth = `Basic ${btoa(`${MOCK_CLIENT_ID}:${MOCK_CLIENT_SECRET}`)}`) => {
+    const form = new URLSearchParams({ grant_type: "authorization_code", code: issued.code, redirect_uri: issued.redirect });
+    if (value !== undefined) form.set("code_verifier", value);
+    return idp.handle(new Request(`${MOCK_ISSUER}/token`, { method: "POST", headers: { Authorization: auth }, body: form }));
+  };
+
+  it.each(["Basic !!!", `Basic ${btoa("%ZZ:x")}`])("rejects malformed client authentication (%s) and remains available", async (auth) => {
+    const issued = await issueCode();
+    const bad = await redeem(issued, verifier, auth);
     expect(bad.status).toBe(401);
+    expect(await bad.json()).toEqual({ error: "invalid_client" });
+    expect((await redeem(issued)).status).toBe(200);
+  });
+
+  it.each([undefined, "", "short", "!".repeat(43), "v".repeat(129)])("requires a syntactically valid PKCE verifier (%s)", async (value) => {
+    // Match the challenge even for invalid verifier values: hashing alone must not accept them.
+    const issued = await issueCode(value ?? "");
+    const form = new URLSearchParams({ grant_type: "authorization_code", code: issued.code, redirect_uri: issued.redirect });
+    if (value !== undefined) form.set("code_verifier", value);
+    const res = await idp.handle(new Request(`${MOCK_ISSUER}/token`, { method: "POST", headers: { Authorization: `Basic ${btoa(`${MOCK_CLIENT_ID}:${MOCK_CLIENT_SECRET}`)}` }, body: form }));
+    expect(res.status).toBe(400);
+    expect(await res.json()).toEqual({ error: "invalid_grant" });
+  });
+
+  it("accepts a correct verifier once and rejects the identical code replay", async () => {
+    const issued = await issueCode();
+    const first = await redeem(issued);
+    expect(first.status).toBe(200);
+    expect(await first.json()).toHaveProperty("id_token");
+    const replay = await redeem(issued);
+    expect(replay.status).toBe(400);
+    expect(await replay.json()).toEqual({ error: "invalid_grant" });
+  });
+
+  it("consumes a code even when the first verifier is wrong", async () => {
+    const issued = await issueCode();
+    expect((await redeem(issued, "w".repeat(43))).status).toBe(400);
+    expect((await redeem(issued)).status).toBe(400);
   });
 
   it("persona SQL is idempotent and creates exactly one live membership per persona", async () => {

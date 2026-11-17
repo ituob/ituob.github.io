@@ -28,6 +28,9 @@ npm-debug.log*
 .env
 .env.local
 .env.*.local
+.dev.vars
+.dev.vars.*
+!.dev.vars.example
 
 # spd PDF artifact, placed by scripts/fetch-publications.ts at build time
 public/downloads/

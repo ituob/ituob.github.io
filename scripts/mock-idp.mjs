@@ -116,14 +116,22 @@ export async function createMockIdp({
     let id = form.get("client_id"), secret = form.get("client_secret");
     const auth = req.headers.get("Authorization");
     if (auth?.startsWith("Basic ")) {
-      const [i, s] = atob(auth.slice(6)).split(":");
-      id = decodeURIComponent(i.replace(/\+/g, "%20")); secret = decodeURIComponent((s ?? "").replace(/\+/g, "%20"));
+      try {
+        const decoded = atob(auth.slice(6));
+        const colon = decoded.indexOf(":");
+        if (colon < 0) return err(401, "invalid_client");
+        id = decodeURIComponent(decoded.slice(0, colon).replace(/\+/g, "%20"));
+        secret = decodeURIComponent(decoded.slice(colon + 1).replace(/\+/g, "%20"));
+      } catch {
+        return err(401, "invalid_client");
+      }
     }
     if (id !== clientId || (clientAuth !== "none" && secret !== clientSecret)) return err(401, "invalid_client");
     const rec = codes.get(form.get("code") ?? "");
     codes.delete(form.get("code") ?? ""); // single use
-    if (!rec || form.get("grant_type") !== "authorization_code" || form.get("redirect_uri") !== rec.redirect
-      || Date.now() - rec.at > 60_000 || (await sha256b64url(form.get("code_verifier") ?? "")) !== rec.challenge) {
+    const verifier = form.get("code_verifier");
+    if (!rec || !verifier || !/^[A-Za-z0-9._~-]{43,128}$/.test(verifier) || form.get("grant_type") !== "authorization_code" || form.get("redirect_uri") !== rec.redirect
+      || Date.now() - rec.at > 60_000 || (await sha256b64url(verifier)) !== rec.challenge) {
       return err(400, "invalid_grant");
     }
     const now = Math.floor(Date.now() / 1000);
@@ -155,12 +163,18 @@ async function main() {
   const idp = await createMockIdp({ issuer: `http://127.0.0.1:${port}` });
   const { createServer } = await import("node:http");
   createServer(async (nreq, nres) => {
-    const chunks = [];
-    for await (const c of nreq) chunks.push(c);
-    const body = nreq.method === "GET" || nreq.method === "HEAD" ? undefined : Buffer.concat(chunks);
-    const res = await idp.handle(new Request(`http://127.0.0.1:${port}${nreq.url}`, { method: nreq.method, headers: nreq.headers, body }));
-    nres.writeHead(res.status, Object.fromEntries(res.headers));
-    nres.end(Buffer.from(await res.arrayBuffer()));
+    try {
+      const chunks = [];
+      for await (const c of nreq) chunks.push(c);
+      const body = nreq.method === "GET" || nreq.method === "HEAD" ? undefined : Buffer.concat(chunks);
+      const res = await idp.handle(new Request(`http://127.0.0.1:${port}${nreq.url}`, { method: nreq.method, headers: nreq.headers, body }));
+      nres.writeHead(res.status, Object.fromEntries(res.headers));
+      nres.end(Buffer.from(await res.arrayBuffer()));
+    } catch (error) {
+      console.error("mock identity provider request failed", error);
+      if (!nres.headersSent) nres.writeHead(500, { "Content-Type": "application/json" });
+      nres.end(JSON.stringify({ error: "server_error" }));
+    }
   }).listen(port, "127.0.0.1", () => console.log(`mock identity provider on http://127.0.0.1:${port} (dev only)`));
 }
 if (import.meta.url === pathToFileURL(process.argv[1] ?? "").href) await main();
