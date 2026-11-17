@@ -1,0 +1,10 @@
+---
+import ProseMirror from "~/components/ProseMirror.astro";
+import { resolveGeneralContent } from "~/lib/i18n";
+import type { Language } from "~/lib/catalogs";
+interface Props { content: unknown; lang?: Language }
+const content = resolveGeneralContent(Astro.props.content, Astro.props.lang);
+---
+{typeof content === "string" ? (
+  <div class="prose-bulletin" style="white-space: pre-wrap;">{content}</div>
+) : content && content.content.map(node => <ProseMirror node={node} />)}

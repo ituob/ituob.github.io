@@ -1,6 +1,6 @@
 import { describe, expect, it, beforeEach } from "vitest";
 import {
-  ADMIN, Forbidden, activateMember, addUser, api, db, provisionItu, seedFixtures, submit,
+  ADMIN, BOOTSTRAP_ADMIN_ID, Forbidden, activateMember, addUser, api, db, provisionItu, seedFixtures, submit,
 } from "./helpers.ts";
 
 const count = async (sql: string, ...b: unknown[]) =>
@@ -40,9 +40,9 @@ describe("spoofed binding is ignored", () => {
       body: { memberId: "A", note: "x", status: "active", roles: ["itu-admin"], userId: "itu-admin", kind: "itu", memberStateId: "B" },
     });
     expect(r.status).toBe(201);
-    const m = await db().prepare("SELECT user_id,kind,member_id,status FROM memberships").first<any>();
+    const m = await db().prepare("SELECT user_id,kind,member_id,status FROM memberships WHERE user_id='unaffiliated'").first<any>();
     expect(m).toEqual({ user_id: "unaffiliated", kind: "member", member_id: "A", status: "pending" });
-    expect(await count("SELECT count(*) n FROM user_roles")).toBe(0);
+    expect(await count("SELECT count(*) n FROM user_roles WHERE user_id=?1", "unaffiliated")).toBe(0);
     const w = await api("GET", "/api/whoami", { session: "unaffiliated" });
     expect(w.json.roles).toEqual([]);
     expect(w.json.memberStateId).toBeNull();
@@ -100,9 +100,9 @@ describe("no self-activation", () => {
       const r = await api("POST", p, { session: "member-A", body: { userId: "member-A", roles: ["itu-admin"], status: "active", members: [] } });
       expect(r.status).toBe(403);
     }
-    const m = await db().prepare("SELECT status FROM memberships").first<any>();
+    const m = await db().prepare("SELECT status FROM memberships WHERE user_id='member-A'").first<any>();
     expect(m.status).toBe("pending");
-    expect(await count("SELECT count(*) n FROM user_roles")).toBe(0);
+    expect(await count("SELECT count(*) n FROM user_roles WHERE user_id=?1", "member-A")).toBe(0);
   });
 
   it("a second live membership is refused (API and unique index)", async () => {
@@ -117,7 +117,7 @@ describe("no self-activation", () => {
   it("claims need a session and a same-origin request", async () => {
     expect((await api("POST", "/api/me/membership/claim", { body: { memberId: "A" } })).status).toBe(401);
     expect((await api("POST", "/api/me/membership/claim", { session: "member-A", body: { memberId: "A" }, headers: { "Sec-Fetch-Site": "cross-site" } })).status).toBe(403);
-    expect(await count("SELECT count(*) n FROM memberships")).toBe(0);
+    expect(await count("SELECT count(*) n FROM memberships WHERE user_id=?1", "member-A")).toBe(0);
   });
 
   it("rejected claimant can re-claim", async () => {
@@ -166,9 +166,90 @@ describe("ITU-only actions", () => {
       }
     }
   });
-  it("Access alone (no session) is enough for admin routes", async () => {
+  it("Access plus an active D1 administrator authorizes reads without a member session", async () => {
     expect((await api("GET", "/api/admin/claims", { access: ADMIN })).status).toBe(200);
   });
+  const snapshot = async () => {
+    const result: Record<string, unknown> = {};
+    for (const table of ["users", "members", "memberships", "user_roles", "membership_events"]) {
+      result[table] = (await db().prepare(`SELECT * FROM ${table} ORDER BY rowid`).all()).results;
+    }
+    return result;
+  };
+
+  it("Access-authenticated non-admins cannot administer membership or grant themselves authority", async () => {
+    await activateMember("member-A", "A");
+    await provisionItu("itu-editor", ["itu-editor"]);
+    const claim = await api("POST", "/api/me/membership/claim", { session: "unaffiliated", body: { memberId: "B" } });
+    expect(claim.status).toBe(201);
+    const mid = claim.json.membershipId;
+    const active = await db().prepare("SELECT id FROM memberships WHERE user_id='member-A' AND status='active'").first<{ id: number }>();
+    const before = await snapshot();
+    for (const user of ["unaffiliated", "itu-editor", "member-A", "unknown"]) {
+      const calls = [
+        ["GET", "/api/admin/claims", undefined],
+        ["POST", `/api/admin/claims/${mid}/verify`, {}],
+        ["POST", `/api/admin/claims/${mid}/reject`, {}],
+        ["POST", `/api/admin/memberships/${active!.id}/deactivate`, {}],
+        ["POST", "/api/admin/itu-staff", { userId: user, roles: ["itu-admin"] }],
+        ["POST", "/api/admin/members/A/status", { status: "withdrawn" }],
+        ["POST", "/api/admin/roster/import", { members: [{ id: "X", name: "Injected", register_key: "Injected" }] }],
+      ] as const;
+      for (const [method, path, body] of calls) {
+        // Even an admin session cookie cannot lend its roles to a different Access identity.
+        const res = await api(method, path, { access: `${user}@example.test`, session: BOOTSTRAP_ADMIN_ID, body });
+        expect(res.status, `${method} ${path} as ${user}`).toBe(403);
+        expect(await snapshot()).toEqual(before);
+      }
+    }
+  });
+
+  it("the bootstrap email has no privilege after its stored role is revoked", async () => {
+    await db().prepare("DELETE FROM user_roles WHERE user_id=?1").bind(BOOTSTRAP_ADMIN_ID).run();
+    const before = await snapshot();
+    expect((await api("GET", "/api/admin/claims", { access: ADMIN })).status).toBe(403);
+    expect((await api("POST", "/api/admin/itu-staff", { access: ADMIN, body: { userId: BOOTSTRAP_ADMIN_ID, roles: ["itu-admin"] } })).status).toBe(403);
+    expect(await snapshot()).toEqual(before);
+  });
+
+  it("an explicitly provisioned ITU admin verifies a claim with Access and attributable history", async () => {
+    await provisionItu("itu-admin", ["itu-admin"]);
+    const claim = await api("POST", "/api/me/membership/claim", { session: "member-A", body: { memberId: "A" } });
+    expect(claim.status).toBe(201);
+    const access = "itu-admin@example.test";
+    expect((await api("GET", "/api/admin/claims", { access })).json.claims.map((c: { id: number }) => c.id)).toContain(claim.json.membershipId);
+    expect((await api("POST", `/api/admin/claims/${claim.json.membershipId}/verify`, { access, body: { note: "verified by ITU" } })).status).toBe(200);
+    const event = await db().prepare("SELECT detail FROM membership_events WHERE membership_id=?1 AND event='verified'").bind(claim.json.membershipId).first<{ detail: string }>();
+    expect(JSON.parse(event!.detail)).toEqual({ access, note: "verified by ITU" });
+    expect((await api("GET", "/api/whoami", { session: "member-A" })).json.roles).toEqual(["member-submitter"]);
+  });
+
+  it("deactivating an administrator revokes its Access authority on the next request", async () => {
+    await provisionItu("itu-admin", ["itu-admin"]);
+    const mid = (await db().prepare("SELECT id FROM memberships WHERE user_id='itu-admin'").first<{ id: number }>())!.id;
+    const access = "itu-admin@example.test";
+    expect((await api("GET", "/api/admin/claims", { access })).status).toBe(200);
+    expect((await api("POST", `/api/admin/memberships/${mid}/deactivate`, { access: ADMIN, body: {} })).status).toBe(200);
+    const before = await snapshot();
+    expect((await api("GET", "/api/admin/claims", { access })).status).toBe(403);
+    expect((await api("POST", "/api/admin/itu-staff", { access, body: { userId: "unaffiliated", roles: ["itu-admin"] } })).status).toBe(403);
+    expect(await snapshot()).toEqual(before);
+  });
+
+  it.each(["cross-site", "same-site"])("rejects %s membership mutations even for an authorized Access administrator", async (site) => {
+    const claim = await api("POST", "/api/me/membership/claim", { session: "member-A", body: { memberId: "A" } });
+    const before = await snapshot();
+    for (const [method, path, body] of [
+      ["POST", `/api/admin/claims/${claim.json.membershipId}/verify`, {}],
+      ["POST", "/api/admin/itu-staff", { userId: "unaffiliated", roles: ["itu-admin"] }],
+      ["POST", "/api/admin/roster/import", { members: [{ id: "X", name: "Injected", register_key: "Injected" }] }],
+      ["POST", "/api/admin/members/A/status", { status: "withdrawn" }],
+    ] as const) {
+      expect((await api(method, path, { access: ADMIN, body, headers: { "Sec-Fetch-Site": site, Origin: "https://attacker.example" } })).status).toBe(403);
+      expect(await snapshot()).toEqual(before);
+    }
+  });
+
   it("Access does not satisfy session routes", async () => {
     expect((await api("POST", "/api/me/membership/claim", { access: ADMIN, body: { memberId: "A" } })).status).toBe(401);
   });

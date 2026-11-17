@@ -266,7 +266,7 @@ function renderEmailEvent(n: EmailNotification, locale: EmailLocale, origin: str
   for (const [key, label] of [["actor_name", copy.actor], ["reason", copy.reason], ["excerpt", copy.comment]]) {
     if (p[key!]) lines.push(`${label}${separator}${String(p[key!])}`);
   }
-  const link = `${origin}/submissions/${encodeURIComponent(n.submission_id)}`;
+  const link = `${origin}/me/discussions/?id=${encodeURIComponent(n.submission_id)}`;
   const text = [heading, ...lines, `${copy.open}${separator}${link}`].join("\n");
   const html = `<section><h2>${escapeEmailHtml(heading)}</h2>${lines.map((line) => `<p>${escapeEmailHtml(line).replace(/\n/g, "<br>")}</p>`).join("")}<p><a href="${escapeEmailHtml(link)}">${escapeEmailHtml(copy.open)}</a></p></section>`;
   return { heading, text, html };

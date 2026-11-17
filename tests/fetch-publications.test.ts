@@ -154,6 +154,23 @@ test("workflow_dispatch from the producer main branch remains trusted", () => {
   assertDownloaded(harness({ runs: [{ ...run(1), event: "workflow_dispatch" }], artifacts: [artifact(1)] }), 1);
 });
 
+test("a newer successful main workflow_dispatch subset artifact cannot displace the older full catalog", () => {
+  assertDownloaded(harness({
+    runs: [{ ...run(2, "2026-11-02T00:00:00Z"), event: "workflow_dispatch" }, run(1)],
+    artifacts: [{ ...artifact(2, "2026-11-02T00:00:00Z"), name: "publications-subset" }, artifact(1)],
+  }), 1);
+});
+
+test("a subset-only artifact is not downloaded as the full catalog", () => {
+  const result = harness({
+    runs: [{ ...run(2, "2026-11-02T00:00:00Z"), event: "workflow_dispatch" }, run(1)],
+    artifacts: [{ ...artifact(2, "2026-11-02T00:00:00Z"), name: "publications-subset" }],
+  });
+  assert.equal(result.r.status, 0, result.r.stderr);
+  assert.match(result.r.stdout, /WARNING.*no successful.*"publications" artifact/);
+  assertNoDownload(result);
+});
+
 test("expired artifacts cannot displace a live older artifact", () => {
   assertDownloaded(harness({ artifacts: [{ ...artifact(2, "2026-11-03T00:00:00Z"), expired: true }, artifact(1)] }), 1);
 });

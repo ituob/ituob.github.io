@@ -12,20 +12,19 @@
  *
  * The component iterates entries and renders each country block.
  */
-import ProseMirror from "~/components/ProseMirror.astro";
-import type { ProseMirrorDoc, ProseMirrorNode } from "~/lib/types";
+import GeneralContent from "~/components/GeneralContent.astro";
+import { resolveGeneralContent } from "~/lib/i18n";
 import type { Language } from "~/lib/catalogs";
 import { formatSwissDate } from "~/lib/format";
 
 type LocalizedString = Partial<Record<Language, string>>;
-type LocalizedDoc = Partial<Record<Language, ProseMirrorDoc>>;
 
 export interface TelephoneCountryEntry {
   type?: string;
   country_name?: LocalizedString;
   phone_code?: string;
   contact?: LocalizedString;
-  communications?: Array<{ date?: string | Date; contents?: LocalizedDoc }>;
+  communications?: Array<{ date?: string | Date; contents?: unknown }>;
 }
 
 export interface Props {
@@ -38,11 +37,6 @@ const { contents, lang = "en" } = Astro.props;
 function pick(value: LocalizedString | undefined): string {
   if (!value) return "";
   return value[lang] ?? value.en ?? Object.values(value)[0] ?? "";
-}
-
-function pickDoc(value: LocalizedDoc | undefined): ProseMirrorDoc | null {
-  if (!value) return null;
-  return value[lang] ?? value.en ?? null;
 }
 
 function parseDate(value: string | Date | undefined): Date | null {
@@ -61,7 +55,7 @@ function parseDate(value: string | Date | undefined): Date | null {
       const contact = pick(entry.contact);
       const comms = entry.communications ?? [];
       return (
-        <article class="rule-thin pt-4" id={country ? `ts-${country.toLowerCase().replace(/\s+/g, "-")}` : `ts-${idx}`}>
+        <article class="rule-thin pt-4" id={country ? `ts-${country.toLowerCase().replace(/[^\p{L}\p{N}]+/gu, "-")}` : `ts-${idx}`}>
           <header class="mb-3">
             <h4 class="text-[var(--step-1)] mb-1" style="font-family: var(--font-display); font-weight: 600;">
               {country}
@@ -79,7 +73,7 @@ function parseDate(value: string | Date | undefined): Date | null {
             <div class="space-y-4">
               {comms.map((c) => {
                 const date = parseDate(c.date as string | Date | undefined);
-                const doc = pickDoc(c.contents);
+                const doc = resolveGeneralContent(c.contents, lang);
                 const dateLabel = date ? formatSwissDate(date) : "Communication";
                 return (
                   <section class="ml-4 border-l-2 pl-4" style="border-color: var(--rule);">
@@ -88,7 +82,7 @@ function parseDate(value: string | Date | undefined): Date | null {
                     </h5>
                     {doc && (
                       <div class="prose-bulletin measure">
-                        {(doc.content ?? []).map((node: ProseMirrorNode) => <ProseMirror node={node} />)}
+                        <GeneralContent content={doc} lang={lang} />
                       </div>
                     )}
                   </section>

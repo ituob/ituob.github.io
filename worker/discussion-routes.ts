@@ -38,6 +38,11 @@ export const discussionRoutes: Route[] = [
     } },
   { method: "PUT", pattern: /^\/api\/me\/handle$/, guard: "session",
     handler: async ({ request, env, session }) => json({ ok: true, ...(await setHandle(env.DB, session, (await body(request)).handle)) }) },
+  { method: "GET", pattern: /^\/api\/me\/handle$/, guard: "session",
+    handler: async ({ env, session }) => {
+      const row = await env.DB.prepare("SELECT handle FROM user_handles WHERE user_id=?1").bind(session!.userId).first<{ handle: string }>();
+      return json({ ok: true, handle: row?.handle ?? null });
+    } },
 
   // ITU equivalents (the role check is repeated server-side by ituSession).
   { method: "GET", pattern: re(`${adm}/comments`), guard: "access",

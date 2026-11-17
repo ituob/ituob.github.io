@@ -35,7 +35,7 @@ beforeEach(async () => {
   local = { ...env, EMAIL_PROVIDER: "recording", NOTIFY_Q: { send: async (body: NotifyMessage) => { queued.push(body); } } } as unknown as Env;
   const draft = await api("POST", "/api/me/submissions", { session: "member-A", body: {
     register_id: "E118_IIN", slug: "e118-iin", action_type: "ADD",
-    payload: { type: "ADD", data: { _class: "E118Amendment", entries: [{ country_or_area: { en: "Aland" }, company_name: "Acme" }] } },
+    payload: { type: "ADD", data: { _class: "E118Amendment", entries: [{ country_or_area: { en: "Aland" }, company_name: "Acme", issue_id_number: "89 358 01" }] } },
   } });
   expect(draft.status).toBe(201);
   submission = draft.json.submission.id;

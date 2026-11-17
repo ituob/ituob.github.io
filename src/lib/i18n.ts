@@ -7,7 +7,7 @@
  * TextAmendment `text.yaml` files store the doc directly without a language
  * wrapper; we treat those as English.
  */
-import type { LocalizedContent, ProseMirrorDoc } from "./types";
+import type { ProseMirrorDoc } from "./types";
 import type { Language } from "./catalogs";
 import { SUPPORTED_LANGUAGES, DEFAULT_LANGUAGE } from "./catalogs";
 
@@ -15,37 +15,52 @@ import { SUPPORTED_LANGUAGES, DEFAULT_LANGUAGE } from "./catalogs";
 function isProseMirrorDoc(value: unknown): value is ProseMirrorDoc {
   return (
     typeof value === "object" && value !== null && "type" in value &&
-    (value as { type: string }).type === "doc" && "content" in value
+    (value as { type: string }).type === "doc" && "content" in value &&
+    Array.isArray(value.content)
   );
 }
 
 export function resolveContent(
-  content: LocalizedContent | undefined,
+  content: unknown,
   lang: Language = DEFAULT_LANGUAGE,
 ): ProseMirrorDoc | null {
-  if (!content) return null;
+  const resolved = resolveGeneralContent(content, lang);
+  return isProseMirrorDoc(resolved) ? resolved : null;
+}
 
-  // Unwrapped ProseMirror doc (text.yaml shape).
-  if (isProseMirrorDoc(content)) {
-    return content;
-  }
-
-  if (content[lang]) return content[lang]!;
-  if (content[DEFAULT_LANGUAGE]) return content[DEFAULT_LANGUAGE]!;
-  for (const l of SUPPORTED_LANGUAGES) {
-    if (content[l]) return content[l]!;
+/** Resolve authored prose and readonly legacy documents without interpreting HTML. */
+export function resolveGeneralContent(
+  content: unknown,
+  lang: Language = DEFAULT_LANGUAGE,
+): string | ProseMirrorDoc | null {
+  if (typeof content === "string" || isProseMirrorDoc(content)) return content;
+  if (!content || typeof content !== "object" || Array.isArray(content)) return null;
+  const localized = content as Record<string, unknown>;
+  for (const language of new Set([lang, DEFAULT_LANGUAGE, ...SUPPORTED_LANGUAGES])) {
+    const value = localized[language];
+    if (typeof value === "string" || isProseMirrorDoc(value)) return value;
   }
   return null;
 }
 
-/** Returns the list of languages actually present in a content object. */
+/** Discover languages in prose or nested General payloads, excluding asset references. */
 export function availableLanguages(
-  content: LocalizedContent | undefined,
+  content: unknown,
 ): Language[] {
-  if (!content) return [];
-  if (isProseMirrorDoc(content)) {
-    return [DEFAULT_LANGUAGE];
+  if (typeof content === "string") {
+    return content.endsWith(".adoc") ? [] : [DEFAULT_LANGUAGE];
   }
-  return SUPPORTED_LANGUAGES.filter((l) => content[l]);
+  if (isProseMirrorDoc(content)) return [DEFAULT_LANGUAGE];
+  if (!content || typeof content !== "object") return [];
+  const found = new Set<Language>();
+  for (const [key, value] of Object.entries(content)) {
+    if (SUPPORTED_LANGUAGES.includes(key as Language)) {
+      if ((typeof value === "string" && !value.endsWith(".adoc")) || isProseMirrorDoc(value)) {
+        found.add(key as Language);
+      }
+    } else if (value && typeof value === "object") {
+      for (const language of availableLanguages(value)) found.add(language);
+    }
+  }
+  return SUPPORTED_LANGUAGES.filter((language) => found.has(language));
 }
-

@@ -15,7 +15,7 @@ describe("localized notification messages", () => {
     expect(mail.locale).toBe("en");
     expect(mail.subject).toContain("Changes requested");
     expect(mail.text).toContain("Reason: <img src=x onerror=alert(1)>");
-    expect(mail.text).toContain("https://www.ituob.org/submissions/submission%2Funsafe%22");
+    expect(mail.text).toContain("https://www.ituob.org/me/discussions/?id=submission%2Funsafe%22");
     expect(mail.text).toContain("https://www.ituob.org/api/me/notification-prefs");
     expect(mail.html).toContain("&lt;script&gt;");
     expect(mail.html).toContain("&lt;img src=x onerror=alert(1)&gt;");
@@ -28,7 +28,7 @@ describe("localized notification messages", () => {
     expect(french.locale).toBe("fr");
     expect(french.subject).toContain("Modifications demandées");
     expect(french.text).toContain("Par : A &");
-    expect(french.text).toContain("https://staging.example.org/submissions/");
+    expect(french.text).toContain("https://staging.example.org/me/discussions/?id=");
     expect(french.html).toContain('lang="fr"');
     expect(notify.renderEmail(notification, { locale: "es" }).subject).toContain("Cambios solicitados");
     expect(notify.renderEmail(notification, { locale: "unknown" }).locale).toBe("en");
@@ -44,7 +44,7 @@ describe("localized notification messages", () => {
     expect(digest.text).toContain("Actualización de la presentación");
     expect(digest.html).toContain("&lt;script&gt;");
     expect(digest.html).not.toContain("<custom>");
-    expect((digest.text.match(/https:\/\/www\.ituob\.org\/submissions\//g) ?? []).length).toBe(2);
+    expect((digest.text.match(/https:\/\/www\.ituob\.org\/me\/discussions\/\?id=/g) ?? []).length).toBe(2);
     expect(digest.text).toContain("https://www.ituob.org/api/me/notification-prefs");
   });
 

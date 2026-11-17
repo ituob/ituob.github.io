@@ -1,6 +1,6 @@
 // Approval -> branch -> PR, behind an interface (docs/submission-workflow.adoc
-// "Approval -> branch -> PR"). The real GitHub App client is not built here;
-// tests use FakePatchPublisher. NOTHING in this layer may target `main`.
+// "Approval -> branch -> PR"). Tests can override the configured GitHub App client.
+// Protected branches change only through reviewed pull requests.
 
 export interface OpenPatchPrRequest {
   repo: string;
@@ -12,6 +12,44 @@ export interface OpenPatchPrRequest {
   body: string;
   idempotencyKey: string;
 }
+import { classify } from "../../src/lib/form/corpus.ts";
+
+export interface OpenGeneralMessagePrRequest extends OpenPatchPrRequest {
+  edition: number;
+  revision: number;
+  messageId: string;
+  messageType: string;
+}
+export interface OpenMetadataPrRequest extends OpenPatchPrRequest {
+  edition: number;
+  revision: number;
+}
+/** A change to catalogs/registers.yaml in the catalog repository (service-publications-docs). */
+export interface OpenCatalogPrRequest {
+  repo: string;
+  /** Always `rt-cat-<12 hex>`; derived from the new file bytes, so a retry reuses it. */
+  branch: string;
+  path: string;
+  content: string;
+  /** Git blob SHA of the file the content was computed from; a moved file refuses the change. */
+  baseBlobSha: string;
+  title: string;
+  body: string;
+  idempotencyKey: string;
+}
+export interface CatalogSnapshot {
+  repo: string;
+  baseSha: string;
+  registers: { text: string; blobSha: string };
+  recommendations: { text: string };
+}
+export const CATALOG_BRANCH = /^rt-cat-[0-9a-f]{12}$/;
+export const CATALOG_PATH = "catalogs/registers.yaml";
+export const DEFAULT_CATALOG_REPO = "ituob/service-publications-docs";
+export function assertCatalogRequest(req: OpenCatalogPrRequest): void {
+  if (!CATALOG_BRANCH.test(req.branch) || req.path !== CATALOG_PATH || !req.idempotencyKey || !req.baseBlobSha) throw new Error("Invalid catalog destination");
+}
+
 export interface OpenedPr {
   prNumber: number;
   commitSha: string;
@@ -46,19 +84,50 @@ export interface PinBump {
   freezeSha: string;
   /** The site-repo commit that moved the gitlink. */
   siteCommit: string;
+  /** The pin PR or its staging checks are not complete; never publish yet. */
+  pending?: { prNumber: number; url: string; reason: string };
+}
+export interface PromotionRequest {
+  edition: number;
+  /** The data-repo commit the staged pin carries; the promotion must carry exactly this. */
+  freezeSha: string;
+  /** Deterministic per edition: a replay returns the same promotion PR, never a second. */
+  idempotencyKey: string;
+}
+export interface Promotion {
+  /** The production (default branch) commit of the merged promotion once it is deployed. */
+  siteCommit: string;
+  /** The promotion PR is open, unmerged, or its production deployment is not complete; never publish yet. */
+  pending?: { prNumber: number; url: string; reason: string };
 }
 export interface PatchPublisher {
   /** Idempotent per `idempotencyKey`: a replay returns the same PR, never a second. */
   openPatchPr(req: OpenPatchPrRequest): Promise<OpenedPr>;
+  openMetadataPr(req: OpenMetadataPrRequest): Promise<OpenedPr>;
+  openGeneralMessagePr(req: OpenGeneralMessagePrRequest): Promise<OpenedPr>;
+  /** Read-only: registers.yaml and recommendations.yaml at the catalog repository's default branch. */
+  readCatalog(req: { repo: string }): Promise<CatalogSnapshot>;
+  /** A review PR (never a push to the default branch) that changes only catalogs/registers.yaml. */
+  openCatalogPr(req: OpenCatalogPrRequest): Promise<OpenedPr>;
+  getGeneralMessagePullRequest(req: { repo: string; prNumber: number; expectedHeadSha?: string }): Promise<PullRequestState>;
+  getMetadataPullRequest(req: { repo: string; prNumber: number; expectedHeadSha?: string }): Promise<PullRequestState>;
   /** Close the PR and delete the Worker-created branch (never merges, never touches other refs). */
   closePatchPr(req: { repo: string; branch: string; prNumber: number }): Promise<void>;
   /** A PR (never a push to main) that deletes `path`. Idempotent per `idempotencyKey`. */
   openRevertPr(req: OpenRevertPrRequest): Promise<OpenedPr>;
   /** Read-only: the reconciler's view of a PR we created. */
-  getPullRequest(req: { repo: string; prNumber: number }): Promise<PullRequestState>;
+  getPullRequest(req: { repo: string; prNumber: number; expectedHeadSha?: string }): Promise<PullRequestState>;
   /** Publication is a pin bump (the data-ob gitlink on the site repo). Idempotent per key. */
   bumpDataPin(req: PinBumpRequest): Promise<PinBump>;
+  /**
+   * Publish step: opens (never merges) the staging -> default-branch PR on the site repo and reports
+   * `pending` until a human merged it and the production deployment of that exact commit succeeded.
+   */
+  promoteToProduction(req: PromotionRequest): Promise<Promotion>;
 }
+
+/** A catalog request that cannot produce an active review change. */
+export class CatalogPublishConflict extends Error {}
 
 export class PublisherNotConfigured extends Error {
   constructor() {
@@ -73,30 +142,40 @@ export function assertPatchBranch(branch: string): void {
   if (!PATCH_BRANCH.test(branch)) throw new Error(`refusing branch ${JSON.stringify(branch)}: only rt-sub-* patch branches are writable`);
 }
 
+export const MESSAGE_BRANCH = /^rt-msg-[1-9]\d*-[0-9A-Z]{26}-r[1-9]\d*$/;
+export function assertMessageRequest(req: OpenGeneralMessagePrRequest): void {
+  if (!Number.isSafeInteger(req.edition) || req.edition < 1 || !Number.isSafeInteger(req.revision) || req.revision < 1 || !/^[0-9A-Z]{26}$/.test(req.messageId) || req.branch !== `rt-msg-${req.edition}-${req.messageId}-r${req.revision}`) throw new Error("Invalid general message destination");
+  const prefix = `ob-issues/${req.edition}/`;
+  const relative = req.path.startsWith(prefix) ? req.path.slice(prefix.length) : "";
+  const singleton = ["running_annexes", "approved_recommendations"].includes(req.messageType);
+  if (singleton ? relative !== `general/${req.messageType}.yaml` : !new RegExp(`^${req.messageType}/(?!000)[0-9]{3}\\.yaml$`).test(relative)) throw new Error("Invalid general message path");
+  if (classify(relative, { type: req.messageType })?.role !== "general") throw new Error("Unknown general message type");
+}
+
+export const METADATA_BRANCH = /^rt-meta-[1-9]\d*-r[1-9]\d*$/;
+export function assertMetadataRequest(req: OpenMetadataPrRequest): void {
+  if (!Number.isSafeInteger(req.edition) || req.edition < 1 || !Number.isSafeInteger(req.revision) || req.revision < 1 || req.branch !== `rt-meta-${req.edition}-r${req.revision}` || req.path !== `ob-issues/${req.edition}/meta.yaml`) throw new Error("Invalid edition metadata destination");
+}
+
 export function branchName(issue: number, seq: number, slug: string, submissionId: string): string {
   const nnn = String(seq).padStart(3, "0");
   const s = slug.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
   return `rt-sub-${issue}-${nnn}-${s}-${submissionId.slice(-8)}`;
 }
 
-/** Real GitHub App implementation: a stub until the App exists (account setup, see design note). */
-export class GitHubAppPatchPublisher implements PatchPublisher {
-  async openPatchPr(_req: OpenPatchPrRequest): Promise<OpenedPr> {
-    throw new PublisherNotConfigured();
-  }
-  async closePatchPr(): Promise<void> {
-    throw new PublisherNotConfigured();
-  }
-  async openRevertPr(_req: OpenRevertPrRequest): Promise<OpenedPr> {
-    throw new PublisherNotConfigured();
-  }
-  async getPullRequest(): Promise<PullRequestState> {
-    throw new PublisherNotConfigured();
-  }
-  async bumpDataPin(_req: PinBumpRequest): Promise<PinBump> {
-    throw new PublisherNotConfigured();
-  }
+export interface PublisherConfig {
+  GITHUB_APP_ID?: string;
+  GITHUB_APP_PRIVATE_KEY?: string;
+  GITHUB_APP_INSTALLATION_ID?: string;
+  PATCH_REPO?: string;
+  /** Catalog repository for service-publication changes; defaults to ituob/service-publications-docs. */
+  CATALOG_REPO?: string;
+  GITHUB_SITE_REPO?: string;
+  GITHUB_DATA_GITLINK?: string;
+  GITHUB_STAGING_BRANCH?: string;
 }
+export { GitHubAppPatchPublisher } from "./github-publisher.ts";
+import { GitHubAppPatchPublisher } from "./github-publisher.ts";
 
 /** The base branch the FAKE reports for a PR (a read-side value: nothing here writes to it). */
 const FAKE_BASE = "main";
@@ -114,6 +193,9 @@ export class FakePatchPublisher implements PatchPublisher {
 
   async openPatchPr(req: OpenPatchPrRequest): Promise<OpenedPr> {
     assertPatchBranch(req.branch);
+    return this.open(req);
+  }
+  private async open(req: OpenPatchPrRequest): Promise<OpenedPr> {
     this.requests.push(req);
     if (this.failNext > 0) {
       this.failNext--;
@@ -127,6 +209,44 @@ export class FakePatchPublisher implements PatchPublisher {
     if (this.afterCreate) await this.afterCreate(pr);
     return pr;
   }
+  async openMetadataPr(req: OpenMetadataPrRequest): Promise<OpenedPr> {
+    assertMetadataRequest(req);
+    return this.open(req);
+  }
+  getMetadataPullRequest(req: { repo: string; prNumber: number; expectedHeadSha?: string }): Promise<PullRequestState> {
+    return this.getPullRequest(req);
+  }
+  openGeneralMessagePr(req: OpenGeneralMessagePrRequest): Promise<OpenedPr> {
+    assertMessageRequest(req);
+    return this.open(req);
+  }
+  /** Test seam: the catalog files the fake repository serves. */
+  catalogFiles = { registers: "registers:\n", recommendations: "recommendations:\n" };
+  readonly catalogRequests: OpenCatalogPrRequest[] = [];
+  private catalogByKey = new Map<string, OpenedPr>();
+  static blobSha(text: string): string {
+    let h = 2166136261;
+    for (const ch of text) h = Math.imul(h ^ ch.codePointAt(0)!, 16777619) >>> 0;
+    return h.toString(16).padStart(8, "0").repeat(5);
+  }
+  async readCatalog(req: { repo: string }): Promise<CatalogSnapshot> {
+    if (req.repo !== DEFAULT_CATALOG_REPO) throw new Error("Repository is not the configured catalog repository");
+    return { repo: req.repo, baseSha: "a".repeat(40), registers: { text: this.catalogFiles.registers, blobSha: FakePatchPublisher.blobSha(this.catalogFiles.registers) }, recommendations: { text: this.catalogFiles.recommendations } };
+  }
+  async openCatalogPr(req: OpenCatalogPrRequest): Promise<OpenedPr> {
+    assertCatalogRequest(req);
+    this.catalogRequests.push(req);
+    if (this.failNext > 0) { this.failNext--; throw new Error("GitHub 502"); }
+    if (req.content === this.catalogFiles.registers) throw new CatalogPublishConflict("Catalog edit has no change");
+    if (req.baseBlobSha !== FakePatchPublisher.blobSha(this.catalogFiles.registers)) throw new Error("Catalog changed since it was read");
+    const hit = this.catalogByKey.get(req.idempotencyKey);
+    if (hit) return hit;
+    const n = this.next++;
+    const pr = { prNumber: n, commitSha: `c${n}`.padEnd(40, "0"), baseSha: "a".repeat(40), url: `https://github.invalid/${req.repo}/pull/${n}` };
+    this.catalogByKey.set(req.idempotencyKey, pr);
+    return pr;
+  }
+  getGeneralMessagePullRequest(req: { repo: string; prNumber: number; expectedHeadSha?: string }): Promise<PullRequestState> { return this.getPullRequest(req); }
   async closePatchPr(req: { repo: string; branch: string; prNumber: number }): Promise<void> {
     assertPatchBranch(req.branch);
     if (this.failClose) throw new Error("GitHub 502 on close");
@@ -161,8 +281,10 @@ export class FakePatchPublisher implements PatchPublisher {
     this.revertByKey.set(req.idempotencyKey, pr);
     return pr;
   }
-  async getPullRequest(req: { repo: string; prNumber: number }): Promise<PullRequestState> {
+  async getPullRequest(req: { repo: string; prNumber: number; expectedHeadSha?: string }): Promise<PullRequestState> {
     if (this.failGet) throw new Error("GitHub 502 on read");
+    const opened = [...this.byKey.values(), ...this.revertByKey.values()].find(pr => pr.prNumber === req.prNumber);
+    if (req.expectedHeadSha !== undefined && opened?.commitSha !== req.expectedHeadSha) throw new Error("Pull request does not match the recorded approved head");
     return this.pullStates.get(req.prNumber) ?? { state: "open", merged: false, mergeSha: null, baseRef: FAKE_BASE };
   }
   /** Test helper: GitHub now reports this PR merged. */
@@ -173,6 +295,18 @@ export class FakePatchPublisher implements PatchPublisher {
   closePr(prNumber: number) {
     this.pullStates.set(prNumber, { state: "closed", merged: false, mergeSha: null, baseRef: FAKE_BASE });
   }
+  readonly promotionRequests: PromotionRequest[] = [];
+  private promotionByKey = new Map<string, Promotion>();
+  /** Fake never merges anything: it only records the request and answers as a deployed promotion. */
+  async promoteToProduction(req: PromotionRequest): Promise<Promotion> {
+    this.promotionRequests.push(req);
+    const hit = this.promotionByKey.get(req.idempotencyKey);
+    if (hit) return hit;
+    const done = { siteCommit: `p${this.promotionByKey.size + 1}`.padEnd(40, "0") };
+    this.promotionByKey.set(req.idempotencyKey, done);
+    return done;
+  }
+
   async bumpDataPin(req: PinBumpRequest): Promise<PinBump> {
     this.pinRequests.push(req);
     if (this.failNextPin > 0) {
@@ -189,10 +323,10 @@ export class FakePatchPublisher implements PatchPublisher {
 }
 
 let override: PatchPublisher | null = null;
-/** Test seam / future wiring point. Production resolves the (unconfigured) App client. */
+/** Test seam. Production resolves the explicitly configured App client. */
 export function setPublisher(p: PatchPublisher | null) {
   override = p;
 }
-export function getPublisher(): PatchPublisher {
-  return override ?? new GitHubAppPatchPublisher();
+export function getPublisher(config?: PublisherConfig): PatchPublisher {
+  return override ?? new GitHubAppPatchPublisher(config);
 }

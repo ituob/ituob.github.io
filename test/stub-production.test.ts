@@ -6,14 +6,31 @@ import { addUser, api, db, seedFixtures } from "./helpers.ts";
 const hdr = { "X-Stub-Session": "itu-admin", "X-Stub-Access": "a@b.c" };
 
 describe("the stub cannot run in production", () => {
-  it("no wrangler config sets AUTH_MODE, vars or the stub", () => {
+  it("live deployment configs stay static-safe and keep credentials in secrets", () => {
     const configs = (env as any).WRANGLER_CONFIGS as Record<string, string>;
     const files = Object.keys(configs);
-    expect(files).toEqual(expect.arrayContaining(["wrangler.jsonc", "wrangler.staging.jsonc"]));
-    for (const f of files) {
+    const liveFiles = ["wrangler.jsonc", "wrangler.staging.jsonc"];
+    expect(files).toEqual(expect.arrayContaining([...liveFiles, "wrangler.bindings.example.jsonc", "wrangler.staging.bindings.example.jsonc"]));
+    for (const f of liveFiles) {
       const text = configs[f]!;
-      expect(text, f).not.toMatch(/AUTH_MODE/);
+      const config = JSON.parse(text);
+      expect(config.vars ?? {}, f).not.toHaveProperty("AUTH_MODE");
+      expect(config.d1_databases ?? [], f).toHaveLength(0);
+      expect(config.queues?.producers ?? [], f).toHaveLength(0);
+      expect(config.queues?.consumers ?? [], f).toHaveLength(0);
+      expect(config.triggers?.crons ?? [], f).toHaveLength(0);
+      for (const secret of ["OIDC_CLIENT_SECRET", "RESEND_API_KEY", "GITHUB_APP_PRIVATE_KEY", "GITHUB_WEBHOOK_SECRET"]) {
+        expect(config.vars ?? {}, f).not.toHaveProperty(secret);
+        expect(config.secrets?.required, f).toContain(secret);
+      }
       expect(text, f).not.toMatch(/stub/i);
+    }
+    for (const f of ["wrangler.bindings.example.jsonc", "wrangler.staging.bindings.example.jsonc"]) {
+      const text = configs[f]!;
+      expect(text, f).not.toMatch(/AUTH_MODE|stub/i);
+      expect(text, f).not.toMatch(/"vars"\s*:/);
+      for (const secret of ["OIDC_CLIENT_SECRET", "RESEND_API_KEY", "GITHUB_APP_PRIVATE_KEY", "GITHUB_WEBHOOK_SECRET"])
+        expect(text, f).not.toContain(`"${secret}"`);
     }
   });
 
@@ -28,10 +45,10 @@ describe("the stub cannot run in production", () => {
 
   it("the Worker answers 500 (not a session) for stub config on a production host", async () => {
     await seedFixtures();
+    const before = (await db().prepare("SELECT * FROM memberships ORDER BY id").all()).results;
     const r = await api("POST", "/api/admin/itu-staff", { host: "www.ituob.org", headers: hdr, body: { userId: "itu-admin", roles: ["itu-admin"] } });
     expect(r.status).toBe(500);
-    const rows = await db().prepare("SELECT count(*) n FROM memberships").first<{ n: number }>();
-    expect(rows!.n).toBe(0);
+    expect((await db().prepare("SELECT * FROM memberships ORDER BY id").all()).results).toEqual(before);
     expect((await api("GET", "/api/whoami", { host: "www.ituob.org", headers: hdr })).status).toBe(500);
   });
 

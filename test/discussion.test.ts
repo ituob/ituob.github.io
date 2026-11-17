@@ -12,7 +12,7 @@ import { activateMember, api, db, provisionItu, seedFixtures } from "./helpers.t
 const sources = import.meta.glob("../worker/**/*.ts", { query: "?raw", import: "default", eager: true }) as Record<string, string>;
 const EDITOR = "itu-editor@example.test";
 const ADMINU = "itu-admin@example.test";
-const entry = () => ({ country_or_area: { en: "Aland" }, company_name: "Acme Telecom" });
+const entry = () => ({ country_or_area: { en: "Aland" }, company_name: "Acme Telecom", issue_id_number: "89 358 01" });
 const payload = () => ({ type: "ADD", data: { _class: "E118Amendment", entries: [entry()] } });
 const subBody = () => ({ register_id: "E118_IIN", slug: "e118-iin", action_type: "ADD", payload: payload() });
 
@@ -147,6 +147,16 @@ describe("event emission", () => {
 });
 
 describe("comments, mentions, prefs", () => {
+  it("shows the roster name for a comment's snapshotted Member State affiliation", async () => {
+    const id = await draft();
+    const created = await say(id, "member-A", "Aland comment");
+    expect(created.json.comment).toMatchObject({ affiliation_kind: "member", affiliation_member_id: "A", affiliation_member_name: "Aland (Republic)" });
+    const thread = await api("GET", `/api/me/submissions/${id}/comments`, { session: "member-A", headers: SAME });
+    expect(thread.json.comments[0]).toMatchObject({ affiliation_member_id: "A", affiliation_member_name: "Aland (Republic)" });
+    const history = await api("GET", `/api/me/submissions/${id}/history`, { session: "member-A", headers: SAME });
+    expect(history.json.comments[0]).toMatchObject({ affiliation_member_id: "A", affiliation_member_name: "Aland (Republic)" });
+  });
+
   it("a mention notifies the mentioned account; none silences email but keeps the inbox row", async () => {
     const id = await draft();
     await me(id, "submit");

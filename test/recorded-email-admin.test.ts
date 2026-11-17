@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { api, db } from "./helpers.ts";
+import { ADMIN, api, bootstrapAdmin, db } from "./helpers.ts";
 
-const ACCESS = "admin@example.test";
+const ACCESS = ADMIN;
 
 async function seedEmails() {
   for (const [id, to] of [["email-a", "a@example.test"], ["email-b", "b@example.test"], ["email-c", "c@example.test"]]) {
@@ -14,6 +14,7 @@ async function seedEmails() {
 
 describe("admin recorded email listing", () => {
   beforeEach(async () => {
+    await bootstrapAdmin();
     await db().prepare("DELETE FROM recorded_emails").run();
     await seedEmails();
   });
