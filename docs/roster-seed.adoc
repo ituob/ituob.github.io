@@ -4,9 +4,10 @@
 
 `seeds/roster.sql` is generated from the git-pinned data-ob submodule's
 `datasets/country-names/data.yaml`: 142 country/area records at revision
-`ff37cb471a8da399bd12d29bc3a334c080c7f7fe`. Each stable source `key` becomes
+`7d94b1c1a6425396525dc6e153ee09eece74cd54`. Each stable source `key` becomes
 `members.id`; the trimmed English name becomes both `name` and `register_key`.
-The Worker extracts English country names from multilingual payloads.
+The Worker extracts country labels from multilingual payloads and resolves them
+through the shared country-to-member mapping.
 
 This dataset is a country/area vocabulary, *not an authoritative TSB membership
 list*. Every new row is therefore `suspended`: it cannot be claimed until an
@@ -24,11 +25,37 @@ ITU staff provisioning remains the existing explicit admin flow for a user who
 has logged in; no default admin or credential is created.
 
 Country names differ across historical registers and ROA, and some registers
-use codes rather than country names. This bootstrap does not assert complete
-alias reconciliation across the 17 Entry classes. Unmatched country values
-remain ITU-only under the existing server authorization. A reviewed mapping and
-authoritative TSB list are still needed before enabling member submissions for
-all registers. This work does not include the admin UI in PR #110.
+use ISO codes. `worker/lib/country-members.generated.ts` is the shared mapping
+used by submission authorization for every country-bearing register. Generate it
+with `node scripts/build-country-members.mjs` after a reviewed data-ob pin update.
+It reconciles stable country keys, names in every available language, ISO alpha-2
+codes (including `iso-3166:` references), and ISO alpha-3 codes in structured
+register rows. Telephone country codes and network identifiers are not unique
+administration identifiers and confer no country authority.
+
+`scripts/country-member-aliases.json` records explicit historical names,
+abbreviations and source misspellings. The generator expands structured row
+translations only from a reconciled English identity. Conflicting translations
+fail generation unless `scripts/country-member-conflicts.json` supplies an
+explicit resolution and reason. In particular, incorrect North Korean
+translations on the seeded South Korea record confer no member authority.
+Runtime performs only normalized dictionary lookup, never fuzzy matching.
+Reviewed local administrations outside the bootstrap retain exact register-key
+lookup; a conflicting key fails closed. No mapping activates a member or grants
+an affiliation.
+
+`test/country-coverage.test.ts` inventories every dataset schema with a country,
+country/area, country/service or area/network field, including ROA and datasets
+outside the submission catalog. Every label in every available language must
+resolve to exactly one seeded member or appear verbatim with a reason in
+`test/fixtures/country-coverage-exceptions.json`. Stale exceptions fail the test.
+The fixture includes absent administrations, territories, reserved allocations
+and international services. It is deliberately nonempty: the 142-country
+vocabulary omits real countries, including France, Germany and Japan. Adding
+these administrations requires authoritative roster review rather than aliases
+to another member. ITU staff may submit these values; members may not submit
+unresolved countries or unscoped service rows. The coverage test also exercises
+country extraction and shared authorization for each typed catalog register.
 
 == Generate and apply locally
 

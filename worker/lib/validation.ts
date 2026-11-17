@@ -74,12 +74,17 @@ function identityPart(value: unknown): string | null {
 export function registerKeysOf(register_id: string, payload: unknown): string[] {
   const entries = isObj(payload) && isObj(payload.data) && Array.isArray(payload.data.entries) ? payload.data.entries : [];
   const cls = isObj(payload) && isObj(payload.data) ? payload.data._class : null;
-  const field = typeof cls === "string" && Object.hasOwn(AMENDMENT_COUNTRY_FIELDS, cls) ? AMENDMENT_COUNTRY_FIELDS[cls] : null;
+  const rule = rulesFor(register_id);
+  const field = typeof cls === "string" && Object.hasOwn(AMENDMENT_COUNTRY_FIELDS, cls)
+    ? (rule?.amendmentClass ? rule.countryField : AMENDMENT_COUNTRY_FIELDS[cls]) : null;
   if (!rulesFor(register_id) || !field) return [];
   const keys: string[] = [];
   for (const e of entries) {
     const k = isObj(e) ? keyOf(e[field]) : null;
     if (k) keys.push(k);
+    // Country/service and area/network registers also contain unscoped rows.
+    // A member may never smuggle one into a country-bound batch; ITU staff can.
+    else if (field === "country_area_or_service" || field === "area_or_network") keys.push("");
   }
   return keys;
 }
@@ -144,7 +149,7 @@ export const stage1: PayloadValidator = ({ register_id, slug, action_type, paylo
         const field = groups.flat().find(candidate => entryFields?.includes(candidate)) ?? rules.keyFields[0];
         req(`${at}.${field}`, `A register identity (${fields}) is required`);
       }
-      if (countryField && keyOf(e[countryField]) === null)
+      if (countryField && countryField !== "country_area_or_service" && countryField !== "area_or_network" && keyOf(e[countryField]) === null)
         req(`${at}.${countryField}`, `${countryField} is required`);
       if (full) for (const f of requiredEntryFields[register_id] ?? []) if (blank(e[f])) req(`${at}.${f}`, `${f} is required`);
     });

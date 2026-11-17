@@ -1,6 +1,6 @@
 import { env } from "cloudflare:workers";
 import { beforeEach, describe, expect, it } from "vitest";
-import { ADMIN, Forbidden, addUser, api, db, submit } from "./helpers.ts";
+import { ADMIN, Forbidden, addUser, api, bootstrapAdmin, db, submit } from "./helpers.ts";
 
 interface Country { id: string; name: string; register_key: string }
 const seed = (env as unknown as { TEST_ROSTER_SEED: {
@@ -43,19 +43,22 @@ describe("checked-in roster seed on real D1", () => {
   });
 
   it("preserves reviewed member changes, existing accounts, and affiliation history", async () => {
+    await bootstrapAdmin();
     await addUser("existing-user");
     expect((await api("POST", `/api/admin/members/${own.id}/status`, { access: ADMIN, body: { status: "active" } })).status).toBe(200);
     await db().prepare("UPDATE members SET name='Reviewed display name', updated_at='reviewed-timestamp' WHERE id=?1").bind(own.id).run();
     await db().prepare("INSERT INTO members (id,name,register_key,status,created_at,updated_at) VALUES ('local-reviewed','Local reviewed','Local reviewed','withdrawn','created','updated')").run();
     const beforeMembers = await members();
     const beforeUsers = (await db().prepare("SELECT * FROM users ORDER BY id").all()).results;
+    const beforeMemberships = (await db().prepare("SELECT * FROM memberships ORDER BY id").all()).results;
+    const beforeRoles = (await db().prepare("SELECT * FROM user_roles ORDER BY user_id,role").all()).results;
     const beforeEvents = (await db().prepare("SELECT * FROM membership_events ORDER BY id").all()).results;
     await applySeed();
     expect(await members()).toEqual(beforeMembers);
     expect((await db().prepare("SELECT * FROM users ORDER BY id").all()).results).toEqual(beforeUsers);
     expect((await db().prepare("SELECT * FROM membership_events ORDER BY id").all()).results).toEqual(beforeEvents);
-    expect(await count("memberships")).toBe(0);
-    expect(await count("user_roles")).toBe(0);
+    expect((await db().prepare("SELECT * FROM memberships ORDER BY id").all()).results).toEqual(beforeMemberships);
+    expect((await db().prepare("SELECT * FROM user_roles ORDER BY user_id,role").all()).results).toEqual(beforeRoles);
   });
 
   it("retains database role/kind, foreign-key, status, and one-live-membership constraints", async () => {
@@ -79,6 +82,7 @@ describe("checked-in roster seed on real D1", () => {
     const claim = () => api("POST", "/api/me/membership/claim", { session: "seed-claimant", body: { memberId: own.id } });
     expect((await claim()).status).toBe(400);
     expect(await count("memberships")).toBe(0);
+    await bootstrapAdmin();
     for (const member of [own, other]) expect((await api("POST", `/api/admin/members/${member.id}/status`, { access: ADMIN, body: { status: "active" } })).status).toBe(200);
     const c = await claim();
     expect(c.status).toBe(201);
@@ -87,7 +91,7 @@ describe("checked-in roster seed on real D1", () => {
     await expect(submit("seed-claimant", [own.register_key])).rejects.toBeInstanceOf(Forbidden);
     expect((await api("POST", `/api/admin/claims/${membershipId}/verify`, { session: "seed-claimant", body: {} })).status).toBe(403);
     expect((await db().prepare("SELECT status FROM memberships WHERE id=?1").bind(membershipId).first<{ status: string }>())!.status).toBe("pending");
-    expect(await count("user_roles")).toBe(0);
+    expect((await db().prepare("SELECT * FROM user_roles WHERE user_id='seed-claimant'").all()).results).toEqual([]);
     expect((await api("POST", `/api/admin/claims/${membershipId}/verify`, { access: ADMIN, body: {} })).status).toBe(200);
     expect((await api("GET", "/api/whoami", { session: "seed-claimant" })).json).toMatchObject({ roles: ["member-submitter"], memberStateId: own.id });
     expect(await submit("seed-claimant", [own.register_key])).toBe(1);
