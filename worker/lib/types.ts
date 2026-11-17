@@ -42,6 +42,9 @@ export interface Env {
   NOTIFY_Q?: Queue<{ notification_ids: string[] }>;
 }
 
+/** Deployment can serve static assets before D1 is provisioned. */
+export type RuntimeEnv = Omit<Env, "DB"> & { DB?: D1Database };
+
 /** Shared contract with #102 (docs/identity-accounts.adoc). */
 export interface Session {
   userId: string;
