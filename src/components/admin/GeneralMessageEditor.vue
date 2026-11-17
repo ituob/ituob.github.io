@@ -53,6 +53,13 @@ async function approve() {
     await reload(); notice.value = 'Approved YAML frozen. Open its review PR before publication.';
   });
 }
+const existingPath = ref('');
+async function importExisting() {
+  await perform(async () => {
+    accept((await api<{draft:GeneralMessage}>(`${endpoint}/import`,'POST',{ob_issue_no:issueNo.value,path:existingPath.value.trim()})).draft);
+    await reload(); notice.value = 'Existing record opened as a draft. Approval will propose a replacement of that file for review.';
+  });
+}
 async function remove() {
   if(!draft.value || !window.confirm(`Delete draft ${draft.value.path}?`)) return;
   await perform(async () => {
@@ -78,6 +85,10 @@ fresh(); onMounted(() => perform(reload));
       <button type="button" @click="perform(reload)">Reload list</button>
       <button v-for="item in drafts" :key="item.id" type="button" @click="accept(item)">{{ item.path }} · r{{ item.revision }}{{ item.approved_at ? ' · approved' : '' }}</button>
       <button type="button" @click="fresh">New message</button>
+    </fieldset>
+    <fieldset :disabled="busy"><legend>Open an existing record</legend>
+      <label>Repository path <input v-model="existingPath" placeholder="ob-issues/1331/misc_communications/001.yaml" /></label>
+      <button type="button" :disabled="!existingPath.trim()" @click="importExisting">Open existing record</button>
     </fieldset>
     <fieldset :disabled="busy"><legend>{{ draft ? 'Edit saved message' : 'New message' }}</legend>
       <label>Issue number <input v-model.number="issueNo" type="number" min="1" max="99999" :disabled="!!draft" /></label>

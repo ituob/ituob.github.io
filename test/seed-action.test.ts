@@ -89,3 +89,16 @@ describe("repository reader", () => {
     await expect(reader.read("bad repo", "x")).rejects.toThrow(RepoReadFailed);
   });
 });
+
+describe("existing general message import route", () => {
+  const path = "ob-issues/1331/misc_communications/001.yaml";
+  const call = () => api("POST", "/api/admin/general-messages/import", { access: "itu-editor@example.test", body: { ob_issue_no: 1331, path } });
+  it("fails closed without a reader and opens a draft with one", async () => {
+    setRepoReader(null);
+    expect((await call()).status).toBe(503);
+    setRepoReader(new FakeRepoReader({ [`ituob/itu-ob-data:${path}`]: "type: misc_communications\nob_issue_no: '1331'\ntext: Old\n" }));
+    const r = await call();
+    expect(r.status, JSON.stringify(r.json)).toBe(200);
+    expect(r.json.draft.path).toBe(path);
+  });
+});

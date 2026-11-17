@@ -1,4 +1,5 @@
-import { stringify } from "yaml";
+import { parse, stringify } from "yaml";
+import { type RepoReader } from "./repo-reader.ts";
 import { generalBinding } from "../../src/lib/form/general.ts";
 export { generalBinding, GENERAL_TYPES } from "../../src/lib/form/general.ts";
 import { validateClass } from "../../src/lib/schema.validators.generated.ts";
@@ -85,6 +86,33 @@ export async function saveGeneralMessage(db: D1Database, session: Session | null
   if (!result[0]?.meta.changes) throw new ConflictError("revision changed, issue frozen, or review PR reserved; reload before editing");
   return stored(db,id);
 }
+const existingPath = /^ob-issues\/([1-9]\d*)\/(?:general\/(approved_recommendations|running_annexes)|([a-z0-9_]+)\/\d{3})\.yaml$/;
+/**
+ * Open an existing canonical record from the data repository as a draft (map row D3). The file is read
+ * through the repository reader, must validate as its class exactly as a new draft does (nothing is
+ * rewritten to make it pass), and keeps its path, so approval produces a replacement of that file in a
+ * reviewed PR, never a direct write.
+ */
+export async function importGeneralMessage(db: D1Database, session: Session | null, input: { ob_issue_no: unknown; path: unknown }, reader: RepoReader, repo: string) {
+  const actor = staff(session), no = editionNo(input.ob_issue_no);
+  const match = typeof input.path === "string" ? existingPath.exec(input.path) : null;
+  if (!match || Number(match[1]) !== no) throw new InvalidError("path must be an existing ob-issues/<issue>/<type>/NNN.yaml or general/<type>.yaml record of that issue");
+  const type = match[2] ?? match[3]!;
+  const text = await reader.read(repo, input.path as string);
+  if (text === null) throw new NotFoundError("no such record in the data repository");
+  let value: unknown;
+  try { value = parse(text); } catch { throw new ValidationFailed([{ path: "", code: "type", message: "record is not valid YAML" }]); }
+  const { className, value: valid } = validateGeneralMessage(type, value);
+  checkIssue(no, valid);
+  const id = ulid(), at = new Date().toISOString();
+  const write = db.prepare(`INSERT INTO general_messages (id,ob_issue_no,type,class_name,path,value_json,revision,updated_at)
+    SELECT ?1,?2,?3,?4,?5,?6,1,?7 WHERE NOT EXISTS (SELECT 1 FROM editions WHERE ob_issue_no=?2 AND status IN ('composing','staged','published'))
+    ON CONFLICT(path) DO NOTHING`).bind(id, no, type, className, input.path, JSON.stringify(valid), at);
+  const result = await run(db, [write, ...await audit(db, actor, id, no, "general.message.imported", 1, at)]);
+  if (!result[0]?.meta.changes) throw new ConflictError("a draft of this record already exists or the issue is frozen");
+  return stored(db, id);
+}
+
 /** Remove a draft that is not yet under review. A reserved publication PR, an approved snapshot trail
  * or a frozen edition keep the record: published work is withdrawn through review, not deleted here. */
 export async function deleteGeneralMessage(db: D1Database, session: Session | null, id: string, revision: unknown) {
