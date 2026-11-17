@@ -62,3 +62,34 @@ describe('general prose authoring controls', () => {
     expect(view.changes).toEqual([{ kind: 'leaf', type: 'HashOrText', value: '{this is prose, not JSON}' }]);
   });
 });
+
+describe('ontology-backed general fields (D7, D14, D15, D18)', () => {
+  it('edits GeneralCustom.title as multilingual text through the generated model', () => {
+    const title = description.classes.GeneralCustom!.attributes.find(a => a.name === 'title')!;
+    expect(title.type).toBe('MultilingualString');
+    const value = { type: 'custom', title: { en: 'Notice', fr: 'Avis' }, text: 'Body' };
+    expect(validateClass('GeneralCustom', value)).toEqual([]);
+    const edited = model.setField(model.toFormState('GeneralCustom', value).state, 'title', { en: 'Changed', fr: 'Avis' });
+    expect(model.toInstance(edited)).toEqual({ ...value, title: { en: 'Changed', fr: 'Avis' } });
+  });
+  it('rejects a non-object custom title', () => {
+    expect(validateClass('GeneralCustom', { type: 'custom', title: ['not', 'a', 'title'] })).not.toEqual([]);
+  });
+  it.each([
+    ['GeneralMid', 'contents', { type: 'mid', contents: 'Plain prose' }],
+    ['GeneralTelephoneCommunication', 'contents', { date: '2020-01-01', contents: 'Plain prose' }],
+  ])('%s.%s accepts text and keeps stored rich objects', (className, attr, value) => {
+    const a = description.classes[className]!.attributes.find(x => x.name === attr)!;
+    expect(a.type).toBe('HashOrText');
+    expect(validateClass(className, value)).toEqual([]);
+    expect(model.toInstance(model.toFormState(className, value).state)).toEqual(value);
+    const rich = { ...value, contents: { en: { type: 'doc', content: [] } } };
+    expect(model.toInstance(model.toFormState(className, rich).state)).toEqual(rich);
+  });
+  it('dispatches sanc to GeneralSancs and edits its plain-text contents', () => {
+    expect(general.generalBinding('sanc').className).toBe('GeneralSancs');
+    const value = { type: 'sanc', contents: 'Notice', items: [{ country: 'Example', sanc: '7-001' }] };
+    expect(validateClass('GeneralSancs', value)).toEqual([]);
+    expect(model.toInstance(model.toFormState('GeneralSancs', value).state)).toEqual(value);
+  });
+});
