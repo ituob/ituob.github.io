@@ -1,5 +1,5 @@
-import { assertPatchBranch, assertMetadataRequest, assertMessageRequest, METADATA_BRANCH, MESSAGE_BRANCH, PublisherNotConfigured } from "./publisher.ts";
-import type { OpenPatchPrRequest, OpenMetadataPrRequest, OpenGeneralMessagePrRequest, OpenRevertPrRequest, OpenedPr, PatchPublisher, PinBump, PinBumpRequest, Promotion, PromotionRequest, PublisherConfig, PullRequestState } from "./publisher.ts";
+import { assertCatalogRequest, CatalogPublishConflict, DEFAULT_CATALOG_REPO, assertPatchBranch, assertMetadataRequest, assertMessageRequest, METADATA_BRANCH, MESSAGE_BRANCH, PublisherNotConfigured } from "./publisher.ts";
+import type { CatalogSnapshot, OpenCatalogPrRequest, OpenPatchPrRequest, OpenMetadataPrRequest, OpenGeneralMessagePrRequest, OpenRevertPrRequest, OpenedPr, PatchPublisher, PinBump, PinBumpRequest, Promotion, PromotionRequest, PublisherConfig, PullRequestState } from "./publisher.ts";
 
 type Json = Record<string, any>;
 export type GitHubTransport = (input: string, init: RequestInit) => Promise<Response>;
@@ -39,6 +39,46 @@ export class GitHubAppPatchPublisher implements PatchPublisher {
     this.configured();
     if (repo !== this.config.PATCH_REPO) throw new Error("Repository is not the configured patch repository");
     return `/repos/${repo}`;
+  }
+  private catalogRepo(repo: string): string {
+    this.configured();
+    if (repo !== (this.config.CATALOG_REPO ?? DEFAULT_CATALOG_REPO) || !repoPattern.test(repo)) throw new Error("Repository is not the configured catalog repository");
+    return `/repos/${repo}`;
+  }
+  private async catalogFile(repo: string, path: string, ref: string): Promise<{ text: string; blobSha: string }> {
+    const file = await this.request(`${repo}/contents/${path}?ref=${requireSha(ref)}`);
+    if (file.encoding !== "base64" || typeof file.content !== "string" || !/^[a-f0-9]{40}$/.test(file.sha)) throw new Error("Unexpected catalog file response");
+    const bytes = Uint8Array.from(atob(file.content.replace(/\s/g, "")), (ch) => ch.charCodeAt(0));
+    return { text: new TextDecoder().decode(bytes), blobSha: file.sha };
+  }
+  async readCatalog(req: { repo: string }): Promise<CatalogSnapshot> {
+    const repo = this.catalogRepo(req.repo);
+    const base = await this.defaultRef(repo);
+    const registers = await this.catalogFile(repo, "catalogs/registers.yaml", base.sha);
+    const recommendations = await this.catalogFile(repo, "catalogs/recommendations.yaml", base.sha);
+    return { repo: req.repo, baseSha: base.sha, registers, recommendations: { text: recommendations.text } };
+  }
+  /** Modifies exactly one existing file on a new owned branch and opens a review PR; never touches the default branch. */
+  async openCatalogPr(req: OpenCatalogPrRequest): Promise<OpenedPr> {
+    assertCatalogRequest(req);
+    const repo = this.catalogRepo(req.repo);
+    const message = this.marker(req.branch, await fingerprint([req.idempotencyKey, req.path, req.content]));
+    const base = await this.defaultRef(repo);
+    if (req.branch === base.ref) throw new Error("Cannot write the default branch");
+    const existing = await this.optional(`${repo}/git/ref/heads/${encode(req.branch)}`);
+    let sha: string;
+    if (existing) sha = requireSha(existing.object.sha);
+    else {
+      const current = await this.catalogFile(repo, req.path, base.sha);
+      if (current.text === req.content) throw new CatalogPublishConflict("Catalog edit has no change");
+      if (current.blobSha !== req.baseBlobSha) throw new Error("Catalog changed since it was read");
+      sha = await this.makeCommit(repo, base.sha, { path: req.path, mode: "100644", type: "blob", content: req.content }, message);
+      sha = await this.createRef(repo, req.branch, sha);
+    }
+    const commit = await this.verifyChange(repo, sha, req.path, message, req.content);
+    const pr = await this.pull(repo, req.branch, base.ref, req.title, req.body, sha);
+    if (pr.state !== "open" && !(pr.state === "closed" && pr.merged_at)) throw new CatalogPublishConflict("Catalog review PR was closed without merging. Submit a new change for review.");
+    return { prNumber: pr.number, url: pr.html_url, commitSha: sha, baseSha: commit.parents[0].sha };
   }
   private async request(path: string, method = "GET", body?: unknown, token?: string): Promise<Json> {
     const auth = token ?? await this.accessToken();

@@ -24,6 +24,8 @@ export interface Env {
   OIDC_ID_TOKEN_ALGS?: string;
   /** Authoritative action repository, explicitly configured for real publishing. */
   PATCH_REPO?: string;
+  /** Catalog repository (registers.yaml); defaults to ituob/service-publications-docs. */
+  CATALOG_REPO?: string;
   /** GitHub App credentials; the private key is PKCS8 PEM in a Worker secret. */
   GITHUB_APP_ID?: string;
   GITHUB_APP_PRIVATE_KEY?: string;
