@@ -18,6 +18,7 @@ import { StubMisconfigured, getAccessIdentity, getAccessServicePrincipal, getSes
 import { type Route, body, json, str } from "./lib/http.ts";
 import { UpstreamError, ValidationFailed } from "./lib/submissions.ts";
 import { discussionRoutes } from "./discussion-routes.ts";
+import { adoptionRoutes } from "./adoption-routes.ts";
 import { composerRoutes } from "./composer-routes.ts";
 import { submissionRoutes } from "./submission-routes.ts";
 import { webhookRoutes } from "./webhook-routes.ts";
@@ -26,6 +27,7 @@ import type { AccessIdentity, Env, Session } from "./lib/types.ts";
 const routes: Route[] = [
   ...submissionRoutes,
   ...composerRoutes,
+  ...adoptionRoutes,
   ...discussionRoutes,
   ...webhookRoutes,
   {
