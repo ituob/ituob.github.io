@@ -131,7 +131,7 @@ export async function spotCheck(
           const close = card.inner.indexOf("</a>", from);
           const linkText = text(card.inner.slice(from, close === -1 ? undefined : close));
           const asOf = `as of OB No. ${entry.as_of_issue}`;
-          if (!linkText.includes(asOf)) failures.push(`link ${href}: as-of issue "${asOf}" not stated`);
+          if (!new RegExp(`\\bas of OB No\\. ${entry.as_of_issue}\\b`).test(linkText)) failures.push(`link ${href}: as-of issue "${asOf}" not stated`);
         }
         const status = editionStatus.get(`${entry.standard}-${entry.edition_year}`)!;
         const p = statusPresentation(status);
@@ -150,10 +150,11 @@ export async function spotCheck(
   return results;
 }
 
-export function renderReport(results: readonly CheckResult[], meta: { target: string; total: number; at: string }): string {
+export function renderReport(results: readonly CheckResult[], meta: { target: string; total: number; at: string; rejected?: readonly string[] }): string {
+  const rejected = meta.rejected ?? [];
   const failed = results.filter((r) => !r.ok);
   const lines = [
-    `## Downloads spot-check: ${failed.length === 0 ? "PASS" : "FAIL"}`,
+    `## Downloads spot-check: ${failed.length === 0 && rejected.length === 0 ? "PASS" : "FAIL"}`,
     "",
     `- Target: ${meta.target}`,
     `- Checked ${results.length} of ${meta.total} manifest entries`,
@@ -166,6 +167,9 @@ export function renderReport(results: readonly CheckResult[], meta: { target: st
         `| ${r.entry.standard} | ${r.entry.edition_year} | ${r.entry.language} | ${r.entry.as_of_issue} | ${r.entry.status} | \`${(r.sha256Actual ?? "none").slice(0, 12)}\` | ${r.ok ? "ok" : "FAIL"} |`,
     ),
   ];
+  if (rejected.length > 0) {
+    lines.push("", `- Rejected ${rejected.length} manifest entries`, ...rejected.map((r) => `- Manifest entry rejected: ${r}`));
+  }
   if (failed.length > 0) {
     lines.push("", "### Failures", ...failed.flatMap((r) => r.failures.map((f) => `- ${r.entry.path}: ${f}`)));
   }

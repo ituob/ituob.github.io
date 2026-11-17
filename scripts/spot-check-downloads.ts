@@ -6,7 +6,7 @@
  *
  * Verifies N manifest entries against the built site (default) or a live host
  * (staging / production), writes spot-check-report/report.md + report.json and
- * appends the table to $GITHUB_STEP_SUMMARY. Exit 1 on any failed entry. An empty
+ * appends the table to $GITHUB_STEP_SUMMARY. Exit 1 on failed or rejected entries. An empty
  * or absent manifest passes with a note unless PUBLICATIONS_REQUIRED=true.
  */
 import { appendFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
@@ -28,7 +28,9 @@ async function main(): Promise<number> {
   const sampleArg = arg("sample", "5");
   mkdirSync(reportDir, { recursive: true });
 
-  const entries = existsSync(manifestPath) ? parseManifest(readFileSync(manifestPath, "utf8")).entries : [];
+  const { entries, rejected } = existsSync(manifestPath)
+    ? parseManifest(readFileSync(manifestPath, "utf8")) : { entries: [], rejected: [] };
+  const total = entries.length + rejected.length;
   const publish = (md: string, json: unknown) => {
     writeFileSync(resolve(reportDir, "report.md"), md);
     writeFileSync(resolve(reportDir, "report.json"), JSON.stringify(json, null, 2) + "\n");
@@ -36,18 +38,19 @@ async function main(): Promise<number> {
     console.log(md);
   };
 
-  if (entries.length === 0) {
+  if (total === 0) {
     const required = process.env.PUBLICATIONS_REQUIRED === "true";
-    publish(`## Downloads spot-check: ${required ? "FAIL" : "NOTHING TO CHECK"}\n\n- Target: ${target}\n- The manifest lists no publications.\n`, { target, checked: 0, ok: !required });
+    publish(`## Downloads spot-check: ${required ? "FAIL" : "NOTHING TO CHECK"}\n\n- Target: ${target}\n- The manifest lists no publications.\n`, { target, total, checked: 0, rejected, ok: !required });
     return required ? 1 : 0;
   }
 
-  const sample = pickEntries(entries, sampleArg === "all" ? entries.length : Number(sampleArg));
+  const sample = entries.length === 0 ? [] : pickEntries(entries, sampleArg === "all" ? entries.length : Number(sampleArg));
   const source = baseUrl ? httpSource(baseUrl) : distSource(resolve(root, arg("dist", "dist")));
   const results = await spotCheck(entries, sample, source);
   const at = new Date().toISOString();
-  publish(renderReport(results, { target, total: entries.length, at }), { target, at, total: entries.length, results });
-  return results.every((r) => r.ok) ? 0 : 1;
+  const ok = rejected.length === 0 && results.every((r) => r.ok);
+  publish(renderReport(results, { target, total, at, rejected }), { target, at, total, checked: results.length, rejected, ok, results });
+  return ok ? 0 : 1;
 }
 
 main().then(

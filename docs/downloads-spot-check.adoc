@@ -16,14 +16,17 @@ the sorted entries; `--sample all` checks every entry), against the built site o
   (`Generated from the patch log, pending ITU adoption` plus the unofficial-data
   disclaimer for candidates; `Official ITU publication` without the disclaimer for adopted).
 
-Any mismatch exits 1 and names the file and the reason. An empty manifest passes with
-"nothing to check" unless `PUBLICATIONS_REQUIRED=true`.
+Any mismatch or rejected manifest entry exits 1 and names the reason. Reports count
+rejected entries in the manifest total and list their errors. An empty or missing
+manifest is optional only for local/manual runs without `PUBLICATIONS_REQUIRED=true`.
+CI requires a populated catalog from the producer on every event.
 
 == Where it runs
 
 `build-deploy.yml` runs it after `npm run build` on every push, pull request and
 `workflow_dispatch`. The result is in the job summary and the `downloads-spot-check`
-artifact (`report.md`, `report.json`).
+artifact (`report.md`, `report.json`). CI uses `--sample all`: every publication
+and every available language is checked on every run, including the last sorted entry.
 
 == Repeat it by hand
 

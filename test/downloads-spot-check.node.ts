@@ -1,5 +1,6 @@
 import { createHash } from "node:crypto";
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { spawnSync } from "node:child_process";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
@@ -96,6 +97,16 @@ describe("downloads spot-check", () => {
     expect((await run(all, dist(all, { html: () => "<html></html>" })))[0]!.failures.join("\n")).toMatch(/no edition card/);
   });
 
+  it.each(["11700", "1170x", "11701"])("rejects issue token %s for manifest issue 1170", async (issue) => {
+    const r = await run(all, dist(all, { html: (h) => h.replaceAll("as of OB No. 1170", `as of OB No. ${issue}`) }));
+    expect(r.every((x) => !x.ok && x.failures.some((f) => f.includes("as-of issue")))).toBe(true);
+  });
+
+  it("accepts an exact issue followed by punctuation", async () => {
+    const r = await run(all, dist(all, { html: (h) => h.replaceAll("as of OB No. 1170", "as of OB No. 1170.") }));
+    expect(r.every((x) => x.ok)).toBe(true);
+  });
+
   it("fails every entry when the downloads page is absent", async () => {
     const src: Source = async (p) => (p === "/downloads/" ? { status: 404, contentType: null, body: Buffer.alloc(0) } : distSourceOk(p));
     const distOk = dist(all);
@@ -124,5 +135,46 @@ describe("downloads spot-check", () => {
     const md = renderReport(r, { target: "dist", total: 2, at: "t" });
     expect(md).toMatch(/Downloads spot-check: FAIL/);
     expect(md).toMatch(/E\.212-en\.pdf: PDF \/downloads.*HTTP 404 \(missing\)/);
+  });
+});
+
+function cli(manifest: unknown, required: boolean) {
+  const dir = mkdtempSync(join(tmpdir(), "spot-cli-"));
+  tmp.push(dir);
+  dist(all); // Use the same matching page/PDF fixture as the library controls.
+  const built = tmp[tmp.length - 1]!;
+  const manifestFile = join(dir, "manifest.json");
+  writeFileSync(manifestFile, JSON.stringify(manifest));
+  const result = spawnSync(process.execPath, ["--experimental-strip-types", "scripts/spot-check-downloads.ts",
+    "--manifest", manifestFile, "--dist", built, "--sample", "all", "--report-dir", dir], {
+    encoding: "utf8", env: { ...process.env, PUBLICATIONS_REQUIRED: String(required), GITHUB_STEP_SUMMARY: "" },
+  });
+  return { ...result, report: JSON.parse(readFileSync(join(dir, "report.json"), "utf8")), md: readFileSync(join(dir, "report.md"), "utf8") };
+}
+
+describe("downloads spot-check CLI", () => {
+  it("fails an empty required manifest, preserving optional local use", () => {
+    expect(cli([], true).status).toBe(1);
+    expect(cli([], false).status).toBe(0);
+    const valid = cli(all, true);
+    expect(valid.status).toBe(0);
+    expect(valid.report).toMatchObject({ total: 2, checked: 2, rejected: [], ok: true });
+  });
+
+  it.each([true, false])("counts rejected entries and fails even with required=%s", (required) => {
+    const result = cli([all[0], { ...all[1], sha256: "INVALID" }], required);
+    expect(result.status).toBe(1);
+    expect(result.report).toMatchObject({ total: 2, checked: 1, ok: false });
+    expect(result.report.rejected).toHaveLength(1);
+    expect(result.md).toContain("Checked 1 of 2 manifest entries");
+    expect(result.md).toContain("Downloads spot-check: FAIL");
+    expect(result.md).toMatch(/Rejected 1 manifest entr/);
+  });
+
+  it("fails an entirely rejected catalog even when empty catalogs are optional", () => {
+    const result = cli([{ ...all[0], sha256: "INVALID" }], false);
+    expect(result.status).toBe(1);
+    expect(result.report).toMatchObject({ total: 1, checked: 0, ok: false });
+    expect(result.report.rejected).toHaveLength(1);
   });
 });
