@@ -5,11 +5,13 @@
  *   node --experimental-strip-types scripts/fetch-publications.ts verify-dist
  *
  * `fetch` finds the newest SUCCESSFUL run of the producer workflow on the
- * producer's default branch (never a pull-request run: those are unreviewed),
+ * producer's default branch (only push / workflow_dispatch runs whose head repository is the producer itself;
+ * never a pull-request or fork run: those are unreviewed),
  * downloads its artifact with `gh`, verifies the checksums and places the files
  * (public/downloads for Astro to copy into dist, manifest into src/data).
  * No run or artifact yet: exit 0 with an empty listing, unless
- * PUBLICATIONS_REQUIRED=true. A checksum failure always exits 1.
+ * PUBLICATIONS_REQUIRED=true (which also fails on an empty manifest). A checksum
+ * failure, a rejected manifest entry or a symlink always exits 1.
  * `verify-dist` re-checks dist/downloads against the manifest after the build.
  *
  * Env: GH_TOKEN (required by gh; the workflow's GITHUB_TOKEN suffices, the
@@ -20,7 +22,7 @@ import { execFileSync } from "node:child_process";
 import { mkdtempSync, readdirSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
-import { verifyAndPlace, verifyDist } from "../src/lib/publications-place.ts";
+import { selectRun, verifyAndPlace, verifyDist, type RunInfo } from "../src/lib/publications-place.ts";
 
 const root = process.cwd();
 const env = process.env;
@@ -45,26 +47,27 @@ function none(why: string): never {
 }
 
 function fetchAndPlace(): void {
-  // Event is not filtered: any run on the default branch is reviewed code.
-  const runs = JSON.parse(
-    gh(["run", "list", "-R", REPO, "-w", WORKFLOW, "-b", BRANCH, "-s", "success", "-L", "1", "--json", "databaseId,headSha"]),
-  ) as { databaseId: number; headSha: string }[];
-  if (runs.length === 0) none(`no successful ${WORKFLOW} run on ${REPO}@${BRANCH}`);
-  const run = runs[0]!;
+  // REST (not `gh run list`): only the API reports the head repository, and
+  // the branch name alone is attacker-chosen for a fork pull_request run.
+  const { workflow_runs } = JSON.parse(
+    gh(["api", `repos/${REPO}/actions/workflows/${WORKFLOW}/runs?branch=${encodeURIComponent(BRANCH)}&status=success&per_page=100`]),
+  ) as { workflow_runs: RunInfo[] };
+  const run = selectRun(workflow_runs, REPO, BRANCH);
+  if (!run) none(`no successful push/workflow_dispatch ${WORKFLOW} run on ${REPO}@${BRANCH}`);
 
   const tmp = mkdtempSync(join(tmpdir(), "publications-"));
   try {
     try {
-      gh(["run", "download", String(run.databaseId), "-R", REPO, "-n", ARTIFACT, "-D", tmp]);
+      gh(["run", "download", String(run.id), "-R", REPO, "-n", ARTIFACT, "-D", tmp]);
     } catch (err) {
       const text = String((err as { stderr?: string }).stderr ?? err);
-      if (/no valid artifacts|not found|expired/i.test(text)) none(`run ${run.databaseId} has no usable "${ARTIFACT}" artifact`);
+      if (/no valid artifacts|not found|expired/i.test(text)) none(`run ${run.id} has no usable "${ARTIFACT}" artifact`);
       throw err;
     }
-    if (readdirSync(tmp).length === 0) none(`artifact "${ARTIFACT}" of run ${run.databaseId} is empty`);
-    const { placed, rejected } = verifyAndPlace(tmp, DOWNLOADS, MANIFEST_OUT);
-    for (const r of rejected) console.warn(`[publications] manifest entry rejected, not placed: ${r}`);
-    console.log(`[publications] ${placed.length} PDFs verified and placed from ${REPO} run ${run.databaseId} (${run.headSha.slice(0, 7)})`);
+    if (readdirSync(tmp).length === 0) none(`artifact "${ARTIFACT}" of run ${run.id} is empty`);
+    const { placed } = verifyAndPlace(tmp, DOWNLOADS, MANIFEST_OUT);
+    if (placed.length === 0) none(`artifact "${ARTIFACT}" of run ${run.id} lists no publications`);
+    console.log(`[publications] ${placed.length} PDFs verified and placed from ${REPO} run ${run.id} (${run.head_sha.slice(0, 7)})`);
   } finally {
     rmSync(tmp, { recursive: true, force: true });
   }
