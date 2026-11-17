@@ -90,15 +90,13 @@ integration environments and credentials.
 == Validation evidence
 
 * Demo: 2/2 tests passed, including transcript reproducibility.
-* Full `npm run test:worker`: 547 passed, 1 failed, 548 total across 36 files.
-  The existing `test/country-authorization.test.ts:50` expects HTTP 400 for a
-  malformed mixed batch but receives validation status 422. Running that file
-  alone reproduces the failure (5 passed, 1 failed); both it and all Worker
-  production files are unchanged from the starting commit. The full suite is
-  therefore not green.
+* Integrated batch `npm run test:worker`: 559/559 tests passed across 38 files,
+  including both demo tests and all six country-authorization tests. The batch
+  retains authorization-first validation and distinct identities for the
+  unscoped-row fixture, so the former 400-versus-422 regression is green.
 * `npm run typecheck:worker`: passed.
 * `focused-quality`: complete demo harness, document and transcript; no remaining
-  in-scope findings. The full-suite failure above is outside these three paths.
+  in-scope findings after batch integration.
 
 == Generated transcript
 
