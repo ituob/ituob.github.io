@@ -21,6 +21,15 @@ describe("annex validator", () => {
     expect(isPositionDate(d)).toBe(false);
     expect(validateAnnexes({ A: { position_on: d } }).map((e) => e.path)).toContain("A.position_on");
   });
+  it.each<[string, unknown]>([
+    ["position_on", null], ["position_on", 20261001], ["position_on", {}],
+    ["datasets", null], ["datasets", "data"], ["datasets", true],
+    ["datasets", { value: undefined }], ["datasets", { value: Infinity }],
+  ])("rejects invalid %s field value %j without ontology validation", (field, value) => {
+    expect(validateAnnexes({ SR: { [field]: value } })).toEqual([
+      expect.objectContaining({ path: `SR.${field}`, code: "type" }),
+    ]);
+  });
   it("rejects non-mapping roots, scalar entries, unknown keys and bad ids", () => {
     expect(validateAnnexes([]).length).toBe(1);
     expect(validateAnnexes(null).length).toBe(1);

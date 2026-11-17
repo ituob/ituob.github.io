@@ -3,12 +3,24 @@ import { computed, ref } from 'vue';
 import TranslationAssist from './TranslationAssist.vue';
 import { description } from '../../lib/form/description';
 import { initialValue } from '../../lib/admin-client';
-import { appendItem, clearField, removeItem, setField, type FormNode } from '../../lib/form/model';
+import { appendItem, clearField, moveItem, removeItem, setField, type FormNode } from '../../lib/form/model';
 import { PROSE_LANGUAGES, isLanguageProse, setProseLanguage } from '../../lib/form/general';
 import { YamlTimestamp } from '../../lib/form/yaml-io';
+import { applyInvalid, type InvalidInput } from '../../lib/form/invalid-input';
 const props = defineProps<{ node: FormNode; path?: string; readonly?: boolean; translation?: boolean; opaqueReadonly?: boolean; prose?: boolean }>();
 const emit = defineEmits<{ change: [node: FormNode]; invalid: [path: string, message: string] }>();
 const jsonError = ref('');
+// Items are keyed by index and an item's invalid text lives in its own component. Reordering while any field of
+// the list holds invalid input would leave that text and its message on the wrong item (and the parent would stop
+// blocking Save), so moves wait until every pending field is valid. Removing is the explicit way to discard an
+// item with invalid text: the items are rebuilt from the model (new key epoch) and the pending input is dropped.
+const pending = ref<InvalidInput>({}), epoch = ref(0);
+function removeAt(node: Extract<FormNode, { kind: 'list' }>, index: number) {
+  epoch.value++; pending.value = {};
+  emit('change', removeItem(node, index)); emit('invalid', props.path || 'data', '');
+}
+const hasPending = computed(() => Object.keys(pending.value).length > 0);
+function itemInvalid(path: string, message: string) { applyInvalid(pending.value, path, message); emit('invalid', path, message); }
 const englishSource = computed(() => {
   if (props.node.kind !== 'object' || props.node.className !== 'MultilingualString') return '';
   const en = props.node.fields.find(f => f.attr.wire === 'en')?.node;
@@ -65,9 +77,11 @@ function replaceItem(index: number, child: FormNode) {
   </fieldset>
   <fieldset v-else-if="node.kind === 'list'" :disabled="readonly">
     <legend>{{ path }} ({{ node.items.length }} items)</legend>
-    <div v-for="(item, index) in node.items" :key="index">
-      <SchemaNode :node="item" :path="`${path}[${index}]`" :readonly="readonly" :translation="translation" :opaque-readonly="opaqueReadonly" :prose="prose" @change="replaceItem(index, $event)" @invalid="(path, message) => emit('invalid', path, message)" />
-      <button type="button" @click="emit('change', removeItem(node, index)); emit('invalid', path || 'data', '')">Remove item {{ index + 1 }}</button>
+    <div v-for="(item, index) in node.items" :key="`${epoch}:${index}`">
+      <SchemaNode :node="item" :path="`${path}[${index}]`" :readonly="readonly" :translation="translation" :opaque-readonly="opaqueReadonly" :prose="prose" @change="replaceItem(index, $event)" @invalid="itemInvalid" />
+      <button type="button" :disabled="index === 0 || hasPending" @click="emit('change', moveItem(node, index, -1)); emit('invalid', path || 'data', '')">Move item {{ index + 1 }} up</button>
+      <button type="button" :disabled="index === node.items.length - 1 || hasPending" @click="emit('change', moveItem(node, index, 1)); emit('invalid', path || 'data', '')">Move item {{ index + 1 }} down</button>
+      <button type="button" @click="removeAt(node, index)">Remove item {{ index + 1 }}</button>
     </div>
     <button type="button" @click="emit('change', appendItem(node, initialValue({ name: 'item', wire: 'item', type: node.itemType, kind: node.itemKind, collection: false, required: false })))">Add item</button>
   </fieldset>

@@ -53,6 +53,20 @@ async function approve() {
     await reload(); notice.value = 'Approved YAML frozen. Open its review PR before publication.';
   });
 }
+const existingPath = ref('');
+async function importExisting() {
+  await perform(async () => {
+    accept((await api<{draft:GeneralMessage}>(`${endpoint}/import`,'POST',{ob_issue_no:issueNo.value,path:existingPath.value.trim()})).draft);
+    await reload(); notice.value = 'Existing record opened as a draft. Approval will propose a replacement of that file for review.';
+  });
+}
+async function remove() {
+  if(!draft.value || !window.confirm(`Delete draft ${draft.value.path}?`)) return;
+  await perform(async () => {
+    await api(`${endpoint}/${draft.value!.id}/delete`,'POST',{expected_revision:draft.value!.revision});
+    fresh(); await reload(); notice.value = 'Draft deleted.';
+  });
+}
 async function openReview() {
   if(!draft.value) return;
   await perform(async () => {
@@ -72,12 +86,17 @@ fresh(); onMounted(() => perform(reload));
       <button v-for="item in drafts" :key="item.id" type="button" @click="accept(item)">{{ item.path }} · r{{ item.revision }}{{ item.approved_at ? ' · approved' : '' }}</button>
       <button type="button" @click="fresh">New message</button>
     </fieldset>
+    <fieldset :disabled="busy"><legend>Open an existing record</legend>
+      <label>Repository path <input v-model="existingPath" placeholder="ob-issues/1331/misc_communications/001.yaml" /></label>
+      <button type="button" :disabled="!existingPath.trim()" @click="importExisting">Open existing record</button>
+    </fieldset>
     <fieldset :disabled="busy"><legend>{{ draft ? 'Edit saved message' : 'New message' }}</legend>
       <label>Issue number <input v-model.number="issueNo" type="number" min="1" max="99999" :disabled="!!draft" /></label>
       <label>Message type <select v-model="type" :disabled="!!draft" @change="fresh"><option v-for="choice in GENERAL_TYPES" :key="choice" >{{ choice }}</option></select></label>
       <SchemaNode :node="node" path="message" :opaque-readonly="true" :prose="true" @change="node=$event" @invalid="invalid" />
       <button type="button" @click="save">Save draft</button>
       <button type="button" :disabled="!draft || dirty || !!draft.approved_at" @click="approve">Approve saved revision (administrator)</button>
+      <button type="button" :disabled="!draft || !!draft.approved_at" @click="remove">Delete draft</button>
       <button type="button" :disabled="!draft?.approved_at || dirty" @click="openReview">Open publication review PR (administrator)</button>
     </fieldset>
     <p v-if="draft">{{ draft.path }} · revision {{ draft.revision }} · {{ draft.approved_at ? 'Approved; publication still requires a reviewed and merged PR.' : 'Awaiting administrator approval.' }}</p>

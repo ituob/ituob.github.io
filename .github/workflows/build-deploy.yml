@@ -4,7 +4,7 @@ on:
   push:
     branches: [ main, staging ]
   pull_request:
-    branches: [ main, feat/webapp-integration ]
+    branches: [ main, feat/webapp-integration, "codex/**", "claude-a/**" ]
   workflow_dispatch:
 
 permissions:
@@ -66,6 +66,10 @@ jobs:
       run: |
         node scripts/generate-register-rules.mjs data-ob/catalogs/registers.yaml
         git diff --exit-code -- src/lib/register-rules.generated.ts
+    - name: Validate optional Worker bindings
+      run: |
+        npm run check:bindings
+        npm run test:bindings
 
     - name: Worker tests
       run: npx vitest run

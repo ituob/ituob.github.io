@@ -4,11 +4,9 @@
  * One module, used by the admin form and by the Worker, so the browser and
  * the server cannot disagree. Wire shape: a mapping of publication id to the
  * annexed position, `{ position_on?, datasets? }`, or null when the position
- * is not known. The ontology (IssueAnnexes / AnnexedPosition) describes the
- * same data as a list; `toOntologyInstance` bridges the two so the generated
- * validator checks the field types.
+ * is not known. Validation is self-contained: the pinned ontology does not
+ * define annex classes, so these wire rules check every field directly.
  */
-import { validateClass } from "../schema.validators.generated.ts";
 
 export interface AnnexedPositionWire {
   position_on?: string;
@@ -56,7 +54,7 @@ export function publicationIdError(id: string): string | null {
   return null;
 }
 
-/** Inspect iteratively before JSON/YAML serialization or generated validation can
+/** Inspect iteratively before JSON/YAML serialization can
  * recurse. Budgets include keys, scalar contents and container punctuation. */
 function datasetError(dataset: Record<string, unknown>): string | null {
   const pending: { value: unknown; depth: number }[] = [{ value: dataset, depth: 0 }];
@@ -84,50 +82,32 @@ function datasetError(dataset: Record<string, unknown>): string | null {
   return null;
 }
 
-/** Ontology view of the wire mapping: the entry list the generated schema describes. */
-export function toOntologyInstance(wire: Record<string, unknown>): { positions: Record<string, unknown>[] } {
-  return {
-    positions: Object.entries(wire).map(([id, entry]) => ({
-      publication_id: id,
-      ...(isObject(entry) && "position_on" in entry ? { position_on: entry.position_on } : {}),
-      ...(isObject(entry) && "datasets" in entry ? { datasets: entry.datasets } : {}),
-    })),
-  };
-}
-
 export function validateAnnexes(value: unknown): AnnexIssue[] {
   if (!isObject(value)) return [{ path: "", code: "type", message: "annexes must be a mapping of publication id to position" }];
   const errors: AnnexIssue[] = [];
   const ids = Object.keys(value);
   if (ids.length > MAX_ANNEXES) errors.push({ path: "", code: "type", message: `at most ${MAX_ANNEXES} annexed publications` });
-  const clean: Record<string, unknown> = {};
   for (const id of ids) {
     const at = JSON.stringify(id);
     const idError = publicationIdError(id);
     if (idError) { errors.push({ path: at, code: "type", message: idError }); continue; }
     const entry = value[id];
-    if (entry === null) { clean[id] = entry; continue; }
+    if (entry === null) continue;
     if (!isObject(entry)) { errors.push({ path: id, code: "type", message: `${id}: position must be a mapping or null` }); continue; }
-    let ok = true;
     for (const key of Object.keys(entry)) {
-      if (key !== "position_on" && key !== "datasets") { errors.push({ path: `${id}.${key}`, code: "unknown", message: `${id}.${key} is not an annex field` }); ok = false; }
+      if (key !== "position_on" && key !== "datasets") { errors.push({ path: `${id}.${key}`, code: "unknown", message: `${id}.${key} is not an annex field` }); }
     }
     if ("position_on" in entry && !isPositionDate(entry.position_on)) {
       errors.push({ path: `${id}.position_on`, code: "type", message: `${id}.position_on must be a real date (YYYY-MM-DD) or ISO timestamp` });
-      ok = false;
     }
     if ("datasets" in entry && !isObject(entry.datasets)) {
       errors.push({ path: `${id}.datasets`, code: "type", message: `${id}.datasets must be an object` });
-      ok = false;
     }
     if (isObject(entry.datasets)) {
       const message = datasetError(entry.datasets);
-      if (message) { errors.push({ path: `${id}.datasets`, code: "type", message }); ok = false; }
+      if (message) { errors.push({ path: `${id}.datasets`, code: "type", message }); }
     }
-    if (ok) clean[id] = entry;
   }
-  // Ontology-typed checks run over the entries that are structurally sound.
-  for (const issue of validateClass("IssueAnnexes", toOntologyInstance(clean))) errors.push(issue);
   return errors;
 }
 

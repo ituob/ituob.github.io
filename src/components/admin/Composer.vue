@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
+import type { IssueMetadataWire } from '../../lib/schema.generated';
 import EditionMetadata from './EditionMetadata.vue';
-import { api, canPlace, canPublishEdition, generalMessageStatus, editionNumber, publicationNotice, type ComposerSubmission, type Edition, type EditionItem, type EditionGeneralMessage } from '../../lib/discussion-client';
+import { api, canPlace, canStageEdition, generalMessageStatus, editionNumber, publicationNotice, type ComposerSubmission, type Edition, type EditionItem, type EditionGeneralMessage } from '../../lib/discussion-client';
 import { composerPreviewLinks } from '../../lib/composer-preview';
+defineProps<{ previousMetadata?: IssueMetadataWire | null }>();
 interface EditionDetail { edition: Edition; items: EditionItem[]; general_messages: EditionGeneralMessage[] }
 interface Pending { prNumber: number; url?: string; reason: string }
 const editions = ref<Edition[]>([]), submissions = ref<ComposerSubmission[]>([]), detail = ref<EditionDetail | null>(null);
@@ -37,12 +39,12 @@ async function remove(id: string) { await perform(async () => {
   if (!detail.value) throw new Error('Choose an edition.');
   await api(`${prefix}/editions/${detail.value.edition.ob_issue_no}/items/${id}/remove`, 'POST', {}); await refresh(); notice.value = 'Submission removed from the edition.';
 }); }
-async function publish() { await perform(async () => {
+async function publish(step: 'stage' | 'publish') { await perform(async () => {
   if (!detail.value) throw new Error('Choose an edition.');
   const no = detail.value.edition.ob_issue_no;
-  const result = await api<{ edition: Edition; published: string[]; pending?: Pending }>(`${prefix}/editions/${no}/publish`, 'POST', {});
+  const result = await api<{ edition: Edition; published: string[]; pending?: Pending }>(`${prefix}/editions/${no}/${step}`, 'POST', {});
   pending.value = result.pending ?? null; await refresh();
-  notice.value = publicationNotice(no, result);
+  notice.value = publicationNotice(no, result, step);
 }); }
 onMounted(() => perform(refresh));
 </script>
@@ -55,7 +57,7 @@ onMounted(() => perform(refresh));
     <form @submit.prevent="open"><fieldset :disabled="busy"><legend>Open edition</legend><label>OB edition number <input v-model.number="number" required type="number" min="1" max="99999" step="1" /></label><button>Open or select edition</button></fieldset></form>
     <fieldset :disabled="busy"><legend>Editions</legend><button @click="perform(refresh)">Refresh composer</button><p v-if="loaded && !editions.length && !error">No editions have been opened.</p><ul><li v-for="edition in editions" :key="edition.ob_issue_no"><button @click="perform(() => select(edition.ob_issue_no))">OB {{ edition.ob_issue_no }} · {{ edition.status }}</button></li></ul></fieldset>
     <section v-if="detail"><h2>OB {{ detail.edition.ob_issue_no }} · {{ detail.edition.status }}</h2>
-      <EditionMetadata :key="detail.edition.ob_issue_no" :issue-no="detail.edition.ob_issue_no" @saved="metadataRevision = $event.scheduled_at ? $event.revision : null" />
+      <EditionMetadata :key="detail.edition.ob_issue_no" :issue-no="detail.edition.ob_issue_no" :previous="previousMetadata" @saved="metadataRevision = $event.scheduled_at ? $event.revision : null" />
       <div><button :disabled="busy || !metadataRevision" @click="metadataPr()">Open metadata review PR</button><button :disabled="busy" @click="metadataPr(true)">Check metadata review</button>
         <p v-if="metadataReview" role="status">Metadata {{ metadataReview.pending ? 'review pending' : 'merged' }} · PR {{ metadataReview.pr.pr_number ?? 'request reserved; retry to resume' }} <a v-if="pendingUrl(metadataReview.pr.pr_url || undefined)" :href="pendingUrl(metadataReview.pr.pr_url || undefined)" target="_blank" rel="noopener noreferrer">Inspect metadata PR</a></p>
       </div>
@@ -72,7 +74,8 @@ onMounted(() => perform(refresh));
           <details v-if="message.content_yaml"><summary>Approved message contents</summary><pre>{{ message.content_yaml }}</pre></details>
         </li></ul><a href="/admin/general/">Prepare and review general messages</a>
       </section>
-      <button v-if="canPublishEdition(detail.edition, detail.items.length, detail.general_messages.length)" :disabled="busy" @click="publish">{{ pending ? 'Check staging and resume publication' : detail.edition.status === 'staged' ? 'Resume edition publication' : 'Publish edition through staging' }}</button>
+      <button v-if="canStageEdition(detail.edition, detail.items.length, detail.general_messages.length)" :disabled="busy" @click="publish('stage')">{{ pending ? 'Check staging and resume' : 'Stage edition (staging preview)' }}</button>
+      <button v-if="detail.edition.status === 'staged'" :disabled="busy" @click="publish('publish')">{{ pending ? 'Check production and resume publication' : 'Publish edition to production' }}</button>
     </section>
     <section><h2>Merged, unpublished submissions</h2><p v-if="loaded && !submissions.length && !error">No merged submissions are waiting for publication.</p><ul><li v-for="submission in submissions" :key="submission.id"><p>{{ submission.register_id }} · {{ submission.action_type }} · {{ submission.id }} · {{ submission.state }} · Target OB {{ submission.target_edition }}<span v-if="submission.edition"> · Placed in OB {{ submission.edition }}</span><span v-if="submission.revert_state && submission.revert_state !== 'closed'"> · Revert {{ submission.revert_state }}</span></p><button v-if="detail && canPlace(submission, detail.edition)" :disabled="busy" @click="place(submission)">Place in OB {{ detail.edition.ob_issue_no }}</button><a :href="`/admin/submissions/?id=${encodeURIComponent(submission.id)}`">Inspect submission</a></li></ul></section>
   </div>

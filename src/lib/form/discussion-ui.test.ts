@@ -47,6 +47,8 @@ describe('admin composer contract', () => {
   it('never describes pending staging or a composing response as published', () => {
     const pending = { edition, published: [], pending: { prNumber: 44, reason: 'Awaiting required staging checks' } };
     expect(publicationNotice(1351, pending)).toContain('waiting for staging');
+    expect(publicationNotice(1351, { ...pending, edition }, 'publish')).toContain('waiting for production');
+    expect(publicationNotice(1351, { edition: { ...edition, status: 'staged' }, published: [] }, 'stage')).toContain('staged');
     expect(publicationNotice(1351, { edition, published: [] })).toContain('Publication is not confirmed');
     expect(publicationNotice(1351, { edition: { ...edition, status: 'published' }, published: [item.id] })).toContain('service recorded');
   });

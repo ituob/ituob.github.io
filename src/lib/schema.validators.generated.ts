@@ -32,11 +32,6 @@ export const CLASSES: Readonly<Record<string, Readonly<Record<string, FieldSpec>
     "position_on": { kind: "date" },
     "notes": { kind: "string", many: true },
   },
-  "AnnexedPosition": {
-    "publication_id": { kind: "string" },
-    "position_on": { kind: "dateOrText" },
-    "datasets": { kind: "hash" },
-  },
   "Change": {
     "type": { kind: "string" },
     "identifier": { kind: "string" },
@@ -399,7 +394,7 @@ export const CLASSES: Readonly<Record<string, Readonly<Record<string, FieldSpec>
   },
   "GeneralCustom": {
     "type": { kind: "string" },
-    "title": { kind: "hash" },
+    "title": { kind: "class", ref: "MultilingualString" },
     "recommendation": { kind: "string" },
     "text": { kind: "string" },
     "ob_issue_no": { kind: "string" },
@@ -511,9 +506,6 @@ export const CLASSES: Readonly<Record<string, Readonly<Record<string, FieldSpec>
     "reclamation_date": { kind: "string" },
     "trial": { kind: "boolean" },
   },
-  "IssueAnnexes": {
-    "positions": { kind: "class", ref: "AnnexedPosition", many: true },
-  },
   "IssueAuthor": {
     "name": { kind: "string" },
     "address": { kind: "string" },
@@ -586,6 +578,15 @@ export const CLASSES: Readonly<Record<string, Readonly<Record<string, FieldSpec>
     "part_iii_reference": { kind: "string" },
     "centralizing_office": { kind: "class", ref: "ListVIIICentralizingOffice" },
     "measurements": { kind: "class", ref: "ListVIIIMeasurement", many: true },
+  },
+  "LocaleLabel": {
+    "key": { kind: "string", required: true },
+    "en": { kind: "string" },
+    "fr": { kind: "string" },
+    "es": { kind: "string" },
+    "zh": { kind: "string" },
+    "ru": { kind: "string" },
+    "ar": { kind: "string" },
   },
   "M1400Action": {
     "action_type": { kind: "string" },
@@ -664,6 +665,21 @@ export const CLASSES: Readonly<Record<string, Readonly<Record<string, FieldSpec>
     "as_of_issue": { kind: "integer", required: true },
     "seed_issue": { kind: "integer", required: true },
     "last_change_issue": { kind: "integer" },
+  },
+  "PublicationManifest": {
+    "publications": { kind: "class", ref: "PublicationManifestEntry", many: true },
+  },
+  "PublicationManifestEntry": {
+    "standard": { kind: "string", required: true },
+    "recommendation": { kind: "string", required: true },
+    "title": { kind: "string", required: true },
+    "edition_year": { kind: "integer", required: true },
+    "language": { kind: "string", required: true },
+    "as_of_issue": { kind: "integer", required: true },
+    "sha256": { kind: "string", required: true },
+    "status": { kind: "string", required: true },
+    "register_slugs": { kind: "string", many: true },
+    "path": { kind: "string", required: true },
   },
   "Q708ISPCAction": {
     "action_type": { kind: "string" },
@@ -777,6 +793,10 @@ export const CLASSES: Readonly<Record<string, Readonly<Record<string, FieldSpec>
     "key": { kind: "string", required: true },
     "membership": { kind: "string", required: true },
     "entries": { kind: "class", ref: "KeyHistoryEntry", many: true },
+  },
+  "RegisterLocale": {
+    "title": { kind: "class", ref: "MultilingualString" },
+    "locale": { kind: "class", ref: "LocaleLabel", many: true },
   },
   "T35AssignmentAuthority": {
     "terminal_type": { kind: "string", many: true },

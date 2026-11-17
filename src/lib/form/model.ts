@@ -322,6 +322,15 @@ export function removeItem(list: ListNode, index: number): ListNode {
   return { ...list, items: list.items.filter((_, i) => i !== index) };
 }
 
+/** Move an item up (-1) or down (+1); an edge move is a no-op. Item order is authored data (map row C6). */
+export function moveItem(list: ListNode, index: number, delta: -1 | 1): ListNode {
+  const to = index + delta;
+  if (index < 0 || index >= list.items.length || to < 0 || to >= list.items.length) return list;
+  const items = [...list.items];
+  [items[index], items[to]] = [items[to]!, items[index]!];
+  return { ...list, items };
+}
+
 /** Replace the node at `path` (field wire names and list indexes) with `f(node)`. */
 export function updateAt(root: FormNode, path: Path, f: (n: FormNode) => FormNode): FormNode {
   const [head, ...rest] = path;
