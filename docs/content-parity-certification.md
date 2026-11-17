@@ -4,7 +4,78 @@ Part of ituob/ituob.github.io#100. This is a bounded measurement, not a certific
 that every printed item survives as a structured patch. The reports and commands
 below identify the exact inputs and unresolved work.
 
-## Inputs
+## Count-aware correction (PR #133)
+
+The original results below used **unique-token containment**. They remain historical
+receipts; they do not certify multiplicity preservation. The evidence wrapper now
+computes uncapped **multiset token containment**:
+
+`sum(min(old_count[token], new_count[token])) / sum(old_count.values)`.
+
+Counts use the canonical auditor's tokens from the first `<main>` (fallback
+`<body>`): descendant text leaves joined with spaces, excluding script/style,
+canonical date normalization, Unicode word scanning, lowercasing, removal of
+stop words, tokens shorter than three characters and punctuation-only runs.
+An empty reference token multiset scores 1.0. Added occurrences cannot compensate
+for another token's missing occurrences. There is no frequency cap. The threshold
+stays **95%**, and each page uses its worst included Jekyll variant. Section,
+heading, table and link diagnostics retain their canonical definitions and are
+not additional pass conditions. The wrapper changes the page score used by both
+the canonical walker output and its retained variant evidence; the submodule's
+standalone auditor remains unchanged.
+
+The correction reuses the saved OB 1343 reference and 4,107-page Astro audit build.
+It does not rebuild either locally. The latest merge of `origin/main` changes
+rendering inputs and the `data-ob` pin, so those saved scores describe the recorded
+build, **not the newly merged source**. The earlier unchanged-input statement below
+applies only through `ae9b589`. A fresh hosted build is required for current output.
+
+OB 1350 reference scores are **not independently verified**: its original Jekyll
+fixture is unavailable here. The old 429-page receipt is internally consistent;
+it is not a fresh count-aware measurement, nor independent reference validation.
+OB 1344–1350 is outside the available pinned reference.
+
+### Saved-build remeasurement
+
+| Metric | Page min / median | Pages ≥95% | Variant min / median | Included variants ≥95% |
+| --- | --- | ---: | --- | ---: |
+| Old unique-token containment | 95.5696% / 98.9450% | 422/422 | 95.5696% / 99.1620% | 602/602 |
+| New multiset containment | 85.8144% / 97.5544% | 392/422 | 85.8144% / 97.7840% | 565/602 |
+
+The generator exited **1**: 30 pages (37 included variants) are below 95%; none
+are missing. The same two existing cross-listed variants remain excluded.
+All 604 reference/local HTML hash pairs match the old pinned evidence, and all
+81 saved rendering source hashes match its build receipt. Full precision scores
+and the complete failing-page list are in [comparison.json](parity/count-aware/comparison.json).
+The [count-aware report](parity/count-aware/pinned/parity_report.md) retains YAML,
+JSON and CSV companions. Its canonical Markdown/YAML calls 80–95% `warn`; those
+are **gate failures** at 95%, as the variant JSON and nonzero exit indicate.
+See the [per-page investigation](parity/count-aware/failure-analysis.md) for observed
+missing labels, repeated prose and unresolved content differences. These failures
+remain visible; no threshold reduction or new exclusion was made.
+
+Reproduce against the saved HTML with the corrected wrapper and a source checkout
+matching [build_inputs.json](parity/current-main/build_inputs.json):
+
+```sh
+PARITY_SOURCE_ROOT="$SAVED_RENDERING_SOURCE" \
+DEPLOYED_SITE="$PINNED_REFERENCE" LOCAL_DIST="$SAVED_ASTRO_BUILD" \
+OUTPUT_DIR=docs/parity/count-aware/pinned ruby test/generate_parity_evidence.rb
+```
+
+`PARITY_SOURCE_ROOT` attributes source hashes to the saved rendering checkout;
+it does not rebuild anything. The canonical walker/auditor bytes are identical
+at the old and newly merged submodule pins. The count-aware receipt records the
+wrapper SHA-256, and the old evidence remains unchanged.
+
+Regression tests: **10/10 pass**, including deletion of all 100 occurrences of
+`critical` (old 20/21 = 95.24%, new 20/120 = 16.67%), deletion of 100 while retaining
+one, no cross-token compensation, 94% failure / 95% pass / extra-content bounds,
+empty-token reference and the five existing controls. The retained-one regression
+was observed red with the old scorer. The same suite is now a hosted CI step.
+
+
+## Original inputs and unique-token measurement
 
 Build basis: site main `0fb48d1`, included by merge. The branch subsequently
 integrates main `ae9b589fbc20f879ec30fd4eb1152e3735709688`; all 81 captured source
@@ -46,9 +117,9 @@ reference build adaptations, not fixes to registry content.
 Ruby 3.1.7 builds Jekyll (3.1.6/mise unavailable locally); Ruby 3.4.8 runs the
 existing evidence wrapper; Node 22.23.1 builds Astro.
 
-## Measurement and commands
+## Original measurement and commands
 
-Both generator runs exited 0; every included variant reaches 95%.
+The original unique-token generator runs exited 0; every included variant reached 95%.
 
 | Reference | Local pages passing | Included variants passing | Excluded variants | Issue pages |
 | --- | ---: | ---: | ---: | ---: |
@@ -216,10 +287,10 @@ changed the loader to deduplicate asset/inlined twin messages. Thus the old
 prove a content regression, and no conclusion is drawn from comparing those
 non-equivalent historical counts alone.
 
-**Belief verdict:** no below-threshold current-main page regression is reproduced.
-The fresh OB 1350 run reproduces 429/429, so the claim that the committed number
-itself is stale is not supported. Its *source receipt* is stale, as the hash
-checks demonstrate. PR #109's 408/429 is an earlier build claim, not a measurement
+**Original belief verdict (unique-token metric):** that measurement reported no
+below-threshold page regression and reproduced 429/429 for its OB 1350 fixture.
+This is not a count-aware result or independent verification of that reference.
+Its historical *source receipt* is stale, as the hash checks demonstrate. PR #109's 408/429 is an earlier build claim, not a measurement
 of today's output. This audit does not assign the historical 21-page difference
 to individual commits: a controlled rebuild of #109 on identical inputs was
 NOT RUN. Full row/action equivalence remains unproven despite the token passes.
@@ -231,7 +302,7 @@ node --test test/parity-evidence-generator.test.mjs
 npm run check
 ```
 
-Generator tests: 5/5 pass. Astro check: 0 errors, 0 warnings, one existing script
+Original generator tests: 5/5 pass. Astro check: 0 errors, 0 warnings, one existing script
 hint. No application code changed in this audit. A consistency check also
 recomputed every canonical worst-variant score and matched both audit manifests
 to all captured build inputs; both report sets passed.
@@ -241,7 +312,10 @@ unified-diff context lines in the reference patch. They are retained as generate
 evidence; authored documentation has no whitespace errors.
 
 
-## Verify committed evidence
+## Verify original committed evidence
+
+This verifies the historical receipts against the saved build source checkout
+through `ae9b589`, not the newly merged tree or count-aware evidence.
 
 Run from the site root with Node 22 (exit 0 in this audit):
 
@@ -279,7 +353,7 @@ JS
 - Jekyll reference localization diagnostics and missing annex/title warnings limit
   the reference itself; this audit compares generated HTML and does not certify
   those legacy fields rendered correctly.
-- A 95% weighted token score is a one-way text-containment check, not a proof
+- A 95% multiset token-containment score is a one-way occurrence-count check, not a proof
   of row equality, action semantics,
   chronology, absence of extra content, heading/table/link completeness, or all routes. The canonical walker ignores
   unclassified routes and excludes its two documented cross-listed variants.
