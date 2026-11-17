@@ -15,7 +15,7 @@ const origin = 'https://127.0.0.1:8443';
 mkdirSync(state, { recursive: true });
 const key = resolve(state, 'key.pem'), cert = resolve(state, 'cert.pem');
 function run(command, args) {
-  const result = spawnSync(command, args, { cwd: root, stdio: 'inherit' });
+  const result = spawnSync(command, args, { cwd: root, stdio: 'inherit', env: { ...process.env, CI: '1' } });
   if (result.error) throw result.error;
   if (result.status !== 0) throw new Error(`${command} exited ${result.status}`);
 }
@@ -67,7 +67,7 @@ server = https.createServer({ key: readFileSync(key), cert: readFileSync(cert) }
   const worker = /^\/(api|auth)(\/|$)/.test(path);
   const provider = path === '/authorize';
   const transport = worker ? https : http;
-  const upstream = transport.request({ hostname: '127.0.0.1', port: worker ? 18787 : provider ? 18788 : 14321, path: req.url, method: req.method, headers: req.headers, ...(worker ? { rejectUnauthorized: false } : {}) }, incoming => {
+  const upstream = transport.request({ hostname: '127.0.0.1', port: worker ? 18787 : provider ? 18788 : 14321, path: req.url, method: req.method, headers: req.headers, ...(worker ? { ca: readFileSync(cert) } : {}) }, incoming => {
     res.writeHead(incoming.statusCode, incoming.headers);
     incoming.pipe(res);
   });
