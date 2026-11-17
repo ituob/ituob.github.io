@@ -23,6 +23,7 @@ import ApprovedRecommendations from "~/components/ApprovedRecommendations.astro"
 import IncompleteBanner from "~/components/IncompleteBanner.astro";
 import GeneralMessage from "~/components/GeneralMessage.astro";
 import StructuredAmendment from "~/components/StructuredAmendment.astro";
+import PrintedRegisterContext from "~/components/PrintedRegisterContext.astro";
 import TextualAmendment from "~/components/TextualAmendment.astro";
 import type { TextualGeneralMessage } from "~/lib/types";
 
@@ -316,6 +317,7 @@ const authoritativeHref =
           <div class="included-contents">
             {a.hasStructured && issue.amendments.structured[a.slug] && (
               <StructuredAmendment amendments={issue.amendments.structured[a.slug]!} lang={lang} />
+              <PrintedRegisterContext slug={a.slug} issue={id} />
             )}
             {a.hasTextual && issue.amendments.textual[a.slug] && (
               <TextualAmendment amendment={issue.amendments.textual[a.slug]} lang={lang} />

@@ -4390,8 +4390,8 @@
         {
           "name": "title",
           "wire": "title",
-          "type": "Hash",
-          "kind": "primitive",
+          "type": "MultilingualString",
+          "kind": "class",
           "required": false,
           "collection": false
         },
@@ -5350,6 +5350,86 @@
         }
       ]
     },
+    "LocaleLabel": {
+      "attributes": [
+        {
+          "name": "key",
+          "wire": "key",
+          "type": "String",
+          "kind": "primitive",
+          "required": true,
+          "collection": false
+        },
+        {
+          "name": "en",
+          "wire": "en",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "fr",
+          "wire": "fr",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "es",
+          "wire": "es",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "zh",
+          "wire": "zh",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "ru",
+          "wire": "ru",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "ar",
+          "wire": "ar",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        }
+      ]
+    },
+    "RegisterLocale": {
+      "attributes": [
+        {
+          "name": "title",
+          "wire": "title",
+          "type": "MultilingualString",
+          "kind": "class",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "locale",
+          "wire": "locale",
+          "type": "LocaleLabel",
+          "kind": "class",
+          "required": false,
+          "collection": true
+        }
+      ]
+    },
     "RegisterKeyHistory": {
       "attributes": [
         {
@@ -5400,6 +5480,102 @@
           "name": "changes",
           "wire": "changes",
           "type": "RegisterChange",
+          "kind": "class",
+          "required": false,
+          "collection": true
+        }
+      ]
+    },
+    "PublicationManifestEntry": {
+      "attributes": [
+        {
+          "name": "standard",
+          "wire": "standard",
+          "type": "String",
+          "kind": "primitive",
+          "required": true,
+          "collection": false
+        },
+        {
+          "name": "recommendation",
+          "wire": "recommendation",
+          "type": "String",
+          "kind": "primitive",
+          "required": true,
+          "collection": false
+        },
+        {
+          "name": "title",
+          "wire": "title",
+          "type": "String",
+          "kind": "primitive",
+          "required": true,
+          "collection": false
+        },
+        {
+          "name": "edition_year",
+          "wire": "edition_year",
+          "type": "Integer",
+          "kind": "primitive",
+          "required": true,
+          "collection": false
+        },
+        {
+          "name": "language",
+          "wire": "language",
+          "type": "String",
+          "kind": "primitive",
+          "required": true,
+          "collection": false
+        },
+        {
+          "name": "as_of_issue",
+          "wire": "as_of_issue",
+          "type": "Integer",
+          "kind": "primitive",
+          "required": true,
+          "collection": false
+        },
+        {
+          "name": "sha256",
+          "wire": "sha256",
+          "type": "String",
+          "kind": "primitive",
+          "required": true,
+          "collection": false
+        },
+        {
+          "name": "status",
+          "wire": "status",
+          "type": "String",
+          "kind": "primitive",
+          "required": true,
+          "collection": false
+        },
+        {
+          "name": "register_slugs",
+          "wire": "register_slugs",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": true
+        },
+        {
+          "name": "path",
+          "wire": "path",
+          "type": "String",
+          "kind": "primitive",
+          "required": true,
+          "collection": false
+        }
+      ]
+    },
+    "PublicationManifest": {
+      "attributes": [
+        {
+          "name": "publications",
+          "wire": "publications",
+          "type": "PublicationManifestEntry",
           "kind": "class",
           "required": false,
           "collection": true

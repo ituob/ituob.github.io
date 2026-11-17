@@ -11,7 +11,7 @@ import { stringifyYaml } from "../src/lib/form/yaml-io.ts";
 import { MAX_STORED_BYTES, unpackJSON, unpackText } from "../worker/lib/general-message-storage.ts";
 import { FakePatchPublisher, setPublisher } from "../worker/lib/publisher.ts";
 import { generalSelection, requireGeneralReviews } from "../worker/lib/general-message-composition.ts";
-import { openEdition, publishEdition, readEdition } from "../worker/lib/composer.ts";
+import { openEdition, stageEdition, publishEdition, readEdition } from "../worker/lib/composer.ts";
 import { ADMIN, api } from "./helpers.ts";
 const admin: Session = {userId:BOOTSTRAP_ADMIN_ID,roles:["itu-admin"],memberStateId:null};
 const value={ob_issue_no:"1400",type:"misc_communications",contents:{en:{type:"doc",content:[{type:"paragraph",content:[{type:"text",text:"Preserved notice"}]}]}}};
@@ -55,17 +55,18 @@ it("D1 large storage keeps multi-megabyte imported values and exact published by
       return { freezeSha: "stale", siteCommit: "stale" };
     });
     try {
-      await expect(publishEdition(db(), admin, 1400, fake)).rejects.toBeInstanceOf(ConflictError);
+      await expect(stageEdition(db(), admin, 1400, fake)).rejects.toBeInstanceOf(ConflictError);
       expect(await db().prepare("SELECT status,freeze_sha FROM editions WHERE ob_issue_no=1400").first()).toEqual({ status: "composing", freeze_sha: null });
     } finally { stalePin.mockRestore(); }
     await db().prepare("UPDATE general_messages SET content_yaml=?2 WHERE id=?1").bind(saved.id, raw.content_yaml).run();
+    expect((await stageEdition(db(), admin, 1400, fake)).edition.status).toBe("staged");
     expect((await publishEdition(db(), admin, 1400, fake)).edition.status).toBe("published");
     expect((await readEdition(db(), admin, 1400)).general_messages[0].content_yaml).toBe(source);
     expect(await verifyChain(db())).toBeNull();
   } finally { setPublisher(null); }
 }, 60_000);
 it.each(["sanc", "telephone_service_2"])("D1 retains imported %s source through form save and approval", async type => {
-  const source = `---\n# Source formatting must survive\ntype: ${type}\nob_issue_no: '1400'\ncontents: ${type === "sanc" ? "'Original notice'" : "[]"}\n`;
+  const source = `---\n# Source formatting must survive\ntype: ${type}\nob_issue_no: '1400'\ncontents: ${type === "sanc" ? "'Original notice'\nitems: [{country: Example, sanc: 7-001}]" : "[]"}\n`;
   const path = `ob-issues/1400/${type}/001.yaml`;
   const reader = new FakeRepoReader({ [`o/r:${path}`]: source });
   const imported = await importGeneralMessage(db(), admin, { ob_issue_no: 1400, path }, reader, "o/r");

@@ -1,0 +1,55 @@
+= Email and deployment configuration values
+
+All values are Worker vars or secrets set per environment (production and
+staging separately). Nothing here is committed with a real value, and no
+wrangler file sets `AUTH_MODE` (a test enforces it). Email is sent only by
+the queue consumer (`worker/queue-consumer.ts`), never on a request path.
+
+== Email provider
+
+[cols="2,1,3"]
+|===
+| Name | Kind | Meaning
+| `EMAIL_PROVIDER` | var | `log` (send nothing; one structured log line per message, no body) or `http` (real send). Unset or anything else: sending fails closed, rows retry and are counted, then dead-letter
+| `EMAIL_API_URL` | var | `http` only. HTTPS endpoint, for example `https://api.resend.com/emails`. A non-HTTPS or invalid URL fails closed
+| `EMAIL_API_KEY` | *secret* | `http` only. Sent as `Authorization: Bearer <key>`
+| `MAIL_FROM` | var | `http` only. The `from` address, for example `ITU OB <noreply@ituob.org>`; the provider must have verified this sender/domain
+|===
+
+The `http` transport posts JSON `{from, to: [address], subject, text}` with
+an `Idempotency-Key` header (the notification id, so a redelivery does not
+send twice) and requires a 2xx response containing `{"id": "..."}`; the id
+is stored as `notifications.email_provider_id`. This matches the Resend
+API; another provider needs a request-shape adapter. No account exists yet,
+so real delivery is unverified: use `log` until one does.
+
+== OIDC (`AUTH_MODE=oidc`)
+
+Full semantics and assumptions A1-A11: `docs/identity-accounts.adoc`.
+
+[cols="2,1,3"]
+|===
+| Name | Kind | Value
+| `AUTH_MODE` | var | `oidc` in deployed environments. `stub` is loopback-only development; any other value fails closed
+| `OIDC_ISSUER` | var | required. Issuer URL of the identity service
+| `OIDC_CLIENT_ID` | var | required
+| `OIDC_CLIENT_SECRET` | *secret* | required unless `OIDC_CLIENT_AUTH=none`
+| `OIDC_CLIENT_AUTH` | var | `basic` (default), `post` or `none`
+| `OIDC_REDIRECT_URI` | var | optional; default `<request origin>/auth/callback`. Register this exact URI with the provider
+| `OIDC_AUTHORIZATION_ENDPOINT`, `OIDC_TOKEN_ENDPOINT`, `OIDC_JWKS_URI` | var | optional; override discovery
+| `OIDC_END_SESSION_ENDPOINT`, `OIDC_POST_LOGOUT_REDIRECT_URI` | var | optional; enable RP-initiated logout
+| `OIDC_SCOPES` | var | default `openid email profile`
+| `OIDC_SUB_KEY` | var | `verbatim` (default) or `issuer`
+| `OIDC_ID_TOKEN_ALGS` | var | default `RS256,ES256`
+|===
+
+== Other
+
+[cols="2,1,3"]
+|===
+| Name | Kind | Value
+| `ACCESS_TEAM_DOMAIN`, `ACCESS_AUD`, `ACCESS_CI_CLIENT_IDS` | var | See `docs/access-configuration.adoc`
+| `GITHUB_WEBHOOK_SECRET` | *secret* | Unset: the webhook route answers 503
+| `PATCH_REPO` | var | default `ituob/service-publications-docs`
+| `DB`, `NOTIFY_Q` bindings | binding | D1 database and the `ituob-notify` queue
+|===

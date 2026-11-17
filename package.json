@@ -10,10 +10,13 @@
     "build": "astro build",
     "preview": "astro preview",
     "check": "astro check",
+    "test": "node --experimental-strip-types --test tests/*.test.ts",
     "astro": "astro",
     "test:worker": "vitest run",
     "test:form": "vitest run --config vitest.form.config.ts",
-    "typecheck:worker": "tsc -p worker/tsconfig.json"
+    "typecheck:worker": "tsc -p worker/tsconfig.json",
+    "check:bindings": "node scripts/check-bindings.mjs",
+    "test:bindings": "node --experimental-strip-types --test tests/check-bindings.test.ts"
   },
   "dependencies": {
     "@astrojs/mdx": "^7.0.0",

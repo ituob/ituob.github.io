@@ -22,6 +22,48 @@ export interface GeneralMessageArtifact {
   id: string; ob_issue_no: number; type: string; class_name: string; path: string; revision: number; content: string;
 }
 const staff = (s: Session | null) => requireRole(s, "itu-admin", "itu-editor");
+const SANC_LIMITS = { items: 500, field: 200, notes: 10_000, contents: 200_000 };
+function hasRichText(value: unknown): boolean {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  const node = value as Record<string, unknown>;
+  if (node.type === "text") return typeof node.text === "string" && node.text.trim() !== "";
+  return Array.isArray(node.content) && node.content.some(hasRichText);
+}
+function hasLegacySancContents(contents: unknown): boolean {
+  if (!contents || typeof contents !== "object" || Array.isArray(contents)) return false;
+  return Object.values(contents).some(doc => doc && typeof doc === "object" && !Array.isArray(doc)
+    && (doc as Record<string, unknown>).type === "doc" && hasRichText(doc));
+}
+/** Typed notices require assignments; historical notices store them in rich documents instead. */
+function sancErrors(record: Record<string, unknown>) {
+  const errors: { path: string; code: "type" | "required"; message: string }[] = [];
+  const bad = (path: string, code: "type" | "required", message: string) => errors.push({ path, code, message });
+  const items = record.items;
+  const legacyContents = !("items" in record) && hasLegacySancContents(record.contents);
+  if (!legacyContents && (!Array.isArray(items) || items.length === 0)) bad("items", "required", "a SANC message needs at least one item");
+  else if (Array.isArray(items)) {
+    if (items.length > SANC_LIMITS.items) bad("items", "type", `at most ${SANC_LIMITS.items} items`);
+    items.forEach((item, i) => {
+      if (!item || typeof item !== "object" || Array.isArray(item)) return bad(`items.${i}`, "type", "item must be an object");
+      for (const field of ["country", "sanc"]) {
+        const v = (item as Record<string, unknown>)[field];
+        if (typeof v !== "string" || v.trim() === "") bad(`items.${i}.${field}`, "required", `${field} is required`);
+        else if (v.length > SANC_LIMITS.field) bad(`items.${i}.${field}`, "type", `${field} must be at most ${SANC_LIMITS.field} characters`);
+      }
+    });
+  }
+  if ("contents" in record) {
+    const c = record.contents;
+    if (c === null || c === undefined || (typeof c === "string" && c.trim() === "")) bad("contents", "required", "contents must not be null or empty");
+    else if (JSON.stringify(c).length > SANC_LIMITS.contents) bad("contents", "type", "contents is too large");
+  }
+  if ("notes" in record) {
+    const n = record.notes;
+    if (typeof n !== "string") bad("notes", "type", "notes must be a string");
+    else if (n.length > SANC_LIMITS.notes) bad("notes", "type", `notes must be at most ${SANC_LIMITS.notes} characters`);
+  }
+  return errors;
+}
 export function validateGeneralMessage(type: unknown, value: unknown): { className: string; value: Record<string, unknown> } {
   let className: string;
   try { ({ className } = generalBinding(type)); } catch (error) { throw new InvalidError(error instanceof Error ? error.message : "invalid general-message type"); }
@@ -31,6 +73,7 @@ export function validateGeneralMessage(type: unknown, value: unknown): { classNa
     const record = value as Record<string, unknown>;
     if (record.type !== type) errors.push({ path: "type", code: "type", message: "type must match the canonical message directory" });
     if (record._class !== undefined && record._class !== className) errors.push({ path: "_class", code: "type", message: "class must match the canonical message type" });
+    if (type === "sanc") errors.push(...sancErrors(record));
   }
   if (errors.length) throw new ValidationFailed(errors);
   return { className, value: value as Record<string, unknown> };

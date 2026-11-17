@@ -6,20 +6,31 @@ import { addUser, api, db, seedFixtures } from "./helpers.ts";
 const hdr = { "X-Stub-Session": "itu-admin", "X-Stub-Access": "a@b.c" };
 
 describe("the stub cannot run in production", () => {
-  it("deployment configs only enable OIDC authentication and never embed the development stub", () => {
+  it("live deployment configs stay static-safe and keep credentials in secrets", () => {
     const configs = (env as any).WRANGLER_CONFIGS as Record<string, string>;
     const files = Object.keys(configs);
-    expect(files).toEqual(expect.arrayContaining(["wrangler.jsonc", "wrangler.staging.jsonc"]));
-    for (const f of files) {
+    const liveFiles = ["wrangler.jsonc", "wrangler.staging.jsonc"];
+    expect(files).toEqual(expect.arrayContaining([...liveFiles, "wrangler.bindings.example.jsonc", "wrangler.staging.bindings.example.jsonc"]));
+    for (const f of liveFiles) {
       const text = configs[f]!;
       const config = JSON.parse(text);
-      expect(config.vars?.AUTH_MODE, f).toBe("oidc");
+      expect(config.vars ?? {}, f).not.toHaveProperty("AUTH_MODE");
+      expect(config.d1_databases ?? [], f).toHaveLength(0);
+      expect(config.queues?.producers ?? [], f).toHaveLength(0);
+      expect(config.queues?.consumers ?? [], f).toHaveLength(0);
+      expect(config.triggers?.crons ?? [], f).toHaveLength(0);
       for (const secret of ["OIDC_CLIENT_SECRET", "RESEND_API_KEY", "GITHUB_APP_PRIVATE_KEY", "GITHUB_WEBHOOK_SECRET"]) {
-        expect(config.vars, f).not.toHaveProperty(secret);
-        if (secret !== "OIDC_CLIENT_SECRET" || config.vars.OIDC_CLIENT_AUTH !== "none")
-          expect(config.secrets?.required, f).toContain(secret);
+        expect(config.vars ?? {}, f).not.toHaveProperty(secret);
+        expect(config.secrets?.required, f).toContain(secret);
       }
       expect(text, f).not.toMatch(/stub/i);
+    }
+    for (const f of ["wrangler.bindings.example.jsonc", "wrangler.staging.bindings.example.jsonc"]) {
+      const text = configs[f]!;
+      expect(text, f).not.toMatch(/AUTH_MODE|stub/i);
+      expect(text, f).not.toMatch(/"vars"\s*:/);
+      for (const secret of ["OIDC_CLIENT_SECRET", "RESEND_API_KEY", "GITHUB_APP_PRIVATE_KEY", "GITHUB_WEBHOOK_SECRET"])
+        expect(text, f).not.toContain(`"${secret}"`);
     }
   });
 
@@ -52,7 +63,7 @@ describe("the stub cannot run in production", () => {
   });
 
   it("loopback allow-list is exact", () => {
-    expect(["localhost", "127.0.0.1", "[::1]", "a.localhost"].every(isLoopbackHost)).toBe(true);
-    expect(["ituob.org", "www.ituob.org", "localhost.ituob.org", "xlocalhost", "127.0.0.1.evil.com"].some(isLoopbackHost)).toBe(false);
+    expect(["localhost", "127.0.0.1", "[::1]"].every(isLoopbackHost)).toBe(true);
+    expect(["ituob.org", "www.ituob.org", "localhost.ituob.org", "xlocalhost", "127.0.0.1.evil.com", "a.localhost", "evil.localhost"].some(isLoopbackHost)).toBe(false);
   });
 });

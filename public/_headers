@@ -9,3 +9,11 @@
 # Astro content-hashed bundles never change — cache hard at the edge.
 /_astro/*
   Cache-Control: public, max-age=31536000, immutable
+
+# Generated publication PDFs (placed from the spd artifact at build time).
+# Content-hashed names are not used, so revalidate: browsers keep a copy for an
+# hour, the edge for a day, and a changed edition is picked up via ETag.
+/downloads/*.pdf
+  Content-Type: application/pdf
+  Content-Disposition: inline
+  Cache-Control: public, max-age=3600, s-maxage=86400, stale-while-revalidate=86400

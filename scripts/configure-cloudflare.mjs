@@ -2,6 +2,7 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import { parseJsonc } from './check-bindings.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 export const TARGETS = {
@@ -113,8 +114,8 @@ export function buildConfig(resources, environment, base) {
   return validateConfig(config, environment);
 }
 function readJson(file) {
-  try { return JSON.parse(readFileSync(file, 'utf8')); }
-  catch { throw new Error(`Cannot read valid JSON from ${file}. Keep generated .jsonc files as JSON.`); }
+  try { return parseJsonc(file, readFileSync(file, 'utf8')); }
+  catch { throw new Error(`Cannot read valid JSONC from ${file}.`); }
 }
 export function main(args, root = ROOT) {
   let environment, input, write = false, check = false;

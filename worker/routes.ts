@@ -14,16 +14,18 @@ import {
 } from "./lib/membership.ts";
 import { Forbidden, requireRole } from "./lib/authz.ts";
 import { sameOrigin } from "./lib/csrf.ts";
-import { StubMisconfigured, getAccessIdentity, getSession, takePendingSessionCookie } from "./lib/session.ts";
+import { StubMisconfigured, getAccessIdentity, getAccessServicePrincipal, getSession, takePendingSessionCookie } from "./lib/session.ts";
 import { type Route, body, json, str } from "./lib/http.ts";
 import { RepoReaderNotConfigured, RepoReadFailed } from "./lib/repo-reader.ts";
 import { UpstreamError, ValidationFailed } from "./lib/submissions.ts";
 import { discussionRoutes } from "./discussion-routes.ts";
+import { catalogRoutes } from "./catalog-routes.ts";
 import { generalMessageRoutes } from "./general-message-routes.ts";
 import { generalMessagePublicationRoutes } from "./general-message-publication-routes.ts";
 import { editionMetadataRoutes } from "./edition-metadata-routes.ts";
 import { editionMetadataPublicationRoutes } from "./edition-metadata-publication-routes.ts";
 import { translationRoutes } from "./translation-routes.ts";
+import { adoptionRoutes } from "./adoption-routes.ts";
 import { composerRoutes } from "./composer-routes.ts";
 import { ituSession, submissionRoutes } from "./submission-routes.ts";
 import { webhookRoutes } from "./webhook-routes.ts";
@@ -32,9 +34,11 @@ import type { AccessIdentity, Env, Session } from "./lib/types.ts";
 const workflowAndAccountRoutes: Route[] = [
   ...submissionRoutes,
   ...composerRoutes,
+  ...adoptionRoutes,
   ...discussionRoutes,
   ...translationRoutes,
   ...editionMetadataRoutes,
+  ...catalogRoutes,
   ...generalMessageRoutes,
   ...generalMessagePublicationRoutes,
   ...editionMetadataPublicationRoutes,
@@ -206,6 +210,11 @@ async function handleApiInner(request: Request, env: Env, url: URL): Promise<Res
     // Deny by default: no route, and not a read, is refused outright.
     if (!route && !readOnly) return json({ error: "forbidden" }, 403);
 
+    if (!route && path.startsWith("/api/ci/")) {
+      // CI namespace: only an allowlisted service token; no write endpoint exists yet.
+      if (!(await getAccessServicePrincipal(request, env)) || !readOnly) return json({ error: "forbidden" }, 403);
+      return json({ error: "not found" }, 404);
+    }
     if (route?.guard === "access" || (!route && onAccessPrefix)) {
       // A session cookie/stub-session is never consulted on Access routes.
       const access = await getAccessIdentity(request, env);

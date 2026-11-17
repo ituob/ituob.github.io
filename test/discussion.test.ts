@@ -313,6 +313,25 @@ describe("delivery: consumer, retry, counters", () => {
     expect(c.failed).toBe(1);
   });
 
+  it("a row that already has a provider id is marked sent and never sent again", async () => {
+    const id = await draft();
+    await me(id, "submit");
+    await db().prepare(`UPDATE notifications SET email_status='failed', email_provider_id='prov-earlier'`).run();
+    await drain();
+    expect(sender.sent).toHaveLength(0);
+    expect((await notes("itu-editor"))[0].email_status).toBe("sent");
+  });
+
+  it("provider error text is redacted of URL queries and bearer tokens before storage", async () => {
+    setEmailSender({ send: async () => { throw new Error("fetch failed https://api.mail.example/send?api_key=SECRETQ Authorization: Bearer sk-live-9999"); } });
+    const id = await draft();
+    await me(id, "submit");
+    await drain();
+    const reason = (await notes("itu-editor"))[0].email_reason as string;
+    expect(reason).toContain("api.mail.example/send");
+    expect(reason).not.toMatch(/SECRETQ|sk-live-9999/);
+  });
+
   it("the unconfigured real sender fails visibly; after the cap the row is dead and counted, not deleted", async () => {
     setEmailSender(null);
     const id = await draft();

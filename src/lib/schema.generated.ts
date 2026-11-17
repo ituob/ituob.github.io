@@ -411,7 +411,7 @@ export interface GeneralCallbackProceduresWire {
 
 export interface GeneralCustomWire {
   type?: string;
-  title?: Record<string, unknown>;
+  title?: MultilingualStringWire;
   recommendation?: string;
   text?: string;
   ob_issue_no?: string;
@@ -624,6 +624,16 @@ export interface ListVIIIStationWire {
   measurements?: ListVIIIMeasurementWire[];
 }
 
+export interface LocaleLabelWire {
+  key?: string;
+  en?: string;
+  fr?: string;
+  es?: string;
+  zh?: string;
+  ru?: string;
+  ar?: string;
+}
+
 export interface M1400ActionWire {
   action_type?: string;
   position?: string;
@@ -709,6 +719,23 @@ export interface ProjectionProvenanceWire {
   as_of_issue?: number;
   seed_issue?: number;
   last_change_issue?: number;
+}
+
+export interface PublicationManifestWire {
+  publications?: PublicationManifestEntryWire[];
+}
+
+export interface PublicationManifestEntryWire {
+  standard?: string;
+  recommendation?: string;
+  title?: string;
+  edition_year?: number;
+  language?: string;
+  as_of_issue?: number;
+  sha256?: string;
+  status?: string;
+  register_slugs?: string[];
+  path?: string;
 }
 
 export interface Q708ISPCActionWire {
@@ -835,6 +862,11 @@ export interface RegisterKeyHistoryWire {
   key?: string;
   membership?: string;
   entries?: KeyHistoryEntryWire[];
+}
+
+export interface RegisterLocaleWire {
+  title?: MultilingualStringWire;
+  locale?: LocaleLabelWire[];
 }
 
 export interface T35AssignmentAuthorityWire {

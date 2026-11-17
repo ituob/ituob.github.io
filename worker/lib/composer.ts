@@ -180,19 +180,20 @@ export async function removeItem(db: D1Database, session: Session | null, no: nu
 
 // ---------------------------------------------------------------- publication
 
+const itemQuery = `SELECT i.submission_id, i.position, s.state, p.merge_sha FROM edition_items i JOIN submissions s ON s.id=i.submission_id
+  LEFT JOIN submission_prs p ON p.submission_id=s.id AND p.rev=(SELECT max(rev) FROM submission_prs WHERE submission_id=s.id)
+  WHERE i.ob_issue_no=?1 ORDER BY i.position`;
+
 /**
- * Publish an edition: a pin bump behind the publisher, then scheduled -> published for every item.
- * Pending pin PRs/deployments leave the edition composing and every item scheduled.
- * Resumable: only a confirmed bump stages the edition (with freeze_sha); a failure midway
- * is repaired by calling this again. Already published items are skipped; the bump is idempotent.
+ * Stage step (admin click 1): freeze the placed selection and have the publisher bump the data pin
+ * on the site repo's `staging` branch through a human-merged PR. Only a confirmed staging deployment
+ * moves the edition to `staged` (with freeze_sha); nothing is published and nothing reaches production.
+ * Pending PRs/deployments leave the edition composing and every item scheduled.
  */
-export async function publishEdition(db: D1Database, session: Session | null, no: number, publisher: PatchPublisher) {
+export async function stageEdition(db: D1Database, session: Session | null, no: number, publisher: PatchPublisher) {
   const s = admin(session);
   let ed = await getEdition(db, no);
-  if (ed.status === "published") throw new ConflictError(`edition ${no} is already published`);
-  const itemQuery = `SELECT i.submission_id, i.position, s.state, p.merge_sha FROM edition_items i JOIN submissions s ON s.id=i.submission_id
-    LEFT JOIN submission_prs p ON p.submission_id=s.id AND p.rev=(SELECT max(rev) FROM submission_prs WHERE submission_id=s.id)
-    WHERE i.ob_issue_no=?1 ORDER BY i.position`;
+  if (ed.status === "staged" || ed.status === "published") throw new ConflictError(`edition ${no} is already ${ed.status}`);
   const items = (await db.prepare(itemQuery).bind(no)
     .all<{ submission_id: string; position: number; state: string; merge_sha: string | null }>()).results;
   const generalMessages = await generalSelection(db, no);
@@ -200,56 +201,79 @@ export async function publishEdition(db: D1Database, session: Session | null, no
   const bad = items.find((i) => i.state !== "scheduled" && i.state !== "published");
   if (bad) throw new ConflictError(`item ${bad.submission_id} is ${bad.state}, not scheduled`);
 
-  if (ed.status === "open" || ed.status === "composing") {
-    requireGeneralReviews(no, generalMessages);
-    // Do not freeze an open general-only issue while local metadata still
-    // needs authoring/scheduling or its first review request to be completed.
-    const metadata = await db.prepare(`SELECT m.scheduled_at,p.pr_number FROM edition_metadata m
-      LEFT JOIN edition_metadata_prs p ON p.ob_issue_no=m.ob_issue_no AND p.revision=m.revision
-      WHERE m.ob_issue_no=?1`).bind(no).first<{ scheduled_at: string | null; pr_number: number | null }>();
-    if (metadata && (!metadata.scheduled_at || !metadata.pr_number))
-      throw new ConflictError("edition metadata must be scheduled and have a review PR before composition");
-    // A general-only edition starts open. Freeze before any upstream read or
-    // pin request so general authoring APIs cannot change its selected content.
-    await run(db, [
-      ...requireGeneralSelection(db, no, generalMessages),
-      db.prepare(`UPDATE editions SET status='composing' WHERE ob_issue_no=?1 AND status='open'`).bind(no),
-      ...(await auditStatements(db, [auditEdition(now(), s.userId, no, "edition.composing", { general_messages: generalMessages.map(message => ({ id: message.id, revision: message.revision })) })], { sql: "changes()=1", args: [] })),
-      requireEditionStatus(db, no, ["composing"]),
-    ]);
-    ed = await getEdition(db, no);
-    const generalMerges = await generalMergesForPublication(generalMessages, publisher);
-    const metadataMerge = await metadataMergeForPublication(db, s, no, publisher);
-    let bump;
-    try {
-      bump = await publisher.bumpDataPin({
-        edition: no, idempotencyKey: `edition-${no}-pin`,
-        items: [...items.map((i) => ({ submissionId: i.submission_id, mergeSha: i.merge_sha })), ...generalMerges, ...(metadataMerge ? [metadataMerge] : [])],
-      });
-    } catch (e) {
-      throw new UpstreamError(`could not bump the data pin: ${String((e as Error).message)}`);
-    }
-    if (bump.pending) return { edition: ed, published: [], pending: bump.pending };
-    const t = now();
-    await run(db, [
-      // Check the selected snapshot in the SAME transaction as staging. Placement may have
-      // changed during the upstream request; publishing that stale pin must roll back.
-      db.prepare(`INSERT INTO edition_items (ob_issue_no, submission_id, position)
-        SELECT ?1, '-', NULL WHERE (SELECT count(*) FROM edition_items WHERE ob_issue_no=?1) != ?3
-          OR EXISTS (SELECT 1 FROM json_each(?2) expected WHERE NOT EXISTS (
-            SELECT 1 FROM (${itemQuery}) current
-              WHERE current.submission_id=json_extract(expected.value, '$.submission_id')
-                AND current.position=json_extract(expected.value, '$.position')
-                AND current.state=json_extract(expected.value, '$.state')
-                AND current.merge_sha IS json_extract(expected.value, '$.merge_sha')
-          ))`).bind(no, JSON.stringify(items), items.length),
-      ...requireGeneralSelection(db, no, generalMessages),
-      db.prepare(`UPDATE editions SET status='staged', freeze_sha=?2, staging_commit=?3 WHERE ob_issue_no=?1 AND status='composing'`).bind(no, bump.freezeSha, bump.siteCommit),
-      requireEditionStatusAfter(db, no),
-      ...(await auditStatements(db, [auditEdition(t, s.userId, no, "edition.staged", { freeze_sha: bump.freezeSha, staging_commit: bump.siteCommit })])),
-    ]);
-    ed = await getEdition(db, no);
+  requireGeneralReviews(no, generalMessages);
+  // Do not freeze an open general-only issue while local metadata still
+  // needs authoring/scheduling or its first review request to be completed.
+  const metadata = await db.prepare(`SELECT m.scheduled_at,p.pr_number FROM edition_metadata m
+    LEFT JOIN edition_metadata_prs p ON p.ob_issue_no=m.ob_issue_no AND p.revision=m.revision
+    WHERE m.ob_issue_no=?1`).bind(no).first<{ scheduled_at: string | null; pr_number: number | null }>();
+  if (metadata && (!metadata.scheduled_at || !metadata.pr_number))
+    throw new ConflictError("edition metadata must be scheduled and have a review PR before composition");
+  // A general-only edition starts open. Freeze before any upstream read or
+  // pin request so general authoring APIs cannot change its selected content.
+  await run(db, [
+    ...requireGeneralSelection(db, no, generalMessages),
+    db.prepare(`UPDATE editions SET status='composing' WHERE ob_issue_no=?1 AND status='open'`).bind(no),
+    ...(await auditStatements(db, [auditEdition(now(), s.userId, no, "edition.composing", { general_messages: generalMessages.map(message => ({ id: message.id, revision: message.revision })) })], { sql: "changes()=1", args: [] })),
+    requireEditionStatus(db, no, ["composing"]),
+  ]);
+  ed = await getEdition(db, no);
+  const generalMerges = await generalMergesForPublication(generalMessages, publisher);
+  const metadataMerge = await metadataMergeForPublication(db, s, no, publisher);
+  let bump;
+  try {
+    bump = await publisher.bumpDataPin({
+      edition: no, idempotencyKey: `edition-${no}-pin`,
+      items: [...items.map((i) => ({ submissionId: i.submission_id, mergeSha: i.merge_sha })), ...generalMerges, ...(metadataMerge ? [metadataMerge] : [])],
+    });
+  } catch (e) {
+    throw new UpstreamError(`could not bump the data pin: ${String((e as Error).message)}`);
   }
+  if (bump.pending) return { edition: ed, published: [], pending: bump.pending };
+  const t = now();
+  await run(db, [
+    // Check the selected snapshot in the SAME transaction as staging. Placement may have
+    // changed during the upstream request; publishing that stale pin must roll back.
+    db.prepare(`INSERT INTO edition_items (ob_issue_no, submission_id, position)
+      SELECT ?1, '-', NULL WHERE (SELECT count(*) FROM edition_items WHERE ob_issue_no=?1) != ?3
+        OR EXISTS (SELECT 1 FROM json_each(?2) expected WHERE NOT EXISTS (
+          SELECT 1 FROM (${itemQuery}) current
+            WHERE current.submission_id=json_extract(expected.value, '$.submission_id')
+              AND current.position=json_extract(expected.value, '$.position')
+              AND current.state=json_extract(expected.value, '$.state')
+              AND current.merge_sha IS json_extract(expected.value, '$.merge_sha')
+        ))`).bind(no, JSON.stringify(items), items.length),
+    ...requireGeneralSelection(db, no, generalMessages),
+    db.prepare(`UPDATE editions SET status='staged', freeze_sha=?2, staging_commit=?3 WHERE ob_issue_no=?1 AND status='composing'`).bind(no, bump.freezeSha, bump.siteCommit),
+    requireEditionStatusAfter(db, no),
+    ...(await auditStatements(db, [auditEdition(t, s.userId, no, "edition.staged", { freeze_sha: bump.freezeSha, staging_commit: bump.siteCommit })])),
+  ]);
+  ed = await getEdition(db, no);
+  return { edition: await getEdition(db, no), published: [] as string[] };
+}
+
+/**
+ * Publish step (admin click 2, only after Stage): the publisher opens, and never merges, the
+ * staging -> production PR on the site repo. A human merges it; once the production deployment of that exact
+ * commit succeeded, every item and the edition become `published` and the audit trail records who published.
+ * Pending or failed upstream leaves the edition staged and every item scheduled. Resumable and idempotent.
+ */
+export async function publishEdition(db: D1Database, session: Session | null, no: number, publisher: PatchPublisher) {
+  const s = admin(session);
+  const ed = await getEdition(db, no);
+  if (ed.status === "published") throw new ConflictError(`edition ${no} is already published`);
+  if (ed.status !== "staged" || !ed.freeze_sha) throw new ConflictError(`edition ${no} is ${ed.status}; stage it before publishing`);
+  const items = (await db.prepare(itemQuery).bind(no)
+    .all<{ submission_id: string; position: number; state: string; merge_sha: string | null }>()).results;
+  const bad = items.find((i) => i.state !== "scheduled" && i.state !== "published");
+  if (bad) throw new ConflictError(`item ${bad.submission_id} is ${bad.state}, not scheduled`);
+  let promotion;
+  try {
+    promotion = await publisher.promoteToProduction({ edition: no, freezeSha: ed.freeze_sha, idempotencyKey: `edition-${no}-promote` });
+  } catch (e) {
+    throw new UpstreamError(`could not promote to production: ${String((e as Error).message)}`);
+  }
+  if (promotion.pending) return { edition: ed, published: [] as string[], pending: promotion.pending };
 
   const published: string[] = [];
   for (const i of items) {
@@ -266,7 +290,7 @@ export async function publishEdition(db: D1Database, session: Session | null, no
   await run(db, [
     db.prepare(`UPDATE editions SET status='published', published_at=?2 WHERE ob_issue_no=?1 AND status='staged'`).bind(no, t),
     requireEditionStatusAfter(db, no, "published"),
-    ...(await auditStatements(db, [auditEdition(t, s.userId, no, "edition.published", { published, freeze_sha: ed.freeze_sha })])),
+    ...(await auditStatements(db, [auditEdition(t, s.userId, no, "edition.published", { published, freeze_sha: ed.freeze_sha, production_commit: promotion.siteCommit })])),
   ]);
   return { edition: await getEdition(db, no), published };
 }

@@ -4,7 +4,7 @@ on:
   push:
     branches: [ main, staging ]
   pull_request:
-    branches: [ main, feat/webapp-integration, "claude-a/**" ]
+    branches: [ main, feat/webapp-integration, "codex/**", "claude-a/**" ]
   workflow_dispatch:
 
 permissions:
@@ -56,19 +56,7 @@ jobs:
           --projection-root "$RUNNER_TEMP/ituob-site-projection"
         echo "OB_DATA_ROOT=$RUNNER_TEMP/ituob-site-projection" >> "$GITHUB_ENV"
 
-    # Projection fixtures exercise authored staging even when the production
-    # ontology pin predates that helper. Keep their helper source explicit.
-    - name: Check out projection test helper
-      uses: actions/checkout@v4
-      with:
-        repository: ituob/service-publications-docs
-        ref: 30ef6d28e97635cb7c5549bdf619ef988efda5f0
-        path: .projection-test-service
-        persist-credentials: false
-
     - name: Verify projection guards
-      env:
-        PROJECTION_SERVICE_ROOT: ${{ github.workspace }}/.projection-test-service
       run: python3 -m unittest discover -s scripts/tests -p test_project_authored_data.py
 
     - name: Install dependencies
@@ -78,6 +66,10 @@ jobs:
       run: |
         node scripts/generate-register-rules.mjs data-ob/catalogs/registers.yaml
         git diff --exit-code -- src/lib/register-rules.generated.ts
+    - name: Validate optional Worker bindings
+      run: |
+        npm run check:bindings
+        npm run test:bindings
 
     - name: Worker tests
       run: npx vitest run
@@ -104,8 +96,21 @@ jobs:
     - name: Form round-trip tests
       run: npm run test:form
 
+    - name: Publication artifact selection tests
+      run: node --experimental-strip-types --test tests/fetch-publications.test.ts
+
+    # Published PDFs from ituob/service-publications-docs CI. No run or artifact
+    # yet = empty listing; a sha256 mismatch fails the build.
+    - name: Fetch and verify publication PDFs
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: node --experimental-strip-types scripts/fetch-publications.ts fetch
+
     - name: Build Astro site
       run: npm run build
+
+    - name: Verify PDFs in dist match the manifest
+      run: node --experimental-strip-types scripts/fetch-publications.ts verify-dist
 
     - name: Run TypeScript check
       run: npm run check

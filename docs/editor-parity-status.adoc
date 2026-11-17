@@ -44,6 +44,10 @@ B10 inline help covers general messages, scheduling and amendments.
   (`worker/lib/composer.ts` `listMergedUnpublished`). A uniqueness check would reject
   valid series, including the bulk import above. Status: DROPPED, superseded by per-action patches.
 
+== D7, D14, D15, D18 (telephone, custom title, SANC, mid)
+
+Done, depending on `service-publications-docs` PR #114 (typed `GeneralCustom.title`, `HashOrText` telephone and mid contents, `sanc` dispatch agreeing with the corpus classifier). `schema.generated.ts`, `schema.validators.generated.ts` and `class-description.generated.json` were regenerated from the #114 head (d956cdb8) with its generators; if #114 changes, regenerate. Covered by `src/lib/form/general.test.ts`.
+
 == Still blocking retirement
 
 [cols="1,3,3",options="header"]
