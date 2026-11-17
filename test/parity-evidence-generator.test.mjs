@@ -104,3 +104,59 @@ test("descendant text traversal matches canonical XPath ordering and exclusions"
   const result = spawnSync(ruby, ["-e", code], { cwd: root, encoding: "utf8" });
   assert.equal(result.status, 0, result.stderr);
 });
+
+test("dropping 100 repeats fails even when all token types remain", () => fixture((directory) => {
+  const words = "alpha bravo charlie delta echo foxtrot golf hotel india juliet kilo lima mike november oscar papa quebec romeo sierra";
+  const html = (repeats) => `<main><h1>Allocation registry</h1><p>${"critical ".repeat(repeats)}${words}</p></main>`;
+  writeFileSync(join(directory, "reference/index.html"), html(101));
+  writeFileSync(join(directory, "build/index.html"), html(1));
+  const result = generate(directory);
+  assert.equal(result.status, 1, result.stdout + result.stderr);
+  const evidence = JSON.parse(readFileSync(join(directory, "output/parity_variants.json"), "utf8"));
+  assert.equal(evidence.variants[0].coverage, 21 / 121);
+  assert.equal(evidence.variants[0].verdict, "fail");
+}));
+
+test("extra repeats cannot compensate for missing different tokens", () => fixture((directory) => {
+  writeFileSync(join(directory, "reference/index.html"), "<main>alpha alpha bravo bravo</main>");
+  writeFileSync(join(directory, "build/index.html"), "<main>alpha alpha alpha alpha alpha</main>");
+  const result = generate(directory);
+  assert.equal(result.status, 1, result.stdout + result.stderr);
+  const evidence = JSON.parse(readFileSync(join(directory, "output/parity_variants.json"), "utf8"));
+  assert.equal(evidence.variants[0].coverage, 0.5);
+}));
+
+
+test("dropping all 100 repeats of one token fails", () => fixture((directory) => {
+  const words = "alpha bravo charlie delta echo foxtrot golf hotel india juliet kilo lima mike november oscar papa quebec romeo sierra";
+  const html = (repeats) => `<main><h1>Allocation registry</h1><p>${"critical ".repeat(repeats)}${words}</p></main>`;
+  writeFileSync(join(directory, "reference/index.html"), html(100));
+  writeFileSync(join(directory, "build/index.html"), html(0));
+  const result = generate(directory);
+  assert.equal(result.status, 1, result.stdout + result.stderr);
+  const evidence = JSON.parse(readFileSync(join(directory, "output/parity_variants.json"), "utf8"));
+  assert.equal(evidence.variants[0].coverage, 20 / 120);
+  assert.equal(evidence.variants[0].verdict, "fail");
+}));
+
+test("count-aware threshold stays at 95 percent including repeated tokens", () => fixture((directory) => {
+  writeFileSync(join(directory, "reference/index.html"), `<main>${"critical ".repeat(100)}</main>`);
+  for (const [count, status, verdict] of [[95, 0, "pass"], [94, 1, "fail"], [110, 0, "pass"]]) {
+    writeFileSync(join(directory, "build/index.html"), `<main>${"critical ".repeat(count)}</main>`);
+    const result = generate(directory);
+    assert.equal(result.status, status, result.stdout + result.stderr);
+    const evidence = JSON.parse(readFileSync(join(directory, "output/parity_variants.json"), "utf8"));
+    assert.equal(evidence.metric, "multiset-token-containment");
+    assert.equal(evidence.variants[0].coverage, Math.min(count, 100) / 100);
+    assert.equal(evidence.variants[0].verdict, verdict);
+  }
+}));
+
+test("an empty token reference retains full containment", () => fixture((directory) => {
+  writeFileSync(join(directory, "reference/index.html"), "<main>the and for<script>hidden</script></main>");
+  writeFileSync(join(directory, "build/index.html"), "<main>extra content</main>");
+  const result = generate(directory);
+  assert.equal(result.status, 0, result.stdout + result.stderr);
+  const evidence = JSON.parse(readFileSync(join(directory, "output/parity_variants.json"), "utf8"));
+  assert.equal(evidence.variants[0].coverage, 1);
+}));

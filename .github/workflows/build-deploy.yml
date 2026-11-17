@@ -74,6 +74,11 @@ jobs:
     - name: Worker tests
       run: npx vitest run
 
+    - name: Count-aware parity evidence regression tests
+      env:
+        BUNDLE_GEMFILE: data-ob/ituob/Gemfile
+      run: bundle exec node --test test/parity-evidence-generator.test.mjs
+
     - name: Worker typecheck
       run: npm run typecheck:worker
 

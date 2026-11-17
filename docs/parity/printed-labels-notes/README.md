@@ -1,5 +1,10 @@
 # Printed labels and notes: validation
 
+> Historical fixture evidence. Current main has changed since this receipt; see
+> [the fresh partial certification](../../content-parity-certification.md) for
+> current pins, measured failures, conflicts, and limits. The all-pass figures
+> below describe this fixture build, not current-main certification.
+
 Part of [ituob/ituob.github.io#100](https://github.com/ituob/ituob.github.io/issues/100).
 
 ## Review target

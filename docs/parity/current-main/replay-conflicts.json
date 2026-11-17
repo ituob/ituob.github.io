@@ -1,0 +1,235 @@
+{
+  "data_ob": "ff37cb471a8da399bd12d29bc3a334c080c7f7fe",
+  "current_snapshots": 21,
+  "error_events": 46,
+  "by_register": {
+    "e118-iin": 1,
+    "f32-tdi": 34,
+    "q708-ispc": 10,
+    "x121-dnic": 1
+  },
+  "conflicts": [
+    {
+      "register": "e118-iin",
+      "error": "skip SUP {\"code\" => \"89 420 06\"} at OB 1161: SUP conflict: key \"89 420 06\" not present in register E118_IIN"
+    },
+    {
+      "register": "f32-tdi",
+      "error": "skip SUP {\"code\" => \"MALAISIE\"} at OB 1013: SUP conflict: key \"MALAISIE | MA- | MAAS MAIP MAJB MAKU MAKO MAKB MAKL MATG MAKN MAKG MAMC MAPK MAPG MAPJ MASR MATP MAMX\" not present in register F32_TDI"
+    },
+    {
+      "register": "f32-tdi",
+      "error": "skip SUP {\"code\" => \"UKRAINE\"} at OB 1148: SUP conflict: key \"UKRAINE | UX- - | \" not present in register F32_TDI"
+    },
+    {
+      "register": "f32-tdi",
+      "error": "skip SUP {\"code\" => \"UKRAINE\"} at OB 1148: SUP conflict: key \"UKRAINE | UX- - | UXCK\" not present in register F32_TDI"
+    },
+    {
+      "register": "f32-tdi",
+      "error": "skip SUP {\"code\" => \"UKRAINE\"} at OB 1148: SUP conflict: key \"UCRANIA | UX- - | UXCG\" not present in register F32_TDI"
+    },
+    {
+      "register": "f32-tdi",
+      "error": "skip SUP {\"code\" => \"UKRAINE\"} at OB 1148: SUP conflict: key \"UCRANIA | UX- - | UXCV\" not present in register F32_TDI"
+    },
+    {
+      "register": "f32-tdi",
+      "error": "skip SUP {\"code\" => \"UKRAINE\"} at OB 1148: SUP conflict: key \"UCRANIA | UX- - | UXDP\" not present in register F32_TDI"
+    },
+    {
+      "register": "f32-tdi",
+      "error": "skip SUP {\"code\" => \"UKRAINE\"} at OB 1148: SUP conflict: key \"UCRANIA | UX- - | UXDC\" not present in register F32_TDI"
+    },
+    {
+      "register": "f32-tdi",
+      "error": "skip SUP {\"code\" => \"UKRAINE\"} at OB 1148: SUP conflict: key \"UCRANIA | UX- - | UXGR\" not present in register F32_TDI"
+    },
+    {
+      "register": "f32-tdi",
+      "error": "skip SUP {\"code\" => \"UKRAINE\"} at OB 1148: SUP conflict: key \"UCRANIA | UX- - | UXIF\" not present in register F32_TDI"
+    },
+    {
+      "register": "f32-tdi",
+      "error": "skip SUP {\"code\" => \"UKRAINE\"} at OB 1148: SUP conflict: key \"UCRANIA | UX- - | UXHR\" not present in register F32_TDI"
+    },
+    {
+      "register": "f32-tdi",
+      "error": "skip SUP {\"code\" => \"UKRAINE\"} at OB 1148: SUP conflict: key \"UCRANIA | UX- - | UXHS\" not present in register F32_TDI"
+    },
+    {
+      "register": "f32-tdi",
+      "error": "skip SUP {\"code\" => \"UKRAINE\"} at OB 1148: SUP conflict: key \"UCRANIA | UX- - | UXHM\" not present in register F32_TDI"
+    },
+    {
+      "register": "f32-tdi",
+      "error": "skip SUP {\"code\" => \"UKRAINE\"} at OB 1148: SUP conflict: key \"UCRANIA | UX- - | UXKG\" not present in register F32_TDI"
+    },
+    {
+      "register": "f32-tdi",
+      "error": "skip SUP {\"code\" => \"UKRAINE\"} at OB 1148: SUP conflict: key \"UCRANIA | UX- - | UXKM\" not present in register F32_TDI"
+    },
+    {
+      "register": "f32-tdi",
+      "error": "skip SUP {\"code\" => \"UKRAINE\"} at OB 1148: SUP conflict: key \"UCRANIA | UX- - | UXKR\" not present in register F32_TDI"
+    },
+    {
+      "register": "f32-tdi",
+      "error": "skip SUP {\"code\" => \"UKRAINE\"} at OB 1148: SUP conflict: key \"UCRANIA | UX- - | UXKV\" not present in register F32_TDI"
+    },
+    {
+      "register": "f32-tdi",
+      "error": "skip SUP {\"code\" => \"UKRAINE\"} at OB 1148: SUP conflict: key \"UCRANIA | UX- - | UXLK\" not present in register F32_TDI"
+    },
+    {
+      "register": "f32-tdi",
+      "error": "skip SUP {\"code\" => \"UKRAINE\"} at OB 1148: SUP conflict: key \"UCRANIA | UX- - | UXLC\" not present in register F32_TDI"
+    },
+    {
+      "register": "f32-tdi",
+      "error": "skip SUP {\"code\" => \"UKRAINE\"} at OB 1148: SUP conflict: key \"UCRANIA | UX- - | UXLV\" not present in register F32_TDI"
+    },
+    {
+      "register": "f32-tdi",
+      "error": "skip SUP {\"code\" => \"UKRAINE\"} at OB 1148: SUP conflict: key \"UCRANIA | UX- - | UXMR\" not present in register F32_TDI"
+    },
+    {
+      "register": "f32-tdi",
+      "error": "skip SUP {\"code\" => \"UKRAINE\"} at OB 1148: SUP conflict: key \"UCRANIA | UX- - | UXMK\" not present in register F32_TDI"
+    },
+    {
+      "register": "f32-tdi",
+      "error": "skip SUP {\"code\" => \"UKRAINE\"} at OB 1148: SUP conflict: key \"UCRANIA | UX- - | UXOD\" not present in register F32_TDI"
+    },
+    {
+      "register": "f32-tdi",
+      "error": "skip SUP {\"code\" => \"UKRAINE\"} at OB 1148: SUP conflict: key \"UCRANIA | UX- - | UXPL\" not present in register F32_TDI"
+    },
+    {
+      "register": "f32-tdi",
+      "error": "skip SUP {\"code\" => \"UKRAINE\"} at OB 1148: SUP conflict: key \"UCRANIA | UX- - | UXRV\" not present in register F32_TDI"
+    },
+    {
+      "register": "f32-tdi",
+      "error": "skip SUP {\"code\" => \"UKRAINE\"} at OB 1148: SUP conflict: key \"UCRANIA | UX- - | UXSV\" not present in register F32_TDI"
+    },
+    {
+      "register": "f32-tdi",
+      "error": "skip SUP {\"code\" => \"UKRAINE\"} at OB 1148: SUP conflict: key \"UCRANIA | UX- - | UXSF\" not present in register F32_TDI"
+    },
+    {
+      "register": "f32-tdi",
+      "error": "skip SUP {\"code\" => \"UKRAINE\"} at OB 1148: SUP conflict: key \"UCRANIA | UX- - | UXSU\" not present in register F32_TDI"
+    },
+    {
+      "register": "f32-tdi",
+      "error": "skip SUP {\"code\" => \"UKRAINE\"} at OB 1148: SUP conflict: key \"UCRANIA | UX- - | UXTR\" not present in register F32_TDI"
+    },
+    {
+      "register": "f32-tdi",
+      "error": "skip SUP {\"code\" => \"UKRAINE\"} at OB 1148: SUP conflict: key \"UCRANIA | UX- - | UXUG\" not present in register F32_TDI"
+    },
+    {
+      "register": "f32-tdi",
+      "error": "skip SUP {\"code\" => \"UKRAINE\"} at OB 1148: SUP conflict: key \"UCRANIA | UX- - | UXVC\" not present in register F32_TDI"
+    },
+    {
+      "register": "f32-tdi",
+      "error": "skip SUP {\"code\" => \"UKRAINE\"} at OB 1148: SUP conflict: key \"UCRANIA | UX- - | UXYL\" not present in register F32_TDI"
+    },
+    {
+      "register": "f32-tdi",
+      "error": "skip SUP {\"code\" => \"UKRAINE\"} at OB 1148: SUP conflict: key \"UCRANIA | UX- - | UXZP\" not present in register F32_TDI"
+    },
+    {
+      "register": "f32-tdi",
+      "error": "skip SUP {\"code\" => \"UKRAINE\"} at OB 1148: SUP conflict: key \"UCRANIA | UX- - | UXZT\" not present in register F32_TDI"
+    },
+    {
+      "register": "f32-tdi",
+      "error": "skip SUP {\"code\" => \"UKRAINE\"} at OB 1148: SUP conflict: key \"UCRANIA | UX- - | UXKX\" not present in register F32_TDI"
+    },
+    {
+      "register": "q708-ispc",
+      "error": "skip SUP {\"code\" => \"2-125-6\"} at OB 1109: SUP conflict: key \"2-125-6\" not present in register Q708_ISPC"
+    },
+    {
+      "register": "q708-ispc",
+      "error": "skip SUP {\"code\" => \"2-125-6\"} at OB 1109: SUP conflict: key \"2-248-4\" not present in register Q708_ISPC"
+    },
+    {
+      "register": "q708-ispc",
+      "error": "skip SUP {\"code\" => \"2-125-6\"} at OB 1109: SUP conflict: key \"5-245-2\" not present in register Q708_ISPC"
+    },
+    {
+      "register": "q708-ispc",
+      "error": "skip SUP {\"code\" => \"2-125-6\"} at OB 1109: SUP conflict: key \"5-245-6\" not present in register Q708_ISPC"
+    },
+    {
+      "register": "q708-ispc",
+      "error": "skip SUP {\"code\" => \"2-125-6\"} at OB 1109: SUP conflict: key \"5-251-0\" not present in register Q708_ISPC"
+    },
+    {
+      "register": "q708-ispc",
+      "error": "skip SUP {\"code\" => \"2-125-6\"} at OB 1109: SUP conflict: key \"6-237-4\" not present in register Q708_ISPC"
+    },
+    {
+      "register": "q708-ispc",
+      "error": "skip SUP {\"code\" => \"4-082-6\"} at OB 1109: SUP conflict: key \"4-082-6\" not present in register Q708_ISPC"
+    },
+    {
+      "register": "q708-ispc",
+      "error": "skip SUP {\"code\" => \"4-082-6\"} at OB 1109: SUP conflict: key \"4-086-0\" not present in register Q708_ISPC"
+    },
+    {
+      "register": "q708-ispc",
+      "error": "skip SUP {\"code\" => \"4-082-6\"} at OB 1109: SUP conflict: key \"4-086-1\" not present in register Q708_ISPC"
+    },
+    {
+      "register": "q708-ispc",
+      "error": "skip SUP {\"code\" => \"Genza SA Rue de Lausanne 37 1201 GENEVE\"} at OB 1167: SUP conflict: key \"Genza SA Rue de Lausanne 37 1201 GENEVE\" not present in register Q708_ISPC"
+    },
+    {
+      "register": "x121-dnic",
+      "error": "skip SUP {\"code\" => \"206 1\"} at OB 1081: SUP conflict: key \"206 1\" not present in register X121_DNIC"
+    }
+  ],
+  "source_message_groups": [
+    {
+      "register": "e118-iin",
+      "diagnostic_prefix": "skip SUP {\"code\" => \"89 420 06\"} at OB 1161",
+      "events": 1
+    },
+    {
+      "register": "f32-tdi",
+      "diagnostic_prefix": "skip SUP {\"code\" => \"MALAISIE\"} at OB 1013",
+      "events": 1
+    },
+    {
+      "register": "f32-tdi",
+      "diagnostic_prefix": "skip SUP {\"code\" => \"UKRAINE\"} at OB 1148",
+      "events": 33
+    },
+    {
+      "register": "q708-ispc",
+      "diagnostic_prefix": "skip SUP {\"code\" => \"2-125-6\"} at OB 1109",
+      "events": 6
+    },
+    {
+      "register": "q708-ispc",
+      "diagnostic_prefix": "skip SUP {\"code\" => \"4-082-6\"} at OB 1109",
+      "events": 3
+    },
+    {
+      "register": "q708-ispc",
+      "diagnostic_prefix": "skip SUP {\"code\" => \"Genza SA Rue de Lausanne 37 1201 GENEVE\"} at OB 1167",
+      "events": 1
+    },
+    {
+      "register": "x121-dnic",
+      "diagnostic_prefix": "skip SUP {\"code\" => \"206 1\"} at OB 1081",
+      "events": 1
+    }
+  ],
+  "source_message_group_count": 7
+}
