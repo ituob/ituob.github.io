@@ -12,9 +12,14 @@ const config = (suffix = "prod") => ({
   triggers: { crons: ["*/5 * * * *"] },
 });
 
-function fixture(run, { types = "export interface Env { DB: D1Database; NOTIFY_Q?: Queue<unknown>; }", extra = "", handlers = "async queue(batch: unknown, env: Env) {}, scheduled: async (event: unknown, env: Env) => {}" } = {}) {
+interface Fixture {
+  root: string;
+  write(path: string, value: unknown): void;
+}
+
+function fixture(run: (fixture: Fixture) => void, { types = "export interface Env { DB: D1Database; NOTIFY_Q?: Queue<unknown>; }", extra = "", handlers = "async queue(batch: unknown, env: Env) {}, scheduled: async (event: unknown, env: Env) => {}" } = {}) {
   const root = mkdtempSync(join(tmpdir(), "bindings-test-"));
-  const write = (path, value) => writeFileSync(join(root, path), typeof value === "string" ? value : JSON.stringify(value));
+  const write: Fixture["write"] = (path, value) => writeFileSync(join(root, path), typeof value === "string" ? value : JSON.stringify(value));
   mkdirSync(join(root, "worker/lib"), { recursive: true });
   write("worker/tsconfig.json", { compilerOptions: { strict: true, types: [], moduleResolution: "bundler", module: "esnext", allowImportingTsExtensions: true }, include: ["**/*.ts"] });
   write("worker/globals.d.ts", "interface D1Database { prepare(sql: string): unknown } interface Queue<T> { send(value: T): Promise<void> }");
@@ -119,7 +124,7 @@ test("JSONC rejects malformed input instead of silently recovering", () => {
 
 test("invalid database UUIDs fail while example placeholder UUIDs remain accepted", () => {
   const cfg = config();
-  cfg.d1_databases[0].database_id = "not-a-uuid";
+  cfg.d1_databases[0]!.database_id = "not-a-uuid";
   assert.match(check("example", cfg, bindings).join("\n"), /UUID database_id/);
   assert.deepEqual(check("example", config(), bindings), []);
 });
