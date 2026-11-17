@@ -1,0 +1,192 @@
+ITU-OB webapp (#103) end-to-end acceptance demo
+Worker: real code, real local D1 + migrations (workerd). Faked: OpenID provider, Access keys, GitHub REST API.
+Register: E164_CC (slug e164-cc), real entry country_code 43 from data-ob dataset 1114-E.164D. Edition: OB 1351.
+
+Step 1. Operator bootstrap and country roster seed
+------------------------------------------------
+  CHECK roster seed (seeds/roster.sql) loaded; every country starts suspended: 142 countries, 142 suspended
+  CHECK austria before activation: {"id":"austria","name":"Austria","register_key":"Austria","status":"suspended"}
+  the first itu-admin is created by the operator directly in D1 (never over HTTP)
+
+Step 2. Mock sign-in: ITU administrator, then activate Austria
+------------------------------------------------------------
+  CHECK admin session: {"authenticated":true,"roles":["itu-admin"],"memberStateId":null}
+  CHECK admin API refuses a session cookie without Cloudflare Access: 403
+  CHECK POST /api/admin/members/austria/status {active}: 200
+
+Step 3. Mock sign-in: ITU editor (inert until provisioned), provisioned by the administrator
+------------------------------------------------------------------------------
+  CHECK editor before provisioning: {"authenticated":true,"roles":[]}
+  CHECK provision itu-editor: 201
+  CHECK editor after provisioning: ["itu-editor"]
+
+Step 4. Mock sign-in: Austrian member claims Austria; staff verify the claim
+--------------------------------------------------------------------------
+  CHECK member before claim: []
+  CHECK claim: [201,"pending"]
+  CHECK verify claim (Access, admin): 200
+  CHECK member session after verification: {"roles":["member-submitter"],"memberStateId":"austria"}
+
+Step 5. Country binding: a Belgian member cannot propose a change for Austria
+---------------------------------------------------------------------------
+  CHECK verify Belgian claim: 200
+  CHECK entry taken from data-ob: "Austria"
+  CHECK Belgium proposing for Austria: 403
+  CHECK no submission was written: 0
+
+Step 6. Austrian member proposes a patch; stage2 validation warns
+---------------------------------------------------------------
+  first attempt is a mistake: ADD of country code 43, which the register already holds
+  CHECK create draft ADD 43: 201
+  CHECK stage2 warnings on ADD of an active key: ["unknown@register_state","mismatch@data.entries[0].country_code"]
+  stage2 conflict text: ADD of "43": it already exists in E164_CC
+  CHECK withdraw the mistaken draft: "withdrawn"
+  second attempt: MOD of the existing entry, adding an explanatory note
+  CHECK create draft MOD 43: 201
+  CHECK stage2 warnings (snapshot freshness advisory only): ["unknown@register_state"]
+  CHECK proposer and affiliation snapshot: {"proposer_id":"mock-member-austria","affiliation_kind":"member","affiliation_member_id":"austria","state":"draft"}
+  CHECK submit: [200,"submitted"]
+
+Step 7. Staff review: the editor reads, starts review, asks for a change; the member revises; the editor approves
+------------------------------------------------------------------------------
+  CHECK editor queue: [[true,"submitted","E164_CC","MOD"]]
+  CHECK start review: "in_review"
+  CHECK request changes: "changes_requested"
+  CHECK revise (revision 2 resubmitted): [200,"submitted",2]
+  CHECK revision 1 bytes and hash are unchanged
+  CHECK both revisions remain: [1,2]
+  CHECK start review again: "in_review"
+
+Step 8. Approve for OB 1351: the Worker opens the patch PR on ituob/itu-ob-data (never a push to main)
+------------------------------------------------------------------------------
+  CHECK approve: [200,"pr_open",1]
+  CHECK approval-time stage2 warnings: ["unknown@register_state"]
+  CHECK the exact PR the Worker opened: {"repo":"ituob/itu-ob-data","number":1,"state":"open","title":"OB-1351: MOD E164_CC","base":"main","head":"rt-sub-1351-001-e164-cc-<sub-1-suffix>"}
+  PR title: OB-1351: MOD E164_CC
+  PR body: "Submission <sub-1> (rev 2). Part of the submission workflow; a human merges."
+  CHECK PR changes exactly one file, an append-only patch: ["ob-issues/1351/e164-cc/001-MOD.yaml"]
+  CHECK main is untouched by the approval: []
+  file content:
+    | type: MOD
+    | date_requested: null
+    | date_active: null
+    | ob_issue_no: "1351"
+    | reference: OB-1351
+    | identifier:
+    |   code: 1351-001
+    | data:
+    |   _class: E164CCAmendment
+    |   entries:
+    |     - country_code: "43"
+    |       country_area_or_service:
+    |         en: Austria
+    |         fr: Autriche
+    |         es: Austria
+    |         ru: Австрия
+    |         zh: 奥地利
+    |         ar: النمسا
+    |       note:
+    |         en: "Operational Bulletin demo: numbering plan note updated by the Austrian
+    |           administration (Bundesministerium)."
+  CHECK file is the revision-2 MOD of country code 43: {"type":"MOD","reference":"OB-1351","code":"1351-001","cls":"E164CCAmendment","cc":"43","note":true}
+  CHECK stored PR row matches the bytes sent: "type: MOD\ndate_requested: null\ndate_active: null\nob_issue_no: \"1351\"\nreference: OB-1351\nidentifier:\n  code: 1351-001\ndata:\n  _class: E164CCAmendment\n  entries:\n    - country_code: \"43\"\n      country_area_or_service:\n        en: Austria\n        fr: Autriche\n        es: Austria\n        ru: Австрия\n        zh: 奥地利\n        ar: النمسا\n      note:\n        en: \"Operational Bulletin demo: numbering plan note updated by the Austrian\n          administration (Bundesministerium).\"\n"
+  CHECK no write ever targeted a protected branch: ["/repos/ituob/itu-ob-data/git/refs refs/heads/rt-sub-1351-001-e164-cc-<sub-1-suffix>"]
+
+Step 9. Human merges the patch PR; GitHub's signed webhook moves the submission to merged
+------------------------------------------------------------------------------
+  CHECK webhook accepted: 200
+  CHECK submission state: "merged"
+  CHECK merge commit recorded: {"merge_sha":"0000000900000009000000090000000900000009","pr_state":"merged"}
+
+Step 10. Compose OB 1351: admin opens the edition and places the merged item
+-------------------------------------------------------------------------
+  CHECK editor cannot compose (itu-admin only): 403
+  CHECK open edition: 201
+  CHECK merged-unpublished list: [[true,"merged",true]]
+  CHECK place item: "scheduled"
+
+Step 11. Stage (click 1): pin the data into the site's staging branch through a human-merged PR
+------------------------------------------------------------------------------
+  CHECK editor cannot Stage: 403
+  CHECK stage -> pending (PR awaits a human): [202,"Pin pull request awaits merge","composing"]
+  CHECK the exact staging PR: {"repo":"ituob/ituob.github.io","number":1,"state":"open","title":"Publish bulletin 1351","base":"staging","head":"rt-publish-1351"}
+  CHECK PR changes only the data gitlink, pinning itu-ob-data main (which holds the merged patch): [true,["data"]]
+  CHECK the pinned data contains the patch: ["ob-issues/1351/e164-cc/001-MOD.yaml"]
+  PR body: "Review frozen data pin for edition 1351.\n\n<!-- ituob-publication:<selection-digest> -->"
+  CHECK item still scheduled, nothing published: ["scheduled",{"status":"composing","freeze_sha":null}]
+  CHECK PR merged but staging not deployed yet -> still pending: [202,"Exact merge commit awaits successful staging deployment"]
+  CHECK staging deploy succeeded -> staged: [200,"staged",true,true,[]]
+  CHECK item still scheduled: Stage publishes nothing: ["scheduled",null]
+
+Step 12. Publish (click 2): open the staging -> main PR on the site repository (the Worker never merges)
+------------------------------------------------------------------------------
+  CHECK editor cannot Publish: 403
+  CHECK publish -> pending (PR awaits a human): [202,"Promotion pull request awaits merge","staged"]
+  CHECK the exact production PR: {"repo":"ituob/ituob.github.io","number":2,"state":"open","title":"Publish bulletin 1351","base":"main","head":"staging"}
+  PR body: "Promote bulletin 1351 (data pin 0000000900000009000000090000000900000009) from staging to main.\n\n<!-- ituob-promotion:LtohFV1hpjQgXKfefafdouEbP46PPLBpXDgyP1rHlrI -->"
+  CHECK exactly one promotion PR, staging pins the frozen data: [1,true]
+  CHECK production is unchanged until a human merges: true
+  CHECK item scheduled, edition staged: ["scheduled","staged"]
+  CHECK PR merged but production not deployed yet -> still pending: [202,"Exact merge commit awaits successful production deployment"]
+  CHECK idempotent: still one promotion PR: 1
+  CHECK production deploy succeeded -> published: [200,"published",1,true]
+  CHECK submission is published: "published"
+  CHECK production pins the frozen data: true
+  CHECK publish again is refused: 409
+
+Step 13. State history and audit trail
+-----------------------------------
+  submission state history:
+    (new) -> draft  [user]
+    draft -> submitted  [user]
+    submitted -> in_review  [user]
+    in_review -> changes_requested  [user]
+    changes_requested -> submitted  [user]
+    submitted -> in_review  [user]
+    in_review -> approved  [user]
+    approved -> pr_pending  [user]
+    pr_pending -> pr_open  [system]
+    pr_open -> merged  [github]
+    merged -> scheduled  [user]
+    scheduled -> published  [user]
+  CHECK history reaches published: "published"
+  CHECK composer and GitHub audit entries: ["github.pull_request.merged","edition.created","composer.placed","edition.staged","composer.published","edition.published"]
+  CHECK audit hash chain verifies: verifyChain -> null (no break)
+
+Step 14. Notification outbox and recorded email
+--------------------------------------------
+  notification rows for the submission (kind -> recipients):
+    submission.approved -> admin@itu.example, delegate@austria.example
+    submission.changes_requested -> delegate@austria.example
+    submission.in_review -> delegate@austria.example, delegate@austria.example
+    submission.pr_merged -> admin@itu.example, delegate@austria.example
+    submission.pr_opened -> admin@itu.example, delegate@austria.example
+    submission.published -> delegate@austria.example
+    submission.submitted -> editor@itu.example, editor@itu.example
+  CHECK the member is told about review, approval, PR merge and publication: changes_requested, approved, pr_opened, pr_merged, published
+  queue messages handed to the consumer: 9; delivered by the consumer: 13
+  CHECK mail was recorded, never sent: 13 recorded emails
+  recorded emails (recipient: subjects):
+    admin@itu.example: [ITU OB] E164_CC e164-cc: Pull request merged
+    admin@itu.example: [ITU OB] E164_CC e164-cc: Pull request opened
+    admin@itu.example: [ITU OB] E164_CC e164-cc: Submission approved
+    delegate@austria.example: [ITU OB] E164_CC e164-cc: Changes requested
+    delegate@austria.example: [ITU OB] E164_CC e164-cc: Pull request merged
+    delegate@austria.example: [ITU OB] E164_CC e164-cc: Pull request opened
+    delegate@austria.example: [ITU OB] E164_CC e164-cc: Submission approved
+    delegate@austria.example: [ITU OB] E164_CC e164-cc: Submission published
+    delegate@austria.example: [ITU OB] E164_CC e164-cc: Submission under review
+    delegate@austria.example: [ITU OB] E164_CC e164-cc: Submission under review
+    editor@itu.example: [ITU OB] E164_CC e164-cc: Submission received
+    editor@itu.example: [ITU OB] E164_CC e164-cc: Submission received
+    editor@itu.example: [ITU OB] E164_CC e164-cc: Submission withdrawn
+  CHECK the member's publication email exists and links to the discussion
+  CHECK every notification row ended sent or skipped, none failed: ["sent"]
+
+Step 15. Boundaries
+----------------
+  CHECK hosts the Worker contacted: ["https://api.github.com","https://idp.mock.test","https://ituob-demo.cloudflareaccess.com"]
+  CHECK GitHub writes by the Worker (method path): ["POST /app/installations/777/access_tokens","POST /repos/ituob/itu-ob-data/git/commits","POST /repos/ituob/itu-ob-data/git/refs","POST /repos/ituob/itu-ob-data/git/trees","POST /repos/ituob/itu-ob-data/pulls","POST /repos/ituob/ituob.github.io/git/commits","POST /repos/ituob/ituob.github.io/git/refs","POST /repos/ituob/ituob.github.io/git/trees","POST /repos/ituob/ituob.github.io/pulls"]
+  CHECK no merge, no PATCH, no ref update or delete was ever issued by the Worker: 0
+
+Not exercised here (see docs/acceptance/103-end-to-end-demo.adoc): replay regenerating projections from the merged patch, and the staging/production site builds.
