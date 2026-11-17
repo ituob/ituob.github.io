@@ -89,13 +89,19 @@ test("actual submission write path denies unscoped member text before any databa
 });
 
 
-test("E164_CC uses its catalog fallback identity without inventing a country attribute", () => {
+test("E164_CC accepts primary and fallback identities without inventing a country authority attribute", () => {
   for (const action_type of ACTION_TYPES) {
     const payload = { type: action_type, data: { _class: "E164CCAmendment", entries: [{ cc_ic: "+883 5100", applicant: "Example network" }] } };
     assert.deepEqual(validate({ register_id: "E164_CC", slug: "e164-cc", action_type, payload }), []);
     assert.deepEqual(registerKeysOf("E164_CC", payload), []);
-    const unkeyed = { ...payload, data: { ...payload.data, entries: [{ applicant: "Example network" }] } };
-    assert.ok(validate({ register_id: "E164_CC", action_type, payload: unkeyed }).some(e => e.code === "required" && e.path === "data.entries[0].cc_ic" && e.message.includes("cc_ic")));
+    const primary = { ...payload, data: { ...payload.data, entries: [{ country_code: "+883", applicant: "Example network" }] } };
+    assert.deepEqual(validate({ register_id: "E164_CC", action_type, payload: primary }), []);
+    assert.deepEqual(registerKeysOf("E164_CC", primary), []);
+    for (const entry of [{ applicant: "Example network" }, { country_code: " ", cc_ic: " " }]) {
+      const unkeyed = { ...payload, data: { ...payload.data, entries: [entry] } };
+      assert.ok(validate({ register_id: "E164_CC", action_type, payload: unkeyed }).some(e =>
+        e.code === "required" && e.path === "data.entries[0].country_code" && e.message.includes("country_code or cc_ic")), action_type);
+    }
   }
 });
 
@@ -117,13 +123,29 @@ test("country authority cannot substitute for a missing register identity", () =
   }
 });
 
-test("catalog composite identities match replay's partial-key and multilingual semantics", () => {
-  const context = { register_id: "F32_TDI", action_type: "ADD" as const };
-  const payload = (entry: unknown) => ({ type: "ADD", data: { _class: "F32TDIAmendment", entries: [entry] } });
-  assert.deepEqual(validate({ ...context, payload: payload({ country_or_area: { fr: "Aland" } }) }), []);
-  assert.ok(validate({ ...context, payload: payload({ country_or_area: { en: " " }, network_code: " ", office_code: "" }) }).some(e => e.code === "required"));
-  assert.ok(validate({ ...context, payload: payload({ country_or_area: { xx: "Aland" } }) }).some(e => e.code === "required"));
-  assert.ok(validate({ ...context, payload: payload({ network_code: "AA" }) }).some(e => e.path === "data.entries[0].country_or_area" && e.code === "required"));
+test("multilingual catalog identities require a nonblank canonical language", () => {
+  const payload = (country_or_area: unknown) => ({ type: "ADD", data: { _class: "NNPAmendment", entries: [{ country_or_area }] } });
+  assert.deepEqual(errors(payload({ fr: "Aland" })), []);
+  for (const country of [{ en: " " }, { xx: "Aland" }]) {
+    assert.ok(errors(payload(country)).some(e => e.code === "required" && e.path === "data.entries[0].country_or_area"));
+  }
+});
+
+test("F32 requires the catalog office identity independently of multilingual country authority", () => {
+  for (const action_type of ACTION_TYPES) {
+    const context = { register_id: "F32_TDI", action_type };
+    const payload = (entry: unknown) => ({ type: action_type, data: { _class: "F32TDIAmendment", entries: [entry] } });
+    assert.deepEqual(validate({ ...context, payload: payload({ country_or_area: { fr: "Aland" }, office_code: "AABB" }) }), []);
+    for (const entry of [
+      { country_or_area: { fr: "Aland" } },
+      { country_or_area: { en: "Aland" }, network_code: "AA" },
+      { country_or_area: { en: "Aland" }, office_code: " " },
+    ]) {
+      assert.ok(validate({ ...context, payload: payload(entry) }).some(e => e.path === "data.entries[0].office_code" && e.code === "required"), action_type);
+    }
+    assert.ok(validate({ ...context, payload: payload({ office_code: "AABB" }) }).some(e => e.path === "data.entries[0].country_or_area" && e.code === "required"), action_type);
+    assert.ok(validate({ ...context, payload: payload({ country_or_area: { en: " " }, office_code: "AABB" }) }).some(e => e.path === "data.entries[0].country_or_area" && e.code === "required"), action_type);
+  }
 });
 
 test("ListVIII reports its unrepresentable canonical identity while authorized text remains valid", () => {

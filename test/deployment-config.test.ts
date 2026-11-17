@@ -3,8 +3,9 @@ import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { buildConfig, main, TARGETS, validateConfig, validateIsolation } from "../scripts/configure-cloudflare.mjs";
+import { parseJsonc } from "../scripts/check-bindings.mjs";
 
-const templates = Object.fromEntries(Object.entries(TARGETS).map(([environment, target]) => [environment, JSON.parse(readFileSync(target.file, "utf8"))]));
+const templates = Object.fromEntries(Object.entries(TARGETS).map(([environment, target]) => [environment, parseJsonc(target.file, readFileSync(target.file, "utf8"))]));
 const resources = (environment = "staging") => ({
   account_id: "1234567890abcdef1234567890abcdef",
   database_id: environment === "staging" ? "12345678-1234-1234-1234-123456789abc" : "87654321-4321-4321-4321-cba987654321",
@@ -51,15 +52,25 @@ describe("Cloudflare deployment configuration", () => {
     main(["--input", input, "--environment", "staging", "--write"], temp);
     expect(readFileSync(join(temp, TARGETS.staging.file), "utf8")).toBe(output);
     expect(readFileSync(join(temp, TARGETS.production.file), "utf8")).toBe(productionBefore);
+    const generated = readFileSync(join(temp, TARGETS.staging.file), "utf8")
+      .replace('"workers_dev": false,', '"workers_dev": false, // JSONC comment')
+      .replace(/\n}\n$/, ",\n}\n");
+    writeFileSync(join(temp, TARGETS.staging.file), generated);
     expect(main(["--check", "--environment", "staging"], temp)).toContain("Remote resources, migrations and secret values are not checked");
   });
-  it("preserves deployment authentication without exposing provider secrets", () => {
-    for (const config of Object.values(templates)) {
-      expect(config.vars.AUTH_MODE).toBe("oidc");
-      expect(JSON.stringify(config)).not.toMatch(/stub/i);
+  it("keeps checked-in templates static-safe and generated configs explicitly opt into OIDC without exposing provider secrets", () => {
+    for (const [environment, config] of Object.entries(templates)) {
+      expect(config.vars?.AUTH_MODE).toBeUndefined();
+      expect(config.d1_databases ?? []).toHaveLength(0);
+      expect(config.queues?.producers ?? []).toHaveLength(0);
+      expect(config.queues?.consumers ?? []).toHaveLength(0);
+      expect(config.triggers?.crons ?? []).toHaveLength(0);
+      const generated = buildConfig(resources(environment), environment, config);
+      expect(generated.vars.AUTH_MODE).toBe("oidc");
+      expect(JSON.stringify(generated)).not.toMatch(/stub/i);
       for (const name of ["OIDC_CLIENT_SECRET", "RESEND_API_KEY", "GITHUB_APP_PRIVATE_KEY", "GITHUB_WEBHOOK_SECRET"]) {
-        expect(config.vars).not.toHaveProperty(name);
-        expect(config.secrets.required).toContain(name);
+        expect(generated.vars).not.toHaveProperty(name);
+        expect(generated.secrets.required).toContain(name);
       }
     }
   });

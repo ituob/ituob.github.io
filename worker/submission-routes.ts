@@ -3,6 +3,7 @@
 import { Forbidden } from "./lib/authz.ts";
 import { type Route, body, json } from "./lib/http.ts";
 import { resolveAuthority } from "./lib/authority.ts";
+import { getRepoReader, registerIsEmpty, DATA_REPO_DEFAULT } from "./lib/repo-reader.ts";
 import { getPublisher } from "./lib/publisher.ts";
 import { requestRevert } from "./lib/revert.ts";
 import {
@@ -30,11 +31,13 @@ export async function ituSession(env: Env, access: AccessIdentity): Promise<Sess
   return { userId: u.id, ...(await resolveAuthority(env.DB, u.id)) };
 }
 
+/** Lazy: only a SEED reads the data repository, so a missing token never affects other actions. */
+const emptyCheck = (env: Env) => (slug: string) => registerIsEmpty(getRepoReader(env), env.GITHUB_DATA_REPO ?? DATA_REPO_DEFAULT, slug);
 export const submissionRoutes: Route[] = [
   { method: "GET", pattern: re("/api/me/submissions"), guard: "session",
     handler: async ({ env, session, url }) => json({ ok: true, submissions: await listSubmissions(env.DB, session, url.searchParams.get("state"), false) }) },
   { method: "POST", pattern: re("/api/me/submissions"), guard: "session",
-    handler: async ({ request, env, session }) => submissionJson(await createSubmission(env.DB, session, await body(request), env.ASSETS), 201) },
+    handler: async ({ request, env, session }) => submissionJson(await createSubmission(env.DB, session, await body(request), emptyCheck(env), env.ASSETS), 201) },
   { method: "GET", pattern: re(`/api/me/submissions/${ID}`), guard: "session",
     handler: async ({ env, session, params }) => json({ ok: true, ...(await readSubmission(env.DB, session, params[0]!)) }) },
   { method: "PUT", pattern: re(`/api/me/submissions/${ID}`), guard: "session",
@@ -61,7 +64,7 @@ export const submissionRoutes: Route[] = [
   })),
   { method: "POST", pattern: re(`/api/admin/submissions/${ID}/approve`), guard: "access",
     handler: async ({ request, env, access, params }) => {
-      const sub = await approve(env.DB, await ituSession(env, access!), params[0]!, await body(request), env.PATCH_REPO ?? DEFAULT_PATCH_REPO, env.ASSETS);
+      const sub = await approve(env.DB, await ituSession(env, access!), params[0]!, await body(request), env.PATCH_REPO ?? DEFAULT_PATCH_REPO, emptyCheck(env), env.ASSETS);
       // The consumer runs after the approval is durable; a GitHub failure leaves pr_pending + last_error.
       const pr = await openPr(env.DB, getPublisher(env), sub.id);
       return json({ ok: true, submission: { ...sub, state: pr.state }, pr }, pr.error ? 202 : 200);

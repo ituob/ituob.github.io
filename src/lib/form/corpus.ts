@@ -1,8 +1,7 @@
 /**
  * Which class owns a stored corpus file. Port of Ituob::Support::CorpusTree
  * (service-publications-docs ituob/lib/ituob/support/corpus_tree.rb), with
- * general messages resolved by their stored `type` where the Ruby map is
- * coarser (sanc -> GeneralMessage there, GeneralSancs here).
+ * general messages resolved by their stored `type` (sanc -> GeneralSancs, as in the Ruby map).
  *
  *   ob-issues/<issue>/meta.yaml                       IssueMetadata
  *   ob-issues/<issue>/general/running_annexes.yaml    GeneralRunningAnnexes

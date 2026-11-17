@@ -244,7 +244,7 @@ async function bind(db: D1Database, session: Session, register_id: string, actio
       message: "Text amendments require an ITU editor or administrator because their country scope cannot be verified",
     }]);
   const keys = registerKeysOf(register_id, payload);
-  if (action === "LIR" && !isItu(session)) throw new Forbidden();
+  if ((action === "LIR" || action === "SEED") && !isItu(session)) throw new Forbidden();
   // ITU roles are not key-bound; authorizeEntries needs a non-empty list to be callable.
   if (keys.length === 0 && !isItu(session)) {
     // An invalid class cannot supply a country field. Return its schema errors
@@ -256,7 +256,18 @@ async function bind(db: D1Database, session: Session, register_id: string, actio
   return authorizeEntries(db, session, keys.length ? keys : ["-"]);
 }
 
-export async function createSubmission(db: D1Database, session: Session | null, b: Record<string, unknown>, assets?: Assets): Promise<Sub> {
+/** SEED is the only full-state action: ITU staff only, and only while the register's replayed state is empty. */
+export type EmptyRegisterCheck = (slug: string) => Promise<boolean>;
+async function requireEmptyRegister(db: D1Database, action: ActionType, slug: string, isEmpty: EmptyRegisterCheck | undefined, selfId: string | null) {
+  if (action !== "SEED") return;
+  // One SEED per register: replay seeds once, so a second in-flight SEED would open a second full-state PR.
+  const other = await db.prepare(`SELECT id FROM submissions WHERE action_type='SEED' AND slug=?1 AND id IS NOT ?2 AND state NOT IN ('rejected','withdrawn') LIMIT 1`).bind(slug, selfId).first();
+  if (other) throw new ConflictError(`register ${slug} already has a SEED in progress; withdraw or finish it first`);
+  if (!isEmpty) throw new UpstreamError("register state cannot be checked; a SEED is refused");
+  if (!(await isEmpty(slug))) throw new ConflictError(`register ${slug} already has state; change it with ADD, REP or SUP actions, not a SEED`);
+}
+
+export async function createSubmission(db: D1Database, session: Session | null, b: Record<string, unknown>, isEmpty?: EmptyRegisterCheck, assets?: Assets): Promise<Sub> {
   const s = requireUser(session);
   const c = parseCreate(b);
   const snap = await bind(db, s, c.register_id, c.action_type, c.payload, assets);
@@ -271,6 +282,7 @@ export async function createSubmission(db: D1Database, session: Session | null, 
   const t = now();
   const { errors, warnings } = await validateCurrent(assets, { register_id: c.register_id, slug: c.slug, action_type: c.action_type, payload: c.payload });
   if (errors.length) throw new ValidationFailed(errors, warnings);
+  await requireEmptyRegister(db, c.action_type, c.slug, isEmpty, null);
   const rev = await revisionRow({ id }, 1, c.payload, errors, s.userId, t, warnings);
   const stmts = [
     db
@@ -413,9 +425,10 @@ export function finalYaml(sub: Sub, edition: number, seq: number, payloadYaml: s
  * happens afterwards in openPr (the "queue consumer"), so a GitHub outage never
  * un-approves anything.
  */
-export async function approve(db: D1Database, session: Session | null, id: string, b: Record<string, unknown>, repo: string, assets?: Assets) {
+export async function approve(db: D1Database, session: Session | null, id: string, b: Record<string, unknown>, repo: string, isEmpty?: EmptyRegisterCheck, assets?: Assets) {
   const s = reviewer(session);
   const sub = await getSub(db, id);
+  await requireEmptyRegister(db, sub.action_type, sub.slug, isEmpty, sub.id);
   const detail = selfReview(s, sub, b);
   if (sub.state !== "in_review") throw new ConflictError(`illegal transition from ${sub.state}`);
   const edition = b.target_edition;

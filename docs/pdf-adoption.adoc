@@ -1,0 +1,51 @@
+= PDF adoption: candidate to itu-adopted
+:toc:
+
+Part of ituob/ituob.github.io#106.
+
+The spd `pdf.yml` workflow writes `status: candidate` for every generated PDF.
+A PDF becomes `itu-adopted` only through an audited Worker action by an approver.
+
+== Rules
+
+* Adoption is pinned to `{standard, edition_year, language, sha256}`. A re-render
+  has a new sha256, so it is a candidate again until adopted.
+* The downloads page shows "Official ITU publication" only when a live adoption
+  record matches the served file's sha256 (every language file, for an edition).
+  Otherwise, and whenever the lookup fails, it shows the candidate wording.
+* Records live in D1 (`publication_adoptions`, migration 0005), so they survive
+  deploys; the page reads them from the public `GET /api/publications/adoptions`.
+  Each adoption and revocation also appends a hash-chained `audit_log` row
+  (`publication.adopted`, `publication.adoption_revoked`) naming the actor.
+* Revocation keeps the row and stamps `revoked_by`/`revoked_at`.
+
+== Endpoints
+
+Access-guarded (`/api/admin/*`); the Access email must belong to a user row.
+
+* `POST /api/admin/publications/adopt` and `POST /api/admin/publications/revoke`,
+  body `{ "standard": "T-SP-PP.RES.21", "edition_year": 2011, "language": "en", "sha256": "<64 hex>" }`.
+  Adopt: 201, or 409 if that exact file is already adopted. Revoke: 200, or 404
+  if it is not adopted. A non-approver gets 403 and nothing is written.
+
+== Who may adopt: the owner sets this
+
+WHO may adopt is the site owner's open decision. It is configuration, not code:
+`ADOPTION_APPROVERS`, a comma-separated allowlist of `role:<role>` and
+`email:<address>` tokens (a Worker variable in the wrangler config).
+
+* Unset: `role:itu-editor,role:itu-admin` (ITU staff).
+* Example: `role:itu-admin,email:editor@itu.example`.
+* A malformed value fails closed: nobody can adopt. Roles are `itu-admin`,
+  `itu-editor`, `member-submitter`; listing `member-submitter` is possible but
+  is the owner's explicit choice.
+* An `email:` token still needs the Access identity to map to a `users` row.
+
+== Limits
+
+* The Worker does not read the manifest, so adopting a sha256 that no manifest
+  entry carries succeeds and simply matches nothing.
+* The page overlay is client-side (the site is static); without JavaScript the
+  page shows candidate, which is the safe default.
+* A manifest entry that itself says `itu-adopted` is still rendered as adopted
+  at build time; the pipeline only ever writes `candidate`.

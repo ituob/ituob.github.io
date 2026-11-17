@@ -43,7 +43,7 @@ it("rechecks state when editing, submitting, revising and approving", async () =
   expect(revised.json.warnings.some((w: any) => w.message.includes("already exists"))).toBe(true);
   await db().prepare("UPDATE submissions SET state='in_review' WHERE id=?1").bind(id).run();
   await approve(db(), { userId: "itu-editor", roles: ["itu-admin"], memberStateId: null }, id,
-    { target_edition: 1351, override_self_review: true }, "ituob/itu-ob-data", { fetch: fetchAsset });
+    { target_edition: 1351, override_self_review: true }, "ituob/itu-ob-data", undefined, { fetch: fetchAsset });
   expect(fetchAsset).toHaveBeenCalledTimes(5);
 });
 it.each(["404", "throws", "html", "invalid shape"])("%s snapshot degrades to local checks with a warning, never a 500", async (failure) => {

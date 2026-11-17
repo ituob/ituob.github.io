@@ -19,6 +19,15 @@ describe("stage2 key semantics", () => {
     expect(run("ADD", ["89999"])).toEqual([]);
     for (const a of ["REP", "MOD", "SUP", "DEL", "LIR"] as const) expect(run(a, ["89001", "89003"])).toEqual([]);
   });
+  it("accepts new SEED keys in an empty register while rejecting duplicates", () => {
+    const context = { register_id: "E118_IIN", action_type: "SEED" as const,
+      payload: { type: "SEED", data: { _class: "E118Amendment", entries: [{ issue_id_number: "new", company_name: "Co", country_or_area: { en: "France" } }] } },
+      register_state: { active: new Set<string>(), lapsed: new Set<string>(), stale: true } };
+    expect(validateWithWarnings(context)).toEqual({ errors: [], warnings: [] });
+    expect(stage2({ ...context, payload: payload("new", "new") })).toEqual([
+      expect.objectContaining({ path: "data.entries[1].issue_id_number", message: expect.stringContaining("more than once") }),
+    ]);
+  });
   it("rejects ADD of an active key, anchored to the entry", () => {
     expect(run("ADD", ["89999", "89001"])).toEqual([
       expect.objectContaining({ path: "data.entries[1].issue_id_number", code: "mismatch", message: expect.stringContaining("89001") }),
