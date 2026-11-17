@@ -481,7 +481,19 @@ validator must accept all of it) plus a negative fixture set.
   which the CI-built site already contains (`dist/` assets; the Worker
   reads it via `env.ASSETS` or R2 once Phase 1 lands). A stale snapshot
   produces a *warning*, not a block (the edition may be one deploy
-  behind); CI (`replay`) is the real check.
+  behind); CI (`replay`) is the real check. The build copies each
+  register's `current.json` to `dist/data/snapshots/{slug}/current.json`.
+  Snapshot directories use the catalog slug; key extraction uses the
+  catalog register ID. Current snapshots have no verifiable freshness
+  marker, so deployed snapshot conflicts are conservatively advisory.
+  Missing, unreadable or malformed snapshots produce a warning and retain
+  within-payload validation. Responses expose `warnings` alongside the
+  submission (and alongside `errors` on failure); revisions retain warnings
+  in their validation JSON. Payload-local duplicates always block.
+  Approval re-runs the same validation and returns its current warnings,
+  including when opening the PR is pending. Approval warnings are recorded
+  in the submission's approval audit detail; existing revision validation
+  remains immutable.
 
 Validation results are stored per revision (`validation` JSON) with
 the `schema_sha` of the compiled ontology, so a reviewer can see which

@@ -236,7 +236,7 @@ async function handleApiInner(request: Request, env: Env, url: URL): Promise<Res
     if (e instanceof Forbidden) return json({ error: "forbidden" }, 403);
     if (e instanceof NotFoundError) return json({ error: e.message }, 404);
     if (e instanceof ConflictError) return json({ error: e.message }, 409);
-    if (e instanceof ValidationFailed) return json({ error: "validation failed", errors: e.errors }, 422);
+    if (e instanceof ValidationFailed) return json({ error: "validation failed", errors: e.errors, warnings: e.warnings }, 422);
     if (e instanceof RepoReaderNotConfigured) return json({ error: e.message }, 503);
     if (e instanceof RepoReadFailed) return json({ error: e.message }, 502);
     if (e instanceof UpstreamError) return json({ error: e.message }, 502);
