@@ -15,21 +15,5 @@
     "binding": "ASSETS",
     "html_handling": "auto-trailing-slash",
     "not_found_handling": "404-page"
-  },
-  // Bindings: docs/cloudflare-bindings.adoc. The database_id is a PLACEHOLDER
-  // until the owner runs `wrangler d1 create ituob-org-staging-db` and pastes the real id.
-  "d1_databases": [
-    {
-      "binding": "DB",
-      "database_name": "ituob-org-staging-db",
-      "database_id": "00000000-0000-0000-0000-000000000001",
-      "migrations_dir": "migrations"
-    }
-  ],
-  "queues": {
-    "producers": [{ "binding": "NOTIFY_Q", "queue": "ituob-notify-staging" }],
-    "consumers": [{ "queue": "ituob-notify-staging", "max_batch_size": 10, "max_retries": 5 }]
-  },
-  // scheduled(): outbox sweep (re-enqueues rows stale > 5 min) + reconcile.
-  "triggers": { "crons": ["*/5 * * * *"] }
+  }
 }

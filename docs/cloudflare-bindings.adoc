@@ -1,13 +1,21 @@
 = Cloudflare bindings: what the Worker needs and how to provision it
 :toc:
 
-The Worker (`worker/index.ts`) uses a D1 database, a notification queue, and a
-cron trigger. `wrangler.jsonc` (production) and `wrangler.staging.jsonc`
-declare them, with *placeholder* IDs, so the Worker builds and
-`wrangler deploy --dry-run` passes without touching Cloudflare. Nothing is
-created by the repository: the account owner provisions the resources below.
+The live `wrangler.jsonc` (production) and `wrangler.staging.jsonc` retain the
+static deployment configuration from main. They contain no D1, queue, or cron
+bindings. Deploying them does not opt into resource provisioning. Without `DB`,
+static assets and canonical redirects work; API and sign-in return an uncached
+503 explaining the missing binding. Scheduled work skips with a diagnostic, and
+queue deliveries retry rather than acknowledge messages. Without `NOTIFY_Q`,
+outbox rows remain queued for later delivery.
 
-== What is declared
+`wrangler.bindings.example.jsonc` and
+`wrangler.staging.bindings.example.jsonc` are *opt-in templates*, not selected by
+CI. Their database IDs are placeholders and must never be deployed as-is. A dry
+run verifies bundling only: it does not validate remote resources. Wrangler can
+automatically create a missing queue before a subsequent D1 upload fails.
+
+== What the opt-in examples declare
 
 [cols="2,2,2,3"]
 |===
@@ -26,20 +34,28 @@ Production and staging never share a database or queue.
 [source,sh]
 ----
 # Production
-npx wrangler d1 create ituob-org-db           # copy database_id into wrangler.jsonc
+npx wrangler d1 create ituob-org-db           # copy database_id into wrangler.bindings.example.jsonc
 npx wrangler queues create ituob-notify
-npx wrangler d1 migrations apply ituob-org-db --remote
+npx wrangler d1 migrations apply ituob-org-db --remote -c wrangler.bindings.example.jsonc
 
 # Staging
-npx wrangler d1 create ituob-org-staging-db   # copy database_id into wrangler.staging.jsonc
+npx wrangler d1 create ituob-org-staging-db   # copy database_id into wrangler.staging.bindings.example.jsonc
 npx wrangler queues create ituob-notify-staging
-npx wrangler d1 migrations apply ituob-org-staging-db --remote -c wrangler.staging.jsonc
+npx wrangler d1 migrations apply ituob-org-staging-db --remote -c wrangler.staging.bindings.example.jsonc
 ----
 
-Replace the placeholder `database_id` (`00000000-0000-0000-0000-00000000000{0,1}`)
-in each config with the printed id and commit it. Until then a real deploy
-fails at the D1 binding, by design. Apply migrations before the first deploy
-that serves `/api`.
+After creating each database, replace its placeholder `database_id`
+(`00000000-0000-0000-0000-00000000000{0,1}`) in the corresponding example before
+running the migration commands. Create the queues explicitly and apply all
+migrations before enabling the webapp. Review identity and email settings below
+before enabling consumers or the cron.
+
+To opt in, copy the prepared resource sections into the corresponding live
+config and commit that deliberate activation. CI continues using the live
+configs; it never selects these examples. Update the checker’s live-config
+policy in the same activation change after provisioning is verified. Keep
+production and staging resources separate. The commands above are owner actions,
+not steps performed by this change or its tests.
 
 == Deliberately not configured
 
@@ -54,8 +70,10 @@ that serves `/api`.
 
 == Guard
 
-`npm run check:bindings` derives the bindings from `worker/lib/types.ts` (`Env`
-members typed `D1Database` / `Queue<...>`) and `worker/index.ts` (`queue`,
-`scheduled` exports) and fails if either config lacks the matching
-`d1_databases`, `queues.producers`, `queues.consumers` or `triggers.crons`
-entry, shares a resource across environments, or sets `AUTH_MODE`/stub.
+`npm run check:bindings` checks that live configs remain free of D1, queues and
+cron triggers, and separately validates the opt-in examples against the Worker
+`Env` contract and default-exported queue/scheduled handlers. It checks inherited
+and aliased binding types, cross-environment resource isolation (including
+consumers), and forbids secrets in plain vars. Valid JSONC comments and trailing
+commas are supported. Placeholder IDs in examples are documentation only, not
+proof of deployability.

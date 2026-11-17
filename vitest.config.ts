@@ -4,7 +4,7 @@ import { defineConfig } from "vitest/config";
 
 // Worker tests run in workerd via miniflare with a REAL local D1 (no mocks).
 // The test harness declares its own bindings (local D1 + queue producer);
-// the deploy configs declare the real ones (docs/cloudflare-bindings.adoc,
+// opt-in example configs describe provisioned resources (docs/cloudflare-bindings.adoc,
 // npm run check:bindings) and must stay free of AUTH_MODE (test/stub-production.test.ts).
 export default defineConfig(async () => {
   const migrations = await readD1Migrations("./migrations");
