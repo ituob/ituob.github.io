@@ -12,7 +12,7 @@ const count = (env: Env, metric: string, n = 1) =>
 interface Notification {
   id: string; kind: string; payload: string; submission_id: string;
   email: string | null; locale: string | null; level: Level; suppressed: number;
-  delivery: string; digest_key: string | null; email_status: string;
+  delivery: string; digest_key: string | null; email_delivery_key: string | null; email_status: string;
   email_provider_id: string | null; email_attempts: number;
 }
 const query = `SELECT n.*, u.email, u.locale, COALESCE(p.level,'all') AS level,
@@ -37,11 +37,23 @@ async function eligible(env: Env, n: Notification): Promise<boolean> {
     ]);
     return false;
   }
-  return n.delivery !== "digest" || n.digest_key !== null;
+  return n.delivery !== "digest" || n.digest_key !== null || n.email_delivery_key !== null;
 }
 
 /** A digest key freezes the membership of a daily group across queue retries. */
 async function deliver(env: Env, first: Notification): Promise<boolean> {
+  // Freeze identity atomically against cron's digest assignment. Replays may
+  // share the provider key, but can never move this recipient into another send.
+  const claim = await env.DB.prepare(`UPDATE notifications
+    SET email_delivery_key=COALESCE(email_delivery_key,digest_key,id)
+    WHERE id=?1 AND email_status IN ('queued','failed')
+      AND (email_delivery_key IS NOT NULL OR digest_key IS NOT NULL OR
+        COALESCE((SELECT delivery FROM notification_prefs WHERE user_id=notifications.user_id),'immediate')='immediate')
+    RETURNING digest_key,email_delivery_key`).bind(first.id)
+    .first<{ digest_key: string | null; email_delivery_key: string }>();
+  if (!claim) return false;
+  // Cron may have won the claim since the caller's SELECT.
+  first = (await env.DB.prepare(`${query} WHERE n.id=?1`).bind(first.id).first<Notification>())!;
   const group = first.digest_key
     ? (await env.DB.prepare(`${query} WHERE n.digest_key=?1 ORDER BY n.created_at,n.id`).bind(first.digest_key).all<Notification>()).results
     : [first];
@@ -52,7 +64,7 @@ async function deliver(env: Env, first: Notification): Promise<boolean> {
   const mail = first.digest_key ? renderDigestEmail(ready, options) : renderEmail(ready[0]!, options);
   try {
     const result = await getEmailSender(env).send({
-      to: ready[0]!.email!, ...mail, idempotencyKey: first.digest_key ?? first.id,
+      to: ready[0]!.email!, ...mail, idempotencyKey: claim.email_delivery_key,
     });
     // Conditional updates make repeated/concurrent deliveries leave counters unchanged.
     const statements: D1PreparedStatement[] = [];
@@ -72,13 +84,25 @@ async function deliver(env: Env, first: Notification): Promise<boolean> {
     const error = redactSecrets(String((e as Error).message ?? e), env.EMAIL_API_KEY, env.EMAIL_API_URL).slice(0, 300);
     let retry = false;
     for (const n of ready) {
-      const attempts = n.email_attempts + 1;
-      const dead = attempts >= MAX_ATTEMPTS;
-      await env.DB.batch([
-        env.DB.prepare(`UPDATE notifications SET email_status='failed', email_attempts=?2, email_reason=?3
-          WHERE id=?1 AND email_status IN ('queued','failed')`).bind(n.id, attempts, dead ? `dead: ${error}` : error),
-        count(env, "failed"), ...(dead ? [count(env, "dlq")] : []),
+      // Increment and arbitrate against a successful consumer in one statement.
+      // Counter inserts observe changes() inside the same D1 transaction.
+      const day = new Date().toISOString().slice(0, 10);
+      const [transition] = await env.DB.batch<{ email_attempts: number }>([
+        env.DB.prepare(`UPDATE notifications SET email_status='failed', email_attempts=email_attempts+1,
+          email_reason=CASE WHEN email_attempts+1>=?2 THEN 'dead: ' || ?3 ELSE ?3 END
+          WHERE id=?1 AND email_status IN ('queued','failed') AND email_provider_id IS NULL AND email_attempts<?2
+          RETURNING email_attempts`).bind(n.id, MAX_ATTEMPTS, error),
+        env.DB.prepare(`INSERT INTO notification_counters(day,metric,n) SELECT ?1,'failed',1
+          WHERE changes()>0 ON CONFLICT(day,metric) DO UPDATE SET n=n+excluded.n`).bind(day),
+        env.DB.prepare(`INSERT INTO notification_counters(day,metric,n) SELECT ?1,'dlq',1
+          WHERE changes()>0 AND EXISTS (SELECT 1 FROM notifications WHERE id=?2
+            AND email_status='failed' AND email_attempts=?3)
+          ON CONFLICT(day,metric) DO UPDATE SET n=n+excluded.n`).bind(day, n.id, MAX_ATTEMPTS),
       ]);
+      const updated = transition!.results[0];
+      if (!updated) continue;
+      const attempts = updated.email_attempts;
+      const dead = attempts >= MAX_ATTEMPTS;
       retry ||= !dead;
       console.log(JSON.stringify({ level: dead ? "error" : "warn", event: "notify.send_failed", notification_id: n.id, kind: n.kind, attempt: attempts, error }));
     }
