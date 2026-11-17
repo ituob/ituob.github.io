@@ -234,7 +234,7 @@ describe("illegal transitions are rejected and write nothing", () => {
     // every composer entry point checks the admin role itself, not only the route guard
     const c = sources[COMPOSER]!;
     const exported = [...c.matchAll(/export async function (\w+)\(db: D1Database, session: Session \| null/g)].map((m) => m[1]);
-    expect(exported.sort()).toEqual(["listEditions", "listMergedUnpublished", "openEdition", "placeItem", "publishEdition", "readEdition", "removeItem"]);
+    expect(exported.sort()).toEqual(["listEditions", "listMergedUnpublished", "openEdition", "placeItem", "publishEdition", "readEdition", "removeItem", "stageEdition"]);
     for (const fn of exported) {
       const body = c.slice(c.indexOf(`export async function ${fn}(`)).split(/\nexport /)[0]!;
       expect(body, fn).toMatch(/admin\(session\)/);

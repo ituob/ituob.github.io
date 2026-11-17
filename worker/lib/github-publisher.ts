@@ -1,5 +1,5 @@
 import { assertPatchBranch, assertMetadataRequest, assertMessageRequest, METADATA_BRANCH, MESSAGE_BRANCH, PublisherNotConfigured } from "./publisher.ts";
-import type { OpenPatchPrRequest, OpenMetadataPrRequest, OpenGeneralMessagePrRequest, OpenRevertPrRequest, OpenedPr, PatchPublisher, PinBump, PinBumpRequest, PublisherConfig, PullRequestState } from "./publisher.ts";
+import type { OpenPatchPrRequest, OpenMetadataPrRequest, OpenGeneralMessagePrRequest, OpenRevertPrRequest, OpenedPr, PatchPublisher, PinBump, PinBumpRequest, Promotion, PromotionRequest, PublisherConfig, PullRequestState } from "./publisher.ts";
 
 type Json = Record<string, any>;
 export type GitHubTransport = (input: string, init: RequestInit) => Promise<Response>;
@@ -289,6 +289,52 @@ export class GitHubAppPatchPublisher implements PatchPublisher {
     const jobs = await this.request(`${repo}/actions/runs/${run.id}/jobs?filter=latest&per_page=100`);
     if (jobs.total_count > 100 || !jobs.jobs?.some((job: Json) => job.name === "deploy-cloudflare-staging" && job.status === "completed" && job.conclusion === "success")) return pending("Staging deployment job has not succeeded");
     return { freezeSha: freeze, siteCommit: merged };
+  }
+  /**
+   * Publish step. Opens one staging -> default-branch PR on the site repo and reads it back. It never merges,
+   * never creates or moves a ref and never writes a tree: a human merges, the existing production job deploys.
+   */
+  async promoteToProduction(req: PromotionRequest): Promise<Promotion> {
+    this.configured();
+    const c = this.config;
+    const staging = c.GITHUB_STAGING_BRANCH ?? "staging";
+    if (!c.GITHUB_SITE_REPO || !repoPattern.test(c.GITHUB_SITE_REPO) || !["data", "data-ob"].includes(c.GITHUB_DATA_GITLINK ?? "") || !/^[a-zA-Z0-9_-]+$/.test(staging)) throw new PublisherNotConfigured();
+    if (!Number.isSafeInteger(req.edition) || req.edition < 1 || !req.idempotencyKey || !shaPattern.test(req.freezeSha)) throw new Error("Invalid promotion request");
+    const repo = `/repos/${c.GITHUB_SITE_REPO}`;
+    const production = (await this.request(repo)).default_branch as string;
+    if (production === staging) throw new Error("Staging must not be the default branch");
+    const tip = requireSha((await this.request(`${repo}/git/ref/heads/${encode(staging)}`)).object.sha);
+    const pinned = await this.request(`${repo}/contents/${c.GITHUB_DATA_GITLINK}?ref=${tip}`);
+    if (pinned.sha !== req.freezeSha || !this.gitlinkMatches(pinned.submodule_git_url)) throw new Error("Staging does not pin the frozen data");
+    const marker = `<!-- ituob-promotion:${await fingerprint([req.idempotencyKey, req.freezeSha])} -->`;
+    const body = `Promote bulletin ${req.edition} (data pin ${req.freezeSha}) from ${staging} to ${production}.\n\n${marker}`;
+    const owner = c.GITHUB_SITE_REPO.split("/")[0];
+    const query = `${repo}/pulls?state=all&head=${encode(`${owner}:${staging}`)}&base=${encode(production)}&per_page=100`;
+    const find = async () => ((await this.request(query)) as unknown as Json[]).filter((pr) => typeof pr.body === "string" && pr.body.includes(marker));
+    let prs = await find();
+    if (!prs.length) {
+      try { prs = [await this.request(`${repo}/pulls`, "POST", { head: staging, base: production, title: `Publish bulletin ${req.edition}`, body })]; }
+      catch (error) {
+        if (!(error instanceof GitHubFailure) || error.status !== 422) throw error;
+        prs = await find();
+      }
+    }
+    if (prs.length !== 1) throw new Error("Ambiguous promotion pull request");
+    const listed = prs[0]!;
+    const full = repo.slice(7);
+    if (listed.head?.ref !== staging || listed.base?.ref !== production || listed.head?.repo?.full_name !== full || listed.base?.repo?.full_name !== full) throw new Error("Promotion pull request does not match staging and production");
+    const pending = (reason: string): Promotion => ({ siteCommit: "", pending: { prNumber: listed.number, url: listed.html_url, reason } });
+    const pr = await this.request(`${repo}/pulls/${this.prNumber(listed.number)}`);
+    if (!pr.merged) return pending(pr.state === "closed" ? "Promotion pull request was closed without merging" : "Promotion pull request awaits merge");
+    const merged = requireSha(pr.merge_commit_sha);
+    const after = await this.request(`${repo}/contents/${c.GITHUB_DATA_GITLINK}?ref=${merged}`);
+    if (after.sha !== req.freezeSha) throw new Error("Merged production pin differs from frozen data");
+    const runs = await this.request(`${repo}/actions/runs?head_sha=${merged}&branch=${encode(production)}&per_page=100`);
+    const run = (runs.workflow_runs ?? []).filter((r: Json) => r.head_sha === merged && r.head_branch === production && r.path === ".github/workflows/build-deploy.yml" && r.event === "push").sort((a: Json, b: Json) => b.id - a.id)[0];
+    if (!run || run.status !== "completed" || run.conclusion !== "success") return pending("Exact merge commit awaits successful production deployment");
+    const jobs = await this.request(`${repo}/actions/runs/${run.id}/jobs?filter=latest&per_page=100`);
+    if (jobs.total_count > 100 || !jobs.jobs?.some((j: Json) => j.name === "deploy-cloudflare-production" && j.status === "completed" && j.conclusion === "success")) return pending("Production deployment job has not succeeded");
+    return { siteCommit: merged };
   }
   private gitlinkMatches(url: unknown): boolean {
     return typeof url === "string" && [

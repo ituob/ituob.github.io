@@ -92,7 +92,7 @@ describe("admin-only guard (Access JWT verification is not built: fail closed)",
     const r = await toMerged();
     const calls: [string, string, unknown?][] = [
       ["GET", "/submissions"], ["GET", "/editions"], ["POST", "/editions", { ob_issue_no: 1351 }], ["GET", "/editions/1351"],
-      ["POST", "/editions/1351/items", { submission_id: r.id }], ["POST", `/editions/1351/items/${r.id}/remove`], ["POST", "/editions/1351/publish"],
+      ["POST", "/editions/1351/items", { submission_id: r.id }], ["POST", `/editions/1351/items/${r.id}/remove`], ["POST", "/editions/1351/stage"], ["POST", "/editions/1351/publish"],
     ];
     const before = await counts();
     for (const [m, p, b] of calls) {
@@ -145,6 +145,7 @@ describe("composer: merged -> scheduled -> published", () => {
     expect((await comp("POST", "/editions/1351/items", ADMINU, { submission_id: r.id })).status).toBe(200);
 
     expect(fake.pinRequests).toHaveLength(0);
+    expect((await comp("POST", "/editions/1351/stage")).status).toBe(200);
     const pub = await comp("POST", "/editions/1351/publish");
     expect(pub.status).toBe(200);
     expect(pub.json.published).toEqual([r.id]);
@@ -210,7 +211,7 @@ describe("composer: merged -> scheduled -> published", () => {
     for (const reason of ["pin PR is open", "staging deployment is pending", "staging deployment failed", "pin PR was closed without merge"]) {
       pending.reason = reason;
       bump.mockResolvedValueOnce({ freezeSha: "unconfirmed-data", siteCommit: "unconfirmed-site", pending });
-      const res = await comp("POST", "/editions/1351/publish");
+      const res = await comp("POST", "/editions/1351/stage");
       expect(res.status, reason).toBe(202);
       expect(res.json.pending).toEqual(pending);
       expect(res.json.published).toEqual([]);
@@ -219,7 +220,7 @@ describe("composer: merged -> scheduled -> published", () => {
       expect(await snapshot()).toEqual(before);
     }
     bump.mockRejectedValueOnce(new Error("GitHub read failed"));
-    expect((await comp("POST", "/editions/1351/publish")).status).toBe(502);
+    expect((await comp("POST", "/editions/1351/stage")).status).toBe(502);
     expect(await snapshot()).toEqual(before);
     expect(bump.mock.calls).toHaveLength(5);
     for (const [request] of bump.mock.calls) {
@@ -230,6 +231,8 @@ describe("composer: merged -> scheduled -> published", () => {
     }
     // Ready responses retain the existing ready-provider contract.
     bump.mockRestore();
+    const staged = await comp("POST", "/editions/1351/stage");
+    expect([staged.status, staged.json.edition.status, staged.json.published]).toEqual([200, "staged", []]);
     const ready = await comp("POST", "/editions/1351/publish");
     expect([ready.status, ready.json.published, ready.json.pending]).toEqual([200, [a.id, b.id], undefined]);
     expect([ready.json.edition.status, ready.json.edition.freeze_sha, ready.json.edition.staging_commit])
@@ -260,7 +263,7 @@ describe("composer: merged -> scheduled -> published", () => {
       expect((await comp("POST", "/editions/1351/items", ADMINU, { submission_id: b.id })).status).toBe(200);
       return { freezeSha: "stale-freeze", siteCommit: "stale-site" };
     });
-    const res = await comp("POST", "/editions/1351/publish");
+    const res = await comp("POST", "/editions/1351/stage");
     expect(res.status).toBe(409);
     bump.mockRestore();
     expect(await one("SELECT status, freeze_sha, staging_commit, published_at FROM editions"))
@@ -276,9 +279,10 @@ describe("composer: merged -> scheduled -> published", () => {
   it("a failed pin bump publishes nothing and a retry publishes once", async () => {
     const r = await placed();
     fake.failNextPin = 1;
-    expect((await comp("POST", "/editions/1351/publish")).status).toBe(502);
+    expect((await comp("POST", "/editions/1351/stage")).status).toBe(502);
     expect(await stateOf(r.id)).toBe("scheduled");
     expect((await one("SELECT status FROM editions")).status).toBe("composing");
+    expect((await comp("POST", "/editions/1351/stage")).status).toBe(200);
     expect((await comp("POST", "/editions/1351/publish")).status).toBe(200);
     expect(await stateOf(r.id)).toBe("published");
     expect(await n("SELECT count(*) n FROM audit_log WHERE action='composer.published'")).toBe(1);
@@ -288,6 +292,7 @@ describe("composer: merged -> scheduled -> published", () => {
     const a = await placed("e118-iin");
     const b = await toMerged("e212-mnc");
     await comp("POST", "/editions/1351/items", ADMINU, { submission_id: b.id });
+    expect((await comp("POST", "/editions/1351/stage")).status).toBe(200);
     expect((await comp("POST", "/editions/1351/publish")).status).toBe(200);
     // Rewind to the interrupted shape by hand: edition staged, one item still scheduled.
     await db().prepare("UPDATE editions SET status='staged', published_at=NULL").run();
@@ -339,11 +344,13 @@ describe("forbidden composer transitions: 409 and nothing written", () => {
 
   it("publish needs a composing edition with items, and a published edition cannot be published or changed", async () => {
     await comp("POST", "/editions", ADMINU, { ob_issue_no: 1351 });
-    expect((await comp("POST", "/editions/1351/publish")).status).toBe(409); // open, nothing placed
+    expect((await comp("POST", "/editions/1351/stage")).status).toBe(409); // open, nothing placed
+    expect((await comp("POST", "/editions/1351/publish")).status).toBe(409); // not staged
     expect((await comp("POST", "/editions/7/publish")).status).toBe(404);
     const r = await toMerged();
     await comp("POST", "/editions/1351/items", ADMINU, { submission_id: r.id });
     const x = await toMerged("e212-mnc");
+    expect((await comp("POST", "/editions/1351/stage")).status).toBe(200);
     expect((await comp("POST", "/editions/1351/publish")).status).toBe(200);
     const before = await counts();
     expect((await comp("POST", "/editions/1351/publish")).status).toBe(409);
@@ -436,6 +443,7 @@ describe("revert path: merged -> (revert PR merged) -> withdrawn", () => {
 
   it("a published submission cannot be withdrawn; it is corrected by a follow-on with corrects_id", async () => {
     const r = await placed();
+    expect((await comp("POST", "/editions/1351/stage")).status).toBe(200);
     expect((await comp("POST", "/editions/1351/publish")).status).toBe(200);
     const before = await counts();
     const w = await adm(r.id, "withdraw", ADMINU, { reason: "oops" });
@@ -570,5 +578,75 @@ describe("reconciler: repairs a lost webhook, idempotently", () => {
     const res = await api("POST", "/api/admin/reconcile", { access: ADMINU, body: {} });
     expect([res.status, res.json.repaired.length]).toEqual([200, 1]);
     expect(await stateOf(r.id)).toBe("merged");
+  });
+});
+
+describe("stage and publish are separate, staff-only, audited clicks (#103)", () => {
+  const audit = () => rows("SELECT action,actor_id,actor_kind,subject_id,detail FROM audit_log WHERE action LIKE 'edition.%' ORDER BY id");
+
+  it("publish before stage is refused and writes nothing", async () => {
+    const r = await placed();
+    const before = await counts();
+    const res = await comp("POST", "/editions/1351/publish");
+    expect(res.status).toBe(409);
+    expect(await counts()).toEqual(before);
+    expect(fake.pinRequests).toHaveLength(0);
+    expect(fake.promotionRequests).toHaveLength(0);
+    expect(await stateOf(r.id)).toBe("scheduled");
+  });
+
+  it("stage freezes and records the staging commit but publishes and promotes nothing", async () => {
+    const r = await placed();
+    const res = await comp("POST", "/editions/1351/stage");
+    expect([res.status, res.json.edition.status, res.json.published]).toEqual([200, "staged", []]);
+    expect(await stateOf(r.id)).toBe("scheduled");
+    expect(fake.pinRequests).toHaveLength(1);
+    expect(fake.promotionRequests).toHaveLength(0);
+    expect((await one("SELECT published_at FROM editions")).published_at).toBeNull();
+    const a = await audit();
+    expect(a.map((x) => [x.action, x.actor_id, x.actor_kind])).toEqual([["edition.created", "itu-admin", "user"], ["edition.staged", "itu-admin", "user"]]);
+    expect((await comp("POST", "/editions/1351/stage")).status).toBe(409); // already staged
+    expect(await verifyChain(db())).toBeNull();
+  });
+
+  it("publish stays pending until the production promotion is merged and deployed, then audits who published", async () => {
+    const r = await placed();
+    await comp("POST", "/editions/1351/stage");
+    const snap = async () => [await one("SELECT * FROM editions"), await rows("SELECT * FROM submissions"), await counts()];
+    const before = await snap();
+    const promote = vi.spyOn(fake, "promoteToProduction");
+    const pending = { prNumber: 77, url: "https://github.invalid/site/pull/77", reason: "promotion PR awaits merge" };
+    promote.mockResolvedValueOnce({ siteCommit: "unconfirmed", pending });
+    const wait = await comp("POST", "/editions/1351/publish");
+    expect([wait.status, wait.json.pending, wait.json.published, wait.json.edition.status]).toEqual([202, pending, [], "staged"]);
+    expect(await snap()).toEqual(before);
+    promote.mockRejectedValueOnce(new Error("GitHub 502"));
+    expect((await comp("POST", "/editions/1351/publish")).status).toBe(502);
+    expect(await snap()).toEqual(before);
+    promote.mockRestore();
+
+    const done = await comp("POST", "/editions/1351/publish");
+    expect([done.status, done.json.published, done.json.edition.status]).toEqual([200, [r.id], "published"]);
+    expect(await stateOf(r.id)).toBe("published");
+    expect(fake.promotionRequests).toEqual([{ edition: 1351, freezeSha: "f1".padEnd(40, "0"), idempotencyKey: "edition-1351-promote" }]);
+    const pub = (await audit()).find((x) => x.action === "edition.published")!;
+    expect([pub.actor_id, pub.actor_kind, pub.subject_id]).toEqual(["itu-admin", "user", "1351"]);
+    expect(JSON.parse(pub.detail).production_commit).toBe("p1".padEnd(40, "0"));
+    expect((await comp("POST", "/editions/1351/publish")).status).toBe(409);
+    expect(await verifyChain(db())).toBeNull();
+  });
+
+  it("returns 403 to non-staff on stage and publish; nothing is written or sent to GitHub", async () => {
+    await placed();
+    const before = await counts();
+    for (const verb of ["stage", "publish"])
+      for (const who of [MEMBER_A, EDITOR, "nobody@example.test"]) {
+        expect((await api("POST", `/api/admin/composer/editions/1351/${verb}`, {})).status, `${verb} no identity`).toBe(403);
+        expect((await comp("POST", `/editions/1351/${verb}`, who)).status, `${verb} ${who}`).toBe(403);
+        expect((await api("POST", `/api/admin/composer/editions/1351/${verb}`, { session: "member-A" })).status).toBe(403);
+      }
+    expect(await counts()).toEqual(before);
+    expect([fake.pinRequests.length, fake.promotionRequests.length]).toEqual([0, 0]);
+    expect((await one("SELECT status FROM editions")).status).toBe("composing");
   });
 });

@@ -14,8 +14,8 @@ export interface Edition { ob_issue_no: number; status: 'open' | 'composing' | '
 export interface ComposerSubmission { id: string; register_id: string; slug: string; action_type: string; state: string; target_edition: number; edition: number | null; revert_state: string | null; pr_number: number | null }
 export interface EditionItem { submission_id: string; position: number; state: string; slug: string; action_type: string; merge_sha: string | null; path: string }
 export interface EditionGeneralMessage { id: string; type: string; path: string; revision: number; approved_at: string | null; content_yaml: string | null; pr_number: number | null; pr_url: string | null; status: 'awaiting_approval' | 'awaiting_review' | 'review_reserved' | 'review_pr_created' | 'published' }
-export function canPublishEdition(edition: Edition, registerCount: number, generalCount: number): boolean {
-  return ['open', 'composing', 'staged'].includes(edition.status) && registerCount + generalCount > 0;
+export function canStageEdition(edition: Edition, registerCount: number, generalCount: number): boolean {
+  return ['open', 'composing'].includes(edition.status) && registerCount + generalCount > 0;
 }
 export function generalMessageStatus(status: EditionGeneralMessage['status']): string {
   return { awaiting_approval: 'Awaiting administrator approval', awaiting_review: 'Awaiting publication review PR', review_reserved: 'Review request reserved; retry in general messages', review_pr_created: 'Review PR created; its merge is verified when publishing', published: 'Included in published issue' }[status];
@@ -59,8 +59,9 @@ export function canPlace(item: ComposerSubmission, edition: Edition): boolean {
 }
 
 export interface PublicationResult { edition: Edition; published: string[]; pending?: { prNumber: number; url?: string; reason: string } }
-export function publicationNotice(no: number, result: PublicationResult): string {
-  if (result.pending) return `Edition ${no} is waiting for staging: ${result.pending.reason}`;
+export function publicationNotice(no: number, result: PublicationResult, step: 'stage' | 'publish' = 'stage'): string {
+  if (result.pending) return `Edition ${no} is waiting for ${step === 'stage' ? 'staging' : 'production'}: ${result.pending.reason}`;
+  if (result.edition.status === 'staged') return `Edition ${no} is staged. Review the preview, then publish.`;
   if (result.edition.status === 'published') return `The service recorded edition ${no} as published. See its publication evidence below.`;
   return `The service returned edition status ${result.edition.status}. Publication is not confirmed.`;
 }
