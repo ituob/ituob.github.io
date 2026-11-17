@@ -1,5 +1,10 @@
 ---
 import Base from '../../layouts/Base.astro';
 import Composer from '../../components/admin/Composer.vue';
+import { listIssueIds, loadIssue } from '../../lib/loaders';
+// Masthead identity for new editions comes from the latest published edition (map row B8).
+const ids = listIssueIds();
+const latest = ids.length ? loadIssue(ids[ids.length - 1]!) : null;
+const previousMetadata = latest ? { id: latest.id, issn: latest.meta.issn, languages: latest.meta.languages, authors: latest.meta.authors } : null;
 ---
-<Base title="Edition composer"><h1>Edition composer</h1><Composer client:load /><noscript>Enable JavaScript to compose editions.</noscript></Base>
+<Base title="Edition composer"><h1>Edition composer</h1><Composer previousMetadata={previousMetadata} client:load /><noscript>Enable JavaScript to compose editions.</noscript></Base>

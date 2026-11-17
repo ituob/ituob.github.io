@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
+import type { IssueMetadataWire } from '../../lib/schema.generated';
 import EditionMetadata from './EditionMetadata.vue';
 import { api, canPlace, canPublishEdition, generalMessageStatus, editionNumber, publicationNotice, type ComposerSubmission, type Edition, type EditionItem, type EditionGeneralMessage } from '../../lib/discussion-client';
 import { composerPreviewLinks } from '../../lib/composer-preview';
+defineProps<{ previousMetadata?: IssueMetadataWire | null }>();
 interface EditionDetail { edition: Edition; items: EditionItem[]; general_messages: EditionGeneralMessage[] }
 interface Pending { prNumber: number; url?: string; reason: string }
 const editions = ref<Edition[]>([]), submissions = ref<ComposerSubmission[]>([]), detail = ref<EditionDetail | null>(null);
@@ -55,7 +57,7 @@ onMounted(() => perform(refresh));
     <form @submit.prevent="open"><fieldset :disabled="busy"><legend>Open edition</legend><label>OB edition number <input v-model.number="number" required type="number" min="1" max="99999" step="1" /></label><button>Open or select edition</button></fieldset></form>
     <fieldset :disabled="busy"><legend>Editions</legend><button @click="perform(refresh)">Refresh composer</button><p v-if="loaded && !editions.length && !error">No editions have been opened.</p><ul><li v-for="edition in editions" :key="edition.ob_issue_no"><button @click="perform(() => select(edition.ob_issue_no))">OB {{ edition.ob_issue_no }} · {{ edition.status }}</button></li></ul></fieldset>
     <section v-if="detail"><h2>OB {{ detail.edition.ob_issue_no }} · {{ detail.edition.status }}</h2>
-      <EditionMetadata :key="detail.edition.ob_issue_no" :issue-no="detail.edition.ob_issue_no" @saved="metadataRevision = $event.scheduled_at ? $event.revision : null" />
+      <EditionMetadata :key="detail.edition.ob_issue_no" :issue-no="detail.edition.ob_issue_no" :previous="previousMetadata" @saved="metadataRevision = $event.scheduled_at ? $event.revision : null" />
       <div><button :disabled="busy || !metadataRevision" @click="metadataPr()">Open metadata review PR</button><button :disabled="busy" @click="metadataPr(true)">Check metadata review</button>
         <p v-if="metadataReview" role="status">Metadata {{ metadataReview.pending ? 'review pending' : 'merged' }} · PR {{ metadataReview.pr.pr_number ?? 'request reserved; retry to resume' }} <a v-if="pendingUrl(metadataReview.pr.pr_url || undefined)" :href="pendingUrl(metadataReview.pr.pr_url || undefined)" target="_blank" rel="noopener noreferrer">Inspect metadata PR</a></p>
       </div>
