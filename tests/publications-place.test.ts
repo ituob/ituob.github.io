@@ -137,6 +137,14 @@ const run = (o: Partial<RunInfo>): RunInfo => ({
 });
 const REPO = "ituob/service-publications-docs";
 
+test("selectRun sorts invalid creation dates behind valid dates", () => {
+  assert.equal(selectRun([
+    run({ id: 9, created_at: "invalid" }),
+    run({ id: 1, created_at: "2026-01-01T00:00:00Z" }),
+    run({ id: 2, created_at: "2026-02-01T00:00:00Z" }),
+  ], REPO, "main")?.id, 2);
+});
+
 test("selectRun takes the newest trusted run and ignores PR, fork, failed and other-branch runs", () => {
   const runs = [
     run({ id: 9, event: "pull_request", created_at: "2026-03-01T00:00:00Z" }),
