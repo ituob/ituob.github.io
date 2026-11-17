@@ -1,0 +1,38 @@
+{
+  "_comment": "Provisional fixture for ituob.github.io#112 until the spd#89 manifest schema is final. Paths and checksums are placeholders; the PDFs are not shipped.",
+  "publications": [
+    {
+      "standard": "E.212",
+      "title": "The international identification plan for public networks and subscriptions",
+      "edition_year": 2026,
+      "language": "en",
+      "as_of_issue": 1170,
+      "sha256": "1111111111111111111111111111111111111111111111111111111111111111",
+      "status": "candidate",
+      "register_slugs": ["e212-mnc"],
+      "path": "T-SP-E.212B-2026-E.pdf"
+    },
+    {
+      "standard": "E.212",
+      "title": "The international identification plan for public networks and subscriptions",
+      "edition_year": 2026,
+      "language": "fr",
+      "as_of_issue": 1170,
+      "sha256": "2222222222222222222222222222222222222222222222222222222222222222",
+      "status": "candidate",
+      "register_slugs": ["e212-mnc"],
+      "path": "T-SP-E.212B-2026-F.pdf"
+    },
+    {
+      "standard": "F.32",
+      "title": "Telegram destination indicators and telegram address",
+      "edition_year": 2011,
+      "language": "en",
+      "as_of_issue": 980,
+      "sha256": "3333333333333333333333333333333333333333333333333333333333333333",
+      "status": "itu-adopted",
+      "register_slugs": ["f32-tdi"],
+      "path": "T-SP-F.32-2011-E.pdf"
+    }
+  ]
+}

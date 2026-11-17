@@ -26,6 +26,7 @@ import AdocText from "~/components/AdocText.astro";
 import TelephoneService from "~/components/TelephoneService.astro";
 import ServiceRestrictions from "~/components/ServiceRestrictions.astro";
 import StructuredAmendment from "~/components/StructuredAmendment.astro";
+import PrintedRegisterContext from "~/components/PrintedRegisterContext.astro";
 import TextualAmendment from "~/components/TextualAmendment.astro";
 import type { TextualGeneralMessage } from "~/lib/types";
 
@@ -164,7 +165,7 @@ const authoritativeHref =
   extraStylesheets={["/assets/css/issue.css"]}
   headScripts={["https://kit.fontawesome.com/3ebc4b9810.js"]}
 >
-  {issue.incomplete && <IncompleteBanner />}
+  {issue.incomplete && <IncompleteBanner incomplete={issue.incomplete} />}
 
   <header>
     <h1 class="bulletin-title">
@@ -338,6 +339,7 @@ const authoritativeHref =
           <div class="included-contents">
             {a.hasStructured && issue.amendments.structured[a.slug] && (
               <StructuredAmendment amendments={issue.amendments.structured[a.slug]!} lang={lang} />
+              <PrintedRegisterContext slug={a.slug} issue={id} />
             )}
             {a.hasTextual && issue.amendments.textual[a.slug] && (
               <TextualAmendment amendment={issue.amendments.textual[a.slug]} lang={lang} />
