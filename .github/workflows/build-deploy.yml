@@ -96,6 +96,9 @@ jobs:
     - name: Form round-trip tests
       run: npm run test:form
 
+    - name: Publication artifact selection tests
+      run: node --experimental-strip-types --test tests/fetch-publications.test.ts
+
     # Published PDFs from ituob/service-publications-docs CI. No run or artifact
     # yet = empty listing; a sha256 mismatch fails the build.
     - name: Fetch and verify publication PDFs
