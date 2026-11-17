@@ -13,7 +13,7 @@ A PDF becomes `itu-adopted` only through an audited Worker action by an approver
 * The downloads page shows "Official ITU publication" only when a live adoption
   record matches the served file's sha256 (every language file, for an edition).
   Otherwise, and whenever the lookup fails, it shows the candidate wording.
-* Records live in D1 (`publication_adoptions`, migration 0002), so they survive
+* Records live in D1 (`publication_adoptions`, migration 0005), so they survive
   deploys; the page reads them from the public `GET /api/publications/adoptions`.
   Each adoption and revocation also appends a hash-chained `audit_log` row
   (`publication.adopted`, `publication.adoption_revoked`) naming the actor.
