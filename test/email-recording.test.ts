@@ -44,7 +44,7 @@ describe("localized notification messages", () => {
     expect(digest.text).toContain("Actualización de la presentación");
     expect(digest.html).toContain("&lt;script&gt;");
     expect(digest.html).not.toContain("<custom>");
-    expect((digest.text.match(/https:\/\/www.ituob.org\/submissions\//g) ?? []).length).toBe(2);
+    expect((digest.text.match(/https:\/\/www\.ituob\.org\/submissions\//g) ?? []).length).toBe(2);
     expect(digest.text).toContain("https://www.ituob.org/api/me/notification-prefs");
   });
 
