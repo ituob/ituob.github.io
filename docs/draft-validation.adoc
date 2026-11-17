@@ -1,0 +1,66 @@
+= Durable draft validation
+
+A draft is a persisted register action, not a storage area for incomplete form
+input. Creation and draft edits run the existing validator chain before any
+submission, revision, review-state or audit write. This chain validates the
+RegisterChange envelope and concrete amendment/item using validators generated
+from the LML ontology, plus the existing register-specific rules. A failed write
+returns field errors and leaves the durable record unchanged. Country authority
+and the ITU-only text amendment restriction still apply on every payload write.
+
+The workspace validates the generated envelope and concrete amendment before
+saving as well as submitting. Invalid input remains in the local form; a server
+validation failure also preserves that form and reports its field errors. A
+successful save means a durable, validated revision exists. Previously stored
+invalid revisions remain readable, and submission revalidates them.
+
+These checks establish the schema boundary only. Generated TypeScript validation
+alone does not prove that the compiled Lutaml model can round-trip the YAML or
+that replay applies an action to a register correctly. The publication pipeline
+must separately exercise actual compiled-class round-trip and replay contracts;
+that CI evidence remains required for the full issue 101 criterion, “Nothing
+reaches a draft that cannot round-trip or replay.”
+
+Patch publication defaults to `ituob/itu-ob-data`, the authoritative data
+repository. An explicitly configured runtime target must also satisfy deployment
+preflight and repository allowlist controls.
+
+
+== Register identities and country authority
+
+`scripts/generate-register-rules.mjs` reads the authoritative data catalog and
+LML-generated class description. After regenerating the class description and
+installing Node dependencies, run from the site root:
+
+[source,sh]
+----
+node scripts/generate-register-rules.mjs data-ob/catalogs/registers.yaml
+git diff --exit-code -- src/lib/register-rules.generated.ts
+----
+
+The committed artifact records SHA256 digests of both inputs. A different
+checkout of the canonical catalog can be supplied as the first argument; that
+path is an input location, not an alternative data authority. Generation follows
+the description generation step; CI must check the resulting artifact for drift.
+
+Identity fields and fallback fields come directly from the register catalog.
+Every typed action, including SUP, DEL and LIR, requires a usable entry identity.
+Partial composite identities are accepted when at least one part is present,
+matching the replay engine. Multilingual identity parts use replay's canonical
+language order. This check does not establish snapshot existence or uniqueness.
+
+Country authority is separate: the concrete entry model must declare
+`country_or_area` or `country`. No other field is interpreted as a country. A
+register entry with no such field is staff-only because member country authority
+cannot be established. For example, E164_CC accepts the catalog fallback key
+`cc_ic` and its applicant data, without demanding an undeclared country field.
+E118 requires its actual `issue_id_number` identity as well as country authority;
+its existing ADD/REP `company_name` requirement remains a product constraint.
+
+The current canonical ListVIII catalog declares `callsign` as its identity, but
+LML `ListVIIIStation` has no callsign attribute. Typed ListVIII input therefore
+fails with an explicit catalog/model mismatch until those authoritative sources
+are aligned. An invented callsign field would also fail generated schema
+validation. The catalog classifies ListVIII as textual, so its ITU-only
+`TextAmendment` path remains valid. Country binding and the generated specialized
+NNP and RR.25.1 entry shapes remain supported.

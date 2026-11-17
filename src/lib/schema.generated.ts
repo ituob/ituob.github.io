@@ -149,6 +149,10 @@ export interface E164CCAmendmentWire {
 
 export interface E164CCEntryWire {
   _class?: string;
+  country_code?: string;
+  country_area_or_service?: MultilingualStringWire;
+  note?: MultilingualStringWire;
+  notes?: string[];
   applicant?: string;
   network?: string;
   cc_ic?: string;
@@ -251,6 +255,69 @@ export interface EntryWire {
   _class?: string;
 }
 
+export interface F32CompletenessReportWire {
+  source_uri?: string;
+  source_sha256?: string;
+  candidate_source?: string;
+  candidate_rows?: number;
+  candidate_context_rows?: number;
+  matching_keys?: string[];
+  missing?: F32OfficeDifferenceWire[];
+  extra?: F32OfficeDifferenceWire[];
+  different?: F32OfficeDifferenceWire[];
+  countries?: F32CountryCompletenessWire[];
+}
+
+export interface F32CountryCompletenessWire {
+  country?: string;
+  matching?: number;
+  missing?: number;
+  extra?: number;
+  different?: number;
+}
+
+export interface F32OfficeDifferenceWire {
+  country?: string;
+  office_code?: string;
+  expected?: F32TDIEntryWire;
+  actual?: F32TDIEntryWire;
+  reason?: string;
+}
+
+export interface F32PrintedPageWire {
+  number?: number;
+  text?: string;
+}
+
+export interface F32SeedContextWire {
+  kind?: string;
+  ob_issue_no?: number;
+  entry?: F32TDIEntryWire;
+  source_uri?: string;
+  source_page?: number;
+  source_path?: string;
+  source_row?: number;
+  related_office_code?: string;
+  network_codes?: string[];
+  continuation_target?: F32TDIEntryWire;
+  explanation?: string;
+}
+
+export interface F32SeedPublicationWire {
+  _class?: string;
+  source_uri?: string;
+  source_sha256?: string;
+  source_position_on?: string;
+  source_path?: string;
+  seed_sha256?: string;
+  source_row_count?: number;
+  source_complete?: boolean;
+  legacy_rows?: F32TDIEntryWire[];
+  pages?: F32PrintedPageWire[];
+  allocations?: F32TDIEntryWire[];
+  contexts?: F32SeedContextWire[];
+}
+
 export interface F32TDIActionWire {
   action_type?: string;
   position?: string;
@@ -276,12 +343,13 @@ export interface F32TDIEntryWire {
   country_or_area_note?: MultilingualStringWire;
   notes?: MultilingualStringWire;
   network_roa?: string;
-  network_roa_note?: string;
+  network_roa_note?: MultilingualStringWire;
   network_code?: string;
   network_code_note?: MultilingualStringWire;
   telegraph_office_name?: MultilingualStringWire;
   office_code?: string;
   office_code_note?: MultilingualStringWire;
+  network_codes?: string[];
   subarea?: MultilingualStringWire;
 }
 
@@ -332,22 +400,22 @@ export interface GeneralApprovedRecommendationsWire {
   procedures?: string;
   ob_issue_no?: string;
   payload?: Record<string, unknown>;
-  contents?: Record<string, unknown>;
+  contents?: Record<string, unknown> | string;
 }
 
 export interface GeneralCallbackProceduresWire {
   type?: string;
   ob_issue_no?: string;
-  contents?: Record<string, unknown>;
+  contents?: Record<string, unknown> | string;
 }
 
 export interface GeneralCustomWire {
   type?: string;
-  title?: Record<string, unknown>;
+  title?: MultilingualStringWire;
   recommendation?: string;
   text?: string;
   ob_issue_no?: string;
-  contents?: Record<string, unknown>;
+  contents?: Record<string, unknown> | string;
 }
 
 export interface GeneralIpnsWire {
@@ -357,7 +425,7 @@ export interface GeneralIpnsWire {
   date_of_assignment?: string;
   notes?: string;
   ob_issue_no?: string;
-  contents?: Record<string, unknown>;
+  contents?: Record<string, unknown> | string;
 }
 
 export interface GeneralIptnWire {
@@ -366,19 +434,19 @@ export interface GeneralIptnWire {
   notes?: string;
   manual?: boolean;
   ob_issue_no?: string;
-  contents?: Record<string, unknown>;
+  contents?: Record<string, unknown> | string;
 }
 
 export interface GeneralMessageWire {
   type?: string;
   ob_issue_no?: string;
-  contents?: Record<string, unknown>;
+  contents?: Record<string, unknown> | string;
 }
 
 export interface GeneralMidWire {
   type?: string;
   ob_issue_no?: string;
-  contents?: Record<string, unknown>;
+  contents?: Record<string, unknown> | string;
 }
 
 export interface GeneralMiscCommunicationsWire {
@@ -392,7 +460,7 @@ export interface GeneralOrgChangesWire {
   type?: string;
   text?: string;
   ob_issue_no?: string;
-  contents?: Record<string, unknown>;
+  contents?: Record<string, unknown> | string;
 }
 
 export interface GeneralRunningAnnexesWire {
@@ -400,7 +468,7 @@ export interface GeneralRunningAnnexesWire {
   extra_links?: string[];
   ob_issue_no?: string;
   payload?: Record<string, unknown>;
-  contents?: Record<string, unknown>;
+  contents?: Record<string, unknown> | string;
 }
 
 export interface GeneralSancWire {
@@ -413,7 +481,7 @@ export interface GeneralSancsWire {
   items?: GeneralSancWire[];
   notes?: string;
   ob_issue_no?: string;
-  contents?: Record<string, unknown>;
+  contents?: Record<string, unknown> | string;
 }
 
 export interface GeneralServiceRestrictionWire {
@@ -426,12 +494,12 @@ export interface GeneralServiceRestrictionsWire {
   type?: string;
   ob_issue_no?: string;
   items?: GeneralServiceRestrictionWire[];
-  contents?: Record<string, unknown>;
+  contents?: Record<string, unknown> | string;
 }
 
 export interface GeneralTelephoneCommunicationWire {
   date?: string;
-  contents?: Record<string, unknown>;
+  contents?: Record<string, unknown> | string;
 }
 
 export interface GeneralTelephoneSectionWire {
@@ -453,7 +521,7 @@ export interface GeneralTelephoneServicesWire {
   type?: string;
   items?: GeneralTelephoneServiceWire[];
   ob_issue_no?: string;
-  contents?: Record<string, unknown>;
+  contents?: Record<string, unknown> | string;
 }
 
 export interface IdentifierWire {
@@ -498,6 +566,13 @@ export interface IssueMetadataWire {
   issn?: string;
   languages?: Record<string, unknown>;
   authors?: IssueAuthorWire[];
+}
+
+export interface KeyHistoryEntryWire {
+  key?: string;
+  type?: string;
+  ob_issue_no?: number;
+  identifier?: IdentifierWire;
 }
 
 export interface ListVIIIActionWire {
@@ -547,6 +622,16 @@ export interface ListVIIIStationWire {
   part_iii_reference?: string;
   centralizing_office?: ListVIIICentralizingOfficeWire;
   measurements?: ListVIIIMeasurementWire[];
+}
+
+export interface LocaleLabelWire {
+  key?: string;
+  en?: string;
+  fr?: string;
+  es?: string;
+  zh?: string;
+  ru?: string;
+  ar?: string;
 }
 
 export interface M1400ActionWire {
@@ -627,6 +712,30 @@ export interface OldIssueWire {
   metadata?: IssueMetadataWire;
   general?: IssueGeneralWire;
   amendments?: AmendmentWire[];
+}
+
+export interface ProjectionProvenanceWire {
+  register_id?: string;
+  as_of_issue?: number;
+  seed_issue?: number;
+  last_change_issue?: number;
+}
+
+export interface PublicationManifestWire {
+  publications?: PublicationManifestEntryWire[];
+}
+
+export interface PublicationManifestEntryWire {
+  standard?: string;
+  recommendation?: string;
+  title?: string;
+  edition_year?: number;
+  language?: string;
+  as_of_issue?: number;
+  sha256?: string;
+  status?: string;
+  register_slugs?: string[];
+  path?: string;
 }
 
 export interface Q708ISPCActionWire {
@@ -718,12 +827,17 @@ export interface RR251EntryWire {
   subarea?: MultilingualStringWire;
 }
 
+export interface RegisterActionsWire {
+  provenance?: ProjectionProvenanceWire;
+  changes?: RegisterChangeWire[];
+}
+
 export interface RegisterChangeWire {
   type?: string;
   register?: string;
   identifier?: IdentifierWire;
   recommendation?: string;
-  data?: Record<string, unknown>;
+  data?: Record<string, unknown> | Record<string, unknown>[];
   ob_issue_no?: number;
   date_active?: string;
   date_requested?: string;
@@ -734,8 +848,30 @@ export interface RegisterChangeWire {
   merge_strategy?: string;
 }
 
+export interface RegisterEditionWire {
+  provenance?: ProjectionProvenanceWire;
+  items?: EntryWire[];
+  source_contexts?: F32SeedContextWire[];
+  lapsed_keys?: string[];
+  deleted_keys?: string[];
+  key_history?: KeyHistoryEntryWire[];
+}
+
+export interface RegisterKeyHistoryWire {
+  provenance?: ProjectionProvenanceWire;
+  key?: string;
+  membership?: string;
+  entries?: KeyHistoryEntryWire[];
+}
+
+export interface RegisterLocaleWire {
+  title?: MultilingualStringWire;
+  locale?: LocaleLabelWire[];
+}
+
 export interface T35AssignmentAuthorityWire {
-  terminal_type?: string;
+  terminal_type?: string[];
+  last_updated?: string;
   contact_name?: string;
   organization?: string;
   department?: string;
@@ -769,7 +905,7 @@ export interface T35NAEntryWire {
   _class?: string;
   country?: string;
   administration_name?: string;
-  manufactures_htv?: string;
+  manufactures_htv?: boolean;
   last_updated?: string;
   assignment_authority?: T35AssignmentAuthorityWire[];
   note?: string;

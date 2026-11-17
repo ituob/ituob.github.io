@@ -8,23 +8,20 @@ import {
   cumulativeAmendmentNumber,
   loadRegisterCatalog,
   lastAnnexBefore,
-  loadGeneralAdoc,
 } from "~/lib/loaders";
 import { formatSwissDate } from "~/lib/format";
 import {
   MESSAGE_TYPE_ORDER,
   GENERAL_TYPE_LABELS,
   PUBLICATION_BY_SLUG,
+  PUBLICATION_BY_ID,
   type GeneralMessageType,
   type Language,
 } from "~/lib/catalogs";
 import RunningAnnexes from "~/components/RunningAnnexes.astro";
 import ApprovedRecommendations from "~/components/ApprovedRecommendations.astro";
 import IncompleteBanner from "~/components/IncompleteBanner.astro";
-import TextualMessage from "~/components/TextualMessage.astro";
-import AdocText from "~/components/AdocText.astro";
-import TelephoneService from "~/components/TelephoneService.astro";
-import ServiceRestrictions from "~/components/ServiceRestrictions.astro";
+import GeneralMessage from "~/components/GeneralMessage.astro";
 import StructuredAmendment from "~/components/StructuredAmendment.astro";
 import PrintedRegisterContext from "~/components/PrintedRegisterContext.astro";
 import TextualAmendment from "~/components/TextualAmendment.astro";
@@ -55,15 +52,6 @@ for (const m of issue.general.textual) {
   arr.push(m);
   textualByType.set(m.type, arr);
 }
-
-// A few messages normalize as references to an AsciiDoc asset
-// (contents: "general/<file>.adoc"); their text is loaded from the
-// corpus at build time.
-const adocTextFor = (m: TextualGeneralMessage): string | null => {
-  const contents = m.contents as unknown;
-  if (typeof contents !== "string" || !contents.endsWith(".adoc")) return null;
-  return loadGeneralAdoc(id, contents);
-};
 
 const amendmentSlugs = [
   ...new Set([
@@ -165,7 +153,7 @@ const authoritativeHref =
   extraStylesheets={["/assets/css/issue.css"]}
   headScripts={["https://kit.fontawesome.com/3ebc4b9810.js"]}
 >
-  {issue.incomplete && <IncompleteBanner incomplete={issue.incomplete} />}
+  {issue.incomplete && <IncompleteBanner incomplete />}
 
   <header>
     <h1 class="bulletin-title">
@@ -272,17 +260,7 @@ const authoritativeHref =
               <ApprovedRecommendations message={issue.general.approvedRecommendations} />
             )}
             {textualByType.has(t) && textualByType.get(t)!.map((m) => (
-              <>
-                {t === "service_restrictions" && Array.isArray((m as unknown as { items?: unknown }).items) ? (
-                  <ServiceRestrictions items={(m as unknown as { items: never[] }).items} lang={lang} />
-                ) : t === "telephone_service_2" && Array.isArray((m as unknown as { contents?: unknown }).contents) ? (
-                  <TelephoneService contents={(m as unknown as { contents: never[] }).contents} lang={lang} />
-                ) : adocTextFor(m) ? (
-                  <AdocText text={adocTextFor(m) ?? ""} />
-                ) : (
-                  <TextualMessage message={m} lang={lang} />
-                )}
-              </>
+              <GeneralMessage message={m} issueId={id} lang={lang} />
             ))}
           </div>
         </article>
@@ -350,6 +328,26 @@ const authoritativeHref =
           </div>
         </article>
       ))}
+    </section>
+  )}
+
+  {Object.keys(issue.annexes).length > 0 && (
+    <section class="annexes" id="annexes">
+      <h3>Annexes to this issue</h3>
+      {Object.keys(issue.annexes).map((pubId) => {
+        const known = PUBLICATION_BY_ID.get(pubId);
+        const meta = loadListMetadata(pubId);
+        const title = meta?.title?.en ?? known?.label ?? pubId;
+        return (
+          <article class="annex">
+            <header>
+              <h3 class="title">
+                {meta?.url ? <a href={meta.url}>{title}</a> : title}
+              </h3>
+            </header>
+          </article>
+        );
+      })}
     </section>
   )}
 

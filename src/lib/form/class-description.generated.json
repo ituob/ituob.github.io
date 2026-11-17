@@ -9,6 +9,7 @@
     "Time",
     "Hash",
     "HashOrText",
+    "HashOrList",
     "DateOrText"
   ],
   "enums": {
@@ -210,7 +211,7 @@
         {
           "name": "contents",
           "wire": "contents",
-          "type": "Hash",
+          "type": "HashOrText",
           "kind": "primitive",
           "required": false,
           "collection": false
@@ -963,6 +964,38 @@
           "default": "E164CCEntry"
         },
         {
+          "name": "country_code",
+          "wire": "country_code",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "country_area_or_service",
+          "wire": "country_area_or_service",
+          "type": "MultilingualString",
+          "kind": "class",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "note",
+          "wire": "note",
+          "type": "MultilingualString",
+          "kind": "class",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "notes",
+          "wire": "notes",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": true
+        },
+        {
           "name": "applicant",
           "wire": "applicant",
           "type": "String",
@@ -1699,8 +1732,8 @@
         {
           "name": "network_roa_note",
           "wire": "network_roa_note",
-          "type": "String",
-          "kind": "primitive",
+          "type": "MultilingualString",
+          "kind": "class",
           "required": false,
           "collection": false
         },
@@ -1745,12 +1778,406 @@
           "collection": false
         },
         {
+          "name": "network_codes",
+          "wire": "network_codes",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": true
+        },
+        {
           "name": "subarea",
           "wire": "subarea",
           "type": "MultilingualString",
           "kind": "class",
           "required": false,
           "collection": false
+        }
+      ]
+    },
+    "F32OfficeDifference": {
+      "attributes": [
+        {
+          "name": "country",
+          "wire": "country",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "office_code",
+          "wire": "office_code",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "expected",
+          "wire": "expected",
+          "type": "F32TDIEntry",
+          "kind": "class",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "actual",
+          "wire": "actual",
+          "type": "F32TDIEntry",
+          "kind": "class",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "reason",
+          "wire": "reason",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        }
+      ]
+    },
+    "F32CountryCompleteness": {
+      "attributes": [
+        {
+          "name": "country",
+          "wire": "country",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "matching",
+          "wire": "matching",
+          "type": "Integer",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "missing",
+          "wire": "missing",
+          "type": "Integer",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "extra",
+          "wire": "extra",
+          "type": "Integer",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "different",
+          "wire": "different",
+          "type": "Integer",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        }
+      ]
+    },
+    "F32CompletenessReport": {
+      "attributes": [
+        {
+          "name": "source_uri",
+          "wire": "source_uri",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "source_sha256",
+          "wire": "source_sha256",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "candidate_source",
+          "wire": "candidate_source",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "candidate_rows",
+          "wire": "candidate_rows",
+          "type": "Integer",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "candidate_context_rows",
+          "wire": "candidate_context_rows",
+          "type": "Integer",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "matching_keys",
+          "wire": "matching_keys",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": true
+        },
+        {
+          "name": "missing",
+          "wire": "missing",
+          "type": "F32OfficeDifference",
+          "kind": "class",
+          "required": false,
+          "collection": true
+        },
+        {
+          "name": "extra",
+          "wire": "extra",
+          "type": "F32OfficeDifference",
+          "kind": "class",
+          "required": false,
+          "collection": true
+        },
+        {
+          "name": "different",
+          "wire": "different",
+          "type": "F32OfficeDifference",
+          "kind": "class",
+          "required": false,
+          "collection": true
+        },
+        {
+          "name": "countries",
+          "wire": "countries",
+          "type": "F32CountryCompleteness",
+          "kind": "class",
+          "required": false,
+          "collection": true
+        }
+      ]
+    },
+    "F32PrintedPage": {
+      "attributes": [
+        {
+          "name": "number",
+          "wire": "number",
+          "type": "Integer",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "text",
+          "wire": "text",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        }
+      ]
+    },
+    "F32SeedContext": {
+      "attributes": [
+        {
+          "name": "kind",
+          "wire": "kind",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "ob_issue_no",
+          "wire": "ob_issue_no",
+          "type": "Integer",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "entry",
+          "wire": "entry",
+          "type": "F32TDIEntry",
+          "kind": "class",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "source_uri",
+          "wire": "source_uri",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "source_page",
+          "wire": "source_page",
+          "type": "Integer",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "source_path",
+          "wire": "source_path",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "source_row",
+          "wire": "source_row",
+          "type": "Integer",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "related_office_code",
+          "wire": "related_office_code",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "network_codes",
+          "wire": "network_codes",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": true
+        },
+        {
+          "name": "continuation_target",
+          "wire": "continuation_target",
+          "type": "F32TDIEntry",
+          "kind": "class",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "explanation",
+          "wire": "explanation",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        }
+      ]
+    },
+    "F32SeedPublication": {
+      "attributes": [
+        {
+          "name": "_class",
+          "wire": "_class",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false,
+          "default": "F32SeedPublication"
+        },
+        {
+          "name": "source_uri",
+          "wire": "source_uri",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "source_sha256",
+          "wire": "source_sha256",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "source_position_on",
+          "wire": "source_position_on",
+          "type": "Date",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "source_path",
+          "wire": "source_path",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "seed_sha256",
+          "wire": "seed_sha256",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "source_row_count",
+          "wire": "source_row_count",
+          "type": "Integer",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "source_complete",
+          "wire": "source_complete",
+          "type": "Boolean",
+          "kind": "primitive",
+          "required": false,
+          "collection": false,
+          "default": false
+        },
+        {
+          "name": "legacy_rows",
+          "wire": "legacy_rows",
+          "type": "F32TDIEntry",
+          "kind": "class",
+          "required": false,
+          "collection": true
+        },
+        {
+          "name": "pages",
+          "wire": "pages",
+          "type": "F32PrintedPage",
+          "kind": "class",
+          "required": false,
+          "collection": true
+        },
+        {
+          "name": "allocations",
+          "wire": "allocations",
+          "type": "F32TDIEntry",
+          "kind": "class",
+          "required": false,
+          "collection": true
+        },
+        {
+          "name": "contexts",
+          "wire": "contexts",
+          "type": "F32SeedContext",
+          "kind": "class",
+          "required": false,
+          "collection": true
         }
       ]
     },
@@ -3418,6 +3845,14 @@
           "type": "String",
           "kind": "primitive",
           "required": false,
+          "collection": true
+        },
+        {
+          "name": "last_updated",
+          "wire": "last_updated",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
           "collection": false
         },
         {
@@ -3629,7 +4064,7 @@
         {
           "name": "manufactures_htv",
           "wire": "manufactures_htv",
-          "type": "String",
+          "type": "Boolean",
           "kind": "primitive",
           "required": false,
           "collection": false
@@ -3907,7 +4342,7 @@
         {
           "name": "contents",
           "wire": "contents",
-          "type": "Hash",
+          "type": "HashOrText",
           "kind": "primitive",
           "required": false,
           "collection": false
@@ -3935,7 +4370,7 @@
         {
           "name": "contents",
           "wire": "contents",
-          "type": "Hash",
+          "type": "HashOrText",
           "kind": "primitive",
           "required": false,
           "collection": false
@@ -3955,8 +4390,8 @@
         {
           "name": "title",
           "wire": "title",
-          "type": "Hash",
-          "kind": "primitive",
+          "type": "MultilingualString",
+          "kind": "class",
           "required": false,
           "collection": false
         },
@@ -3987,7 +4422,7 @@
         {
           "name": "contents",
           "wire": "contents",
-          "type": "Hash",
+          "type": "HashOrText",
           "kind": "primitive",
           "required": false,
           "collection": false
@@ -4047,7 +4482,7 @@
         {
           "name": "contents",
           "wire": "contents",
-          "type": "Hash",
+          "type": "HashOrText",
           "kind": "primitive",
           "required": false,
           "collection": false
@@ -4099,7 +4534,7 @@
         {
           "name": "contents",
           "wire": "contents",
-          "type": "Hash",
+          "type": "HashOrText",
           "kind": "primitive",
           "required": false,
           "collection": false
@@ -4127,7 +4562,7 @@
         {
           "name": "contents",
           "wire": "contents",
-          "type": "Hash",
+          "type": "HashOrText",
           "kind": "primitive",
           "required": false,
           "collection": false
@@ -4199,7 +4634,7 @@
         {
           "name": "contents",
           "wire": "contents",
-          "type": "Hash",
+          "type": "HashOrText",
           "kind": "primitive",
           "required": false,
           "collection": false
@@ -4243,7 +4678,7 @@
         {
           "name": "contents",
           "wire": "contents",
-          "type": "Hash",
+          "type": "HashOrText",
           "kind": "primitive",
           "required": false,
           "collection": false
@@ -4335,7 +4770,7 @@
         {
           "name": "contents",
           "wire": "contents",
-          "type": "Hash",
+          "type": "HashOrText",
           "kind": "primitive",
           "required": false,
           "collection": false
@@ -4371,7 +4806,7 @@
         {
           "name": "contents",
           "wire": "contents",
-          "type": "Hash",
+          "type": "HashOrText",
           "kind": "primitive",
           "required": false,
           "collection": false
@@ -4435,7 +4870,7 @@
         {
           "name": "contents",
           "wire": "contents",
-          "type": "Hash",
+          "type": "HashOrText",
           "kind": "primitive",
           "required": false,
           "collection": false
@@ -4507,7 +4942,7 @@
         {
           "name": "contents",
           "wire": "contents",
-          "type": "Hash",
+          "type": "HashOrText",
           "kind": "primitive",
           "required": false,
           "collection": false
@@ -4720,7 +5155,7 @@
         {
           "name": "data",
           "wire": "data",
-          "type": "Hash",
+          "type": "HashOrList",
           "kind": "primitive",
           "required": false,
           "collection": false
@@ -4788,6 +5223,362 @@
           "kind": "primitive",
           "required": false,
           "collection": false
+        }
+      ]
+    },
+    "ProjectionProvenance": {
+      "attributes": [
+        {
+          "name": "register_id",
+          "wire": "register_id",
+          "type": "String",
+          "kind": "primitive",
+          "required": true,
+          "collection": false
+        },
+        {
+          "name": "as_of_issue",
+          "wire": "as_of_issue",
+          "type": "Integer",
+          "kind": "primitive",
+          "required": true,
+          "collection": false
+        },
+        {
+          "name": "seed_issue",
+          "wire": "seed_issue",
+          "type": "Integer",
+          "kind": "primitive",
+          "required": true,
+          "collection": false
+        },
+        {
+          "name": "last_change_issue",
+          "wire": "last_change_issue",
+          "type": "Integer",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        }
+      ]
+    },
+    "KeyHistoryEntry": {
+      "attributes": [
+        {
+          "name": "key",
+          "wire": "key",
+          "type": "String",
+          "kind": "primitive",
+          "required": true,
+          "collection": false
+        },
+        {
+          "name": "type",
+          "wire": "type",
+          "type": "ActionType",
+          "kind": "enum",
+          "required": true,
+          "collection": false
+        },
+        {
+          "name": "ob_issue_no",
+          "wire": "ob_issue_no",
+          "type": "Integer",
+          "kind": "primitive",
+          "required": true,
+          "collection": false
+        },
+        {
+          "name": "identifier",
+          "wire": "identifier",
+          "type": "Identifier",
+          "kind": "class",
+          "required": true,
+          "collection": false
+        }
+      ]
+    },
+    "RegisterEdition": {
+      "attributes": [
+        {
+          "name": "provenance",
+          "wire": "provenance",
+          "type": "ProjectionProvenance",
+          "kind": "class",
+          "required": true,
+          "collection": false
+        },
+        {
+          "name": "items",
+          "wire": "items",
+          "type": "Entry",
+          "kind": "class",
+          "required": false,
+          "collection": true
+        },
+        {
+          "name": "source_contexts",
+          "wire": "source_contexts",
+          "type": "F32SeedContext",
+          "kind": "class",
+          "required": false,
+          "collection": true
+        },
+        {
+          "name": "lapsed_keys",
+          "wire": "lapsed_keys",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": true
+        },
+        {
+          "name": "deleted_keys",
+          "wire": "deleted_keys",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": true
+        },
+        {
+          "name": "key_history",
+          "wire": "key_history",
+          "type": "KeyHistoryEntry",
+          "kind": "class",
+          "required": false,
+          "collection": true
+        }
+      ]
+    },
+    "LocaleLabel": {
+      "attributes": [
+        {
+          "name": "key",
+          "wire": "key",
+          "type": "String",
+          "kind": "primitive",
+          "required": true,
+          "collection": false
+        },
+        {
+          "name": "en",
+          "wire": "en",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "fr",
+          "wire": "fr",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "es",
+          "wire": "es",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "zh",
+          "wire": "zh",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "ru",
+          "wire": "ru",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "ar",
+          "wire": "ar",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": false
+        }
+      ]
+    },
+    "RegisterLocale": {
+      "attributes": [
+        {
+          "name": "title",
+          "wire": "title",
+          "type": "MultilingualString",
+          "kind": "class",
+          "required": false,
+          "collection": false
+        },
+        {
+          "name": "locale",
+          "wire": "locale",
+          "type": "LocaleLabel",
+          "kind": "class",
+          "required": false,
+          "collection": true
+        }
+      ]
+    },
+    "RegisterKeyHistory": {
+      "attributes": [
+        {
+          "name": "provenance",
+          "wire": "provenance",
+          "type": "ProjectionProvenance",
+          "kind": "class",
+          "required": true,
+          "collection": false
+        },
+        {
+          "name": "key",
+          "wire": "key",
+          "type": "String",
+          "kind": "primitive",
+          "required": true,
+          "collection": false
+        },
+        {
+          "name": "membership",
+          "wire": "membership",
+          "type": "String",
+          "kind": "primitive",
+          "required": true,
+          "collection": false
+        },
+        {
+          "name": "entries",
+          "wire": "entries",
+          "type": "KeyHistoryEntry",
+          "kind": "class",
+          "required": false,
+          "collection": true
+        }
+      ]
+    },
+    "RegisterActions": {
+      "attributes": [
+        {
+          "name": "provenance",
+          "wire": "provenance",
+          "type": "ProjectionProvenance",
+          "kind": "class",
+          "required": true,
+          "collection": false
+        },
+        {
+          "name": "changes",
+          "wire": "changes",
+          "type": "RegisterChange",
+          "kind": "class",
+          "required": false,
+          "collection": true
+        }
+      ]
+    },
+    "PublicationManifestEntry": {
+      "attributes": [
+        {
+          "name": "standard",
+          "wire": "standard",
+          "type": "String",
+          "kind": "primitive",
+          "required": true,
+          "collection": false
+        },
+        {
+          "name": "recommendation",
+          "wire": "recommendation",
+          "type": "String",
+          "kind": "primitive",
+          "required": true,
+          "collection": false
+        },
+        {
+          "name": "title",
+          "wire": "title",
+          "type": "String",
+          "kind": "primitive",
+          "required": true,
+          "collection": false
+        },
+        {
+          "name": "edition_year",
+          "wire": "edition_year",
+          "type": "Integer",
+          "kind": "primitive",
+          "required": true,
+          "collection": false
+        },
+        {
+          "name": "language",
+          "wire": "language",
+          "type": "String",
+          "kind": "primitive",
+          "required": true,
+          "collection": false
+        },
+        {
+          "name": "as_of_issue",
+          "wire": "as_of_issue",
+          "type": "Integer",
+          "kind": "primitive",
+          "required": true,
+          "collection": false
+        },
+        {
+          "name": "sha256",
+          "wire": "sha256",
+          "type": "String",
+          "kind": "primitive",
+          "required": true,
+          "collection": false
+        },
+        {
+          "name": "status",
+          "wire": "status",
+          "type": "String",
+          "kind": "primitive",
+          "required": true,
+          "collection": false
+        },
+        {
+          "name": "register_slugs",
+          "wire": "register_slugs",
+          "type": "String",
+          "kind": "primitive",
+          "required": false,
+          "collection": true
+        },
+        {
+          "name": "path",
+          "wire": "path",
+          "type": "String",
+          "kind": "primitive",
+          "required": true,
+          "collection": false
+        }
+      ]
+    },
+    "PublicationManifest": {
+      "attributes": [
+        {
+          "name": "publications",
+          "wire": "publications",
+          "type": "PublicationManifestEntry",
+          "kind": "class",
+          "required": false,
+          "collection": true
         }
       ]
     }

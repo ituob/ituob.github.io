@@ -144,7 +144,7 @@ describe("Cloudflare Access CI service principals", () => {
         expect([401, 404], path).toContain((await handleApi(req, env, new URL(req.url))).status);
       }
       const who = await handleApi(new Request("https://www.ituob.org/api/whoami", { headers: { "Cf-Access-Jwt-Assertion": jwt } }), env, new URL("https://www.ituob.org/api/whoami"));
-      expect(await who.json()).toEqual({ ok: true, authenticated: false });
+      expect(await who.json()).toEqual({ ok: true, authenticated: false, access: null });
       expect(prepare).not.toHaveBeenCalled();
     } finally {
       vi.unstubAllGlobals();

@@ -1,0 +1,44 @@
+id: 669
+# Data for this edition is not fully populated (the deployed site
+# carries the same disclaimer).
+incomplete: true
+publication_date: 1998-06-01
+cutoff_date: 1998-05-25
+issn: 1564-5223
+languages:
+  en: yes
+authors:
+  - address: |-
+      Place des Nations CH-1211
+      Genève 20 (Switzerland)
+    contacts:
+      - type: phone
+        data: +41 22 730 5111
+      - type: email
+        data: itumail@itu.int
+        recommended: yes
+  - name: Standardization Bureau (TSB)
+    contacts:
+      - type: phone
+        data: +41 22 730 5211
+        recommended: yes
+      - type: fax
+        data: +41 22 730 5853
+        recommended: yes
+      - type: email
+        data: tsbmail@itu.int
+        recommended: yes
+      - type: email
+        data: tsbtson@itu.int
+        recommended: yes
+  - name: Radiocommunication Bureau (BR)
+    contacts:
+      - type: phone
+        data: +41 22 730 5560
+        recommended: yes
+      - type: fax
+        data: +41 22 730 5785
+        recommended: yes
+      - type: email
+        data: brmail@itu.int
+        recommended: yes

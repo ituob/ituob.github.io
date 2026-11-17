@@ -5,7 +5,7 @@
 
 export type FieldKind =
   | "string" | "integer" | "float" | "boolean" | "date" | "time"
-  | "hash" | "hashOrText" | "dateOrText" | "enum" | "class";
+  | "hash" | "hashOrText" | "hashOrList" | "dateOrText" | "enum" | "class";
 
 export interface FieldSpec {
   kind: FieldKind;
@@ -159,6 +159,10 @@ export const CLASSES: Readonly<Record<string, Readonly<Record<string, FieldSpec>
   },
   "E164CCEntry": {
     "_class": { kind: "string" },
+    "country_code": { kind: "string" },
+    "country_area_or_service": { kind: "class", ref: "MultilingualString" },
+    "note": { kind: "class", ref: "MultilingualString" },
+    "notes": { kind: "string", many: true },
     "applicant": { kind: "string" },
     "network": { kind: "string" },
     "cc_ic": { kind: "string" },
@@ -249,6 +253,63 @@ export const CLASSES: Readonly<Record<string, Readonly<Record<string, FieldSpec>
   "Entry": {
     "_class": { kind: "string" },
   },
+  "F32CompletenessReport": {
+    "source_uri": { kind: "string" },
+    "source_sha256": { kind: "string" },
+    "candidate_source": { kind: "string" },
+    "candidate_rows": { kind: "integer" },
+    "candidate_context_rows": { kind: "integer" },
+    "matching_keys": { kind: "string", many: true },
+    "missing": { kind: "class", ref: "F32OfficeDifference", many: true },
+    "extra": { kind: "class", ref: "F32OfficeDifference", many: true },
+    "different": { kind: "class", ref: "F32OfficeDifference", many: true },
+    "countries": { kind: "class", ref: "F32CountryCompleteness", many: true },
+  },
+  "F32CountryCompleteness": {
+    "country": { kind: "string" },
+    "matching": { kind: "integer" },
+    "missing": { kind: "integer" },
+    "extra": { kind: "integer" },
+    "different": { kind: "integer" },
+  },
+  "F32OfficeDifference": {
+    "country": { kind: "string" },
+    "office_code": { kind: "string" },
+    "expected": { kind: "class", ref: "F32TDIEntry" },
+    "actual": { kind: "class", ref: "F32TDIEntry" },
+    "reason": { kind: "string" },
+  },
+  "F32PrintedPage": {
+    "number": { kind: "integer" },
+    "text": { kind: "string" },
+  },
+  "F32SeedContext": {
+    "kind": { kind: "string" },
+    "ob_issue_no": { kind: "integer" },
+    "entry": { kind: "class", ref: "F32TDIEntry" },
+    "source_uri": { kind: "string" },
+    "source_page": { kind: "integer" },
+    "source_path": { kind: "string" },
+    "source_row": { kind: "integer" },
+    "related_office_code": { kind: "string" },
+    "network_codes": { kind: "string", many: true },
+    "continuation_target": { kind: "class", ref: "F32TDIEntry" },
+    "explanation": { kind: "string" },
+  },
+  "F32SeedPublication": {
+    "_class": { kind: "string" },
+    "source_uri": { kind: "string" },
+    "source_sha256": { kind: "string" },
+    "source_position_on": { kind: "date" },
+    "source_path": { kind: "string" },
+    "seed_sha256": { kind: "string" },
+    "source_row_count": { kind: "integer" },
+    "source_complete": { kind: "boolean" },
+    "legacy_rows": { kind: "class", ref: "F32TDIEntry", many: true },
+    "pages": { kind: "class", ref: "F32PrintedPage", many: true },
+    "allocations": { kind: "class", ref: "F32TDIEntry", many: true },
+    "contexts": { kind: "class", ref: "F32SeedContext", many: true },
+  },
   "F32TDIAction": {
     "action_type": { kind: "string" },
     "position": { kind: "string" },
@@ -272,12 +333,13 @@ export const CLASSES: Readonly<Record<string, Readonly<Record<string, FieldSpec>
     "country_or_area_note": { kind: "class", ref: "MultilingualString" },
     "notes": { kind: "class", ref: "MultilingualString" },
     "network_roa": { kind: "string" },
-    "network_roa_note": { kind: "string" },
+    "network_roa_note": { kind: "class", ref: "MultilingualString" },
     "network_code": { kind: "string" },
     "network_code_note": { kind: "class", ref: "MultilingualString" },
     "telegraph_office_name": { kind: "class", ref: "MultilingualString" },
     "office_code": { kind: "string" },
     "office_code_note": { kind: "class", ref: "MultilingualString" },
+    "network_codes": { kind: "string", many: true },
     "subarea": { kind: "class", ref: "MultilingualString" },
   },
   "F400Action": {
@@ -323,20 +385,20 @@ export const CLASSES: Readonly<Record<string, Readonly<Record<string, FieldSpec>
     "procedures": { kind: "string" },
     "ob_issue_no": { kind: "string" },
     "payload": { kind: "hash" },
-    "contents": { kind: "hash" },
+    "contents": { kind: "hashOrText" },
   },
   "GeneralCallbackProcedures": {
     "type": { kind: "string" },
     "ob_issue_no": { kind: "string" },
-    "contents": { kind: "hash" },
+    "contents": { kind: "hashOrText" },
   },
   "GeneralCustom": {
     "type": { kind: "string" },
-    "title": { kind: "hash" },
+    "title": { kind: "class", ref: "MultilingualString" },
     "recommendation": { kind: "string" },
     "text": { kind: "string" },
     "ob_issue_no": { kind: "string" },
-    "contents": { kind: "hash" },
+    "contents": { kind: "hashOrText" },
   },
   "GeneralIpns": {
     "type": { kind: "string" },
@@ -345,7 +407,7 @@ export const CLASSES: Readonly<Record<string, Readonly<Record<string, FieldSpec>
     "date_of_assignment": { kind: "string" },
     "notes": { kind: "string" },
     "ob_issue_no": { kind: "string" },
-    "contents": { kind: "hash" },
+    "contents": { kind: "hashOrText" },
   },
   "GeneralIptn": {
     "type": { kind: "string" },
@@ -353,17 +415,17 @@ export const CLASSES: Readonly<Record<string, Readonly<Record<string, FieldSpec>
     "notes": { kind: "string" },
     "manual": { kind: "boolean" },
     "ob_issue_no": { kind: "string" },
-    "contents": { kind: "hash" },
+    "contents": { kind: "hashOrText" },
   },
   "GeneralMessage": {
     "type": { kind: "string" },
     "ob_issue_no": { kind: "string" },
-    "contents": { kind: "hash" },
+    "contents": { kind: "hashOrText" },
   },
   "GeneralMid": {
     "type": { kind: "string" },
     "ob_issue_no": { kind: "string" },
-    "contents": { kind: "hash" },
+    "contents": { kind: "hashOrText" },
   },
   "GeneralMiscCommunications": {
     "type": { kind: "string" },
@@ -375,14 +437,14 @@ export const CLASSES: Readonly<Record<string, Readonly<Record<string, FieldSpec>
     "type": { kind: "string" },
     "text": { kind: "string" },
     "ob_issue_no": { kind: "string" },
-    "contents": { kind: "hash" },
+    "contents": { kind: "hashOrText" },
   },
   "GeneralRunningAnnexes": {
     "type": { kind: "string" },
     "extra_links": { kind: "string", many: true },
     "ob_issue_no": { kind: "string" },
     "payload": { kind: "hash" },
-    "contents": { kind: "hash" },
+    "contents": { kind: "hashOrText" },
   },
   "GeneralSanc": {
     "country": { kind: "string" },
@@ -393,7 +455,7 @@ export const CLASSES: Readonly<Record<string, Readonly<Record<string, FieldSpec>
     "items": { kind: "class", ref: "GeneralSanc", many: true },
     "notes": { kind: "string" },
     "ob_issue_no": { kind: "string" },
-    "contents": { kind: "hash" },
+    "contents": { kind: "hashOrText" },
   },
   "GeneralServiceRestriction": {
     "country": { kind: "class", ref: "MultilingualString" },
@@ -404,11 +466,11 @@ export const CLASSES: Readonly<Record<string, Readonly<Record<string, FieldSpec>
     "type": { kind: "string" },
     "ob_issue_no": { kind: "string" },
     "items": { kind: "class", ref: "GeneralServiceRestriction", many: true },
-    "contents": { kind: "hash" },
+    "contents": { kind: "hashOrText" },
   },
   "GeneralTelephoneCommunication": {
     "date": { kind: "dateOrText" },
-    "contents": { kind: "hash" },
+    "contents": { kind: "hashOrText" },
   },
   "GeneralTelephoneSection": {
     "type": { kind: "string" },
@@ -427,7 +489,7 @@ export const CLASSES: Readonly<Record<string, Readonly<Record<string, FieldSpec>
     "type": { kind: "string" },
     "items": { kind: "class", ref: "GeneralTelephoneService", many: true },
     "ob_issue_no": { kind: "string" },
-    "contents": { kind: "hash" },
+    "contents": { kind: "hashOrText" },
   },
   "Identifier": {
     "code": { kind: "string" },
@@ -466,6 +528,12 @@ export const CLASSES: Readonly<Record<string, Readonly<Record<string, FieldSpec>
     "issn": { kind: "string" },
     "languages": { kind: "hash" },
     "authors": { kind: "class", ref: "IssueAuthor", many: true },
+  },
+  "KeyHistoryEntry": {
+    "key": { kind: "string", required: true },
+    "type": { kind: "enum", ref: "ActionType", required: true },
+    "ob_issue_no": { kind: "integer", required: true },
+    "identifier": { kind: "class", ref: "Identifier", required: true },
   },
   "ListVIIIAction": {
     "action_type": { kind: "string" },
@@ -510,6 +578,15 @@ export const CLASSES: Readonly<Record<string, Readonly<Record<string, FieldSpec>
     "part_iii_reference": { kind: "string" },
     "centralizing_office": { kind: "class", ref: "ListVIIICentralizingOffice" },
     "measurements": { kind: "class", ref: "ListVIIIMeasurement", many: true },
+  },
+  "LocaleLabel": {
+    "key": { kind: "string", required: true },
+    "en": { kind: "string" },
+    "fr": { kind: "string" },
+    "es": { kind: "string" },
+    "zh": { kind: "string" },
+    "ru": { kind: "string" },
+    "ar": { kind: "string" },
   },
   "M1400Action": {
     "action_type": { kind: "string" },
@@ -582,6 +659,27 @@ export const CLASSES: Readonly<Record<string, Readonly<Record<string, FieldSpec>
     "metadata": { kind: "class", ref: "IssueMetadata" },
     "general": { kind: "class", ref: "IssueGeneral" },
     "amendments": { kind: "class", ref: "Amendment", many: true },
+  },
+  "ProjectionProvenance": {
+    "register_id": { kind: "string", required: true },
+    "as_of_issue": { kind: "integer", required: true },
+    "seed_issue": { kind: "integer", required: true },
+    "last_change_issue": { kind: "integer" },
+  },
+  "PublicationManifest": {
+    "publications": { kind: "class", ref: "PublicationManifestEntry", many: true },
+  },
+  "PublicationManifestEntry": {
+    "standard": { kind: "string", required: true },
+    "recommendation": { kind: "string", required: true },
+    "title": { kind: "string", required: true },
+    "edition_year": { kind: "integer", required: true },
+    "language": { kind: "string", required: true },
+    "as_of_issue": { kind: "integer", required: true },
+    "sha256": { kind: "string", required: true },
+    "status": { kind: "string", required: true },
+    "register_slugs": { kind: "string", many: true },
+    "path": { kind: "string", required: true },
   },
   "Q708ISPCAction": {
     "action_type": { kind: "string" },
@@ -663,12 +761,16 @@ export const CLASSES: Readonly<Record<string, Readonly<Record<string, FieldSpec>
     "office_code_note": { kind: "class", ref: "MultilingualString" },
     "subarea": { kind: "class", ref: "MultilingualString" },
   },
+  "RegisterActions": {
+    "provenance": { kind: "class", ref: "ProjectionProvenance", required: true },
+    "changes": { kind: "class", ref: "RegisterChange", many: true },
+  },
   "RegisterChange": {
     "type": { kind: "enum", ref: "ActionType" },
     "register": { kind: "string" },
     "identifier": { kind: "class", ref: "Identifier", required: true },
     "recommendation": { kind: "string" },
-    "data": { kind: "hash" },
+    "data": { kind: "hashOrList" },
     "ob_issue_no": { kind: "integer" },
     "date_active": { kind: "string" },
     "date_requested": { kind: "string" },
@@ -678,8 +780,27 @@ export const CLASSES: Readonly<Record<string, Readonly<Record<string, FieldSpec>
     "reason": { kind: "hash" },
     "merge_strategy": { kind: "string" },
   },
+  "RegisterEdition": {
+    "provenance": { kind: "class", ref: "ProjectionProvenance", required: true },
+    "items": { kind: "class", ref: "Entry", many: true },
+    "source_contexts": { kind: "class", ref: "F32SeedContext", many: true },
+    "lapsed_keys": { kind: "string", many: true },
+    "deleted_keys": { kind: "string", many: true },
+    "key_history": { kind: "class", ref: "KeyHistoryEntry", many: true },
+  },
+  "RegisterKeyHistory": {
+    "provenance": { kind: "class", ref: "ProjectionProvenance", required: true },
+    "key": { kind: "string", required: true },
+    "membership": { kind: "string", required: true },
+    "entries": { kind: "class", ref: "KeyHistoryEntry", many: true },
+  },
+  "RegisterLocale": {
+    "title": { kind: "class", ref: "MultilingualString" },
+    "locale": { kind: "class", ref: "LocaleLabel", many: true },
+  },
   "T35AssignmentAuthority": {
-    "terminal_type": { kind: "string" },
+    "terminal_type": { kind: "string", many: true },
+    "last_updated": { kind: "string" },
     "contact_name": { kind: "string" },
     "organization": { kind: "string" },
     "department": { kind: "string" },
@@ -710,7 +831,7 @@ export const CLASSES: Readonly<Record<string, Readonly<Record<string, FieldSpec>
     "_class": { kind: "string" },
     "country": { kind: "string" },
     "administration_name": { kind: "string" },
-    "manufactures_htv": { kind: "string" },
+    "manufactures_htv": { kind: "boolean" },
     "last_updated": { kind: "string" },
     "assignment_authority": { kind: "class", ref: "T35AssignmentAuthority", many: true },
     "note": { kind: "string" },
@@ -762,6 +883,7 @@ const KIND_LABEL: Record<string, string> = {
   string: "a string", integer: "an integer", float: "a number", boolean: "a boolean",
   date: "an ISO date string (YYYY-MM-DD)", time: "a timestamp string", hash: "an object",
   hashOrText: "an object or a string", dateOrText: "a string", enum: "an enum member", class: "an object",
+  hashOrList: "an object or a list of objects",
 };
 
 function scalarOk(kind: FieldKind, v: unknown): boolean {
@@ -774,6 +896,7 @@ function scalarOk(kind: FieldKind, v: unknown): boolean {
     case "time": return typeof v === "string";
     case "hash": return isObj(v);
     case "hashOrText": return isObj(v) || typeof v === "string";
+    case "hashOrList": return isObj(v) || (Array.isArray(v) && v.every(isObj));
     case "dateOrText": return typeof v === "string";
     default: return false;
   }

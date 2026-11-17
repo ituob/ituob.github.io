@@ -24,7 +24,7 @@ export interface Diagnostic {
   message: string;
 }
 
-/** A value shown by one input (scalar, enum choice, or opaque Hash/HashOrText content). */
+/** A value shown by one input (scalar, enum choice, or opaque hash content). */
 export interface LeafNode {
   kind: "leaf";
   /** Declared ontology type, or "any" for an extra key. */
@@ -110,6 +110,9 @@ class Builder {
       return { kind: "leaf", type: attr.type, value };
     }
     if (Array.isArray(value)) {
+      if (attr.type === "HashOrList" && value.every(isPlainObject)) {
+        return { kind: "leaf", type: attr.type, value };
+      }
       this.diag(path, "shape", `${attr.type} stored as a list; kept as stored`);
       return { kind: "leaf", type: attr.type, value };
     }
@@ -133,7 +136,7 @@ class Builder {
       return leaf();
     }
     // primitive
-    if (attr.type === "Hash" || attr.type === "HashOrText") {
+    if (attr.type === "Hash" || attr.type === "HashOrText" || attr.type === "HashOrList") {
       if (isPlainObject(value)) {
         const named = value["_class"];
         // A Hash that names a known class is an instance of it (e.g. RegisterChange.data).
@@ -263,6 +266,7 @@ export function widgetFor(attr: AttributeDescription): Widget {
       return "date";
     case "Hash":
     case "HashOrText":
+    case "HashOrList":
       return "json";
     default:
       return "text";
@@ -316,6 +320,15 @@ export function appendItem(list: ListNode, value: unknown, d: Description = defa
 
 export function removeItem(list: ListNode, index: number): ListNode {
   return { ...list, items: list.items.filter((_, i) => i !== index) };
+}
+
+/** Move an item up (-1) or down (+1); an edge move is a no-op. Item order is authored data (map row C6). */
+export function moveItem(list: ListNode, index: number, delta: -1 | 1): ListNode {
+  const to = index + delta;
+  if (index < 0 || index >= list.items.length || to < 0 || to >= list.items.length) return list;
+  const items = [...list.items];
+  [items[index], items[to]] = [items[to]!, items[index]!];
+  return { ...list, items };
 }
 
 /** Replace the node at `path` (field wire names and list indexes) with `f(node)`. */
