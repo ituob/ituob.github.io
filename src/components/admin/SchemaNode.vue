@@ -3,7 +3,7 @@ import { computed, ref } from 'vue';
 import TranslationAssist from './TranslationAssist.vue';
 import { description } from '../../lib/form/description';
 import { initialValue } from '../../lib/admin-client';
-import { appendItem, clearField, removeItem, setField, type FormNode } from '../../lib/form/model';
+import { appendItem, clearField, moveItem, removeItem, setField, type FormNode } from '../../lib/form/model';
 import { PROSE_LANGUAGES, isLanguageProse, setProseLanguage } from '../../lib/form/general';
 import { YamlTimestamp } from '../../lib/form/yaml-io';
 const props = defineProps<{ node: FormNode; path?: string; readonly?: boolean; translation?: boolean; opaqueReadonly?: boolean; prose?: boolean }>();
@@ -67,6 +67,8 @@ function replaceItem(index: number, child: FormNode) {
     <legend>{{ path }} ({{ node.items.length }} items)</legend>
     <div v-for="(item, index) in node.items" :key="index">
       <SchemaNode :node="item" :path="`${path}[${index}]`" :readonly="readonly" :translation="translation" :opaque-readonly="opaqueReadonly" :prose="prose" @change="replaceItem(index, $event)" @invalid="(path, message) => emit('invalid', path, message)" />
+      <button type="button" :disabled="index === 0" @click="emit('change', moveItem(node, index, -1)); emit('invalid', path || 'data', '')">Move item {{ index + 1 }} up</button>
+      <button type="button" :disabled="index === node.items.length - 1" @click="emit('change', moveItem(node, index, 1)); emit('invalid', path || 'data', '')">Move item {{ index + 1 }} down</button>
       <button type="button" @click="emit('change', removeItem(node, index)); emit('invalid', path || 'data', '')">Remove item {{ index + 1 }}</button>
     </div>
     <button type="button" @click="emit('change', appendItem(node, initialValue({ name: 'item', wire: 'item', type: node.itemType, kind: node.itemKind, collection: false, required: false })))">Add item</button>
