@@ -127,8 +127,8 @@ string attribute or it cannot be authored.
 [cols="1,4,3,4,1,1",options="header"]
 |===
 | ID | Editor feature | Editor ref | Web app ref | PR | Status
-| F1 | Annex a publication to the issue (picker; running annexes first) | `new-item-prompts/annex.tsx`, `annexes/index.tsx` | `AnnexEditor.vue` at `/admin/annexes`; `src/lib/form/annexes.ts` (shared browser/Worker rules, `pickerCandidates`, `runningAnnexes`); `src/pages/annex-index.json.ts`; draft type `annexes` at `ob-issues/N/annexes.yaml` through the general-message draft, approval and review-PR flow | this PR (base #110) | IN PR (the picker offers every id ever annexed plus free-text new id: the site has no publication catalogue, ids are an open set)
-| F2 | Set the annexed position date | `annexes/index.tsx:66-81` | `AnnexEditor.vue` date input; `validateAnnexes` rejects non-dates server side; `setAnnexPosition` keeps stored datasets | this PR (base #110) | IN PR
+| F1 | Annex a publication to the issue (picker; running annexes first) | `new-item-prompts/annex.tsx`, `annexes/index.tsx` | `AnnexEditor.vue` at `/admin/annexes`; `src/lib/form/annexes.ts` (shared browser/Worker rules, `pickerCandidates`, `runningAnnexes`); `src/pages/annex-index.json.ts`; draft type `annexes` at `ob-issues/N/annexes.yaml` through the general-message draft, approval and review-PR flow | main | DONE (the picker offers every id ever annexed plus free-text new id: the site has no publication catalogue, ids are an open set)
+| F2 | Set the annexed position date | `annexes/index.tsx:66-81` | `AnnexEditor.vue` date input; `validateAnnexes` rejects non-dates server side; `setAnnexPosition` keeps stored datasets | main | DONE
 | F3 | Annex dataset grid editor (typed fields, search, row add/move/delete) | `annexes/position-data.tsx` | none | n/a | DROPPED (registers replace datasets; 1 of 61 annex entries carried datasets)
 | F4 | Auto-fill annex datasets | `annexes/index.tsx:161-175` | replay | main | DROPPED
 | F5 | Display of annexes and running annexes on issue pages | n/a (published site) | `RunningAnnexes.astro` | main | DONE
@@ -176,7 +176,7 @@ from parity.
 |===
 | ID | Requirement | Web app ref | PR | Status
 | W1 | Valid-by-construction forms from the ontology; byte-stable YAML round trip | `src/lib/form/model.ts`, `yaml-io.ts`, `exact.ts`, `form.test.ts` | #108 | IN PR
-| W2 | Bulk import of an external full list as a SEED/patch series through PR review | `/admin/bulk`, `bulk-import.ts`, Worker validation and staff-only SEED; authoritative emptiness checked at creation and approval | #117 | IN PR (live repository proof pending)
+| W2 | Bulk import of an external full list as a SEED/patch series through PR review | `/admin/bulk`, `bulk-import.ts`, Worker validation and staff-only SEED; authoritative emptiness checked at creation and approval | main | DONE
 | W3 | Accounts, roles, membership and country authority | `worker/lib/oidc.ts`, `membership.ts`, `authz.ts` (#108); `MembersAdmin.vue`, `MembershipAccount.vue` (#110) | #108, #110 | IN PR
 | W4 | Review workflow: submit, request changes, approve, PR, merge, revert | `worker/lib/submissions.ts`, `reconciler.ts`, `revert.ts`, `github-webhook.ts` | #108 | IN PR
 | W5 | Discussion, mentions, inbox, notification email | `worker/lib/discussion.ts`, `notify.ts`, `email.ts`; `Discussion.vue`, `Inbox.vue` | #108, #110 | IN PR
