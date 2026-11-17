@@ -1,5 +1,5 @@
-import { assertPatchBranch, assertMetadataRequest, assertMessageRequest, METADATA_BRANCH, MESSAGE_BRANCH, PublisherNotConfigured } from "./publisher.ts";
-import type { OpenPatchPrRequest, OpenMetadataPrRequest, OpenGeneralMessagePrRequest, OpenRevertPrRequest, OpenedPr, PatchPublisher, PinBump, PinBumpRequest, Promotion, PromotionRequest, PublisherConfig, PullRequestState } from "./publisher.ts";
+import { assertCatalogRequest, CatalogPublishConflict, DEFAULT_CATALOG_REPO, assertPatchBranch, assertMetadataRequest, assertMessageRequest, METADATA_BRANCH, MESSAGE_BRANCH, PublisherNotConfigured } from "./publisher.ts";
+import type { CatalogSnapshot, OpenCatalogPrRequest, OpenPatchPrRequest, OpenMetadataPrRequest, OpenGeneralMessagePrRequest, OpenRevertPrRequest, OpenedPr, PatchPublisher, PinBump, PinBumpRequest, Promotion, PromotionRequest, PublisherConfig, PullRequestState } from "./publisher.ts";
 
 type Json = Record<string, any>;
 export type GitHubTransport = (input: string, init: RequestInit) => Promise<Response>;
@@ -39,6 +39,46 @@ export class GitHubAppPatchPublisher implements PatchPublisher {
     this.configured();
     if (repo !== this.config.PATCH_REPO) throw new Error("Repository is not the configured patch repository");
     return `/repos/${repo}`;
+  }
+  private catalogRepo(repo: string): string {
+    this.configured();
+    if (repo !== (this.config.CATALOG_REPO ?? DEFAULT_CATALOG_REPO) || !repoPattern.test(repo)) throw new Error("Repository is not the configured catalog repository");
+    return `/repos/${repo}`;
+  }
+  private async catalogFile(repo: string, path: string, ref: string): Promise<{ text: string; blobSha: string }> {
+    const file = await this.request(`${repo}/contents/${path}?ref=${requireSha(ref)}`);
+    if (file.encoding !== "base64" || typeof file.content !== "string" || !/^[a-f0-9]{40}$/.test(file.sha)) throw new Error("Unexpected catalog file response");
+    const bytes = Uint8Array.from(atob(file.content.replace(/\s/g, "")), (ch) => ch.charCodeAt(0));
+    return { text: new TextDecoder().decode(bytes), blobSha: file.sha };
+  }
+  async readCatalog(req: { repo: string }): Promise<CatalogSnapshot> {
+    const repo = this.catalogRepo(req.repo);
+    const base = await this.defaultRef(repo);
+    const registers = await this.catalogFile(repo, "catalogs/registers.yaml", base.sha);
+    const recommendations = await this.catalogFile(repo, "catalogs/recommendations.yaml", base.sha);
+    return { repo: req.repo, baseSha: base.sha, registers, recommendations: { text: recommendations.text } };
+  }
+  /** Modifies exactly one existing file on a new owned branch and opens a review PR; never touches the default branch. */
+  async openCatalogPr(req: OpenCatalogPrRequest): Promise<OpenedPr> {
+    assertCatalogRequest(req);
+    const repo = this.catalogRepo(req.repo);
+    const message = this.marker(req.branch, await fingerprint([req.idempotencyKey, req.path, req.content]));
+    const base = await this.defaultRef(repo);
+    if (req.branch === base.ref) throw new Error("Cannot write the default branch");
+    const existing = await this.optional(`${repo}/git/ref/heads/${encode(req.branch)}`);
+    let sha: string;
+    if (existing) sha = requireSha(existing.object.sha);
+    else {
+      const current = await this.catalogFile(repo, req.path, base.sha);
+      if (current.text === req.content) throw new CatalogPublishConflict("Catalog edit has no change");
+      if (current.blobSha !== req.baseBlobSha) throw new Error("Catalog changed since it was read");
+      sha = await this.makeCommit(repo, base.sha, { path: req.path, mode: "100644", type: "blob", content: req.content }, message);
+      sha = await this.createRef(repo, req.branch, sha);
+    }
+    const commit = await this.verifyChange(repo, sha, req.path, message, req.content);
+    const pr = await this.pull(repo, req.branch, base.ref, req.title, req.body, sha);
+    if (pr.state !== "open" && !(pr.state === "closed" && pr.merged_at)) throw new CatalogPublishConflict("Catalog review PR was closed without merging. Submit a new change for review.");
+    return { prNumber: pr.number, url: pr.html_url, commitSha: sha, baseSha: commit.parents[0].sha };
   }
   private async request(path: string, method = "GET", body?: unknown, token?: string): Promise<Json> {
     const auth = token ?? await this.accessToken();
@@ -303,9 +343,6 @@ export class GitHubAppPatchPublisher implements PatchPublisher {
     const repo = `/repos/${c.GITHUB_SITE_REPO}`;
     const production = (await this.request(repo)).default_branch as string;
     if (production === staging) throw new Error("Staging must not be the default branch");
-    const tip = requireSha((await this.request(`${repo}/git/ref/heads/${encode(staging)}`)).object.sha);
-    const pinned = await this.request(`${repo}/contents/${c.GITHUB_DATA_GITLINK}?ref=${tip}`);
-    if (pinned.sha !== req.freezeSha || !this.gitlinkMatches(pinned.submodule_git_url)) throw new Error("Staging does not pin the frozen data");
     const marker = `<!-- ituob-promotion:${await fingerprint([req.idempotencyKey, req.freezeSha])} -->`;
     const body = `Promote bulletin ${req.edition} (data pin ${req.freezeSha}) from ${staging} to ${production}.\n\n${marker}`;
     const owner = c.GITHUB_SITE_REPO.split("/")[0];
@@ -313,6 +350,11 @@ export class GitHubAppPatchPublisher implements PatchPublisher {
     const find = async () => ((await this.request(query)) as unknown as Json[]).filter((pr) => typeof pr.body === "string" && pr.body.includes(marker));
     let prs = await find();
     if (!prs.length) {
+      // A later edition may advance staging after this edition's promotion merged.
+      // Only a new promotion needs to use the current staging pin.
+      const tip = requireSha((await this.request(`${repo}/git/ref/heads/${encode(staging)}`)).object.sha);
+      const pinned = await this.request(`${repo}/contents/${c.GITHUB_DATA_GITLINK}?ref=${tip}`);
+      if (pinned.sha !== req.freezeSha || !this.gitlinkMatches(pinned.submodule_git_url)) throw new Error("Staging does not pin the frozen data");
       try { prs = [await this.request(`${repo}/pulls`, "POST", { head: staging, base: production, title: `Publish bulletin ${req.edition}`, body })]; }
       catch (error) {
         if (!(error instanceof GitHubFailure) || error.status !== 422) throw error;
@@ -334,6 +376,9 @@ export class GitHubAppPatchPublisher implements PatchPublisher {
     if (!run || run.status !== "completed" || run.conclusion !== "success") return pending("Exact merge commit awaits successful production deployment");
     const jobs = await this.request(`${repo}/actions/runs/${run.id}/jobs?filter=latest&per_page=100`);
     if (jobs.total_count > 100 || !jobs.jobs?.some((j: Json) => j.name === "deploy-cloudflare-production" && j.status === "completed" && j.conclusion === "success")) return pending("Production deployment job has not succeeded");
+    // Historical deployment evidence alone cannot confirm content reverted on main.
+    const current = await this.request(`${repo}/contents/${c.GITHUB_DATA_GITLINK}?ref=${encode(production)}`);
+    if (current.sha !== req.freezeSha || !this.gitlinkMatches(current.submodule_git_url)) return pending("Production no longer pins the frozen data");
     return { siteCommit: merged };
   }
   private gitlinkMatches(url: unknown): boolean {

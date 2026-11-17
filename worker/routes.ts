@@ -18,6 +18,7 @@ import { StubMisconfigured, getAccessIdentity, getAccessServicePrincipal, getSes
 import { type Route, body, json, str } from "./lib/http.ts";
 import { UpstreamError, ValidationFailed } from "./lib/submissions.ts";
 import { discussionRoutes } from "./discussion-routes.ts";
+import { catalogRoutes } from "./catalog-routes.ts";
 import { generalMessageRoutes } from "./general-message-routes.ts";
 import { generalMessagePublicationRoutes } from "./general-message-publication-routes.ts";
 import { editionMetadataRoutes } from "./edition-metadata-routes.ts";
@@ -34,6 +35,7 @@ const workflowAndAccountRoutes: Route[] = [
   ...discussionRoutes,
   ...translationRoutes,
   ...editionMetadataRoutes,
+  ...catalogRoutes,
   ...generalMessageRoutes,
   ...generalMessagePublicationRoutes,
   ...editionMetadataPublicationRoutes,
