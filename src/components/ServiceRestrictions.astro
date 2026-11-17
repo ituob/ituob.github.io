@@ -45,7 +45,6 @@ function pickNote(value: LocalizedString | undefined): string {
         <tr>
           <th>Country / Geographical Area</th>
           <th>OB No.</th>
-          <th>Page</th>
           <th>Note</th>
         </tr>
       </thead>
@@ -61,8 +60,8 @@ function pickNote(value: LocalizedString | undefined): string {
               <td>{country}</td>
               <td class="font-mono text-[var(--step--1)]">
                 {obHref ? <a href={obHref} class="hover:underline">{ob}</a> : ob}
+                {page !== "" && <> (page {page})</>}
               </td>
-              <td class="font-mono text-[var(--step--1)]">{page}</td>
               <td class="text-[var(--step--1)]" style="color: var(--fg-muted);">{note}</td>
             </tr>
           );

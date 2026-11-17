@@ -34,6 +34,10 @@ test('public HTML preserves annexes, incompleteness, communications and the prin
       mkdirSync(directory, { recursive: true });
       writeFileSync(join(directory, `${name}.yaml`), JSON.stringify({ type, ob_issue_no: String(id), ...data }));
     };
+    // A later amendment cites the source register and its original annex.
+    mkdirSync(join(fixture, 'data-ob/ob-issues/1351/q708-sanc'), { recursive: true });
+    writeFileSync(join(fixture, 'data-ob/ob-issues/1351/q708-sanc/001-ADD.yaml'), 'type: ADD\nob_issue_no: "1351"\ndata:\n  entries:\n    - country: Example\n      sanc: 5-144\n');
+    writeFileSync(join(fixture, 'data-ob/ob-issues/1125/annexes.yaml'), 'Q708_SANC:\n  position_on: 2017-06-01\nE218_TRCC: null\n');
     addMessage(1351, 'custom', '001', { contents: localized('Authored') });
     addMessage(1351, 'sanc', '001', { items: [{ country: 'Country <unsafe>', sanc: '5-144' }], notes: 'SANC note <unsafe>' });
     addMessage(1351, 'sanc', '003', { notes: 'Standalone SANC note <unsafe>' });
@@ -70,6 +74,12 @@ const state = { active_entries: [{ country: 'iso-3166:de', manufactures_htv: tru
     const html = id => readFileSync(join(fixture, `dist/issues/${id}/index.html`), 'utf8');
     const authored = html(1351);
     assert.match(authored, /New authored bulletin notice\./);
+    assert.match(authored, /href="\/issues\/1331\/"[^>]*>1331<\/a> \(page 13\)/);
+    assert.match(authored, /Position amended originally published as annex to/);
+    assert.match(authored, /href="https:\/\/www\.itu\.int\/pub\/T-SP-Q\.708A-2013">Authoritative resource<\/a>/);
+    // Structured telephone/restriction branches retain the same metadata as prose.
+    assert.match(authored, /href="http:\/\/www\.itu\.int\/itu-t\/inr-nnp"[^>]*>Authoritative resource/);
+    assert.match(authored, /href="http:\/\/www\.itu\.int\/pub\/T-SP-SR\.1-2012"[^>]*>Authoritative resource/);
     assert.doesNotMatch(authored, /SENSITIVE PROJECTION SECRET/);
     assert.match(authored, /&lt;script&gt;alert\(1\)&lt;\/script&gt;/);
     assert.doesNotMatch(authored, /<script>alert\(1\)<\/script>/);

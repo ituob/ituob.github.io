@@ -79,6 +79,22 @@ export const loadPrintedContext = memoize((id: number, slug: string): ProseMirro
   const nodes = sourceMessages(id)
     .filter((message) => message.target?.publication === publication)
     .flatMap((message) => resolveContent(message.contents)?.content ?? []);
+  if (slug === "list-viii") {
+    // Space-station specifications use numbered headings outside tables;
+    // the typed notes retain the values, but omit these field descriptions.
+    const headings: ProseMirrorNode[] = [];
+    const representedHeadings = stringsOf(represented).map(normalized);
+    const visit = (node: ProseMirrorNode) => {
+      if ((node.type === "heading" || node.type === "paragraph") && /^\s*\d+\.\s+/.test(textOf(node))) {
+        const index = representedHeadings.indexOf(normalized(textOf(node)));
+        if (index >= 0) representedHeadings.splice(index, 1);
+        else headings.push(node);
+      }
+      else (node.content ?? []).forEach(visit);
+    };
+    nodes.forEach(visit);
+    return headings;
+  }
   return printedContext(nodes, represented, slug === "t35-na");
 });
 
