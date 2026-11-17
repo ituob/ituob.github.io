@@ -5,13 +5,17 @@
  * The asset-reference message is kept (it carries the heading
  * structure); the inlined twin is dropped.
  *
- * Equality is deliberately strict: markup is stripped, quotes and dashes
- * are unified, whitespace runs collapse, text is NFC + lowercase. Digits,
- * punctuation, spacing and combining marks all take part, so "3.5 MHz"
- * and "35 MHz" never match. Heading/paragraph/line structure is ignored
+ * Equality is deliberately strict: quotes and dashes are unified,
+ * whitespace runs collapse, text is NFC. Case, digits, punctuation,
+ * spacing and combining marks all take part, so "3.5 MHz" and "35 MHz"
+ * (or "mW" and "MW") never match. Emphasis, superscript and
+ * subscript and code are kept as distinct tokens on both sides (asset markup and
+ * ProseMirror marks), so "m^2^" never matches "m2". Heading/paragraph/line structure is ignored
  * (blocks are joined by one space, and a block's trailing colon is
  * dropped because asset headings and inlined lines differ in it).
  */
+
+import { adocInlineWith, type InlineTag } from "./adoc.ts";
 
 interface MessageLike {
   type: string;
@@ -25,23 +29,39 @@ export function normalizeText(s: string): string {
     .replace(/[‘’‚‛]/g, "'")
     .replace(/[‐-―−]/g, "-")
     .replace(/\s+/g, " ")
-    .trim()
-    .toLowerCase();
+    .trim();
 }
 
 function blockKey(block: string): string {
   return normalizeText(block).replace(/\s*:$/, "");
 }
 
-function stripAdocMarkup(s: string): string {
-  return s
-    .replace(/\*\*([^*]+)\*\*/g, "$1")
-    .replace(/\*([^*]+)\*/g, "$1")
-    .replace(/_([^_]+)_/g, "$1")
-    .replace(/\^\^([^^]+)\^\^/g, "$1")
-    .replace(/(?<!\^)\^([\p{L}\p{N}]+)\^(?!\^)/gu, "$1")
-    .replace(/(?<!~)~([\p{L}\p{N}]+)~(?!~)/gu, "$1")
-    .replace(/`([^`]+)`/g, "$1");
+/** Mark tokens, private-use characters: open/close per tag. */
+const TOKEN: Record<InlineTag, [string, string]> = {
+  strong: ["\uE001", "\uE002"],
+  em: ["\uE003", "\uE004"],
+  sup: ["\uE005", "\uE006"],
+  sub: ["\uE007", "\uE008"],
+  code: ["\uE009", "\uE00A"],
+};
+// Outer-to-inner nesting used when ProseMirror marks are wrapped.
+const MARK_ORDER: InlineTag[] = ["strong", "em", "sup", "sub", "code"];
+const MARK_TYPE: Record<string, InlineTag> = {
+  strong: "strong", bold: "strong", em: "em", italic: "em",
+  superscript: "sup", subscript: "sub", code: "code",
+};
+
+const dropTokens = (s: string) => s.replace(/[\uE000-\uE00F]/g, "");
+/** Adjacent same-tag runs (`</b><b>`) are one run. */
+const joinRuns = (s: string) => s.replace(/([\uE002\uE004\uE006\uE008\uE00A])([\uE001\uE003\uE005\uE007\uE009])/g, (m, c, o) =>
+  Object.values(TOKEN).some(([op, cl]) => op === o && cl === c) ? "" : m);
+
+// Bold carries no meaning here (the real OB 1168 inlined twin lacks the
+// asset's bold) so it is not compared; em, sup, sub and code are.
+const COMPARED: Record<InlineTag, boolean> = { strong: false, em: true, sup: true, sub: true, code: true };
+
+function tokenizeAdoc(s: string): string {
+  return adocInlineWith(dropTokens(s), (t, x) => (COMPARED[t] ? `${TOKEN[t][0]}${x}${TOKEN[t][1]}` : x));
 }
 
 /** Blocks of an AsciiDoc text: headings and bullets stand alone,
@@ -63,13 +83,23 @@ export function adocBlocks(adoc: string): string[] {
     } else para.push(line);
   }
   flush();
-  return blocks.map(stripAdocMarkup);
+  return blocks.map((b) => joinRuns(tokenizeAdoc(b)));
 }
 
 interface PMNode {
   type?: string;
   text?: string;
+  marks?: { type?: string }[];
   content?: PMNode[];
+}
+
+function markedText(n: PMNode): string {
+  const tags = new Set((n.marks ?? []).map((m) => MARK_TYPE[m.type ?? ""]).filter(Boolean));
+  let out = dropTokens(n.text ?? "");
+  for (const t of [...MARK_ORDER].reverse()) {
+    if (COMPARED[t] && tags.has(t)) out = `${TOKEN[t][0]}${out}${TOKEN[t][1]}`;
+  }
+  return out;
 }
 
 /** Blocks of a ProseMirror node: a node whose children are all inline
@@ -77,13 +107,13 @@ interface PMNode {
 export function proseMirrorBlocks(node: unknown): string[] {
   if (!node || typeof node !== "object") return [];
   const n = node as PMNode;
-  if (typeof n.text === "string") return [n.text];
+  if (typeof n.text === "string") return [markedText(n)];
   if (!Array.isArray(n.content)) return [];
   const inline = n.content.every(
     (c) => c && (typeof c.text === "string" || c.type === "hard_break" || c.type === "hardBreak"),
   );
   if (inline) {
-    return [n.content.map((c) => (typeof c.text === "string" ? c.text : " ")).join("")];
+    return [joinRuns(n.content.map((c) => (typeof c.text === "string" ? markedText(c) : " ")).join(""))];
   }
   return n.content.flatMap(proseMirrorBlocks);
 }
@@ -102,7 +132,7 @@ function inlinedKey(m: MessageLike): string | null {
 /** Fields other than contents, compared so an inlined message carrying
  *  extra data (e.g. a title) is never dropped as a twin. */
 function otherFields(m: MessageLike): string {
-  const { contents: _c, ...rest } = m as Record<string, unknown>;
+  const { contents: _c, ...rest } = m as unknown as Record<string, unknown>;
   return JSON.stringify(rest, Object.keys(rest).sort());
 }
 
