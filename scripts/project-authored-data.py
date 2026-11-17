@@ -87,6 +87,11 @@ def project(data_root, service_root, data_ref, service_ref, snapshots_out, proje
             run("bundle", "exec", "ruby", "scripts/validate_data_lml.rb", "--all")
             run("bundle", "exec", "ruby", "scripts/migrate_actions_to_changes.rb")
 
+        # Repair only normalized fields with an unambiguous source-row match.
+        # Both the issue renderer and replay snapshots consume this projection.
+        run("bundle", "exec", "ruby", str(Path(__file__).with_name("repair-historical-cells.rb")),
+            str(data_root), data_ref, str(overlay))
+
         result = run("bundle", "exec", "ruby", "scripts/generate_register_snapshots.rb", capture=True)
         # The generator can rescue per-register errors without exiting nonzero.
         summary = re.findall(r"^Snapshots: .*?, ([0-9]+) errors$", result.stdout, re.MULTILINE)

@@ -34,6 +34,10 @@ test('public HTML preserves annexes, incompleteness, communications and the prin
       mkdirSync(directory, { recursive: true });
       writeFileSync(join(directory, `${name}.yaml`), JSON.stringify({ type, ob_issue_no: String(id), ...data }));
     };
+    // A later amendment cites the source register and its original annex.
+    mkdirSync(join(fixture, 'data-ob/ob-issues/1351/q708-sanc'), { recursive: true });
+    writeFileSync(join(fixture, 'data-ob/ob-issues/1351/q708-sanc/001-ADD.yaml'), 'type: ADD\nob_issue_no: "1351"\ndata:\n  entries:\n    - country: Example\n      sanc: 5-144\n');
+    writeFileSync(join(fixture, 'data-ob/ob-issues/1125/annexes.yaml'), 'Q708_SANC:\n  position_on: 2017-06-01\nE218_TRCC: null\n');
     addMessage(1351, 'custom', '001', { contents: localized('Authored') });
     addMessage(1351, 'sanc', '001', { items: [{ country: 'Country <unsafe>', sanc: '5-144' }], notes: 'SANC note <unsafe>' });
     addMessage(1351, 'sanc', '003', { notes: 'Standalone SANC note <unsafe>' });
@@ -59,7 +63,7 @@ test('public HTML preserves annexes, incompleteness, communications and the prin
     // Isolate issue/component HTML from the unrelated Vue site chrome.
     writeFileSync(join(fixture, 'src/layouts/Base.astro'), '<html><head><title>{Astro.props.title}</title></head><body><slot /></body></html>');
     writeFileSync(join(fixture, 'astro.config.mjs'), `import { defineConfig } from 'astro/config';
-export default defineConfig({ output: 'static', trailingSlash: 'always', vite: { define: { 'import.meta.env.OB_DATA_ROOT': ${JSON.stringify(JSON.stringify(join(fixture, 'data-ob')))}, 'import.meta.env.ITU_OB_DATA_ROOT': ${JSON.stringify(JSON.stringify(join(fixture, 'data')))} } } });`);
+export default defineConfig({ output: 'static', trailingSlash: 'always', vite: { cacheDir: ${JSON.stringify(join(fixture, '.vite'))}, define: { 'import.meta.env.OB_DATA_ROOT': ${JSON.stringify(JSON.stringify(join(fixture, 'data-ob')))}, 'import.meta.env.ITU_OB_DATA_ROOT': ${JSON.stringify(JSON.stringify(join(fixture, 'data')))} } } });`);
     writeFileSync(join(fixture, 'src/pages/table.astro'), `---
 import RegisterTable from '~/components/RegisterTable.astro';
 const state = { active_entries: [{ country: 'iso-3166:de', manufactures_htv: true, last_updated: '2006-03-10' }], entry_count: 1, lapsed_keys: ['old'], lapsed_count: 1, deleted_count: 0, at_ob_issue: 1001 };
@@ -70,6 +74,12 @@ const state = { active_entries: [{ country: 'iso-3166:de', manufactures_htv: tru
     const html = id => readFileSync(join(fixture, `dist/issues/${id}/index.html`), 'utf8');
     const authored = html(1351);
     assert.match(authored, /New authored bulletin notice\./);
+    assert.match(authored, /href="\/issues\/1331\/"[^>]*>1331<\/a> \(page 13\)/);
+    assert.match(authored, /Position amended originally published as annex to/);
+    assert.match(authored, /href="https:\/\/www\.itu\.int\/pub\/T-SP-Q\.708A-2013">Authoritative resource<\/a>/);
+    // Structured telephone/restriction branches retain the same metadata as prose.
+    assert.equal((authored.match(/href="http:\/\/www\.itu\.int\/itu-t\/inr-nnp"[^>]*>Authoritative resource/g) ?? []).length, 4);
+    assert.equal((authored.match(/href="http:\/\/www\.itu\.int\/pub\/T-SP-SR\.1-2012"[^>]*>Authoritative resource/g) ?? []).length, 2);
     assert.doesNotMatch(authored, /SENSITIVE PROJECTION SECRET/);
     assert.match(authored, /&lt;script&gt;alert\(1\)&lt;\/script&gt;/);
     assert.doesNotMatch(authored, /<script>alert\(1\)<\/script>/);

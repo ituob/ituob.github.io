@@ -42,8 +42,27 @@ import {
   generalTypesForRec,
   registerForDataset,
   DATASET_GENERAL_TYPES,
+  PUBLICATION_BY_ID,
   type GeneralMessageType,
 } from "./catalogs";
+
+interface SourceAmendmentMessage {
+  type?: string;
+  target?: { publication?: string };
+  contents?: unknown;
+  datasetChanges?: Record<string, { contents?: unknown }>;
+}
+
+/** Source messages can declare an amendment without carrying any content.
+ * Keep its publication header visible when the normalized projection omitted it. */
+function isEmptySourceAmendment(message: SourceAmendmentMessage): boolean {
+  if (message.type !== "amendment" || !message.target?.publication) return false;
+  if (!message.contents || typeof message.contents !== "object" || Array.isArray(message.contents) ||
+      Object.keys(message.contents).length !== 0) return false;
+  const changes = message.datasetChanges;
+  return !!changes && Object.keys(changes).length > 0 &&
+    Object.values(changes).every((change) => Array.isArray(change?.contents) && change.contents.length === 0);
+}
 
 /** Read an AsciiDoc asset referenced by a general message
  *  (e.g. contents: "general/misc_comms.adoc"). Returns null when the
@@ -172,6 +191,19 @@ export const loadIssue = memoize((id: number): LoadedIssue | null => {
       seqs.sort((a, b) => a.seq - b.seq);
       structured[slug] = seqs;
     }
+  }
+
+  // A few source issues declare a publication amendment with no message text
+  // and no dataset rows. Preserve only that header; never synthesize rows or
+  // replace content already present in the normalized projection.
+  const sourceMessages = readYamlOrNull<{ messages?: SourceAmendmentMessage[] }>(
+    join(listsRoot(), "..", "issues", String(id), "amendments.yaml"),
+  )?.messages ?? [];
+  for (const message of sourceMessages) {
+    if (!isEmptySourceAmendment(message)) continue;
+    const slug = PUBLICATION_BY_ID.get(message.target!.publication!)?.slug;
+    if (!slug || structured[slug] || textualAmd[slug] || placeholder[slug]) continue;
+    placeholder[slug] = { _class: "PlaceholderAmendment", ob_issue_no: String(id) };
   }
 
   return {

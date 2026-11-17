@@ -1,0 +1,65 @@
+type: REP
+date_requested:
+date_active:
+ob_issue_no: '1087'
+reference: OB-1087
+identifier:
+  code: P 332
+data:
+  _class: ListVIIIAmendment
+  position: P 332
+  country: RUS Russian Federation
+  description: P 332 REP
+  entries:
+  - country: RUS Russian Federation
+    name: Novosibirsk (IMS)
+    postal_address: 4, Oktyabrskaya Magistral 630007 Novosibirsk Russian Federation
+    contact: 'TF : +7 383 2231182 FAX : +7 383 2231182 EMAIL : office@srfc.ru'
+    measurements:
+    - measurement_type: Frequency measurements
+      coordinates: 54°47'56''N 083°07'42''E
+      hours_of_service: H24
+      frequency_ranges: 10 kHz - 30 MHz
+    - measurement_type: Field strength or power flux-density measurements
+      coordinates: 54°47'56''N 083°07'42''E
+      hours_of_service: H24
+      frequency_ranges: 10 kHz - 30 MHz
+    - measurement_type: Direction-finding measurements
+      coordinates: 54°47'56''N 083°07'42''E
+      hours_of_service: H24
+      frequency_ranges: 10 kHz - 100 kHz
+      remarks: Two magnetic dipoles - multiturn frames with ferrite cores. The effective
+        length of antenna not less 0.5 m. Vertical polarization.
+    - measurement_type: Direction-finding measurements
+      coordinates: 54°47'56''N 083°07'42''E
+      hours_of_service: H24
+      frequency_ranges: 100 kHz - 1 MHz
+      remarks: Two magnetic dipoles - three‑turn frames 3 m in diameter. The effective
+        length of antenna not less 1.5 m. Vertical polarization.
+    - measurement_type: Direction-finding measurements
+      coordinates: 54°47'56''N 083°07'42''E
+      hours_of_service: H24
+      frequency_ranges: 1 MHz - 30 MHz
+      remarks: 17 antennas based on vertical asymmetrical dipoles with 11.93 m in
+        height. Vertical polarization.
+    - measurement_type: Bandwidth measurements
+      coordinates: 54°47'56''N 083°07'42''E
+      hours_of_service: H24
+      frequency_ranges: 10 kHz - 30 MHz
+      remarks: In accordance with Recommendation ITU R SM.443-4.
+    - measurement_type: Automatic spectrum occupancy surveys
+      coordinates: 54°47'56''N 083°07'42''E
+      hours_of_service: H24
+      frequency_ranges: 10 kHz - 30 MHz
+  notes:
+  - PART I
+  - STATIONS IN THE TERRESTRIAL RADIOCOMMUNICATION SERVICES
+  - Name of the station — Postal address — Telephone, Telefax, Electronic-mail
+  - Geographical coordinates — Types of measurements — Ranges of frequencies for each
+    measurement — Hours of service — Remarks
+  - Name of the station — Postal address — Telephone, Telefax, Electronic-mail
+  - Geographical coordinates — Types of measurements — Ranges of frequencies for each
+    measurement — Hours of service — Remarks
+  - Name of the station — Postal address — Telephone, Telefax, Electronic-mail
+  - Geographical coordinates — Types of measurements — Ranges of frequencies for each
+    measurement — Hours of service — Remarks

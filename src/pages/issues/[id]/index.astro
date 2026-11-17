@@ -101,6 +101,7 @@ interface AmendmentItem {
   amdNo: number;
   title: string;
   datasetHref: string;
+  resourceHref: string | null;
   recCode: string | null;
   recVersion: string | null;
   annexIssueId: number | null;
@@ -130,6 +131,7 @@ const amendmentsList: AmendmentItem[] = [];
       amdNo: cumulativeAmendmentNumber(id, slug),
       title,
       datasetHref: "/datasets/" + slug + "/",
+      resourceHref: listMeta?.url ?? meta?.url ?? null,
       recCode,
       recVersion,
       annexIssueId: annexRef ? annexRef.issueId : null,
@@ -308,11 +310,12 @@ const authoritativeHref =
             )}
             {a.annexIssueId && (
               <p class="annex-to-ob">
-                Position originally published as annex to{" "}
+                Position amended originally published as annex to{" "}
                 <a href={`/issues/${a.annexIssueId}/`}>ITU Operational Bulletin No. {a.annexIssueId}</a>
                 {a.annexDate && <span> — {a.annexDate}</span>}
               </p>
             )}
+            {a.resourceHref && <p class="online-link"><a href={a.resourceHref}>Authoritative resource</a></p>}
           </header>
           <div class="included-contents">
             {a.hasStructured && issue.amendments.structured[a.slug] && (

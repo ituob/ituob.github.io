@@ -1,0 +1,118 @@
+---
+messages:
+- type: amendment
+  target:
+    publication: E212_MNC
+  contents:
+    en:
+      type: doc
+      content:
+      - type: table
+        content:
+        - type: table_row
+          content:
+          - type: table_cell
+            attrs:
+              colspan: 1
+              rowspan: 1
+              colwidth: 
+            content:
+            - type: paragraph
+              content:
+              - type: text
+                text: Barbados
+          - type: table_cell
+            attrs:
+              colspan: 1
+              rowspan: 1
+              colwidth: 
+            content:
+            - type: paragraph
+              content:
+              - type: text
+                text: 342 600
+          - type: table_cell
+            attrs:
+              colspan: 1
+              rowspan: 1
+              colwidth: 
+            content:
+            - type: paragraph
+              content:
+              - type: text
+                text: Cable & Wireless (Barbados) Limited
+            - type: paragraph
+              content:
+              - type: text
+                text: trading as LIME
+        - type: table_row
+          content:
+          - type: table_cell
+            attrs:
+              colspan: 1
+              rowspan: 1
+              colwidth: 
+            content:
+            - type: paragraph
+              content:
+              - type: text
+                text: British Virgin Islands
+          - type: table_cell
+            attrs:
+              colspan: 1
+              rowspan: 1
+              colwidth: 
+            content:
+            - type: paragraph
+              content:
+              - type: text
+                text: 348 170
+          - type: table_cell
+            attrs:
+              colspan: 1
+              rowspan: 1
+              colwidth: 
+            content:
+            - type: paragraph
+              content:
+              - type: text
+                text: Cable and Wireless (BVI) Limited
+              - type: hard_break
+              - type: text
+                text: trading as LIME
+        - type: table_row
+          content:
+          - type: table_cell
+            attrs:
+              colspan: 1
+              rowspan: 1
+              colwidth: 
+            content:
+            - type: paragraph
+              content:
+              - type: text
+                text: Turks & Caicos Islands
+          - type: table_cell
+            attrs:
+              colspan: 1
+              rowspan: 1
+              colwidth: 
+            content:
+            - type: paragraph
+              content:
+              - type: text
+                text: 376 350
+          - type: table_cell
+            attrs:
+              colspan: 1
+              rowspan: 1
+              colwidth: 
+            content:
+            - type: paragraph
+              content:
+              - type: text
+                text: Cable and Wireless (TCI) Limited
+            - type: paragraph
+              content:
+              - type: text
+                text: trading as LIME
