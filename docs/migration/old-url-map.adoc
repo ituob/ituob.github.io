@@ -1,0 +1,125 @@
+= Legacy URL inventory
+
+`old-url-map.json` enumerates every tracked HTML candidate in the production Jekyll branch;
+it does not claim every candidate is currently HTTP-served.
+It is a cutover gap inventory, not a redirect configuration or release certificate.
+Inputs are main `49f704491a730b358c2a8405be0f6876a3408da9`, production Jekyll
+`8ef2eb431183bdb1257c632d340ee3476169a265`, data
+`90f99728acd1e96d025ce0034fe43a38b572aa62`, and data-ob
+`7d94b1c1a6425396525dc6e153ee09eece74cd54`.
+The JSON also records hashes of route source files and each generated snapshot manifest.
+
+== Reproduce
+
+Run from this repository with its installed Node dependencies and initialized
+submodules containing the pinned gitlink commits. Download the retained CI input
+into a temporary directory first (artifact availability is time limited):
+
+[source,sh]
+----
+export CUTOVER_PROJECTION="$(mktemp -d)"
+gh run download 44108114203 --name authored-projection --dir "$CUTOVER_PROJECTION"
+node scripts/cutover-url-inventory.mjs \
+  --projection-root "$CUTOVER_PROJECTION" \
+  --projection-provenance "CI run 44108114203 authored-projection, head 0dddeec671; catalogs from pinned gitlink"
+node --test scripts/cutover-url-inventory.test.mjs
+node --check scripts/cutover-url-inventory.mjs
+----
+
+The artifact contains only `ob-issues/` and `datasets/`; the script restores
+`catalogs/` from the pinned data-ob commit to match the complete build overlay.
+The downloaded directories are used read-only. Omit `--projection-root` to inspect
+normalized gitlink data instead. `--data-repo` and `--data-ob-repo` can select
+existing repositories containing the pinned objects instead of the submodules;
+the recorded assessment used these overrides. Save the downloaded projection with
+the release evidence before artifact expiry.
+
+The script extracts committed data to a temporary directory and executes the actual
+`getStaticPaths` functions for issue, translated issue, recommendation, and register
+overview pages using Vite SSR. It does not render pages, build, deploy, or change the data
+checkouts. Allow several minutes for YAML loading. A missing Git object or invalid generator
+fails the command rather than producing wildcard-based route matches.
+`--legacy-ref` and `--output` can select another old artifact or output file.
+Main's data gitlinks select committed catalogs, recommendations, and lists;
+issue/dataset directories use the recorded projection when supplied. Dirty checkout
+files are not inputs except the explicitly hashed snapshot manifests.
+
+The snapshot manifests are the exception: they are generated, untracked files from
+the selected data repository, read individually and hashed. Only manifest existence is
+needed by register overview generation. Rows depending on them carry
+`route_evidence=conditional_on_hashed_untracked_snapshot_manifest`; their presence is
+conditional until the release produces the same manifests. Replay contents are not loaded.
+
+== Findings
+
+[cols="3,1,3"]
+|===
+|Old page family |Count |Disposition
+|Home and error page |2 |Same paths (`/` and Astro's special `/404.html`)
+|Issue editions |313 |310 redirect candidates; 3 unverified translations
+|Recommendation archives |106 |12 redirect candidates; 94 year archives need a decision
+|Publication edition/year archives |205 |Overview candidates require a content decision
+|Help and documentation |22 |No equivalent page identified
+|===
+
+The conservative inventory contains 648 HTML candidates: 637 public-shaped files
+and 11 underscore-prefixed help copies not established as published. Sample HEAD probes covered only the roots: `/_app_help/` returned 404 while `/docs/` returned 200.
+Child URLs were not individually probed. The 25 gaps include 11 underscore copies
+whose publication is not established, leaving 14 potentially public gaps.
+
+Overall: 648 old page candidates; 2 same paths, 322 redirects required, 25 without verified
+new pages, and 299 semantic replacements requiring a decision.
+No legacy-path redirects were found in the checked source: the Worker's apex-to-www
+redirect preserves the path and does not solve these aliases.
+
+The three untranslated targets are `/issues/1173-ru/`, `/issues/1173-zh/`, and
+`/issues/1195-fr/`. Both normalized gitlink data and the retained authored CI projection return zero
+translated paths. The final JSON uses the latter, CI run 44108114203 at head
+`0dddeec671782253e58f22fbce1bbe151764e6d7`. Its route generators, data gitlinks,
+and projection script match main; among `src/lib` files only
+`register-rules.generated.ts` differs. These remain source-inferred gaps against
+a prior successful CI input, not HTTP-proven omissions from the eventual main release.
+Validate them against the exact release projection before deciding whether to restore
+content or retire/redirect a language edition. The other 22 gaps comprise every old
+`/docs/` and `/_app_help/` page, including their indexes and nested migration/message pages.
+
+`redirect_required` means the candidate was present in concrete generated paths;
+it does not mean a redirect exists. `replacement_requires_decision` means an overview
+exists but does not preserve the archive scope. In particular the four `F32_TDI`
+archive rows are catalog-derived candidates only: legacy crosslisted content can belong
+to BUREAUFAX, so approving a blanket redirect to `f32-tdi` would require content evidence.
+
+The JSON preserves the literal old filename and a percent-encoded canonical URL for
+paths containing spaces, parentheses, or colons. Each `index.html` physical-file alias
+can be recovered as `/` plus `old_file`; the counted page uses its directory URL.
+Host treatment of explicit `index.html`, missing slashes, URL encoding, and 404 status
+must be verified during redirect implementation. Astro emits its special error page as
+`404.html`; this does not prove `/404/` exists or validate Cloudflare error handling.
+
+== Resource and route boundaries
+
+The production branch is already a compiled Jekyll snapshot: no reconstruction of
+collections, permalinks, or pagination rules is needed to enumerate its emitted pages.
+Its recommendation/publication collections include all year-index pages in the table.
+No feed, sitemap, or numbered-pagination artifact is present in that tracked tree.
+Astro's sitemap integration is configured, but this command does not execute it or
+claim a `/sitemap.xml` compatibility alias.
+
+The JSON separately lists all 5,140 non-HTML tracked files. Seven have matching paths
+under `public/`; 5,133 do not. This conservative list includes source YAML, documentation,
+scripts, and Relaton cache files as well as assets: it is not a claim that all are intended
+public API resources. Matching assets are checked by path, not byte content. The old
+`assets/css/style.css`, its map, `assets/js/electron-helpers.js`, and
+`assets/vendor/youtube-video.min.js` have no same-path public file.
+
+Only dynamic generators relevant to an old-page replacement are executed. The JSON's
+`relevant_new_routes` count includes static pages/endpoints plus those generators;
+it is deliberately not the total Astro site route count. Other dynamic dataset, register
+history/item, snapshot, and admin endpoint families are outside that count. A route match
+proves source/data membership, not page rendering, semantic parity, HTTP status, or a
+successful build. `new_route` for an archive is only the overview candidate described
+by its decision-required status.
+
+Focused checks cover exhaustive old-file preservation, a concrete issue redirect,
+home preservation, missing documentation, year archive semantics, and pinned input evidence.
+focused-quality: inventory script and focused assertions; no unresolved material finding.
