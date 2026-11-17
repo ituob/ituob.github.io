@@ -28,3 +28,7 @@ npm-debug.log*
 .env
 .env.local
 .env.*.local
+
+# spd PDF artifact, placed by scripts/fetch-publications.ts at build time
+public/downloads/
+src/data/publications-manifest.json
