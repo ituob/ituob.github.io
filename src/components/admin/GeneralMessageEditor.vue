@@ -93,6 +93,12 @@ fresh(); onMounted(() => perform(reload));
     <fieldset :disabled="busy"><legend>{{ draft ? 'Edit saved message' : 'New message' }}</legend>
       <label>Issue number <input v-model.number="issueNo" type="number" min="1" max="99999" :disabled="!!draft" /></label>
       <label>Message type <select v-model="type" :disabled="!!draft" @change="fresh"><option v-for="choice in GENERAL_TYPES" :key="choice" >{{ choice }}</option></select></label>
+      <details>
+        <summary>Authoring help</summary>
+        <p v-if="type === 'sanc'">For SANC notices, enter the country and SANC code in each typed item row. Existing legacy prose or rich content stays preserved in its original field; rich text is read-only.</p>
+        <p v-else-if="type === 'telephone_service' || type === 'telephone_service_2'">For telephone notices, add a section for each country or area, include its international phone code and contact, then add communications with their publication dates.</p>
+        <p v-else>Use the structured fields for the message. Existing rich-text content is preserved read-only; plain prose can be entered in English, French, Spanish, Arabic, Russian and Chinese.</p>
+      </details>
       <SchemaNode :node="node" path="message" :opaque-readonly="true" :prose="true" @change="node=$event" @invalid="invalid" />
       <button type="button" @click="save">Save draft</button>
       <button type="button" :disabled="!draft || dirty || !!draft.approved_at" @click="approve">Approve saved revision (administrator)</button>

@@ -90,7 +90,7 @@ export async function readEdition(db: D1Database, session: Session | null, no: n
       .all()
   ).results;
   const generalMessages = await generalSelection(db, no);
-  return { edition, items, general_messages: generalMessages.map(message => generalMessageSummary(message, edition.status === "published")) };
+  return { edition, items, general_messages: await Promise.all(generalMessages.map(message => generalMessageSummary(message, edition.status === "published"))) };
 }
 
 // ---------------------------------------------------------------- editions
@@ -212,7 +212,7 @@ export async function publishEdition(db: D1Database, session: Session | null, no
     // A general-only edition starts open. Freeze before any upstream read or
     // pin request so general authoring APIs cannot change its selected content.
     await run(db, [
-      requireGeneralSelection(db, no, generalMessages),
+      ...requireGeneralSelection(db, no, generalMessages),
       db.prepare(`UPDATE editions SET status='composing' WHERE ob_issue_no=?1 AND status='open'`).bind(no),
       ...(await auditStatements(db, [auditEdition(now(), s.userId, no, "edition.composing", { general_messages: generalMessages.map(message => ({ id: message.id, revision: message.revision })) })], { sql: "changes()=1", args: [] })),
       requireEditionStatus(db, no, ["composing"]),
@@ -243,7 +243,7 @@ export async function publishEdition(db: D1Database, session: Session | null, no
                 AND current.state=json_extract(expected.value, '$.state')
                 AND current.merge_sha IS json_extract(expected.value, '$.merge_sha')
           ))`).bind(no, JSON.stringify(items), items.length),
-      requireGeneralSelection(db, no, generalMessages),
+      ...requireGeneralSelection(db, no, generalMessages),
       db.prepare(`UPDATE editions SET status='staged', freeze_sha=?2, staging_commit=?3 WHERE ob_issue_no=?1 AND status='composing'`).bind(no, bump.freezeSha, bump.siteCommit),
       requireEditionStatusAfter(db, no),
       ...(await auditStatements(db, [auditEdition(t, s.userId, no, "edition.staged", { freeze_sha: bump.freezeSha, staging_commit: bump.siteCommit })])),

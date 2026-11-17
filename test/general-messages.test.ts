@@ -1,13 +1,80 @@
-import { beforeEach, expect, it } from "vitest";
-import { approveGeneralMessage, createGeneralMessage, generalMessageArtifact, readGeneralMessage, saveGeneralMessage } from "../worker/lib/general-messages.ts";
+import { beforeEach, expect, it, vi } from "vitest";
+import { approveGeneralMessage, createGeneralMessage, generalMessageArtifact, importGeneralMessage, readGeneralMessage, saveGeneralMessage } from "../worker/lib/general-messages.ts";
+import { FakeRepoReader } from "../worker/lib/repo-reader.ts";
+import { toFormState, toInstance } from "../src/lib/form/model.ts";
 import { verifyChain } from "../worker/lib/audit.ts";
 import { ConflictError } from "../worker/lib/membership.ts";
 import type { Session } from "../worker/lib/types.ts";
 import { BOOTSTRAP_ADMIN_ID, db, seedFixtures } from "./helpers.ts";
 import { parse } from "yaml";
+import { stringifyYaml } from "../src/lib/form/yaml-io.ts";
+import { MAX_STORED_BYTES, unpackJSON, unpackText } from "../worker/lib/general-message-storage.ts";
+import { FakePatchPublisher, setPublisher } from "../worker/lib/publisher.ts";
+import { generalSelection, requireGeneralReviews } from "../worker/lib/general-message-composition.ts";
+import { openEdition, publishEdition, readEdition } from "../worker/lib/composer.ts";
+import { ADMIN, api } from "./helpers.ts";
 const admin: Session = {userId:BOOTSTRAP_ADMIN_ID,roles:["itu-admin"],memberStateId:null};
 const value={ob_issue_no:"1400",type:"misc_communications",contents:{en:{type:"doc",content:[{type:"paragraph",content:[{type:"text",text:"Preserved notice"}]}]}}};
 beforeEach(seedFixtures);
+it("D1 large storage keeps multi-megabyte imported values and exact published bytes within every row budget", async () => {
+  const value = { type: "telephone_service_2", ob_issue_no: "1400", contents: [{ communications: [{ contents: "Telephone café notice. ".repeat(110_000) }] }] };
+  const source = "---\n# Preserve this source exactly\n" + stringifyYaml(value);
+  expect(new TextEncoder().encode(source).length).toBeGreaterThan(2_000_000);
+  expect(new TextEncoder().encode(JSON.stringify(value)).length).toBeGreaterThan(2_000_000);
+  const path = "ob-issues/1400/telephone_service_2/001.yaml";
+  const draft = await importGeneralMessage(db(), admin, { ob_issue_no: 1400, path }, new FakeRepoReader({ [`o/r:${path}`]: source }), "o/r");
+  const saved = await saveGeneralMessage(db(), admin, draft.id, { expected_revision: 1, value: draft.value });
+  await approveGeneralMessage(db(), admin, saved.id, saved.revision);
+  expect((await generalMessageArtifact(db(), saved.id)).content).toBe(source);
+  const raw = (await db().prepare("SELECT value_json,source_yaml,content_yaml FROM general_messages WHERE id=?1").bind(saved.id)
+    .first<{ value_json: string; source_yaml: string; content_yaml: string }>())!;
+  for (const text of Object.values(raw)) expect(new TextEncoder().encode(text).length).toBeLessThanOrEqual(MAX_STORED_BYTES);
+  expect(await unpackJSON(raw.value_json)).toEqual(value);
+  expect(await unpackText(raw.source_yaml)).toBe(source);
+  expect(await unpackText(raw.content_yaml)).toBe(source);
+  const snapshot = (await db().prepare("SELECT value_json,content_yaml FROM general_message_approvals WHERE message_id=?1").bind(saved.id)
+    .first<{ value_json: string; content_yaml: string }>())!;
+  expect(snapshot.value_json).toBe(raw.value_json);
+  expect(snapshot.content_yaml).toBe(raw.content_yaml);
+  const fake = new FakePatchPublisher();
+  setPublisher(fake);
+  try {
+    const review = await api("POST", `/api/admin/general-messages/${saved.id}/review`, { access: ADMIN, body: { expected_revision: 2 } });
+    expect(review.status).toBe(202);
+    expect(review.json.pr.content_yaml).toBe(source);
+    expect(fake.requests[0].content).toBe(source);
+    expect((await api("GET", `/api/admin/general-messages/${saved.id}/review`, { access: ADMIN })).json.pr.content_yaml).toBe(source);
+    const selection = await generalSelection(db(), 1400);
+    expect(selection[0].content_yaml).toBe(raw.content_yaml);
+    expect(selection[0].review_content_yaml).toBe(raw.content_yaml);
+    expect(() => requireGeneralReviews(1400, selection)).not.toThrow();
+    fake.mergePr(review.json.pr.pr_number, "g".repeat(40));
+    await openEdition(db(), admin, 1400);
+    const stalePin = vi.spyOn(fake, "bumpDataPin").mockImplementationOnce(async () => {
+      await db().prepare("UPDATE general_messages SET content_yaml='changed during pinning' WHERE id=?1").bind(saved.id).run();
+      return { freezeSha: "stale", siteCommit: "stale" };
+    });
+    try {
+      await expect(publishEdition(db(), admin, 1400, fake)).rejects.toBeInstanceOf(ConflictError);
+      expect(await db().prepare("SELECT status,freeze_sha FROM editions WHERE ob_issue_no=1400").first()).toEqual({ status: "composing", freeze_sha: null });
+    } finally { stalePin.mockRestore(); }
+    await db().prepare("UPDATE general_messages SET content_yaml=?2 WHERE id=?1").bind(saved.id, raw.content_yaml).run();
+    expect((await publishEdition(db(), admin, 1400, fake)).edition.status).toBe("published");
+    expect((await readEdition(db(), admin, 1400)).general_messages[0].content_yaml).toBe(source);
+    expect(await verifyChain(db())).toBeNull();
+  } finally { setPublisher(null); }
+}, 60_000);
+it.each(["sanc", "telephone_service_2"])("D1 retains imported %s source through form save and approval", async type => {
+  const source = `---\n# Source formatting must survive\ntype: ${type}\nob_issue_no: '1400'\ncontents: ${type === "sanc" ? "'Original notice'" : "[]"}\n`;
+  const path = `ob-issues/1400/${type}/001.yaml`;
+  const reader = new FakeRepoReader({ [`o/r:${path}`]: source });
+  const imported = await importGeneralMessage(db(), admin, { ob_issue_no: 1400, path }, reader, "o/r");
+  const saved = await saveGeneralMessage(db(), admin, imported.id, { expected_revision: 1, value: toInstance(toFormState(imported.class_name, imported.value).state) });
+  const approved = await approveGeneralMessage(db(), admin, saved.id, saved.revision);
+  expect(approved.content_yaml).toBe(source);
+  expect((await generalMessageArtifact(db(), saved.id)).content).toBe(source);
+  expect(await verifyChain(db())).toBeNull();
+});
 it("D1 preserves exact approved general-message bytes and optimistic revisions",async () => {
   const first=await createGeneralMessage(db(),admin,{ob_issue_no:1400,type:value.type,value});
   const writes=await Promise.allSettled([

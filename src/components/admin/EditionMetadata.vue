@@ -7,6 +7,7 @@ import type { EditionMetadata } from '../../../worker/lib/edition-metadata';
 import { inheritedMetadata, previousEdition } from '../../lib/form/edition-defaults';
 import type { IssueMetadataWire } from '../../lib/schema.generated';
 import SchemaNode from './SchemaNode.vue';
+import ScheduleCalendar from './ScheduleCalendar.vue';
 
 const props = defineProps<{ issueNo: number; previous?: IssueMetadataWire | null }>();
 const emit = defineEmits<{ saved: [draft: EditionMetadata] }>();
@@ -16,6 +17,7 @@ const busy = ref(false), loaded = ref(false), error = ref(''), notice = ref('');
 const errors = ref<SchemaIssue[]>([]), inputErrors = ref<Record<string, string>>({});
 const endpoint = computed(() => `/api/admin/composer/editions/${props.issueNo}/metadata`);
 const dirty = computed(() => JSON.stringify(toInstance(node.value)) !== JSON.stringify(draft.value?.metadata ?? { id: props.issueNo }));
+const currentMetadata = computed(() => toInstance(node.value) as Record<string, unknown>);
 function invalid(path: string, message: string) {
   if (message) inputErrors.value[path] = message;
   else for (const k of Object.keys(inputErrors.value)) if (k === path || k.startsWith(`${path}.`) || k.startsWith(`${path}[`)) delete inputErrors.value[k];
@@ -68,10 +70,16 @@ watch(() => props.issueNo, load, { immediate: true });
     <h3>Issue {{ issueNo }} metadata and dates</h3>
     <p v-if="!draft && previousEdition(issueNo, previous)">ISSN, languages and authors start from the latest published edition; review them before saving.</p>
     <p>Enter publication_date and cutoff_date as YYYY-MM-DD. Cutoff must be on or before publication. Scheduling requires an ITU administrator.</p>
+    <details>
+      <summary>Scheduling help</summary>
+      <p>Save metadata first, then schedule the saved dates. Scheduling makes them available locally; publication still requires a reviewed and merged publication request.</p>
+      <p>Use YYYY-MM-DD for both dates. The cutoff date must not be later than the publication date.</p>
+    </details>
     <p v-if="error" role="alert">{{ error }}</p><p v-if="notice" role="status">{{ notice }}</p>
     <ul v-if="errors.length" role="alert"><li v-for="(issue, index) in errors" :key="index">{{ issue.path }}: {{ issue.message }}</li></ul>
     <fieldset :disabled="busy || !loaded"><legend>Issue metadata draft</legend>
       <SchemaNode :node="node" path="metadata" @change="node = $event" @invalid="invalid" />
+      <ScheduleCalendar :cutoff-date="currentMetadata.cutoff_date" :publication-date="currentMetadata.publication_date" />
       <button type="button" @click="save">Save metadata</button>
       <button type="button" :disabled="!draft || dirty || !!draft.scheduled_at" @click="schedule">Schedule saved dates</button>
     </fieldset>

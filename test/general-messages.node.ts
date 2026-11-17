@@ -1,4 +1,5 @@
-import { readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
+import { join } from "node:path";
 import { DatabaseSync } from "node:sqlite";
 import { beforeEach, afterEach, describe, expect, it } from "vitest";
 import { parse } from "yaml";
@@ -12,6 +13,7 @@ import { ValidationFailed } from "../worker/lib/submissions.ts";
 import type { Session } from "../worker/lib/types.ts";
 import { toFormState, toInstance } from "../src/lib/form/model.ts";
 import { classify } from "../src/lib/form/corpus.ts";
+import { MAX_STORED_BYTES, packJSON, packText, unpackJSON, unpackText } from "../worker/lib/general-message-storage.ts";
 
 // Runs the real SQL/migrations transactionally in SQLite. Host workerd/D1 tests remain separate.
 function sqliteDb() {
@@ -19,6 +21,7 @@ function sqliteDb() {
   sqlite.exec(readFileSync("migrations/0001_init.sql", "utf8"));
   sqlite.exec(readFileSync("migrations/0002_edition_metadata.sql", "utf8"));
   sqlite.exec(readFileSync("migrations/0003_general_messages.sql", "utf8"));
+  sqlite.exec(readFileSync("migrations/0005_general_message_source.sql", "utf8"));
   sqlite.exec("INSERT INTO users(id,email,created_at) VALUES ('admin','admin@example.test','2026-01-01'),('editor','editor@example.test','2026-01-01')");
   class Statement {
     constructor(readonly sql: string, readonly args: unknown[] = []) {}
@@ -51,6 +54,48 @@ beforeEach(() => { ({ db,sqlite } = sqliteDb()); });
 afterEach(() => sqlite.close());
 const create = (value: Record<string,unknown> = prose) => createGeneralMessage(db,editor,{ob_issue_no:1331,type:value.type,value});
 describe("canonical general-message draft authoring", () => {
+  it("preserves compressed SQLite TEXT envelopes without truncation", async () => {
+    const source = "Telephone café notice. ".repeat(10_000);
+    const value = { type: "custom", contents: source };
+    const packed = await packText(source), packedJSON = await packJSON(value);
+    sqlite.exec("CREATE TABLE storage_probe (content TEXT, value_json TEXT CHECK(json_valid(value_json)))");
+    sqlite.prepare("INSERT INTO storage_probe(content,value_json) VALUES (?,?)").run(packed, packedJSON);
+    const raw = sqlite.prepare("SELECT content,value_json FROM storage_probe").get() as { content: string; value_json: string };
+    expect(raw.content === packed, "SQLite must return the entire compressed TEXT envelope").toBe(true);
+    expect(await unpackText(raw.content) === source, "decoded SQLite text must preserve every byte").toBe(true);
+    expect(await unpackJSON(raw.value_json)).toEqual(value);
+  });
+  it("stores the largest real telephone corpus source and approval within the D1 column budget", async () => {
+    const path = "ob-issues/1252/telephone_service_2/001.yaml";
+    const source = readFileSync(join(process.env.OB_DATA_ROOT ?? "data-ob", path), "utf8");
+    expect(Buffer.byteLength(source)).toBeGreaterThan(7_000_000);
+    const draft = await importGeneralMessage(db, editor, { ob_issue_no: 1252, path }, new FakeRepoReader({ [`o/r:${path}`]: source }), "o/r");
+    const saved = await saveGeneralMessage(db, editor, draft.id, { expected_revision: 1, value: toInstance(toFormState(draft.class_name, draft.value).state) });
+    await approveGeneralMessage(db, admin, saved.id, saved.revision);
+    const raw = sqlite.prepare("SELECT value_json,source_yaml,content_yaml FROM general_messages WHERE id=?").get(saved.id) as Record<string, string>;
+    for (const text of Object.values(raw)) expect(Buffer.byteLength(text)).toBeLessThanOrEqual(MAX_STORED_BYTES);
+    expect(await unpackText(raw.source_yaml) === source, `${path}: stored source bytes differ`).toBe(true);
+    expect((await generalMessageArtifact(db, saved.id)).content === source, `${path}: approved bytes differ`).toBe(true);
+    expect(sqlite.prepare("SELECT json_valid(value_json) valid FROM general_messages WHERE id=?").get(saved.id)?.valid).toBe(1);
+  }, 60_000);
+  it.each(["sanc", "telephone_service_2"])("keeps imported %s YAML byte-identical through form save and approval", async type => {
+    const source = "# Preserve original formatting\n" + readFileSync(`test/fixtures/general-messages/${type}.yaml`, "utf8").replace(/^ob_issue_no:.*\n/gm, "") + "\nob_issue_no: '1331'\n";
+    const path = `ob-issues/1331/${type}/001.yaml`;
+    const reader = new FakeRepoReader({ [`o/r:${path}`]: source });
+    const imported = await importGeneralMessage(db, editor, { ob_issue_no: 1331, path }, reader, "o/r");
+    const value = toInstance(toFormState(imported.class_name, imported.value).state);
+    const saved = await saveGeneralMessage(db, editor, imported.id, { expected_revision: 1, value });
+    await approveGeneralMessage(db, admin, saved.id, saved.revision);
+    expect((await generalMessageArtifact(db, saved.id)).content).toBe(source);
+    const changed = await saveGeneralMessage(db, editor, saved.id, { expected_revision: saved.revision, value: { ...saved.value, ob_issue_no: "1331", ...(type === "sanc" ? { notes: "Changed notice" } : { text: "Changed notice" }) } });
+    await approveGeneralMessage(db, admin, changed.id, changed.revision);
+    expect((await generalMessageArtifact(db, changed.id)).content).not.toBe(source);
+    expect(parse((await generalMessageArtifact(db, changed.id)).content)).toEqual(changed.value);
+    const reverted = await saveGeneralMessage(db, editor, changed.id, { expected_revision: changed.revision, value });
+    await approveGeneralMessage(db, admin, reverted.id, reverted.revision);
+    expect((await generalMessageArtifact(db, reverted.id)).content).toBe(source);
+    expect(await verifyChain(db)).toBeNull();
+  });
   it("derives every type/class/path from the existing corpus classifier", () => {
     for(const type of GENERAL_TYPES) {
       const binding = generalBinding(type);
@@ -205,4 +250,30 @@ describe("canonical general-message draft authoring", () => {
     reader.set("o/r","ob-issues/1331/misc_communications/006.yaml","type: misc_communications\ntext: no issue number\n");
     await expect(importGeneralMessage(db,editor,{ob_issue_no:1331,path:"ob-issues/1331/misc_communications/006.yaml"},reader,"o/r")).rejects.toThrow(ValidationFailed);
   });
+});
+
+describe("complete general-message corpus through the Worker draft lifecycle", () => {
+  it.each(["sanc", "telephone_service_2", "custom", "mid"])("imports, form-saves and approves every %s record without changing bytes", async type => {
+    const root = process.env.OB_DATA_ROOT ?? "data-ob";
+    const issues = join(root, "ob-issues");
+    expect(existsSync(issues), "OB_DATA_ROOT must provide the real corpus").toBe(true);
+    let count = 0;
+    for (const issue of readdirSync(issues)) {
+      const directory = join(issues, issue, type);
+      if (!existsSync(directory)) continue;
+      for (const file of readdirSync(directory).filter(name => name.endsWith(".yaml"))) {
+        const source = readFileSync(join(directory, file), "utf8");
+        const path = `ob-issues/${issue}/${type}/${file}`;
+        const imported = await importGeneralMessage(db, editor, { ob_issue_no: Number(issue), path }, new FakeRepoReader({ [`o/r:${path}`]: source }), "o/r");
+        const value = toInstance(toFormState(imported.class_name, imported.value).state);
+        const saved = await saveGeneralMessage(db, editor, imported.id, { expected_revision: 1, value });
+        await approveGeneralMessage(db, admin, saved.id, saved.revision);
+        expect((await generalMessageArtifact(db, saved.id)).content === source, `${path}: approved bytes differ`).toBe(true);
+        count++;
+      }
+    }
+    expect(count).toBeGreaterThan(0);
+    console.info(`Worker byte-identical ${type}: ${count} records`);
+    expect(await verifyChain(db)).toBeNull();
+  }, 900_000);
 });

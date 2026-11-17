@@ -1,4 +1,5 @@
-import { parse, stringify } from "yaml";
+import { packJSON, packText, unpackJSON, unpackText } from "./general-message-storage.ts";
+import { parseYaml, stringifyYamlPreservingSource } from "../../src/lib/form/yaml-io.ts";
 import { type RepoReader } from "./repo-reader.ts";
 import { generalBinding } from "../../src/lib/form/general.ts";
 export { generalBinding, GENERAL_TYPES } from "../../src/lib/form/general.ts";
@@ -16,7 +17,7 @@ export interface GeneralMessage {
   value: Record<string, unknown>; revision: number; approved_at: string | null;
   approved_by: string | null; content_yaml: string | null; updated_at: string;
 }
-interface Stored extends Omit<GeneralMessage, "value"> { value_json: string }
+interface Stored extends Omit<GeneralMessage, "value"> { value_json: string; source_yaml: string | null }
 export interface GeneralMessageArtifact {
   id: string; ob_issue_no: number; type: string; class_name: string; path: string; revision: number; content: string;
 }
@@ -42,7 +43,10 @@ function expectedRevision(value: unknown): number {
   if (typeof value !== "number" || !Number.isSafeInteger(value) || value < 1) throw new InvalidError("expected_revision must be a positive integer");
   return value;
 }
-function decode(row: Stored): GeneralMessage { const { value_json, ...rest } = row; return { ...rest, value: JSON.parse(value_json) }; }
+async function decode(row: Stored): Promise<GeneralMessage> {
+  const { value_json, source_yaml, content_yaml, ...rest } = row;
+  return { ...rest, value: await unpackJSON(value_json), content_yaml: content_yaml === null ? null : await unpackText(content_yaml) };
+}
 async function stored(db: D1Database, id: string): Promise<GeneralMessage> {
   const row = await db.prepare("SELECT * FROM general_messages WHERE id=?1").bind(id).first<Stored>();
   if (!row) throw new NotFoundError("general-message draft not found");
@@ -51,7 +55,7 @@ async function stored(db: D1Database, id: string): Promise<GeneralMessage> {
 export async function readGeneralMessage(db: D1Database, session: Session | null, id: string) { staff(session); return stored(db, id); }
 export async function listGeneralMessages(db: D1Database, session: Session | null) {
   staff(session);
-  return (await db.prepare("SELECT * FROM general_messages ORDER BY ob_issue_no DESC,path").all<Stored>()).results.map(decode);
+  return Promise.all((await db.prepare("SELECT * FROM general_messages ORDER BY ob_issue_no DESC,path").all<Stored>()).results.map(decode));
 }
 async function audit(db: D1Database, actor: Session, id: string, no: number, action: string, revision: number, at: string) {
   return auditStatements(db, [{ at, actor_id: actor.userId, actor_kind: "user", action, subject_type: "edition", subject_id: String(no), submission_id: null, detail: { message_id: id, revision } }], { sql: "changes()=1", args: [] });
@@ -70,7 +74,7 @@ export async function createGeneralMessage(db: D1Database, session: Session | nu
     SELECT ?1,?2,?3,?4,${pathSql},?5,1,?6
     WHERE NOT EXISTS (SELECT 1 FROM editions WHERE ob_issue_no=?2 AND status IN ('composing','staged','published'))
     AND (SELECT count(*) FROM general_messages WHERE ob_issue_no=?2 AND type=?3) < ?8
-    ON CONFLICT(path) DO NOTHING`).bind(id,no,type,className,JSON.stringify(value),at,singleton ? `ob-issues/${no}/${binding.relativePath}` : prefix,singleton ? 1 : 999);
+    ON CONFLICT(path) DO NOTHING`).bind(id,no,type,className,await packJSON(value),at,singleton ? `ob-issues/${no}/${binding.relativePath}` : prefix,singleton ? 1 : 999);
   const result = await run(db, [write, ...await audit(db,actor,id,no,"general.message.created",1,at)]);
   if (!result[0]?.meta.changes) throw new ConflictError("issue is frozen, singleton already exists, or message sequence exhausted");
   return stored(db,id);
@@ -81,7 +85,7 @@ export async function saveGeneralMessage(db: D1Database, session: Session | null
   checkIssue(current.ob_issue_no,value);
   const result = await run(db,[db.prepare(`UPDATE general_messages SET value_json=?3,revision=revision+1,approved_at=NULL,approved_by=NULL,content_yaml=NULL,updated_at=?4
     WHERE id=?1 AND revision=?2 AND NOT EXISTS (SELECT 1 FROM general_message_prs WHERE message_id=?1)
-    AND NOT EXISTS (SELECT 1 FROM editions WHERE ob_issue_no=?5 AND status IN ('composing','staged','published'))`).bind(id,expected,JSON.stringify(value),at,current.ob_issue_no),
+    AND NOT EXISTS (SELECT 1 FROM editions WHERE ob_issue_no=?5 AND status IN ('composing','staged','published'))`).bind(id,expected,await packJSON(value),at,current.ob_issue_no),
     ...await audit(db,actor,id,current.ob_issue_no,"general.message.saved",expected+1,at)]);
   if (!result[0]?.meta.changes) throw new ConflictError("revision changed, issue frozen, or review PR reserved; reload before editing");
   return stored(db,id);
@@ -110,13 +114,15 @@ export async function importGeneralMessage(db: D1Database, session: Session | nu
   const text = await reader.read(repo, input.path as string);
   if (text === null) throw new NotFoundError("no such record in the data repository");
   let value: unknown;
-  try { value = parse(text); } catch { throw new ValidationFailed([{ path: "", code: "type", message: "record is not valid YAML" }]); }
+  // Use the corpus YAML dialect, then the same JSON wire representation as the
+  // browser and D1. Original timestamp spelling remains in source_yaml.
+  try { value = JSON.parse(JSON.stringify(parseYaml(text))); } catch { throw new ValidationFailed([{ path: "", code: "type", message: "record is not valid YAML" }]); }
   const { className, value: valid } = validateGeneralMessage(type, value);
   checkIssue(no, valid);
   const id = ulid(), at = new Date().toISOString();
-  const write = db.prepare(`INSERT INTO general_messages (id,ob_issue_no,type,class_name,path,value_json,revision,updated_at)
-    SELECT ?1,?2,?3,?4,?5,?6,1,?7 WHERE NOT EXISTS (SELECT 1 FROM editions WHERE ob_issue_no=?2 AND status IN ('composing','staged','published'))
-    ON CONFLICT(path) DO NOTHING`).bind(id, no, type, className, input.path, JSON.stringify(valid), at);
+  const write = db.prepare(`INSERT INTO general_messages (id,ob_issue_no,type,class_name,path,value_json,revision,updated_at,source_yaml)
+    SELECT ?1,?2,?3,?4,?5,?6,1,?7,?8 WHERE NOT EXISTS (SELECT 1 FROM editions WHERE ob_issue_no=?2 AND status IN ('composing','staged','published'))
+    ON CONFLICT(path) DO NOTHING`).bind(id, no, type, className, input.path, await packJSON(valid), at, await packText(text));
   const result = await run(db, [write, ...await audit(db, actor, id, no, "general.message.imported", 1, at)]);
   if (!result[0]?.meta.changes) throw new ConflictError("a draft of this record already exists or the issue is frozen");
   return stored(db, id);
@@ -143,13 +149,15 @@ export async function approveGeneralMessage(db: D1Database, session: Session | n
   validateGeneralMessage(current.type,current.value);
   checkIssue(current.ob_issue_no,current.value);
   if (current.approved_at) return current;
-  const at = new Date().toISOString(), content = stringify(current.value,{lineWidth:0});
+  const source = await db.prepare("SELECT source_yaml FROM general_messages WHERE id=?1").bind(id).first<{ source_yaml: string | null }>();
+  const at = new Date().toISOString(), content = stringifyYamlPreservingSource(current.value, source?.source_yaml == null ? null : await unpackText(source.source_yaml));
+  const packedContent = await packText(content), packedValue = await packJSON(current.value);
   const result = await run(db,[db.prepare(`UPDATE general_messages SET approved_at=?3,approved_by=?4,content_yaml=?5,updated_at=?3
     WHERE id=?1 AND revision=?2 AND approved_at IS NULL
     AND NOT EXISTS (SELECT 1 FROM general_message_prs WHERE message_id=?1)
-    AND NOT EXISTS (SELECT 1 FROM editions WHERE ob_issue_no=?6 AND status IN ('composing','staged','published'))`).bind(id,expected,at,actor.userId,content,current.ob_issue_no),
+    AND NOT EXISTS (SELECT 1 FROM editions WHERE ob_issue_no=?6 AND status IN ('composing','staged','published'))`).bind(id,expected,at,actor.userId,packedContent,current.ob_issue_no),
     db.prepare(`INSERT INTO general_message_approvals (message_id,revision,value_json,content_yaml,approved_at,approved_by)
-      SELECT ?1,?2,?3,?4,?5,?6 WHERE changes()=1`).bind(id,expected,JSON.stringify(current.value),content,at,actor.userId),
+      SELECT ?1,?2,?3,?4,?5,?6 WHERE changes()=1`).bind(id,expected,packedValue,packedContent,at,actor.userId),
     ...await audit(db,actor,id,current.ob_issue_no,"general.message.approved",expected,at)]);
   if (!result[0]?.meta.changes) throw new ConflictError("revision changed or issue frozen before approval");
   return stored(db,id);
