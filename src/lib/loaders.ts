@@ -19,6 +19,7 @@ import {
   memoize,
   join,
 } from "./fs";
+import { dedupeAssetTwins } from "./dedupe";
 import type {
   LoadedIssue,
   IssueMeta,
@@ -103,15 +104,22 @@ export const loadIssue = memoize((id: number): LoadedIssue | null => {
       join(generalDir, "approved_recommendations.yaml"),
     );
 
-  const textual: TextualGeneralMessage[] = [];
+  const allTextual: TextualGeneralMessage[] = [];
   for (const t of TEXTUAL_GENERAL_TYPES) {
     const tDir = join(issueDir, t);
     if (!exists(tDir)) continue;
     for (const f of listFiles(tDir).filter((n) => n.endsWith(".yaml"))) {
       const msg = readYamlOrNull<TextualGeneralMessage>(join(tDir, f));
-      if (msg) textual.push(msg);
+      if (msg) allTextual.push(msg);
     }
   }
+
+  // A message can exist both as an asset reference and inlined with the
+  // same text (OB 1167, 1168, 1170 misc_communications); show it once.
+  const textual = dedupeAssetTwins(allTextual, (m) => {
+    const c = m.contents as unknown;
+    return typeof c === "string" && c.endsWith(".adoc") ? loadGeneralAdoc(id, c) : null;
+  });
 
   // Amendments — group by slug
   const structured: Record<string, SequencedAmendment[]> = {};
