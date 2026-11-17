@@ -2,6 +2,8 @@ import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from "
 import { dirname, join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
+import { parse as parseAnnexYaml, stringify as stringifyAnnexYaml } from "yaml";
+import { validateAnnexes } from "./annexes.ts";
 import { classify, REGISTER_SLUGS } from "./corpus.ts";
 import { description } from "./description.ts";
 import { firstDifference } from "./exact.ts";
@@ -198,6 +200,19 @@ describe("corpus round trip (stored -> form state -> serialized == stored)", () 
       const stored = parseYaml(text);
       const c = classify(rel, stored);
       if (!c) { skipped++; continue; }
+      if (c.role === "annexes") {
+        // Annex authoring uses YAML 1.2 strings for positions, independently of
+        // the generic ontology form and its YAML 1.1 timestamp wrappers.
+        const wire: unknown = parseAnnexYaml(text);
+        expect(validateAnnexes(wire ?? {}), `${issue}/${rel}`).toEqual([]);
+        const out: unknown = parseAnnexYaml(stringifyAnnexYaml(wire));
+        rows.push({
+          rel: `${issue}/${rel}`, root: c.className, classes: [c.className], diagnostics: [],
+          diff: firstDifference(wire, out),
+          textDiff: firstDifference(stored, parseYaml(stringifyYaml(stored))), requiredMissing: 0,
+        });
+        continue;
+      }
       const { state, diagnostics } = toFormState(c.className, stored);
       const out = toInstance(state);
       const diff = firstDifference(stored, out);
@@ -208,13 +223,13 @@ describe("corpus round trip (stored -> form state -> serialized == stored)", () 
     expect(bad.map((r) => `${r.rel}: ${r.diff ?? r.textDiff}`).slice(0, 10)).toEqual([]);
   });
 
-  it("covers every submittable register class, every General* class in the corpus and IssueMetadata", () => {
+  it("covers every submittable register class, every General* class in the corpus, IssueMetadata and annexes", () => {
     const filesByClass = new Map<string, number>();
     for (const r of rows) for (const c of r.classes) filesByClass.set(c, (filesByClass.get(c) ?? 0) + 1);
     const amendmentClasses = Object.keys(description.classes).filter((c) => c.endsWith("Amendment") && c !== "Amendment" && c !== "OldIssue");
     const submittable = [...REGISTER_SLUGS.map((s) => slugClass[s]), "TextAmendment", "RegisterChange"];
     for (const c of submittable) expect(filesByClass.get(c) ?? 0, `${c} files`).toBeGreaterThan(0);
-    for (const c of ["IssueMetadata", "IssueAuthor", "IssueContact", "GeneralApprovedRecommendations", "GeneralCallbackProcedures", "GeneralCustom", "GeneralIpns", "GeneralIptn", "GeneralMid", "GeneralMiscCommunications", "GeneralOrgChanges", "GeneralRunningAnnexes", "GeneralServiceRestrictions", "GeneralSancs", "GeneralTelephoneService"]) {
+    for (const c of ["IssueAnnexes", "IssueMetadata", "IssueAuthor", "IssueContact", "GeneralApprovedRecommendations", "GeneralCallbackProcedures", "GeneralCustom", "GeneralIpns", "GeneralIptn", "GeneralMid", "GeneralMiscCommunications", "GeneralOrgChanges", "GeneralRunningAnnexes", "GeneralServiceRestrictions", "GeneralSancs", "GeneralTelephoneService"]) {
       expect(filesByClass.get(c) ?? 0, `${c} files`).toBeGreaterThan(0);
     }
     expect(amendmentClasses.length).toBeGreaterThan(15);
