@@ -4,8 +4,7 @@
  * (active entries, with optional lapsed/deleted rows greyed out).
  */
 import type { RegisterState } from "~/lib/snapshots";
-import { formatCellValue } from "~/lib/values";
-import { registerColumnLabel } from "~/lib/register-labels";
+import { registerColumnLabel, formatRegisterCell } from "~/lib/register-labels";
 
 export interface Props {
   state: RegisterState;
@@ -39,7 +38,7 @@ const cols = [...colSet].sort();
         {state.active_entries.map((entry) => (
           <tr>
             {cols.map((c) => (
-              <td>{formatCellValue(entry[c])}</td>
+              <td>{formatRegisterCell(c, entry[c])}</td>
             ))}
           </tr>
         ))}

@@ -15,7 +15,7 @@
     {
       "label": "issue/991",
       "before": 0.9467956469165659,
-      "after": 0.9935509875050383,
+      "after": 0.994155582426441,
       "repair": "Numbered technical field descriptions; links and page references"
     },
     {
@@ -105,7 +105,7 @@
     {
       "label": "issue/1272",
       "before": 0.9430159833217512,
-      "after": 0.9589993050729674,
+      "after": 0.985406532314107,
       "repair": "Printed headings/contact labels, amendment source links, amended-position wording and service-restriction page references"
     },
     {
@@ -117,7 +117,7 @@
     {
       "label": "issue/1282",
       "before": 0.9438842612889083,
-      "after": 0.9557211749232792,
+      "after": 0.9719421306444542,
       "repair": "Printed headings/contact labels, amendment source links, amended-position wording and service-restriction page references"
     },
     {
@@ -141,38 +141,38 @@
     {
       "label": "recommendation/E.212",
       "before": 0.9379032258064516,
-      "after": 0.9968316831683168,
-      "repair": "Full operator headings, per-amendment resource links and source notes"
+      "after": 1.0,
+      "repair": "Complete operator-brand cells, Country B context, source notes and register-specific annex citations"
     },
     {
       "label": "recommendation/F.32",
       "before": 0.8885298869143781,
-      "after": 0.9967689822294022,
-      "repair": "Full destination-indicator and office-code headings; resource links"
+      "after": 1.0,
+      "repair": "Full headings, source links and printed QATAR continuation labels"
     },
     {
       "label": "recommendation/T.35",
       "before": 0.8681318681318682,
-      "after": 0.9816849816849816,
-      "repair": "Authority form headings, contact/information labels and resource links"
+      "after": 1.0,
+      "repair": "Printed form/action labels, YES/NO values and register-specific annex citations"
     },
     {
       "label": "register/e164-acn",
       "before": 0.8581436077057794,
-      "after": 0.989492119089317,
-      "repair": "Full E.164/mobile-number column headings; number-pattern values preserved"
+      "after": 0.9959266802443992,
+      "repair": "Complete Brazil number-pattern cells, printed headings and action captions"
     },
     {
       "label": "register/e212-mnc",
       "before": 0.9364937388193202,
-      "after": 0.9990356798457087,
-      "repair": "Name of Operator/Network headings and source corrigendum context"
+      "after": 1.0,
+      "repair": "Full operator headings, French heading, Country B relation and source notes"
     },
     {
       "label": "register/f32-tdi",
       "before": 0.9211822660098522,
       "after": 1.0,
-      "repair": "Full destination-indicator and office-code headings"
+      "repair": "Full destination-indicator/office headings and printed QATAR continuation labels"
     }
   ],
   "left": [],
@@ -322,11 +322,11 @@
       "deployed": "issues/1272-en/index.html",
       "local": "issues/1272/index.html",
       "label": "issue/1272",
-      "coverage": 0.9589993050729674,
+      "coverage": 0.985406532314107,
       "verdict": "pass",
       "exclusion": null,
       "deployed_sha256": "81c77df7e88c8188980951b37709d8438f90286409ff8099c58915d9c2c10547",
-      "local_sha256": "869a814c0f5fa9dddc08e9c5f94de69755a20aadaeca8ddf131937104e9ccc4a"
+      "local_sha256": "22a1e736f548347cd886860d8b7adeb60f0f5b7ec2fe7bfca936256e6920d420"
     },
     {
       "deployed": "issues/1277-en/index.html",
@@ -342,11 +342,11 @@
       "deployed": "issues/1282-en/index.html",
       "local": "issues/1282/index.html",
       "label": "issue/1282",
-      "coverage": 0.9557211749232792,
+      "coverage": 0.9719421306444542,
       "verdict": "pass",
       "exclusion": null,
       "deployed_sha256": "f021c7e2a53e4a6277c8ae05687a52089529d3d804ddba5d1a19307e9f9f9c07",
-      "local_sha256": "6427fadfaa4186a81d6a1a033131fe8d6428e13a3d9b3592e688f9a72e46faee"
+      "local_sha256": "bf6b5bcd92c25f0eaa7af23cfda01f4a84d498c3747e143850be4160e6b46f2d"
     },
     {
       "deployed": "issues/1310-en/index.html",
@@ -356,7 +356,7 @@
       "verdict": "pass",
       "exclusion": null,
       "deployed_sha256": "a14fb4f7be53854831f3faac837522952d4caa54f99e05ec6757fd2d8179ae77",
-      "local_sha256": "2cadb7b528974efbb4d3406f6912c4bf43f41da09ecce86b6167a2ac5113736e"
+      "local_sha256": "93fcd4338aacd70a443f8def5a0a7cdc7405627e329b64ff47d7c38744ea97be"
     },
     {
       "deployed": "issues/1312-en/index.html",
@@ -366,7 +366,7 @@
       "verdict": "pass",
       "exclusion": null,
       "deployed_sha256": "94c675122d14c864b11968eea4c9aebbef9b627932ca80faa92112c1b24eb57a",
-      "local_sha256": "6885aa526c955aa0a2623569c5ed1be4e4c0b8f583acca524f6b8db97c9ecb00"
+      "local_sha256": "c7a95b26f58f3ff80d9fe0b339490eeaecbe42e5213c2b28a43ada8183a61f9d"
     },
     {
       "deployed": "issues/1321-en/index.html",
@@ -376,7 +376,7 @@
       "verdict": "pass",
       "exclusion": null,
       "deployed_sha256": "20d30e975a324ce9318d3ff274b1ffd5a354d9c9c05b4d78244999de4ae394f0",
-      "local_sha256": "47dd1dfa7a6b12cb4cbff29d3a55912a0b5f6777639e94ab5b80f427b90d7194"
+      "local_sha256": "bef3f37d582d5e027a7c8386ee5d03cb0a04d2bc3ab54ba1edbead1777abca8f"
     },
     {
       "deployed": "issues/974-en/index.html",
@@ -386,17 +386,17 @@
       "verdict": "pass",
       "exclusion": null,
       "deployed_sha256": "e4fa50175089ea5433d31f7b9ef98e644aa4bda4e87d632c7e28617c223b96da",
-      "local_sha256": "aeaf548a98ff5d6598e7cf61cd57c7a0408570f281c7c1cc7462b639138e21b4"
+      "local_sha256": "64929b4a1dd2c43c94cbbc6c2e66068328ad00d667534713512956e2625cc4f0"
     },
     {
       "deployed": "issues/991-en/index.html",
       "local": "issues/991/index.html",
       "label": "issue/991",
-      "coverage": 0.9935509875050383,
+      "coverage": 0.994155582426441,
       "verdict": "pass",
       "exclusion": null,
       "deployed_sha256": "cafea318318b63b08d73debcdfe083b7ca63123952834940e78900b1491744da",
-      "local_sha256": "b1c702783a49b4a3cc691f491c2eaf24ae4f06d18f1155d24c41b852411b0dd4"
+      "local_sha256": "2ee33ee4c7055319aab818b1658ea40710fc41ca8db7cdb8c2c2027f1636f134"
     },
     {
       "deployed": "messages/amending-sp E164_ACN (-)/index.html",
@@ -406,27 +406,27 @@
       "verdict": "pass",
       "exclusion": null,
       "deployed_sha256": "72fa88d48758f79b66515d3a7f8fac61830432ce5e551d4fb3f9a553a4159c16",
-      "local_sha256": "5dff3e17a7b3e87c386b24753823d420313d47a5cca03cfd4f85bc96392556fe"
+      "local_sha256": "77d7ab14a373e127e480b677a50ee63202b80e684f8ecd6193e0bce94da578fa"
     },
     {
       "deployed": "messages/amending-sp E164_ACN (2010-10-31 23:00:00 UTC)/index.html",
       "local": "registers/e164-acn/index.html",
       "label": "register/e164-acn",
-      "coverage": 0.9938900203665988,
+      "coverage": 0.9959266802443992,
       "verdict": "pass",
       "exclusion": null,
       "deployed_sha256": "a80748225f2956d5a27bacb0a78fae74ab0aa262eff73a569bb4cd98218f0524",
-      "local_sha256": "5dff3e17a7b3e87c386b24753823d420313d47a5cca03cfd4f85bc96392556fe"
+      "local_sha256": "77d7ab14a373e127e480b677a50ee63202b80e684f8ecd6193e0bce94da578fa"
     },
     {
       "deployed": "messages/amending-sp E164_ACN (2011-11-30 23:00:00 UTC)/index.html",
       "local": "registers/e164-acn/index.html",
       "label": "register/e164-acn",
-      "coverage": 0.989492119089317,
+      "coverage": 1.0,
       "verdict": "pass",
       "exclusion": null,
       "deployed_sha256": "4d4eb0192a718987ba3a83b46d2de92ff52300f99480ff989e8ca4df11e947ec",
-      "local_sha256": "5dff3e17a7b3e87c386b24753823d420313d47a5cca03cfd4f85bc96392556fe"
+      "local_sha256": "77d7ab14a373e127e480b677a50ee63202b80e684f8ecd6193e0bce94da578fa"
     },
     {
       "deployed": "messages/amending-sp E212_MNC (-)/index.html",
@@ -436,7 +436,7 @@
       "verdict": "pass",
       "exclusion": null,
       "deployed_sha256": "3921aaa0d583130a008627e5040fc355790950db2cd2eb8ea59abe007667d151",
-      "local_sha256": "76830cc10dba1ed847ee95a08e4284a3f227d686c811b9d6841cdf5a0f5e401d"
+      "local_sha256": "7d8861d3e8b40cb04ede2fb757857778e1dff075c066b6024ede315346e51c45"
     },
     {
       "deployed": "messages/amending-sp E212_MNC (2010-06-14 22:00:00 UTC)/index.html",
@@ -446,17 +446,17 @@
       "verdict": "pass",
       "exclusion": null,
       "deployed_sha256": "6e007b30197e82015d6e5b7e981e637d47adfeba1ff00feb666e8fa959802d0c",
-      "local_sha256": "76830cc10dba1ed847ee95a08e4284a3f227d686c811b9d6841cdf5a0f5e401d"
+      "local_sha256": "7d8861d3e8b40cb04ede2fb757857778e1dff075c066b6024ede315346e51c45"
     },
     {
       "deployed": "messages/amending-sp E212_MNC (2011-11-14 23:00:00 UTC)/index.html",
       "local": "registers/e212-mnc/index.html",
       "label": "register/e212-mnc",
-      "coverage": 0.9990356798457087,
+      "coverage": 1.0,
       "verdict": "pass",
       "exclusion": null,
       "deployed_sha256": "2ea1728dff8410dd8e943038cba2f934636454303b7ff21e73671118d6260a30",
-      "local_sha256": "76830cc10dba1ed847ee95a08e4284a3f227d686c811b9d6841cdf5a0f5e401d"
+      "local_sha256": "7d8861d3e8b40cb04ede2fb757857778e1dff075c066b6024ede315346e51c45"
     },
     {
       "deployed": "messages/amending-sp E212_MNC (2012-12-31 23:00:00 UTC)/index.html",
@@ -466,7 +466,7 @@
       "verdict": "pass",
       "exclusion": null,
       "deployed_sha256": "6f1cb4360233ac71a0c4e1b80dde8ba4b767e2f2b58bf82096aada415192fbe5",
-      "local_sha256": "76830cc10dba1ed847ee95a08e4284a3f227d686c811b9d6841cdf5a0f5e401d"
+      "local_sha256": "7d8861d3e8b40cb04ede2fb757857778e1dff075c066b6024ede315346e51c45"
     },
     {
       "deployed": "messages/amending-sp E212_MNC (2013-0-1)/index.html",
@@ -476,7 +476,7 @@
       "verdict": "pass",
       "exclusion": null,
       "deployed_sha256": "c14a3d8215be3163879ada30f10ceff2b8721faf1953e350f5f4f08826b66d9d",
-      "local_sha256": "76830cc10dba1ed847ee95a08e4284a3f227d686c811b9d6841cdf5a0f5e401d"
+      "local_sha256": "7d8861d3e8b40cb04ede2fb757857778e1dff075c066b6024ede315346e51c45"
     },
     {
       "deployed": "messages/amending-sp E212_MNC (2015-10-14 22:00:00 UTC)/index.html",
@@ -486,7 +486,7 @@
       "verdict": "pass",
       "exclusion": null,
       "deployed_sha256": "5f46afb813cb5d5255d7a44796fc2c06416a4faf20b7281b3c863bbccc410366",
-      "local_sha256": "76830cc10dba1ed847ee95a08e4284a3f227d686c811b9d6841cdf5a0f5e401d"
+      "local_sha256": "7d8861d3e8b40cb04ede2fb757857778e1dff075c066b6024ede315346e51c45"
     },
     {
       "deployed": "messages/amending-sp E212_MNC (2016-10-31 23:00:00 UTC)/index.html",
@@ -496,7 +496,7 @@
       "verdict": "pass",
       "exclusion": null,
       "deployed_sha256": "9aeb110d61b6771bc0186bff060c7e81a48fe422b5e294925af5204b8212e613",
-      "local_sha256": "76830cc10dba1ed847ee95a08e4284a3f227d686c811b9d6841cdf5a0f5e401d"
+      "local_sha256": "7d8861d3e8b40cb04ede2fb757857778e1dff075c066b6024ede315346e51c45"
     },
     {
       "deployed": "messages/amending-sp E212_MNC (2018-11-14 23:00:00 UTC)/index.html",
@@ -506,7 +506,7 @@
       "verdict": "pass",
       "exclusion": null,
       "deployed_sha256": "34f9bc200b62956250bb45ea12ce0811e7dbd91e4418dd8b0b4ee40d9b40215c",
-      "local_sha256": "76830cc10dba1ed847ee95a08e4284a3f227d686c811b9d6841cdf5a0f5e401d"
+      "local_sha256": "7d8861d3e8b40cb04ede2fb757857778e1dff075c066b6024ede315346e51c45"
     },
     {
       "deployed": "messages/amending-sp E212_MNC (2018-12-15 00:00:00 UTC)/index.html",
@@ -516,7 +516,7 @@
       "verdict": "pass",
       "exclusion": null,
       "deployed_sha256": "a8090addb84822e8d345a4b83e45ac03a9a5cd2907487da992118237b67cf6f3",
-      "local_sha256": "76830cc10dba1ed847ee95a08e4284a3f227d686c811b9d6841cdf5a0f5e401d"
+      "local_sha256": "7d8861d3e8b40cb04ede2fb757857778e1dff075c066b6024ede315346e51c45"
     },
     {
       "deployed": "messages/amending-sp E212_MNC (2018-12-15)/index.html",
@@ -526,7 +526,7 @@
       "verdict": "pass",
       "exclusion": null,
       "deployed_sha256": "78ecf38b182c3c837a40fbfe0e1d8f3d9a1952bfc9fbdd9ce9792f68cbf05050",
-      "local_sha256": "76830cc10dba1ed847ee95a08e4284a3f227d686c811b9d6841cdf5a0f5e401d"
+      "local_sha256": "7d8861d3e8b40cb04ede2fb757857778e1dff075c066b6024ede315346e51c45"
     },
     {
       "deployed": "messages/amending-sp E212_MNC (2023-10-14 22:00:00 UTC)/index.html",
@@ -536,7 +536,7 @@
       "verdict": "pass",
       "exclusion": null,
       "deployed_sha256": "bc4f4e98b95522c85ab05038dcca15edb9853971e1cccbc1883bce698b1bb9db",
-      "local_sha256": "76830cc10dba1ed847ee95a08e4284a3f227d686c811b9d6841cdf5a0f5e401d"
+      "local_sha256": "7d8861d3e8b40cb04ede2fb757857778e1dff075c066b6024ede315346e51c45"
     },
     {
       "deployed": "messages/amending-sp F32_TDI (-)/index.html",
@@ -546,7 +546,7 @@
       "verdict": "pass",
       "exclusion": null,
       "deployed_sha256": "52eba00402b4f5b423366a412fbfdee8b03cf57cc85f9af92e046365e402720b",
-      "local_sha256": "b77a0669effd29ab61a889ecd609f97792608f25aa6462494abd994166cc1a69"
+      "local_sha256": "89d9f9a163c789ac0523bfde519144ccfee0a6b34d9b478a4402245e4b296542"
     },
     {
       "deployed": "messages/amending-sp F32_TDI (2011-04-15)/index.html",
@@ -556,7 +556,7 @@
       "verdict": "cross-listed",
       "exclusion": "embeds the full OB-1000 BUREAUFAX annex (PARTIE II/III/V fax-booth tables); rendered at /registers/bureaufax/",
       "deployed_sha256": "e4fb7159c1c67aadbdd4ba4018e98afb5b4f5aeebe96bf94872f81f49200ab6f",
-      "local_sha256": "b77a0669effd29ab61a889ecd609f97792608f25aa6462494abd994166cc1a69"
+      "local_sha256": "89d9f9a163c789ac0523bfde519144ccfee0a6b34d9b478a4402245e4b296542"
     },
     {
       "deployed": "messages/amending-sp F32_TDI (2011-05-15 00:00:00 UTC)/index.html",
@@ -566,7 +566,7 @@
       "verdict": "pass",
       "exclusion": null,
       "deployed_sha256": "623fa549cfdca67edc55d8b96fe3c8c8008e7fa8678bccb12415a78e697d8f32",
-      "local_sha256": "b77a0669effd29ab61a889ecd609f97792608f25aa6462494abd994166cc1a69"
+      "local_sha256": "89d9f9a163c789ac0523bfde519144ccfee0a6b34d9b478a4402245e4b296542"
     },
     {
       "deployed": "messages/complement-to-itu-t-r E.212/2010/index.html",
@@ -576,7 +576,7 @@
       "verdict": "pass",
       "exclusion": null,
       "deployed_sha256": "51dcf6330aab56a835d705104114c5407dcbb2b295cb3db6e17c3df7e9862a89",
-      "local_sha256": "a3894b125b7b9ccb91aa806253b12cc9b26c99165640ef2d7d622d54b4ff12f4"
+      "local_sha256": "2535689bd8476c3dfd008c77f14b3dffeb2cc21abe71548cc3b73420a692ccda"
     },
     {
       "deployed": "messages/complement-to-itu-t-r E.212/2011/index.html",
@@ -586,17 +586,17 @@
       "verdict": "pass",
       "exclusion": null,
       "deployed_sha256": "90eb729bfb44c917c35a22602c2d923eac3c6bfd5613b17f276f59cbe834a56f",
-      "local_sha256": "a3894b125b7b9ccb91aa806253b12cc9b26c99165640ef2d7d622d54b4ff12f4"
+      "local_sha256": "2535689bd8476c3dfd008c77f14b3dffeb2cc21abe71548cc3b73420a692ccda"
     },
     {
       "deployed": "messages/complement-to-itu-t-r E.212/2012/index.html",
       "local": "recommendations/E.212/index.html",
       "label": "recommendation/E.212",
-      "coverage": 0.9987113402061856,
+      "coverage": 1.0,
       "verdict": "pass",
       "exclusion": null,
       "deployed_sha256": "10044666c5df87ad01a753ea493278e6bae21b3a6543a1833c8da8ea57e12a48",
-      "local_sha256": "a3894b125b7b9ccb91aa806253b12cc9b26c99165640ef2d7d622d54b4ff12f4"
+      "local_sha256": "2535689bd8476c3dfd008c77f14b3dffeb2cc21abe71548cc3b73420a692ccda"
     },
     {
       "deployed": "messages/complement-to-itu-t-r E.212/2013/index.html",
@@ -606,7 +606,7 @@
       "verdict": "pass",
       "exclusion": null,
       "deployed_sha256": "400db0eee7a225b37b8c49ec94a3d63bf9758c3e0631fb259aeea85171bfdf61",
-      "local_sha256": "a3894b125b7b9ccb91aa806253b12cc9b26c99165640ef2d7d622d54b4ff12f4"
+      "local_sha256": "2535689bd8476c3dfd008c77f14b3dffeb2cc21abe71548cc3b73420a692ccda"
     },
     {
       "deployed": "messages/complement-to-itu-t-r E.212/2014/index.html",
@@ -616,7 +616,7 @@
       "verdict": "pass",
       "exclusion": null,
       "deployed_sha256": "b00abf8eb49aafb3211321c6e79227e427106c2078aa9d2bec2589e0a0a790a0",
-      "local_sha256": "a3894b125b7b9ccb91aa806253b12cc9b26c99165640ef2d7d622d54b4ff12f4"
+      "local_sha256": "2535689bd8476c3dfd008c77f14b3dffeb2cc21abe71548cc3b73420a692ccda"
     },
     {
       "deployed": "messages/complement-to-itu-t-r E.212/2015/index.html",
@@ -626,7 +626,7 @@
       "verdict": "pass",
       "exclusion": null,
       "deployed_sha256": "a412d01acc3c87884d8d6e1a24746a541b857fac55dca4dc7875b4b598fd663d",
-      "local_sha256": "a3894b125b7b9ccb91aa806253b12cc9b26c99165640ef2d7d622d54b4ff12f4"
+      "local_sha256": "2535689bd8476c3dfd008c77f14b3dffeb2cc21abe71548cc3b73420a692ccda"
     },
     {
       "deployed": "messages/complement-to-itu-t-r E.212/2016/index.html",
@@ -636,27 +636,27 @@
       "verdict": "pass",
       "exclusion": null,
       "deployed_sha256": "6d0774efe9d3933acaae196f374ffb01eae87c7ee2755f01e4b95633626ee490",
-      "local_sha256": "a3894b125b7b9ccb91aa806253b12cc9b26c99165640ef2d7d622d54b4ff12f4"
+      "local_sha256": "2535689bd8476c3dfd008c77f14b3dffeb2cc21abe71548cc3b73420a692ccda"
     },
     {
       "deployed": "messages/complement-to-itu-t-r E.212/2017/index.html",
       "local": "recommendations/E.212/index.html",
       "label": "recommendation/E.212",
-      "coverage": 0.9968316831683168,
+      "coverage": 1.0,
       "verdict": "pass",
       "exclusion": null,
       "deployed_sha256": "f819b535e8e9981b0ca4f4e21e046c77cf27354e416d4c0c1b017111900559d0",
-      "local_sha256": "a3894b125b7b9ccb91aa806253b12cc9b26c99165640ef2d7d622d54b4ff12f4"
+      "local_sha256": "2535689bd8476c3dfd008c77f14b3dffeb2cc21abe71548cc3b73420a692ccda"
     },
     {
       "deployed": "messages/complement-to-itu-t-r E.212/2018/index.html",
       "local": "recommendations/E.212/index.html",
       "label": "recommendation/E.212",
-      "coverage": 0.9973444613050075,
+      "coverage": 1.0,
       "verdict": "pass",
       "exclusion": null,
       "deployed_sha256": "e39a6194c78b91afd7d089777e2c17b2ba08485fddf814716d5611ed5c769112",
-      "local_sha256": "a3894b125b7b9ccb91aa806253b12cc9b26c99165640ef2d7d622d54b4ff12f4"
+      "local_sha256": "2535689bd8476c3dfd008c77f14b3dffeb2cc21abe71548cc3b73420a692ccda"
     },
     {
       "deployed": "messages/complement-to-itu-t-r E.212/2019/index.html",
@@ -666,7 +666,7 @@
       "verdict": "pass",
       "exclusion": null,
       "deployed_sha256": "b77da9cc7d59713b8c0c4e23b5444c9cd8c0820aa43ac27a2218db37b95428b7",
-      "local_sha256": "a3894b125b7b9ccb91aa806253b12cc9b26c99165640ef2d7d622d54b4ff12f4"
+      "local_sha256": "2535689bd8476c3dfd008c77f14b3dffeb2cc21abe71548cc3b73420a692ccda"
     },
     {
       "deployed": "messages/complement-to-itu-t-r E.212/2020/index.html",
@@ -676,7 +676,7 @@
       "verdict": "pass",
       "exclusion": null,
       "deployed_sha256": "505e0be8acf6a09c00f749936fe59e06c1c6f5c4ee07667bb1f95a6df73c68a6",
-      "local_sha256": "a3894b125b7b9ccb91aa806253b12cc9b26c99165640ef2d7d622d54b4ff12f4"
+      "local_sha256": "2535689bd8476c3dfd008c77f14b3dffeb2cc21abe71548cc3b73420a692ccda"
     },
     {
       "deployed": "messages/complement-to-itu-t-r E.212/2021/index.html",
@@ -686,7 +686,7 @@
       "verdict": "pass",
       "exclusion": null,
       "deployed_sha256": "ca236e733bd9228fbe7d0d31db133e50d9ab7a12e4c6f037a54dd49dc1066a5a",
-      "local_sha256": "a3894b125b7b9ccb91aa806253b12cc9b26c99165640ef2d7d622d54b4ff12f4"
+      "local_sha256": "2535689bd8476c3dfd008c77f14b3dffeb2cc21abe71548cc3b73420a692ccda"
     },
     {
       "deployed": "messages/complement-to-itu-t-r E.212/2022/index.html",
@@ -696,17 +696,17 @@
       "verdict": "pass",
       "exclusion": null,
       "deployed_sha256": "7ebb95e9884cc0aa71c3d9713d10fcf9cceaa2c8a0cf9f36c9d3f7347508e8c9",
-      "local_sha256": "a3894b125b7b9ccb91aa806253b12cc9b26c99165640ef2d7d622d54b4ff12f4"
+      "local_sha256": "2535689bd8476c3dfd008c77f14b3dffeb2cc21abe71548cc3b73420a692ccda"
     },
     {
       "deployed": "messages/complement-to-itu-t-r E.212/2023/index.html",
       "local": "recommendations/E.212/index.html",
       "label": "recommendation/E.212",
-      "coverage": 0.9986504723346828,
+      "coverage": 1.0,
       "verdict": "pass",
       "exclusion": null,
       "deployed_sha256": "e19763d9df714135734b92c53162ee81dfadc14ffb02cae7be332fcc845d4e59",
-      "local_sha256": "a3894b125b7b9ccb91aa806253b12cc9b26c99165640ef2d7d622d54b4ff12f4"
+      "local_sha256": "2535689bd8476c3dfd008c77f14b3dffeb2cc21abe71548cc3b73420a692ccda"
     },
     {
       "deployed": "messages/complement-to-itu-t-r E.212/2024/index.html",
@@ -716,7 +716,7 @@
       "verdict": "pass",
       "exclusion": null,
       "deployed_sha256": "c1a00e5c6d2a37da02c48d3d26638add4eafba01cba7f5ccc37d424124d685e3",
-      "local_sha256": "a3894b125b7b9ccb91aa806253b12cc9b26c99165640ef2d7d622d54b4ff12f4"
+      "local_sha256": "2535689bd8476c3dfd008c77f14b3dffeb2cc21abe71548cc3b73420a692ccda"
     },
     {
       "deployed": "messages/complement-to-itu-t-r E.212/2025/index.html",
@@ -726,7 +726,7 @@
       "verdict": "pass",
       "exclusion": null,
       "deployed_sha256": "c32a2ae0b8daec50fef6e0a8c090af54499f5a5994ca31df98f5bfc5fc8af808",
-      "local_sha256": "a3894b125b7b9ccb91aa806253b12cc9b26c99165640ef2d7d622d54b4ff12f4"
+      "local_sha256": "2535689bd8476c3dfd008c77f14b3dffeb2cc21abe71548cc3b73420a692ccda"
     },
     {
       "deployed": "messages/complement-to-itu-t-r E.212/index.html",
@@ -736,17 +736,17 @@
       "verdict": "pass",
       "exclusion": null,
       "deployed_sha256": "d113c3b8e866a75bfb9e5eaf1343f9aee5cce69671b1a8a5d520f004a34fb09d",
-      "local_sha256": "a3894b125b7b9ccb91aa806253b12cc9b26c99165640ef2d7d622d54b4ff12f4"
+      "local_sha256": "2535689bd8476c3dfd008c77f14b3dffeb2cc21abe71548cc3b73420a692ccda"
     },
     {
       "deployed": "messages/complement-to-itu-t-r F.32/2010/index.html",
       "local": "recommendations/F.32/index.html",
       "label": "recommendation/F.32",
-      "coverage": 0.9967689822294022,
+      "coverage": 1.0,
       "verdict": "pass",
       "exclusion": null,
       "deployed_sha256": "f8ddba85a8af6c8722421a055d50180a6096876fca8890b595d2275efbc01ec7",
-      "local_sha256": "b521a086e1127e948eb41d3194cf852ddde586c3b9c19350e7a83de4fdc543ba"
+      "local_sha256": "3a6780c62a721ffe9799f62d841604fcce3108a18f57548f1f2bfea6453d2da3"
     },
     {
       "deployed": "messages/complement-to-itu-t-r F.32/2011/index.html",
@@ -756,7 +756,7 @@
       "verdict": "pass",
       "exclusion": null,
       "deployed_sha256": "bb16b2ec1d7ab8e88b366db743d92b667e94ad199b1514981b0c2f55b09d6a9d",
-      "local_sha256": "b521a086e1127e948eb41d3194cf852ddde586c3b9c19350e7a83de4fdc543ba"
+      "local_sha256": "3a6780c62a721ffe9799f62d841604fcce3108a18f57548f1f2bfea6453d2da3"
     },
     {
       "deployed": "messages/complement-to-itu-t-r F.32/2012/index.html",
@@ -766,7 +766,7 @@
       "verdict": "cross-listed",
       "exclusion": "embeds the full OB-1000 BUREAUFAX annex (PARTIE II/III/V fax-booth tables); rendered at /registers/bureaufax/",
       "deployed_sha256": "151affd107cecda09a762d6f2b22b9c91ea7f581e8c041f69639f60f24fd9339",
-      "local_sha256": "b521a086e1127e948eb41d3194cf852ddde586c3b9c19350e7a83de4fdc543ba"
+      "local_sha256": "3a6780c62a721ffe9799f62d841604fcce3108a18f57548f1f2bfea6453d2da3"
     },
     {
       "deployed": "messages/complement-to-itu-t-r F.32/index.html",
@@ -776,17 +776,108 @@
       "verdict": "pass",
       "exclusion": null,
       "deployed_sha256": "e09785283b635685add7ad4029460dfa2d1bd955a5ae12cd70da2c2579426ae5",
-      "local_sha256": "b521a086e1127e948eb41d3194cf852ddde586c3b9c19350e7a83de4fdc543ba"
+      "local_sha256": "3a6780c62a721ffe9799f62d841604fcce3108a18f57548f1f2bfea6453d2da3"
     },
     {
       "deployed": "messages/complement-to-itu-t-r T.35/index.html",
       "local": "recommendations/T.35/index.html",
       "label": "recommendation/T.35",
-      "coverage": 0.9816849816849816,
+      "coverage": 1.0,
       "verdict": "pass",
       "exclusion": null,
       "deployed_sha256": "55cfcaff70f59dd5ac7bd30d3f2faa577be2c90333158aa6c8f856b1e118235d",
-      "local_sha256": "b304b97cc739118b42bd6fc3c9c205043570eba667f3f64f2f14c588a2605272"
+      "local_sha256": "55b39ca6829bac0ffa8f7777952b201513867d378eaaaed2af31bb501ec7371b"
     }
-  ]
+  ],
+  "reference_cache": "604 reference HTML variants hash-validated against the pinned receipt before token tallies were cached; identical canonical tokenizer and multiset containment",
+  "source_sha256": {
+    "src/components/AdocText.astro": "9e1387e06d9154ae0c62ab2e610bf132306aee2b4cf8ebcd8643ad2df8a4a801",
+    "src/components/AmendmentsLegend.astro": "8431e4e3058ba5bae97c86b92e9ff20d245f1d72f685830cca32a191b722836e",
+    "src/components/ApprovedRecommendations.astro": "a4900f6bdb43da9532f6556333be24629a73fa3d1de0bcd9dd4f160dcc98d6ce",
+    "src/components/AuthorContacts.astro": "0b18b188abb630929550a20f949a794a873ac3c1448a3caac0300e2f25a01170",
+    "src/components/AuthoritativeResource.astro": "b8c5ad20a91dee6420337610ee437ef4659d470909c6920d538e87e5fe3028cc",
+    "src/components/DisclaimerBanner.astro": "6738c98b3612708f3481afcdb3b1a1485328e1d3465111f7d8a465b6b2282f77",
+    "src/components/DownloadStatus.astro": "3dd909c580c1cbe68217836ee89eb0abc97155c7a6fa649afa78b3c5ab2bf71b",
+    "src/components/GeneralContent.astro": "c2425c14486eedf1675b912156d5def62b08b5a3665b8024447daf7d56be5944",
+    "src/components/GeneralMessage.astro": "d944f1c004c39d01cac4cff7f1ed1f07975e67e650b76d1508550b4869eb3588",
+    "src/components/GeneralMessageMetadata.astro": "074383eb11910252dfa13dabb966c5972c682b9e93d91ff767e86a5ab441282f",
+    "src/components/IncompleteBanner.astro": "521fad7721071afac359a4b0247ae826163dd29f94b06a53518525bca9056f78",
+    "src/components/IssueArchive.astro": "bd421a34c178f54368195b81676aaaef94af5ad69346a425ae30ab474674b22d",
+    "src/components/PlannedIssues.astro": "b43905af4900bb4a2a91fd4247bea1381bd51a14efe31882e0939a472715b993",
+    "src/components/PrintedRegisterContext.astro": "e779d0251c6ffa44a13898d567673e8783c2fcc37f9e45cc9f484955a4c2d45f",
+    "src/components/ProseMirror.astro": "aa98a540500ec769277aa321c5fbae10de1a163425bc9bf1302cf3b9efacbc43",
+    "src/components/RecommendationHeader.astro": "0976dd78ca4cfda0621316f218fa576cae1f6dd88f38fc0d2d702583776a1f0e",
+    "src/components/RecommendationTimeline.astro": "e905c93461b87199fc8f1895b2628f7459ead24c6b8ac0ccb45536a88c156064",
+    "src/components/RegisterHistory.astro": "fcbb127618fca32cf44dd61bd6b87cd68040e5c3af2c4e3d4109eb61fbe3c100",
+    "src/components/RegisterTable.astro": "60bacf6122f94b6d57252df22b3ae95a8fa1cb4e2155c943c643ccfed2ad92a0",
+    "src/components/RegisterYearArchive.astro": "4ca32da130cc05d426ea9549de52f33325e228f3b1b87994ff1da2bc7745957f",
+    "src/components/RunningAnnexes.astro": "5d98f69f1f89531ccd376839db2ba442d96e88468509941418ac3b6c653e26e5",
+    "src/components/ServiceRestrictions.astro": "9d991db7490473ea376f44aff9cef9d752dab98e63501acf5f1d43f923770e31",
+    "src/components/StructuredAmendment.astro": "3f76ebc0c9e4177e90fd7c33bab8429355bdc754f6eb8a83251faf9b2b4e8c11",
+    "src/components/TelephoneService.astro": "cd274f468c2fdf4a73840eae483636c957c0c0967a2e8a690ef992ad234b0b06",
+    "src/components/TextualAmendment.astro": "87d58e3f2683de18965fb36443cf9bdf2763753c2421d698e385b44ef10dbf8a",
+    "src/components/TextualMessage.astro": "981bec1679d127f5a3a4c18720e77e4267abf591f7fd572e59215a4098f931f0",
+    "src/components/TimelineScrubber.astro": "0a90dd3698f3c2d294abb5ef40216625ccc5be3865469d484de176a49735543d",
+    "src/components/YearArchive.astro": "ebf2f2e6208493a461dbbe324c761fd6f2002f644610e7dc0b0d5d3d59552eed",
+    "src/components/account/api.ts": "20a8d37e911a0a318d585040643e6dd7e6eb4a41121e73765afd9c3a5c18e286",
+    "src/lib/admin-client.ts": "3fac450cfe34c9e4edbf22c1da87e8c8576d06043d44c3bedb924880f81aaab1",
+    "src/lib/adoc.ts": "ce22956ac349f6c05ad0e5282ca43f16fc9b377e385f754635721fc499eacae4",
+    "src/lib/adoption.ts": "461b9fa91ff4f46031c841afb666851392ec67d656efdd54c38f636e798e02e4",
+    "src/lib/catalogs.ts": "ff037701f1b17757d1a4b3eee662053486ef908097fbc2c15c222218b7e0e669",
+    "src/lib/composer-preview.test.ts": "1643db03ba65ac49dc514049cdfe0512d8604af709b9f7dfc8486efa2529e1db",
+    "src/lib/composer-preview.ts": "7fb7e155bc8022bc3375322edcf53ae640492f0e48f729347775eb507df2ccd7",
+    "src/lib/dedupe.ts": "3638a0a43d44c76d1f9711c98ab8408da61d9335d6bcc74a93417a1d4e01e05e",
+    "src/lib/discussion-client.ts": "fae0f483cabd349a8544d93cbcc49ffb98e17ffaf2f53f92f197d97fdf920faa",
+    "src/lib/form/bulk-import.test.ts": "d4454fef2d44a042b3971e397b5e3e88778ef654436e30717b86802d9e350645",
+    "src/lib/form/bulk-import.ts": "d239f7a05be4e3d24d6f72aadee98beab3ce12562baf980276528772a33289ec",
+    "src/lib/form/bulk-review-ui.test.ts": "5600cc60ad48fce88e602dac46f2f8b3866d6fb38aea4e0f3dcc07ac37ffd372",
+    "src/lib/form/catalog-entry.test.ts": "98b04e42cec399dd0054a6b7b19d35d6f1ef56634249a64abe5c0a7f9aad37dd",
+    "src/lib/form/catalog-entry.ts": "cc3ac67c2829e9b2f1f5ce977df02181d9b66373e7481a331ca82415cb97b7f5",
+    "src/lib/form/catalog-yaml.test.ts": "500a08ae1eacece488f80988a2413c716aeb3248406b51c145521e193e0abd23",
+    "src/lib/form/catalog-yaml.ts": "59d889603c3d41f7e2b68b2a4d51ebc1d7729081ab1677bb13995b5a455a6e47",
+    "src/lib/form/corpus.ts": "4d564ce23eb55836616ecfdb1ff806f64684d0bba0eeec9e87cf667d11cd3156",
+    "src/lib/form/description.ts": "5bcedfe9d02084b79fbe46f79a21b6e01616f2d4d41841d5f99a43a65c7e6f06",
+    "src/lib/form/discussion-ui.test.ts": "66fa52d88de56d752bc72fe4c3b4865be8b23530e6a3ccc117bfe86d7a3fb984",
+    "src/lib/form/edition-defaults.test.ts": "2f02c3435d5fde2a46c5d177bc13c02ea87c0dedabf27bb04e19b86099ec305b",
+    "src/lib/form/edition-defaults.ts": "be3ac14eba993a8a7d982129f848bb3eb01ab710407c1c8709651fd7f223402a",
+    "src/lib/form/exact.ts": "79e0b80be0c0c4f77f24591a87a78ecbc9b7640983ee76f0e6bde9fcd7e9ae4e",
+    "src/lib/form/form.test.ts": "12086774dcf8425174830f1a8c704991e8ccea3169d9796384f4082cc8cf0b25",
+    "src/lib/form/general.test.ts": "0ff402dc95f09f6fc7290d2849ff68acf3d186b7d7edb591e528c2d38a20e256",
+    "src/lib/form/general.ts": "f6e9429905d538e1070d9a2fe0d617835515e4e119fe5633826ffde3704b01f8",
+    "src/lib/form/invalid-input.ts": "67eb18391ce5190cce44f1d7c9da5c7aa4eedb0f3a835669de440174ddf0c4a8",
+    "src/lib/form/model.ts": "723343cf606885a9a7d2b69e22bf6a228164315014ee5f452e1390365b912f09",
+    "src/lib/form/move-item.test.ts": "8b32cf453c56b18297ab65cf03a707b2fc9c25944171d6ce0d3ecab6749d06f1",
+    "src/lib/form/submission-diff.test.ts": "c7fdbd1a8d67e677e85a123d4101223b175f3ecff4890274963ddfdb8a697892",
+    "src/lib/form/ui.test.ts": "bf01891bb696f6f9157d7eb937364f20b4049679b3fa264c4a68601ff097bede",
+    "src/lib/form/yaml-io.ts": "82a655a8f97e0f874d6e6fd02271401a245749eb58f68b3d6b1d431edc7b5e9d",
+    "src/lib/format.ts": "0f86b95470f3671e7de6fc924611a685b81cb43b7ca78832cb17236c7841f211",
+    "src/lib/fs.ts": "25649cff84f231a1829e6beafad712e3d8665209a2ddc7a39bd312177f247e3d",
+    "src/lib/i18n.ts": "201a118b5484ca0df2c5cba055009bae78b0cb312358ee560ab7a6d1fe08c1f3",
+    "src/lib/item-history.ts": "427a557ec879ee10b6b59a774f977083120af1ab965f94daba99a626873a075c",
+    "src/lib/loaders.ts": "77c5bd3dfb40e7a318a9b5b546f46354be32647516dcb31f0e307416d4755133",
+    "src/lib/ob-date.ts": "916013f23cf1563ae0d21b55b0735436c76671285f7c79d97c32de280bfaa4bc",
+    "src/lib/printed-context.ts": "f6591422318d0d42c2e30b19eda730e30dac5b9a823904d7b076730325d987ab",
+    "src/lib/publications-place.ts": "226d0dec5c5fcf592a1d284b309fc280947ddbc25d20da631da3186440a84690",
+    "src/lib/publications.ts": "e72fcc6853bdcc2261b6d614fe4f7a7f3729b9e02d03bce40c7ebdd135e015e9",
+    "src/lib/register-labels.ts": "983390fa43f38ae2c6fd932a39fcec7c5a30758b8c6ccf728cb5a049efac19fd",
+    "src/lib/register-rules.generated.ts": "a18efe1fa41f112b3c2b0437f529a368f1604fe7fc5a0f3f01b99f29f69806dc",
+    "src/lib/schema.generated.ts": "5ec9c571710bb94a81f02b2986a6a1fd12075801ad991415e1072056261031e0",
+    "src/lib/schema.validators.generated.ts": "a55da9c6cf941c7a3d26c07bed0ce9db982d747bb599d4e26c17e9ad293aaa37",
+    "src/lib/snapshots.ts": "95b2a6366b593fb9a5a3ddca24063e8bdcc8a32900daa1b6bb8c38430e3df5c2",
+    "src/lib/submission-diff.ts": "de1c95d86db1a03c96b892f40a6f3fa021ff79385e895852a20424e749819d6a",
+    "src/lib/types.ts": "fc85bda1bfcc5cb5580fc63c314d7ef246877faa741a30a9da90dc1f6f4f080a",
+    "src/lib/values.ts": "cd550e7ff1f6a05bd23f39cc8317625607720fe23ab7365de8697659cf338b1a",
+    "src/pages/issues/[id]/[lang].astro": "e79a6780a3e77c6d5df7334f958de4e9a22a5e1e6becd41dda72edbf6ab0bb29",
+    "src/pages/issues/[id]/index.astro": "bb89a8ec719455d7e78a0cc41adff39df8b050c488dd33249dabe7c8dd560129",
+    "src/pages/issues/index.astro": "deae0d9e8056d72a97c475ad3242f9d0f28dbe732b3b92fb6264a28c48c794f5",
+    "scripts/repair-historical-cells.rb": "3eafc4444713fe9b65ad25f348360473912ccc98f15b8a50d1002ddb32edb4af"
+  },
+  "residual_navigation": {
+    "page": "register/e164-acn",
+    "words": [
+      "previous",
+      "years"
+    ],
+    "reason": "Single-year archive suppresses the previous-years navigation label; no registry field or pattern is missing."
+  }
 }

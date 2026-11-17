@@ -1,21 +1,22 @@
-# Content parity rendering repairs
+# Content parity rendering and projection repairs
 
 The 95% count-aware threshold and existing exclusions are unchanged. All 28
-pages failing the site commit `1d0f2965` measurement now pass the scoped re-score.
-Scores below are the minimum across every included reference variant for a page.
-The original reference HTML hashes were checked against the pinned parity receipt.
+pages failing site commit `1d0f2965` now pass the scoped re-score. Each score is
+the minimum across every included reference variant for that page. Reference
+HTML hashes were checked against the pinned receipt before caching all 604
+reference token tallies. The canonical tokenizer and multiset metric are unchanged.
 
-The affected routes were built in isolation from the exact authored projection
-retained by build run 44093145773, with pinned itu-ob-data `90f99728` and the
-existing register snapshot cache. The isolated layout contains the route content
-inside `main`, without the unrelated site chrome. This is scoped rendering evidence;
-the final hosted build and its artifact are verified separately at delivery.
+The 28 affected routes were built in isolation from the exact authored projection
+retained by build run 44093145773, with pinned itu-ob-data `90f99728`, the historical
+cell repairs below, and the existing register snapshot cache. The isolated layout
+contains route content inside `main`, without unrelated site chrome. The final
+hosted build regenerates all snapshots and is verified separately at delivery.
 No full local site build was run.
 
 | Page | Before | After | Repair |
 | --- | ---: | ---: | --- |
 | issue/974 | 93.49% | 97.68% | Printed headings/contact labels, amendment source links, amended-position wording and service-restriction page references |
-| issue/991 | 94.68% | 99.36% | Numbered technical field descriptions; links and page references |
+| issue/991 | 94.68% | 99.42% | Numbered technical field descriptions; links and page references |
 | issue/1079 | 93.96% | 95.90% | Printed headings/contact labels, amendment source links, amended-position wording and service-restriction page references |
 | issue/1087 | 94.12% | 98.53% | Later nested measurement remarks; links, labels and page references |
 | issue/1129 | 92.86% | 99.38% | Per-row Tel/Fax/E-mail labels; links and page references |
@@ -30,46 +31,62 @@ No full local site build was run.
 | issue/1238 | 93.76% | 95.65% | Printed headings/contact labels, amendment source links, amended-position wording and service-restriction page references |
 | issue/1264 | 94.90% | 96.91% | Printed headings/contact labels, amendment source links, amended-position wording and service-restriction page references |
 | issue/1266 | 91.26% | 95.75% | Empty source-declared MNC amendment heading; links and page references |
-| issue/1272 | 94.30% | 95.90% | Printed headings/contact labels, amendment source links, amended-position wording and service-restriction page references |
+| issue/1272 | 94.30% | 98.54% | Printed headings/contact labels, amendment source links, amended-position wording and service-restriction page references |
 | issue/1277 | 91.61% | 95.70% | Empty source-declared MNC amendment heading; links and page references |
-| issue/1282 | 94.39% | 95.57% | Printed headings/contact labels, amendment source links, amended-position wording and service-restriction page references |
+| issue/1282 | 94.39% | 97.19% | Printed headings/contact labels, amendment source links, amended-position wording and service-restriction page references |
 | issue/1310 | 94.49% | 96.02% | Printed headings/contact labels, amendment source links, amended-position wording and service-restriction page references |
 | issue/1312 | 94.05% | 95.59% | Printed headings/contact labels, amendment source links, amended-position wording and service-restriction page references |
 | issue/1321 | 94.96% | 96.54% | Printed headings/contact labels, amendment source links, amended-position wording and service-restriction page references |
-| recommendation/E.212 | 93.79% | 99.68% | Full operator headings, per-amendment resource links and source notes |
-| recommendation/F.32 | 88.85% | 99.68% | Full destination-indicator and office-code headings; resource links |
-| recommendation/T.35 | 86.81% | 98.17% | Authority form headings, contact/information labels and resource links |
-| register/e164-acn | 85.81% | 98.95% | Full E.164/mobile-number column headings; number-pattern values preserved |
-| register/e212-mnc | 93.65% | 99.90% | Name of Operator/Network headings and source corrigendum context |
-| register/f32-tdi | 92.12% | 100.00% | Full destination-indicator and office-code headings |
+| recommendation/E.212 | 93.79% | 100.00% | Complete operator-brand cells, Country B context, source notes and register-specific annex citations |
+| recommendation/F.32 | 88.85% | 100.00% | Full headings, source links and printed QATAR continuation labels |
+| recommendation/T.35 | 86.81% | 100.00% | Printed form/action labels, YES/NO values and register-specific annex citations |
+| register/e164-acn | 85.81% | 99.59% | Complete Brazil number-pattern cells, printed headings and action captions |
+| register/e212-mnc | 93.65% | 100.00% | Full operator headings, French heading, Country B relation and source notes |
+| register/f32-tdi | 92.12% | 100.00% | Full destination-indicator/office headings and printed QATAR continuation labels |
 
-No pages are left below threshold in this original failure set. No old-site
-content was waived as a print error, and no new exclusion was added.
+No pages in this failure set remain below threshold. No old-site content was
+waived as a print error, and no new exclusion was added. E.164 ACN retains a small
+navigation-wording difference: a single-year archive does not print “Previous
+years”; the missing country/action wording and number patterns are restored.
 
-The two empty MNC declarations are present in the pinned source
-`issues/1266/amendments.yaml` and `issues/1277/amendments.yaml`: their contents
-objects and both dataset-change arrays are empty. Preserve their publication
-headers as explicit placeholders; do not invent rows or substitute source prose
-for typed records. Nonempty source messages and existing projected content remain
-untouched by this recovery.
+The repairs preserve source information beyond merely clearing the threshold:
 
-Issue 1129 already contained the Numbering Plan Office and its fax number. Its
-large deficit came from omitted repeated contact labels, rather than missing those
-contacts. Issue 1087 lost remarks found only in later nested measurement objects;
-issue 991 lost the numbered field descriptions accompanying its typed notes.
+- Brazil's OB 1001 cell contained five number-pattern lines; normalization kept
+  only the first. Two OB 1007 operator cells similarly lost their separate
+  “trading as LIME” paragraph. `repair-historical-cells.rb` restores complete cells
+  from pinned canonical Git blobs only when publication, issue, country, code and
+  the existing first line match unambiguously. Both issue files and corresponding
+  replay records are repaired before snapshots are generated. Authored patches,
+  unrelated fields, ambiguous rows and mismatched identities remain unchanged.
+- The E.212 Gabon table's unstyled French heading is preserved. The Swisscom
+  extra-territorial row regains its explicit Country B designation, tied to its
+  existing operator and MCC/MNC, without duplicating typed ranges or records.
+- The [official OB 965 PDF, printed page 21](https://www.itu.int/dms_pub/itu-t/opb/sp/T-SP-OB.965-2010-OAS-PDF-E.pdf#page=21)
+  shows three QATAR labels in the destination-indicator table. The populated typed
+  record remains singular; the two blank continuation labels are display content.
+- Recommendation cards cite each register's own annex. The date in “originally
+  published as annex” comes from that issue's publication date; the separate
+  “Position on” date is preserved. For T.35 this restores OB 1001 rather than the
+  other register's OB 1002; [the official OB 1001 PDF](https://www.itu.int/dms_pub/itu-t/opb/sp/T-SP-OB.1001-2012-OAS-PDF-E.pdf)
+  identifies the authority-list annex and its 1 April 2012 position.
+- OB 1266 and 1277 declare an empty MNC amendment in the source. Their headers
+  survive as explicit placeholders; no dataset rows or nonempty prose are invented.
+- OB 1129 already contained the Numbering Plan Office and its fax number. Its
+  large deficit came from omitted repeated contact labels. OB 1087 lost remarks
+  present only in later nested measurements; OB 991 lost numbered technical field
+  descriptions accompanying its typed notes.
 
-Verification uses small Astro fixture builds in `parity-render.node-test.mjs`,
-`amendment-render.node-test.mjs`, `register-parity-render.node-test.mjs` and
-`empty-amendments.node-test.mjs`. Original renderers fail the corresponding
-regression assertions. Preservation assertions cover contact/measurement values,
-number patterns, existing projections, escaping and register status counts.
+Six small Astro/loader fixture tests cover the rendering changes, including
+mismatched-row controls, typed-record counts, values, escaping and byte preservation.
+Nineteen projection tests cover complete cell repair, immutable source refs,
+authored precedence, identity/ambiguity guards, replay interaction and idempotence.
+Original behavior fails the corresponding regression assertions. Changed-file
+Astro diagnostics, Ruby syntax/focused lint, Python compilation and diff checks pass.
 
-Machine-readable per-variant scores and HTML hashes are in
-[fixes-scores.json](fixes-scores.json). Scoring reuses
-`ParityEvidence::Comparisons` and the canonical content-parity tokenizer; no
-metric or token-normalization change is part of these repairs.
+[fixes-scores.json](fixes-scores.json) retains per-variant scores, HTML hashes and
+rendering-source hashes. Final hosted HTML scores are reported with the CI run at
+delivery; the table above is explicitly scoped rendering evidence.
 
-focused-quality: complete rendering/loader diff and interactions; the empty
-amendment test was isolated from real submodule data, fixture data-root environment
-variables override the CI projection root, and concurrent fixture builds use
-separate Vite caches; no remaining material finding.
+focused-quality: complete rendering/projection/loader diff and interactions;
+fixture data roots and Vite caches were isolated after a CI failure; source-cell
+matching and authored byte preservation are covered; no remaining material finding.

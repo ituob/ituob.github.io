@@ -1,3 +1,5 @@
+import { formatCellValue } from "./values";
+
 /** Printed service-publication headings for normalized register fields. */
 export function registerColumnLabel(key: string, entries: Record<string, unknown>[] = []): string {
   const labels: Record<string, string> = {
@@ -15,4 +17,10 @@ export function registerColumnLabel(key: string, entries: Record<string, unknown
   if (key === "country_code" && entries.some((entry) => "mobile_telephone_numbers" in entry)) return "E.164 Country Code";
   if (key === "last_updated" && entries.some((entry) => "manufactures_htv" in entry)) return "Information updated:";
   return labels[key] ?? key.replace(/_/g, " ");
+}
+
+/** T.35 prints the manufacturer flag as YES/NO; other cells retain their value. */
+export function formatRegisterCell(key: string, value: unknown): string {
+  if (key === "manufactures_htv" && typeof value === "boolean") return value ? "YES" : "NO";
+  return formatCellValue(value);
 }

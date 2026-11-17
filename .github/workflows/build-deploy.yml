@@ -95,7 +95,7 @@ jobs:
       run: |
         node --experimental-strip-types --test test/item-history.node-test.ts
         node --experimental-transform-types --test test/textual-validation.node-test.ts
-        node --experimental-strip-types --test test/parity-render.node-test.mjs test/amendment-render.node-test.mjs test/register-parity-render.node-test.mjs test/empty-amendments.node-test.mjs
+        node --experimental-strip-types --test test/*render.node-test.mjs test/empty-amendments.node-test.mjs
 
     # Round-trips every form-driven file in data-ob through the form model.
     - name: Form round-trip tests

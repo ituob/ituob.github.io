@@ -17,8 +17,8 @@ import type { ActionType } from "~/lib/catalogs";
 import { ACTION_TYPE_LABELS } from "~/lib/catalogs";
 import { formatObDate } from "~/lib/ob-date";
 import { formatCellValue } from "~/lib/values";
-import { registerColumnLabel } from "~/lib/register-labels";
-import { loadPrintedContext } from "~/lib/printed-context";
+import { registerColumnLabel, formatRegisterCell } from "~/lib/register-labels";
+import { loadPrintedContext, loadBlankContinuationLabels } from "~/lib/printed-context";
 import ProseMirror from "~/components/ProseMirror.astro";
 
 export interface Props {
@@ -52,7 +52,7 @@ function columnsFor(entries: Record<string, unknown>[]): string[] {
 }
 
 function resolveCell(entry: Record<string, unknown>, col: string): string {
-  if (col in entry) return formatCellValue(entry[col]);
+  if (col in entry) return formatRegisterCell(col, entry[col]);
   // Nested collections (e.g. a station's measurement services): the
   // column exists on the element objects — join EVERY element's
   // value, not just the first (an entry can carry seven services).
@@ -81,6 +81,7 @@ function entriesOf(amd: SequencedAmendment): Record<string, unknown>[] {
     const hasEntries = entries.length > 0 && cols.length > 0;
     const notes = (amd.data?.notes as string[] | undefined) ?? [];
     const showNotes = amdIdx === amendments.length - 1;
+    const continuationLabels = showNotes ? loadBlankContinuationLabels(Number(amd.ob_issue_no), amd.slug) : [];
     const technicalHeadings = showNotes && amd.slug === "list-viii"
       ? loadPrintedContext(Number(amd.ob_issue_no), amd.slug) : [];
     return (
@@ -131,6 +132,9 @@ function entriesOf(amd: SequencedAmendment): Record<string, unknown>[] {
                       )}</td>
                     ))}
                   </tr>
+                ))}
+                {continuationLabels.map((label) => (
+                  <tr>{cols.map((c) => <td>{c === "country_or_area" ? label : ""}</td>)}</tr>
                 ))}
               </tbody>
             </table>
