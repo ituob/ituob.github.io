@@ -12,6 +12,7 @@ import registerSnapshotsIntegration from "./register-snapshots.integration.mjs";
 // (used only as a fallback / for cross-referencing).
 import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
+import { realpathSync } from "node:fs";
 
 const projectRoot = dirname(fileURLToPath(import.meta.url));
 
@@ -26,6 +27,12 @@ export default defineConfig({
   integrations: [vue(), mdx(), sitemap(), registerSnapshotsIntegration()],
   vite: {
     plugins: [tailwindcss()],
+    // Worktrees may share an installed dependency tree through a symlink.
+    server: {
+      fs: { allow: [projectRoot, realpathSync(resolve(projectRoot, "node_modules"))] },
+      // D1 writes must not reload Astro during sign-in or sign-out.
+      watch: { ignored: ["**/.local-dev/**"] },
+    },
     define: {
       // Expose data roots to client/server build as import.meta.env vars.
       "import.meta.env.OB_DATA_ROOT": JSON.stringify(SERVICE_PUBLICATIONS_DOCS),

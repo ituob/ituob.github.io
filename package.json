@@ -20,7 +20,8 @@
     "typecheck:worker": "tsc -p worker/tsconfig.json",
     "check:bindings": "node scripts/check-bindings.mjs",
     "test:bindings": "node --experimental-strip-types --test tests/check-bindings.test.ts",
-    "seed:roster": "node scripts/seed-roster.mjs"
+    "seed:roster": "node scripts/seed-roster.mjs",
+    "dev:local": "node scripts/dev-local.mjs"
   },
   "dependencies": {
     "@astrojs/mdx": "^7.0.0",
