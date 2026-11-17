@@ -32,3 +32,6 @@ npm-debug.log*
 # spd PDF artifact, placed by scripts/fetch-publications.ts at build time
 public/downloads/
 src/data/publications-manifest.json
+
+# Wrangler local D1 state
+.wrangler/
