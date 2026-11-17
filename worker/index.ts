@@ -59,12 +59,12 @@ export default {
     }
     await handleQueue(batch, env);
   },
-  async scheduled(_e: ScheduledController, env: RuntimeEnv): Promise<void> {
+  async scheduled(event: ScheduledController, env: RuntimeEnv): Promise<void> {
     if (!hasDatabase(env)) {
       console.log(JSON.stringify({ level: "warn", event: "scheduled.disabled", error: "DB binding is not configured" }));
       return;
     }
-    await sweep(env);
+    await sweep(env, event.scheduledTime ?? Date.now());
     // Repair lost webhooks. The real publisher is unconfigured until the App exists: that is a skip, not a crash.
     try {
       await reconcile(env.DB, getPublisher());

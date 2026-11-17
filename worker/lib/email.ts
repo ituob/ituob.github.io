@@ -6,6 +6,8 @@ export interface EmailMessage {
   to: string;
   subject: string;
   text: string;
+  html?: string;
+  locale?: string;
   /** notification.id: the provider dedupes redeliveries by this key. */
   idempotencyKey: string;
 }
@@ -25,6 +27,20 @@ export class LogEmailSender implements EmailSender {
   async send(msg: EmailMessage): Promise<{ id: string }> {
     console.log(JSON.stringify({ level: "info", event: "email.logged", to: msg.to, subject: msg.subject, idempotency_key: msg.idempotencyKey }));
     return { id: `log-${msg.idempotencyKey}` };
+  }
+}
+
+/** Durable development sink. A redelivery preserves the first recorded message. */
+export class RecordingEmailSender implements EmailSender {
+  constructor(private readonly db: D1Database) {}
+
+  async send(msg: EmailMessage): Promise<{ id: string }> {
+    const id = `recording-${msg.idempotencyKey}`;
+    await this.db.prepare(
+      `INSERT INTO recorded_emails (id,to_address,subject,text_body,html_body,locale,recorded_at)
+       VALUES (?1,?2,?3,?4,?5,?6,?7) ON CONFLICT (id) DO NOTHING`,
+    ).bind(id, msg.to, msg.subject, msg.text, msg.html ?? "", msg.locale ?? "en", new Date().toISOString()).run();
+    return { id };
   }
 }
 
@@ -50,7 +66,7 @@ export class HttpEmailSender implements EmailSender {
         "Content-Type": "application/json",
         "Idempotency-Key": msg.idempotencyKey,
       },
-      body: JSON.stringify({ from: this.from, to: [msg.to], subject: msg.subject, text: msg.text }),
+      body: JSON.stringify({ from: this.from, to: [msg.to], subject: msg.subject, text: msg.text, ...(msg.html === undefined ? {} : { html: msg.html }) }),
     });
     if (!res.ok) throw new Error(`email provider ${res.status}`);
     const body = (await res.json().catch(() => null)) as { id?: unknown } | null;
@@ -103,12 +119,13 @@ export function redactSecrets(text: string, ...secrets: (string | undefined)[]):
 }
 
 /**
- * Config-selected provider. EMAIL_PROVIDER="log" -> LogEmailSender; "http" ->
+ * Config-selected provider. "recording" -> durable D1 sink; "log" -> LogEmailSender; "http" ->
  * HttpEmailSender (needs EMAIL_API_URL https, EMAIL_API_KEY, MAIL_FROM);
  * anything else, or incomplete config, -> UnconfiguredEmailSender (fails closed).
  */
 export function getEmailSender(env?: Env, fetcher?: typeof fetch): EmailSender {
   if (override) return override;
+  if (env?.EMAIL_PROVIDER === "recording") return new RecordingEmailSender(env.DB);
   if (env?.EMAIL_PROVIDER === "log") return new LogEmailSender();
   if (env?.EMAIL_PROVIDER === "http") {
     const key = env.EMAIL_API_KEY?.trim();

@@ -72,6 +72,27 @@ const routes: Route[] = [
       json({ ok: true, claims: await listClaims(env.DB, url.searchParams.get("status") ?? "pending") }),
   },
   {
+    method: "GET",
+    pattern: /^\/api\/admin\/recorded-emails$/,
+    guard: "access",
+    handler: async ({ env, url }) => {
+      const rawLimit = url.searchParams.get("limit");
+      const limit = rawLimit === null ? 50 : /^\d+$/.test(rawLimit) ? Number(rawLimit) : NaN;
+      if (!Number.isSafeInteger(limit) || limit < 1 || limit > 100) throw new InvalidError("limit must be an integer from 1 to 100");
+
+      const cursor = url.searchParams.get("cursor");
+      if (cursor !== null && cursor.length === 0) throw new InvalidError("invalid cursor");
+      const rows = cursor === null
+        ? await env.DB.prepare(`SELECT id, to_address, subject, text_body, html_body, locale, recorded_at
+            FROM recorded_emails ORDER BY id LIMIT ?1`).bind(limit + 1).all()
+        : await env.DB.prepare(`SELECT id, to_address, subject, text_body, html_body, locale, recorded_at
+            FROM recorded_emails WHERE id > ?1 ORDER BY id LIMIT ?2`).bind(cursor, limit + 1).all();
+      const hasMore = rows.results.length > limit;
+      const emails = rows.results.slice(0, limit);
+      return json({ ok: true, emails, nextCursor: hasMore ? (emails[emails.length - 1] as { id: string }).id : null });
+    },
+  },
+  {
     method: "POST",
     pattern: /^\/api\/admin\/claims\/(\d+)\/verify$/,
     guard: "access",
