@@ -26,6 +26,12 @@ export interface ValidationContext {
   slug?: string;
   action_type: ActionType;
   payload: unknown;
+  /** Current register keys from the snapshot; absent when no snapshot is available (stage2 then checks only the payload itself). */
+  register_state?: RegisterKeyState;
+}
+export interface RegisterKeyState {
+  active: ReadonlySet<string>;
+  lapsed: ReadonlySet<string>;
 }
 export type PayloadValidator = (ctx: ValidationContext) => FieldError[];
 
@@ -173,10 +179,59 @@ export const schemaStage: PayloadValidator = ({ payload }) => {
   return errs.concat(validateClass(cls, d, "data").map(toError));
 };
 
-/** Stage 2 hook (item payloads vs register schema + key uniqueness vs snapshot). Intentionally empty: gap. */
-export const stage2: PayloadValidator = () => [];
+/** Replay's entry key (Strategies::Base.entry_key): key parts joined by " | ", null when every part is blank. */
+function entryKeyOf(entry: Record<string, unknown>, rules: RegisterIdentity): string | null {
+  for (const group of [rules.keyFields, ...rules.fallbackKeyFields]) {
+    const parts = group.map((f) => identityPart(entry[f]) ?? "");
+    if (parts.some((p) => p !== "")) return parts.join(" | ");
+  }
+  return null;
+}
 
-const DEFAULT_CHAIN: PayloadValidator[] = [stage1, schemaStage];
+/** Build stage-2 state from a register snapshot (`current.json`): active entries' keys plus lapsed keys. */
+export function registerStateFromSnapshot(
+  register_id: string,
+  snapshot: { active_entries?: unknown[]; lapsed_keys?: unknown[] },
+): RegisterKeyState {
+  const rules = rulesFor(register_id);
+  const active = new Set<string>();
+  for (const e of snapshot.active_entries ?? []) {
+    const k = rules && isObj(e) ? entryKeyOf(e, rules) : null;
+    if (k !== null) active.add(k);
+  }
+  const lapsed = new Set((snapshot.lapsed_keys ?? []).filter((k): k is string => typeof k === "string"));
+  return { active, lapsed };
+}
+
+/**
+ * Stage 2 (docs/submission-workflow.adoc): key semantics of the action's entries.
+ * Item shape is schemaStage's job. Here: a key may appear once per payload; with a
+ * snapshot, ADD of an active key and REP/MOD/SUP/DEL/LIR of an unknown key are errors.
+ * Without a snapshot only the payload-local check runs; CI replay stays authoritative.
+ */
+export const stage2: PayloadValidator = ({ register_id, action_type, payload, register_state }) => {
+  const rules = rulesFor(register_id);
+  if (!rules || !isObj(payload) || !isObj(payload.data) || !Array.isArray(payload.data.entries)) return [];
+  if (payload.data._class === "TextAmendment") return [];
+  const errs: FieldError[] = [];
+  const seen = new Set<string>();
+  payload.data.entries.forEach((e, i) => {
+    const key = isObj(e) ? entryKeyOf(e, rules) : null;
+    if (key === null) return; // stage1 reports a missing identity
+    const path = `data.entries[${i}].${rules.keyFields[0]}`;
+    if (seen.has(key)) return errs.push({ path, code: "mismatch", message: `key "${key}" appears more than once in this action` });
+    seen.add(key);
+    if (!register_state) return;
+    const known = register_state.active.has(key) || register_state.lapsed.has(key);
+    if (action_type === "ADD" && register_state.active.has(key))
+      errs.push({ path, code: "mismatch", message: `ADD of "${key}": it already exists in ${register_id}` });
+    else if (action_type !== "ADD" && !known)
+      errs.push({ path, code: "mismatch", message: `${action_type} of "${key}": it does not exist in ${register_id}` });
+  });
+  return errs;
+};
+
+const DEFAULT_CHAIN: PayloadValidator[] = [stage1, schemaStage, stage2];
 let active: PayloadValidator[] = DEFAULT_CHAIN;
 /** Replace the validator chain (generator output, or a test double). */
 export function setValidators(v: PayloadValidator[] | null) {
