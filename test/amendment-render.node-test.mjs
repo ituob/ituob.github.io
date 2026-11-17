@@ -22,7 +22,7 @@ test('amendments retain late measurement remarks, contact labels, stations and t
     symlinkSync(join(root, 'node_modules'), join(fixture, 'node_modules'));
     cpSync(join(root, 'tsconfig.json'), join(fixture, 'tsconfig.json'));
     writeFileSync(join(fixture, 'package.json'), '{"type":"module"}');
-    writeFileSync(join(fixture, 'astro.config.mjs'), `import { defineConfig } from 'astro/config'; export default defineConfig({output:'static', vite: {define: {'import.meta.env.OB_DATA_ROOT': ${JSON.stringify(JSON.stringify(join(fixture, 'data-ob')))}, 'import.meta.env.ITU_OB_DATA_ROOT': ${JSON.stringify(JSON.stringify(join(fixture, 'data')))}}}});`);
+    writeFileSync(join(fixture, 'astro.config.mjs'), `import { defineConfig } from 'astro/config'; export default defineConfig({output:'static', vite: {cacheDir: ${JSON.stringify(join(fixture, '.vite'))}, define: {'import.meta.env.OB_DATA_ROOT': ${JSON.stringify(JSON.stringify(join(fixture, 'data-ob')))}, 'import.meta.env.ITU_OB_DATA_ROOT': ${JSON.stringify(JSON.stringify(join(fixture, 'data')))}}}});`);
     writeFileSync(join(fixture, 'src/pages/index.astro'), `---
 import StructuredAmendment from '~/components/StructuredAmendment.astro';
 import { readFileSync } from 'node:fs';

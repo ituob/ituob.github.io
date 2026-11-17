@@ -14,7 +14,7 @@ test('register tables and recommendation cards preserve printed headings, notes 
     put('package.json', '{"type":"module"}');
     cpSync(join(root, 'tsconfig.json'), join(fixture, 'tsconfig.json'));
     symlinkSync(join(root, 'node_modules'), join(fixture, 'node_modules'));
-    put('astro.config.mjs', `import {defineConfig} from 'astro/config'; export default defineConfig({vite:{define:{'import.meta.env.OB_DATA_ROOT':${JSON.stringify(JSON.stringify(join(fixture,'data-ob')))},'import.meta.env.ITU_OB_DATA_ROOT':${JSON.stringify(JSON.stringify(join(fixture,'data')))}}}});`);
+    put('astro.config.mjs', `import {defineConfig} from 'astro/config'; export default defineConfig({vite:{cacheDir:${JSON.stringify(join(fixture,'.vite'))},define:{'import.meta.env.OB_DATA_ROOT':${JSON.stringify(JSON.stringify(join(fixture,'data-ob')))},'import.meta.env.ITU_OB_DATA_ROOT':${JSON.stringify(JSON.stringify(join(fixture,'data')))}}}});`);
     put('data-ob/catalogs/registers.yaml', JSON.stringify({ registers: [{ slug: 'e212-mnc', register_id: 'E212_MNC', url: 'https://example.test/mnc' }] }));
     put('data-ob/ob-issues/969/meta.yaml', 'id: 969\npublication_date: 2010-12-01\n');
     const amendment = { type: 'ADD', identifier: { code: 'P 29' }, data: { entries: [{ country: 'Sudan', networks: 'Example Network <unsafe>' }] } };
@@ -34,7 +34,7 @@ const block = {id:969,date:'2010-12-01',positionOn:null,positionOnIssue:null,has
 <StructuredAmendment amendments={[{type:'ADD',identifier:{code:'216'},data:{entries}}]} />
 <RecommendationTimeline years={[2010]} yearGroups={new Map([[2010,[block]]])} lang="en" />
 <RegisterHistory slug="e212-mnc" keyField="code" seedIssue={969} history={[]} />`);
-    const build = spawnSync(process.execPath, [join(root, 'node_modules/astro/bin/astro.mjs'), 'build'], { cwd: fixture, encoding: 'utf8' });
+    const build = spawnSync(process.execPath, [join(root, 'node_modules/astro/bin/astro.mjs'), 'build'], { cwd: fixture, encoding: 'utf8', env: { ...process.env, OB_DATA_ROOT: join(fixture, 'data-ob'), ITU_OB_DATA_ROOT: join(fixture, 'data') } });
     assert.equal(build.status, 0, build.stdout + build.stderr);
     const html = readFileSync(join(fixture, 'dist/index.html'), 'utf8');
     const tableText = html.match(/<section id="current-table">(.*?)<\/section>/s)[1].replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ');

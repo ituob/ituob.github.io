@@ -63,7 +63,7 @@ test('public HTML preserves annexes, incompleteness, communications and the prin
     // Isolate issue/component HTML from the unrelated Vue site chrome.
     writeFileSync(join(fixture, 'src/layouts/Base.astro'), '<html><head><title>{Astro.props.title}</title></head><body><slot /></body></html>');
     writeFileSync(join(fixture, 'astro.config.mjs'), `import { defineConfig } from 'astro/config';
-export default defineConfig({ output: 'static', trailingSlash: 'always', vite: { define: { 'import.meta.env.OB_DATA_ROOT': ${JSON.stringify(JSON.stringify(join(fixture, 'data-ob')))}, 'import.meta.env.ITU_OB_DATA_ROOT': ${JSON.stringify(JSON.stringify(join(fixture, 'data')))} } } });`);
+export default defineConfig({ output: 'static', trailingSlash: 'always', vite: { cacheDir: ${JSON.stringify(join(fixture, '.vite'))}, define: { 'import.meta.env.OB_DATA_ROOT': ${JSON.stringify(JSON.stringify(join(fixture, 'data-ob')))}, 'import.meta.env.ITU_OB_DATA_ROOT': ${JSON.stringify(JSON.stringify(join(fixture, 'data')))} } } });`);
     writeFileSync(join(fixture, 'src/pages/table.astro'), `---
 import RegisterTable from '~/components/RegisterTable.astro';
 const state = { active_entries: [{ country: 'iso-3166:de', manufactures_htv: true, last_updated: '2006-03-10' }], entry_count: 1, lapsed_keys: ['old'], lapsed_count: 1, deleted_count: 0, at_ob_issue: 1001 };

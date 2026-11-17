@@ -70,5 +70,6 @@ Machine-readable per-variant scores and HTML hashes are in
 metric or token-normalization change is part of these repairs.
 
 focused-quality: complete rendering/loader diff and interactions; the empty
-amendment test was isolated from real submodule data before delivery; no remaining
-material finding.
+amendment test was isolated from real submodule data, fixture data-root environment
+variables override the CI projection root, and concurrent fixture builds use
+separate Vite caches; no remaining material finding.
