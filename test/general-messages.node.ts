@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { DatabaseSync } from "node:sqlite";
 import { beforeEach, afterEach, describe, expect, it } from "vitest";
 import { parse } from "yaml";
-import { approveGeneralMessage, createGeneralMessage, generalBinding, generalMessageArtifact, readGeneralMessage, saveGeneralMessage, validateGeneralMessage, GENERAL_TYPES } from "../worker/lib/general-messages.ts";
+import { approveGeneralMessage, createGeneralMessage, deleteGeneralMessage, generalBinding, generalMessageArtifact, readGeneralMessage, saveGeneralMessage, validateGeneralMessage, GENERAL_TYPES } from "../worker/lib/general-messages.ts";
 import { Forbidden } from "../worker/lib/authz.ts";
 import { verifyChain } from "../worker/lib/audit.ts";
 import { ConflictError, InvalidError } from "../worker/lib/membership.ts";
@@ -146,5 +146,18 @@ describe("canonical general-message draft authoring", () => {
   it("rolls back state when audit append fails",async () => {
     sqlite.exec("CREATE TRIGGER reject_audit BEFORE INSERT ON audit_log BEGIN SELECT RAISE(ABORT,'audit unavailable'); END");
     await expect(create()).rejects.toThrow(); expect(sqlite.prepare("SELECT count(*) n FROM general_messages").get()?.n).toBe(0);
+  });
+  it("deletes an unreviewed draft with audit, and refuses stale, approved or non-staff deletes", async () => {
+    const draft = await create();
+    await expect(deleteGeneralMessage(db,member,draft.id,1)).rejects.toThrow(Forbidden);
+    await expect(deleteGeneralMessage(db,editor,draft.id,2)).rejects.toThrow(ConflictError);
+    expect(await deleteGeneralMessage(db,editor,draft.id,1)).toEqual({id:draft.id,deleted:true});
+    await expect(readGeneralMessage(db,editor,draft.id)).rejects.toThrow();
+    expect((sqlite.prepare("SELECT count(*) n FROM audit_log WHERE action='general.message.deleted'").get() as {n:number}).n).toBe(1);
+    expect(await verifyChain(db)).toBeNull();
+    const approved = await create();
+    await approveGeneralMessage(db,admin,approved.id,1);
+    await expect(deleteGeneralMessage(db,admin,approved.id,1)).rejects.toThrow(ConflictError);
+    expect((await readGeneralMessage(db,editor,approved.id)).id).toBe(approved.id);
   });
 });

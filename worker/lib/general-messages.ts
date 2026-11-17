@@ -85,6 +85,19 @@ export async function saveGeneralMessage(db: D1Database, session: Session | null
   if (!result[0]?.meta.changes) throw new ConflictError("revision changed, issue frozen, or review PR reserved; reload before editing");
   return stored(db,id);
 }
+/** Remove a draft that is not yet under review. A reserved publication PR, an approved snapshot trail
+ * or a frozen edition keep the record: published work is withdrawn through review, not deleted here. */
+export async function deleteGeneralMessage(db: D1Database, session: Session | null, id: string, revision: unknown) {
+  const actor = staff(session), expected = expectedRevision(revision), current = await stored(db,id), at = new Date().toISOString();
+  if (current.revision !== expected) throw new ConflictError("general-message revision changed; reload before deleting");
+  const result = await run(db,[db.prepare(`DELETE FROM general_messages WHERE id=?1 AND revision=?2
+    AND NOT EXISTS (SELECT 1 FROM general_message_prs WHERE message_id=?1)
+    AND NOT EXISTS (SELECT 1 FROM general_message_approvals WHERE message_id=?1)
+    AND NOT EXISTS (SELECT 1 FROM editions WHERE ob_issue_no=?3 AND status IN ('composing','staged','published'))`).bind(id,expected,current.ob_issue_no),
+    ...await audit(db,actor,id,current.ob_issue_no,"general.message.deleted",expected,at)]);
+  if (!result[0]?.meta.changes) throw new ConflictError("message was approved, has a reserved review PR, or its issue is frozen; it cannot be deleted");
+  return { id, deleted: true };
+}
 export async function approveGeneralMessage(db: D1Database, session: Session | null, id: string, revision: unknown) {
   const actor = requireRole(session,"itu-admin"), expected = expectedRevision(revision), current = await stored(db,id);
   if (current.revision !== expected) throw new ConflictError("general-message revision changed; reload before approving");

@@ -1,4 +1,4 @@
-import { approveGeneralMessage, createGeneralMessage, listGeneralMessages, readGeneralMessage, saveGeneralMessage } from "./lib/general-messages.ts";
+import { approveGeneralMessage, createGeneralMessage, deleteGeneralMessage, listGeneralMessages, readGeneralMessage, saveGeneralMessage } from "./lib/general-messages.ts";
 import { type Route, body, json } from "./lib/http.ts";
 import { ituSession } from "./submission-routes.ts";
 const base = "/api/admin/general-messages";
@@ -14,5 +14,6 @@ export const generalMessageRoutes: Route[] = [
     const input=await body(request);
     return json({ok:true,draft:await saveGeneralMessage(env.DB,await ituSession(env,access!),params[0]!,{expected_revision:input.expected_revision,value:input.value})});
   } },
+  { method: "POST", pattern: new RegExp(`^${item}/delete$`), guard: "access", handler: async ({request,env,access,params}) => json({ok:true,...await deleteGeneralMessage(env.DB,await ituSession(env,access!),params[0]!, (await body(request)).expected_revision)}) },
   { method: "POST", pattern: new RegExp(`^${item}/approve$`), guard: "access", handler: async ({request,env,access,params}) => json({ok:true,draft:await approveGeneralMessage(env.DB,await ituSession(env,access!),params[0]!, (await body(request)).expected_revision)}) },
 ];

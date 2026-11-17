@@ -53,6 +53,13 @@ async function approve() {
     await reload(); notice.value = 'Approved YAML frozen. Open its review PR before publication.';
   });
 }
+async function remove() {
+  if(!draft.value || !window.confirm(`Delete draft ${draft.value.path}?`)) return;
+  await perform(async () => {
+    await api(`${endpoint}/${draft.value!.id}/delete`,'POST',{expected_revision:draft.value!.revision});
+    fresh(); await reload(); notice.value = 'Draft deleted.';
+  });
+}
 async function openReview() {
   if(!draft.value) return;
   await perform(async () => {
@@ -78,6 +85,7 @@ fresh(); onMounted(() => perform(reload));
       <SchemaNode :node="node" path="message" :opaque-readonly="true" :prose="true" @change="node=$event" @invalid="invalid" />
       <button type="button" @click="save">Save draft</button>
       <button type="button" :disabled="!draft || dirty || !!draft.approved_at" @click="approve">Approve saved revision (administrator)</button>
+      <button type="button" :disabled="!draft || !!draft.approved_at" @click="remove">Delete draft</button>
       <button type="button" :disabled="!draft?.approved_at || dirty" @click="openReview">Open publication review PR (administrator)</button>
     </fieldset>
     <p v-if="draft">{{ draft.path }} · revision {{ draft.revision }} · {{ draft.approved_at ? 'Approved; publication still requires a reviewed and merged PR.' : 'Awaiting administrator approval.' }}</p>
