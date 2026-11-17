@@ -1,4 +1,4 @@
-import { generalBinding } from "../../src/lib/form/general.ts";
+import { draftBinding, isSingletonPath } from "../../src/lib/form/general.ts";
 import { ConflictError } from "./membership.ts";
 import type { PatchPublisher } from "./publisher.ts";
 import { UpstreamError } from "./submissions.ts";
@@ -24,9 +24,9 @@ export async function generalSelection(db: D1Database, no: number): Promise<Gene
  * corrected. Upstream merge verification happens after the atomic freeze. */
 export function requireGeneralReviews(no: number, messages: GeneralSelection[]) {
   for (const message of messages) {
-    const {className,relativePath}=generalBinding(message.type);
+    const {className,relativePath}=draftBinding(message.type);
     const prefix=`ob-issues/${no}/`;
-    const canonicalPath=relativePath.startsWith("general/") ? message.path === prefix+relativePath
+    const canonicalPath=isSingletonPath(relativePath) ? message.path === prefix+relativePath
       : message.path.startsWith(prefix) && new RegExp(`^${message.type}/(?!000)[0-9]{3}\\.yaml$`).test(message.path.slice(prefix.length));
     if(!canonicalPath || message.class_name!==className) throw new ConflictError(`general message ${message.id} has an invalid canonical class or path`);
     if(!message.approved_at || !message.approved_by || message.content_yaml===null)

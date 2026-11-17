@@ -222,3 +222,79 @@ describe("canonical general-message draft authoring", () => {
     await expect(importGeneralMessage(db,editor,{ob_issue_no:1331,path:"ob-issues/1331/misc_communications/006.yaml"},reader,"o/r")).rejects.toThrow(ValidationFailed);
   });
 });
+describe("annexes.yaml authoring (#101 F1/F2)", () => {
+  const fixture = (n: number) => parse(readFileSync(`test/fixtures/annexes/${n}.yaml`,"utf8"));
+  const createAnnex = (s: Session|null, value: unknown, no = 1331) => createGeneralMessage(db,s,{ob_issue_no:no,type:"annexes",value});
+  it("lets staff draft, approve and open a review artifact for ob-issues/N/annexes.yaml", async () => {
+    const value = {"Q708_ISPC":{position_on:"2016-10-01"},"Legal time 2013":null};
+    const saved = await createAnnex(editor,value);
+    expect(saved.class_name).toBe("IssueAnnexes");
+    expect(saved.path).toBe("ob-issues/1331/annexes.yaml");
+    await approveGeneralMessage(db,admin,saved.id,1);
+    const artifact = await generalMessageArtifact(db,saved.id,1);
+    expect(artifact.path).toBe("ob-issues/1331/annexes.yaml");
+    expect(parse(artifact.content)).toEqual(value);
+    expect(await verifyChain(db)).toBeNull();
+  });
+  it("answers 403 (Forbidden) for a member and an anonymous caller, with no write", async () => {
+    for(const s of [null,member]) await expect(createAnnex(s,{SR:{position_on:"2012-03-15"}})).rejects.toBeInstanceOf(Forbidden);
+    const saved = await createAnnex(editor,{SR:null});
+    await expect(readGeneralMessage(db,member,saved.id)).rejects.toBeInstanceOf(Forbidden);
+    await expect(saveGeneralMessage(db,member,saved.id,{expected_revision:1,value:{SR:null}})).rejects.toBeInstanceOf(Forbidden);
+    await expect(approveGeneralMessage(db,editor,saved.id,1)).rejects.toBeInstanceOf(Forbidden);
+    expect(sqlite.prepare("SELECT count(*) n FROM general_messages").get()?.n).toBe(1);
+  });
+  it.each([
+    ["an impossible calendar date",{SR:{position_on:"2026-02-30"}}],
+    ["a non-ISO date",{SR:{position_on:"15/03/2012"}}],
+    ["a number as the date",{SR:{position_on:20120315}}],
+    ["an hour of 24",{SR:{position_on:"2012-03-15T24:00:00.000Z"}}],
+    ["an unknown key",{SR:{position_on:"2012-03-15",note:"x"}}],
+    ["a scalar position",{SR:"2012-03-15"}],
+    ["a list at the top",[]],
+    ["an empty publication id",{"":null}],
+    ["an id with a control character",{"a\nb":null}],
+  ])("rejects %s without writing",async (_n,value) => {
+    await expect(createAnnex(editor,value)).rejects.toBeInstanceOf(ValidationFailed);
+    expect(sqlite.prepare("SELECT count(*) n FROM general_messages").get()?.n).toBe(0);
+  });
+  it("preserves the datasets of OB 1162 exactly through draft, approval and artifact", async () => {
+    const value = fixture(1162);
+    const datasets = Object.values(value).filter((e: any) => e && e.datasets);
+    expect(datasets.length).toBeGreaterThan(0);
+    const saved = await createAnnex(editor,value,1162);
+    await approveGeneralMessage(db,admin,saved.id,1);
+    const out = parse((await generalMessageArtifact(db,saved.id)).content);
+    expect(out).toEqual(value);
+    expect(Object.values(out).filter((e: any) => e && e.datasets)).toEqual(datasets);
+  });
+  it.each([1000,1027,1109])("round-trips real OB %i annexes.yaml",async n => {
+    const value = fixture(n);
+    const saved = await createAnnex(editor,value,n);
+    await approveGeneralMessage(db,admin,saved.id,1);
+    expect(parse((await generalMessageArtifact(db,saved.id)).content)).toEqual(value);
+  });
+  it("is one draft per issue (singleton path)",async () => {
+    await createAnnex(editor,{SR:null});
+    await expect(createAnnex(editor,{SR:null})).rejects.toThrow();
+  });
+});
+
+describe("annex breaker worker regressions", () => {
+  it("quotes annex keys for Ruby Psych and preserves String keys", async () => {
+    const saved = await createGeneralMessage(db, editor, { ob_issue_no: 1331, type: "annexes", value: { SR: { position_on: "2016-10-01" }, "Legal time 2013": null, ON: null, OFF: null, YES: null, NO: null } });
+    await approveGeneralMessage(db, admin, saved.id, 1);
+    const { content } = await generalMessageArtifact(db, saved.id);
+    expect(content).toContain('"SR":');
+    const { execFileSync } = await import("node:child_process");
+    expect(JSON.parse(execFileSync(process.env["RUBY"] ?? "ruby", ["-ryaml", "-rdate", "-rjson", "-e", "puts JSON.generate(YAML.safe_load(STDIN.read, permitted_classes:[Date,Time]).keys)"], { input: content, encoding: "utf8" }))).toEqual(["SR", "Legal time 2013", "ON", "OFF", "YES", "NO"]);
+  });
+  it("reports deep and oversized datasets as validation failures before writing", async () => {
+    let datasets: Record<string, unknown> = {};
+    for (let i = 0; i < 20000; i++) datasets = { n: datasets };
+    for (const bad of [datasets, { x: "x".repeat(200001) }]) {
+      await expect(createGeneralMessage(db, editor, { ob_issue_no: 1331, type: "annexes", value: { SR: { datasets: bad } } })).rejects.toBeInstanceOf(ValidationFailed);
+    }
+    expect(sqlite.prepare("SELECT count(*) n FROM general_messages").get()?.n).toBe(0);
+  });
+});

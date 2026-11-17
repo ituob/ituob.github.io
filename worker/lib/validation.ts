@@ -1,6 +1,6 @@
-// Durable-write validation, stage 1 (action envelope) — docs/submission-workflow.adoc "two stages".
+// Durable-write validation (action envelope, ontology and snapshot keys) — docs/submission-workflow.adoc "two stages".
 //
-// The chain is [stage1, schemaStage]. stage1 is the hand-written action
+// The chain is [stage1, schemaStage, stage2]. stage1 is the hand-written action
 // envelope (generated register identities and country binding, per-action presence rules). schemaStage runs the
 // validators GENERATED from the LML ontology (src/lib/schema.validators.generated.ts,
 // second output of service-publications-docs scripts/generate_ts_types.rb):
@@ -26,6 +26,14 @@ export interface ValidationContext {
   slug?: string;
   action_type: ActionType;
   payload: unknown;
+  /** Current register keys from the snapshot; absent when no snapshot is available (stage2 then checks only the payload itself). */
+  register_state?: RegisterKeyState;
+}
+export interface RegisterKeyState {
+  active: ReadonlySet<string>;
+  lapsed: ReadonlySet<string>;
+  /** True when deployed snapshot freshness cannot be established; CI replay is authoritative. */
+  stale?: boolean;
 }
 export type PayloadValidator = (ctx: ValidationContext) => FieldError[];
 
@@ -61,11 +69,11 @@ function keyOf(v: unknown): string | null {
 
 /** Match replay's canonical multilingual identity order, independent of member country lookup. */
 function identityPart(value: unknown): string | null {
-  if (typeof value === "string") return value.trim() || null;
+  if (typeof value === "string") return value || null;
   if (!isObj(value)) return null;
   for (const language of ["fr", "en", "es", "zh", "ru", "ar"]) {
     const text = value[language];
-    if (typeof text === "string" && text.trim()) return text.trim();
+    if (typeof text === "string" && text.length) return text;
   }
   return null;
 }
@@ -74,12 +82,17 @@ function identityPart(value: unknown): string | null {
 export function registerKeysOf(register_id: string, payload: unknown): string[] {
   const entries = isObj(payload) && isObj(payload.data) && Array.isArray(payload.data.entries) ? payload.data.entries : [];
   const cls = isObj(payload) && isObj(payload.data) ? payload.data._class : null;
-  const field = typeof cls === "string" && Object.hasOwn(AMENDMENT_COUNTRY_FIELDS, cls) ? AMENDMENT_COUNTRY_FIELDS[cls] : null;
+  const rule = rulesFor(register_id);
+  const field = typeof cls === "string" && Object.hasOwn(AMENDMENT_COUNTRY_FIELDS, cls)
+    ? (rule?.amendmentClass ? rule.countryField : AMENDMENT_COUNTRY_FIELDS[cls]) : null;
   if (!rulesFor(register_id) || !field) return [];
   const keys: string[] = [];
   for (const e of entries) {
     const k = isObj(e) ? keyOf(e[field]) : null;
     if (k) keys.push(k);
+    // Country/service and area/network registers also contain unscoped rows.
+    // A member may never smuggle one into a country-bound batch; ITU staff can.
+    else if (field === "country_area_or_service" || field === "area_or_network") return [];
   }
   return keys;
 }
@@ -139,12 +152,12 @@ export const stage1: PayloadValidator = ({ register_id, slug, action_type, paylo
       if (!isObj(e)) return errs.push({ path: at, code: "type", message: "entry must be an object" });
       // Replay permits partial composite keys but requires at least one part;
       // fallback groups are alternatives, never additional required fields.
-      if (representable && !groups.some(fields => fields.some(field => identityPart(e[field]) !== null))) {
+      if (representable && !groups.some(fields => fields.some(field => !!identityPart(e[field])?.trim()))) {
         const fields = groups.map(group => group.join(" + ")).join(" or ");
         const field = groups.flat().find(candidate => entryFields?.includes(candidate)) ?? rules.keyFields[0];
         req(`${at}.${field}`, `A register identity (${fields}) is required`);
       }
-      if (countryField && keyOf(e[countryField]) === null)
+      if (countryField && countryField !== "country_area_or_service" && countryField !== "area_or_network" && keyOf(e[countryField]) === null)
         req(`${at}.${countryField}`, `${countryField} is required`);
       if (full) for (const f of requiredEntryFields[register_id] ?? []) if (blank(e[f])) req(`${at}.${f}`, `${f} is required`);
     });
@@ -173,20 +186,84 @@ export const schemaStage: PayloadValidator = ({ payload }) => {
   return errs.concat(validateClass(cls, d, "data").map(toError));
 };
 
-/** Stage 2 hook (item payloads vs register schema + key uniqueness vs snapshot). Intentionally empty: gap. */
-export const stage2: PayloadValidator = () => [];
+/** Replay's entry key (Strategies::Base.entry_key): raw primary parts, then nonblank fallback groups. */
+function entryKeyOf(entry: Record<string, unknown>, rules: RegisterIdentity): string | null {
+  for (const [index, group] of [rules.keyFields, ...rules.fallbackKeyFields].entries()) {
+    const parts = group.map((f) => {
+      const part = identityPart(entry[f]) ?? "";
+      // Replay treats whitespace/NBSP as absent only in fallback groups.
+      return index > 0 && /^[ \t\r\n\u00a0]*$/.test(part) ? "" : part;
+    });
+    if (parts.some((p) => p !== "")) return parts.join(" | ");
+  }
+  return null;
+}
 
-const DEFAULT_CHAIN: PayloadValidator[] = [stage1, schemaStage];
+/** Build stage-2 state from a register snapshot (`current.json`): active entries' keys plus lapsed keys. */
+export function registerStateFromSnapshot(
+  register_id: string,
+  snapshot: { active_entries?: unknown[]; lapsed_keys?: unknown[] },
+): RegisterKeyState {
+  const rules = rulesFor(register_id);
+  const active = new Set<string>();
+  for (const e of snapshot.active_entries ?? []) {
+    const k = rules && isObj(e) ? entryKeyOf(e, rules) : null;
+    if (k !== null) active.add(k);
+  }
+  const lapsed = new Set((snapshot.lapsed_keys ?? []).filter((k): k is string => typeof k === "string"));
+  return { active, lapsed };
+}
+
+/**
+ * Stage 2 (docs/submission-workflow.adoc): key semantics of the action's entries.
+ * Item shape is schemaStage's job. Here: a key may appear once per payload; with a
+ * snapshot, ADD of an active key and REP/MOD/SUP/DEL of an unknown key conflict.
+ * Stale snapshot conflicts are advisory; payload-local duplicates always block.
+ * LIR rows assert existence and can introduce keys, matching replay.
+ * Without a snapshot only the payload-local check runs; CI replay stays authoritative.
+ */
+function stage2Result({ register_id, action_type, payload, register_state }: ValidationContext, warnings: FieldError[]): FieldError[] {
+  const rules = rulesFor(register_id);
+  if (!rules || !isObj(payload) || !isObj(payload.data) || !Array.isArray(payload.data.entries)) return [];
+  if (payload.data._class === "TextAmendment") return [];
+  const errs: FieldError[] = [];
+  const seen = new Set<string>();
+  payload.data.entries.forEach((e, i) => {
+    const key = isObj(e) ? entryKeyOf(e, rules) : null;
+    if (key === null) return; // stage1 reports a missing identity
+    const path = `data.entries[${i}].${rules.keyFields[0]}`;
+    if (seen.has(key)) return errs.push({ path, code: "mismatch", message: `key "${key}" appears more than once in this action` });
+    seen.add(key);
+    if (!register_state) return;
+    const known = register_state.active.has(key) || register_state.lapsed.has(key);
+    const conflicts = register_state.stale ? warnings : errs;
+    if (action_type === "ADD" && register_state.active.has(key))
+      conflicts.push({ path, code: "mismatch", message: `ADD of "${key}": it already exists in ${register_id}` });
+    else if (action_type !== "ADD" && action_type !== "LIR" && action_type !== "SEED" && !known)
+      conflicts.push({ path, code: "mismatch", message: `${action_type} of "${key}": it does not exist in ${register_id}` });
+  });
+  return errs;
+}
+
+export const stage2: PayloadValidator = (ctx) => stage2Result(ctx, []);
+
+const DEFAULT_CHAIN: PayloadValidator[] = [stage1, schemaStage, stage2];
 let active: PayloadValidator[] = DEFAULT_CHAIN;
 /** Replace the validator chain (generator output, or a test double). */
 export function setValidators(v: PayloadValidator[] | null) {
   active = v ?? DEFAULT_CHAIN;
 }
-export function validate(ctx: ValidationContext): FieldError[] {
+export function validateWithWarnings(ctx: ValidationContext): { errors: FieldError[]; warnings: FieldError[] } {
+  const warnings: FieldError[] = [];
   const seen = new Set<string>();
   // Two layers may report the same defect (e.g. a bad data._class); report it once.
-  return active.flatMap((v) => v(ctx)).filter((e) => {
+  const errors = active.flatMap((v) => v === stage2 ? stage2Result(ctx, warnings) : v(ctx)).filter((e) => {
     const k = `${e.path}\u0000${e.code}`;
     return seen.has(k) ? false : (seen.add(k), true);
   });
+  return { errors, warnings };
+}
+
+export function validate(ctx: ValidationContext): FieldError[] {
+  return validateWithWarnings(ctx).errors;
 }

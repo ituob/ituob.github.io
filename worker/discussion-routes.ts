@@ -1,7 +1,7 @@
 // Discussion + notification routes (#104). Member side under session-guarded
 // /api/me/*; moderation and ITU equivalents under Access-guarded /api/admin/*.
 import {
-  addComment, addParticipant, deleteComment, editComment, listNotifications, markRead, readHistory,
+  addComment, addParticipant, deleteComment, editComment, getPrefs, listNotifications, markRead, readHistory,
   readThread, restoreComment, setDiscussionClosed, setHandle, setPrefs,
 } from "./lib/discussion.ts";
 import { type Route, body, json } from "./lib/http.ts";
@@ -29,12 +29,12 @@ export const discussionRoutes: Route[] = [
     handler: async ({ env, session, url }) => json({ ok: true, notifications: await listNotifications(env.DB, session, url.searchParams.get("unread") === "1") }) },
   { method: "POST", pattern: /^\/api\/me\/notifications\/([0-9A-Z]{26})\/read$/, guard: "session",
     handler: async ({ env, session, params }) => { await markRead(env.DB, session, params[0]!); return json({ ok: true }); } },
-  { method: "PUT", pattern: /^\/api\/me\/notification-prefs$/, guard: "session",
-    handler: async ({ request, env, session }) => json({ ok: true, ...(await setPrefs(env.DB, session, (await body(request)).level)) }) },
   { method: "GET", pattern: /^\/api\/me\/notification-prefs$/, guard: "session",
-    handler: async ({ env, session }) => {
-      const row = await env.DB.prepare("SELECT level FROM notification_prefs WHERE user_id=?1").bind(session!.userId).first<{ level: string }>();
-      return json({ ok: true, level: row?.level ?? "all" });
+    handler: async ({ env, session }) => json({ ok: true, ...(await getPrefs(env.DB, session)) }) },
+  { method: "PUT", pattern: /^\/api\/me\/notification-prefs$/, guard: "session",
+    handler: async ({ request, env, session }) => {
+      const value = await body(request);
+      return json({ ok: true, ...(await setPrefs(env.DB, session, value.level, value.delivery, value.locale)) });
     } },
   { method: "PUT", pattern: /^\/api\/me\/handle$/, guard: "session",
     handler: async ({ request, env, session }) => json({ ok: true, ...(await setHandle(env.DB, session, (await body(request)).handle)) }) },

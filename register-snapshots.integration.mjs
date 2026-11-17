@@ -2,9 +2,10 @@
  * Astro integration: enumerates available register snapshots and
  * publishes their slugs + ob_issue numbers to globalThis so the
  * /registers/[slug] and /registers/[slug]/at/[ob_issue] pages can
- * generate static paths at build time.
+ * generate static paths at build time. Also publishes current snapshots
+ * as static assets for Worker validation.
  */
-import { readFileSync, existsSync, readdirSync } from "node:fs";
+import { readFileSync, existsSync, readdirSync, mkdirSync, copyFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, resolve, join } from "node:path";
 
@@ -46,6 +47,17 @@ export default function registerSnapshotsIntegration() {
     hooks: {
       "astro:config:setup"() {
         // Paths are already set on globalThis above.
+      },
+      "astro:build:done"({ dir }) {
+        // The Worker reads current register state through its ASSETS binding.
+        // Astro does not otherwise publish files outside public/ into dist/.
+        for (const { params: { slug } } of slugPaths) {
+          const source = join(snapshotRoot, slug, "current.json");
+          if (!existsSync(source)) continue;
+          const destination = join(fileURLToPath(dir), "data", "snapshots", slug);
+          mkdirSync(destination, { recursive: true });
+          copyFileSync(source, join(destination, "current.json"));
+        }
       },
     },
   };

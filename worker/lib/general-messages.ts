@@ -1,7 +1,8 @@
 import { parse, stringify } from "yaml";
 import { type RepoReader } from "./repo-reader.ts";
-import { generalBinding } from "../../src/lib/form/general.ts";
-export { generalBinding, GENERAL_TYPES } from "../../src/lib/form/general.ts";
+import { draftBinding, generalBinding, isSingletonPath } from "../../src/lib/form/general.ts";
+import { ANNEX_TYPE, validateAnnexes } from "../../src/lib/form/annexes.ts";
+export { draftBinding, generalBinding, GENERAL_TYPES } from "../../src/lib/form/general.ts";
 import { validateClass } from "../../src/lib/schema.validators.generated.ts";
 import { auditStatements } from "./audit.ts";
 import { requireRole } from "./authz.ts";
@@ -53,7 +54,14 @@ function sancErrors(record: Record<string, unknown>) {
 }
 export function validateGeneralMessage(type: unknown, value: unknown): { className: string; value: Record<string, unknown> } {
   let className: string;
-  try { ({ className } = generalBinding(type)); } catch (error) { throw new InvalidError(error instanceof Error ? error.message : "invalid general-message type"); }
+  try { ({ className } = draftBinding(type)); } catch (error) { throw new InvalidError(error instanceof Error ? error.message : "invalid general-message type"); }
+  // Annexes are a mapping keyed by publication id with no message envelope; the shared
+  // annex rules (also run in the browser) replace the envelope checks below.
+  if (type === ANNEX_TYPE) {
+    const annexErrors = validateAnnexes(value);
+    if (annexErrors.length) throw new ValidationFailed(annexErrors);
+    return { className, value: value as Record<string, unknown> };
+  }
   const errors = validateClass(className, value);
   if (!value || typeof value !== "object" || Array.isArray(value)) errors.push({ path: "", code: "type", message: "message must be an object" });
   else {
@@ -65,7 +73,8 @@ export function validateGeneralMessage(type: unknown, value: unknown): { classNa
   if (errors.length) throw new ValidationFailed(errors);
   return { className, value: value as Record<string, unknown> };
 }
-function checkIssue(no: number, value: Record<string, unknown>) {
+function checkIssue(no: number, type: unknown, value: Record<string, unknown>) {
+  if (type === ANNEX_TYPE) return; // annexes.yaml has no issue field: the directory is the issue
   if (value.ob_issue_no !== String(no))
     throw new ValidationFailed([{ path: "ob_issue_no", code: "type", message: "ob_issue_no must match the canonical issue directory" }]);
 }
@@ -92,9 +101,9 @@ async function audit(db: D1Database, actor: Session, id: string, no: number, act
 export async function createGeneralMessage(db: D1Database, session: Session | null, input: { ob_issue_no: unknown; type: unknown; value: unknown }) {
   const actor = staff(session), no = editionNo(input.ob_issue_no);
   const { className, value } = validateGeneralMessage(input.type, input.value);
-  checkIssue(no,value);
-  const type = input.type as string, binding = generalBinding(type), id = ulid(), at = new Date().toISOString();
-  const singleton = binding.relativePath.startsWith("general/");
+  checkIssue(no,input.type,value);
+  const type = input.type as string, binding = draftBinding(type), id = ulid(), at = new Date().toISOString();
+  const singleton = isSingletonPath(binding.relativePath);
   const prefix = `ob-issues/${no}/${type}/`;
   const pathSql = singleton ? "?7" : `?7 || printf('%03d',coalesce((SELECT max(CAST(substr(path,length(?7)+1,3) AS INTEGER)) FROM general_messages WHERE ob_issue_no=?2 AND type=?3),0)+1) || '.yaml'`;
   const write = db.prepare(`INSERT INTO general_messages (id,ob_issue_no,type,class_name,path,value_json,revision,updated_at)
@@ -109,7 +118,7 @@ export async function createGeneralMessage(db: D1Database, session: Session | nu
 export async function saveGeneralMessage(db: D1Database, session: Session | null, id: string, input: { expected_revision: unknown; value: unknown }) {
   const actor = staff(session), current = await stored(db,id), expected = expectedRevision(input.expected_revision);
   const { value } = validateGeneralMessage(current.type,input.value), at = new Date().toISOString();
-  checkIssue(current.ob_issue_no,value);
+  checkIssue(current.ob_issue_no,current.type,value);
   const result = await run(db,[db.prepare(`UPDATE general_messages SET value_json=?3,revision=revision+1,approved_at=NULL,approved_by=NULL,content_yaml=NULL,updated_at=?4
     WHERE id=?1 AND revision=?2 AND NOT EXISTS (SELECT 1 FROM general_message_prs WHERE message_id=?1)
     AND NOT EXISTS (SELECT 1 FROM editions WHERE ob_issue_no=?5 AND status IN ('composing','staged','published'))`).bind(id,expected,JSON.stringify(value),at,current.ob_issue_no),
@@ -143,7 +152,7 @@ export async function importGeneralMessage(db: D1Database, session: Session | nu
   let value: unknown;
   try { value = parse(text); } catch { throw new ValidationFailed([{ path: "", code: "type", message: "record is not valid YAML" }]); }
   const { className, value: valid } = validateGeneralMessage(type, value);
-  checkIssue(no, valid);
+  checkIssue(no, type, valid);
   const id = ulid(), at = new Date().toISOString();
   const write = db.prepare(`INSERT INTO general_messages (id,ob_issue_no,type,class_name,path,value_json,revision,updated_at)
     SELECT ?1,?2,?3,?4,?5,?6,1,?7 WHERE NOT EXISTS (SELECT 1 FROM editions WHERE ob_issue_no=?2 AND status IN ('composing','staged','published'))
@@ -172,9 +181,9 @@ export async function approveGeneralMessage(db: D1Database, session: Session | n
   const actor = requireRole(session,"itu-admin"), expected = expectedRevision(revision), current = await stored(db,id);
   if (current.revision !== expected) throw new ConflictError("general-message revision changed; reload before approving");
   validateGeneralMessage(current.type,current.value);
-  checkIssue(current.ob_issue_no,current.value);
+  checkIssue(current.ob_issue_no,current.type,current.value);
   if (current.approved_at) return current;
-  const at = new Date().toISOString(), content = stringify(current.value,{lineWidth:0});
+  const at = new Date().toISOString(), content = stringify(current.value,{lineWidth:0, ...(current.type === ANNEX_TYPE ? { defaultKeyType: "QUOTE_DOUBLE" as const } : {})});
   const result = await run(db,[db.prepare(`UPDATE general_messages SET approved_at=?3,approved_by=?4,content_yaml=?5,updated_at=?3
     WHERE id=?1 AND revision=?2 AND approved_at IS NULL
     AND NOT EXISTS (SELECT 1 FROM general_message_prs WHERE message_id=?1)
@@ -191,6 +200,6 @@ export async function generalMessageArtifact(db: D1Database, id: string, revisio
   if (revision !== undefined && current.revision !== expectedRevision(revision)) throw new ConflictError("general-message revision changed");
   if (!current.approved_at || current.content_yaml === null) throw new ConflictError("administrator approval required before opening a review PR");
   const { className } = validateGeneralMessage(current.type,current.value);
-  checkIssue(current.ob_issue_no,current.value);
+  checkIssue(current.ob_issue_no,current.type,current.value);
   return { id:current.id, ob_issue_no:current.ob_issue_no,type:current.type,class_name:className,path:current.path,revision:current.revision,content:current.content_yaml };
 }

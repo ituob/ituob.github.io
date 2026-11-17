@@ -57,6 +57,10 @@ policy in the same activation change after provisioning is verified. Keep
 production and staging resources separate. The commands above are owner actions,
 not steps performed by this change or its tests.
 
+The country bootstrap and local-only `npm run seed:roster` command are described
+in `roster-seed.adoc`, including future owner-only remote seed commands. The
+bootstrap does not opt into live bindings or create resources.
+
 == Deliberately not configured
 
 * Identity: no `AUTH_MODE`, no stub, no `OIDC_*`. With `AUTH_MODE` unset the
