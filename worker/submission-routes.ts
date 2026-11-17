@@ -64,10 +64,10 @@ export const submissionRoutes: Route[] = [
   })),
   { method: "POST", pattern: re(`/api/admin/submissions/${ID}/approve`), guard: "access",
     handler: async ({ request, env, access, params }) => {
-      const sub = await approve(env.DB, await ituSession(env, access!), params[0]!, await body(request), env.PATCH_REPO ?? DEFAULT_PATCH_REPO, emptyCheck(env), env.ASSETS);
+      const { warnings, ...sub } = await approve(env.DB, await ituSession(env, access!), params[0]!, await body(request), env.PATCH_REPO ?? DEFAULT_PATCH_REPO, emptyCheck(env), env.ASSETS);
       // The consumer runs after the approval is durable; a GitHub failure leaves pr_pending + last_error.
       const pr = await openPr(env.DB, getPublisher(env), sub.id);
-      return json({ ok: true, submission: { ...sub, state: pr.state }, pr }, pr.error ? 202 : 200);
+      return json({ ok: true, submission: { ...sub, state: pr.state }, warnings, pr }, pr.error ? 202 : 200);
     } },
   { method: "POST", pattern: re(`/api/admin/submissions/${ID}/open-pr`), guard: "access",
     handler: async ({ env, access, params }) => {

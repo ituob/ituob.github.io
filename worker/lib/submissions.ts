@@ -457,12 +457,12 @@ export async function approve(db: D1Database, session: Session | null, id: strin
     submission_id: sub.id, rev: sub.current_rev, repo, branch, path, content_yaml: content,
     content_sha: await sha256(content), idempotency_key: `${repo}:${branch}`,
   };
-  return mutate(db, sub, {
+  return { ...await mutate(db, sub, {
     from: ["in_review"], to: "pr_pending", via: ["approved"], actor: { kind: "user", id: s.userId },
     auditAction: "submission.state", set: { target_edition: edition, seq },
-    detail: { ...detail, target_edition: edition, seq, branch, path, content_sha: pr.content_sha },
+    detail: { ...detail, target_edition: edition, seq, branch, path, content_sha: pr.content_sha, warnings },
     extra: (d, v) => [guardedInsert(d, "submission_prs", pr, sub.id, v)],
-  });
+  }), warnings };
 }
 
 export interface PrOutcome {
