@@ -1,0 +1,73 @@
+= Identity against a mock provider (#102)
+:toc:
+
+Member sign-in is built and tested against a local mock OpenID provider. No real
+identity service, Cloudflare resource, secret or deploy is involved. This page says
+what exists, how to use the mock, and why a real provider is a configuration swap.
+
+== What already existed
+
+The Worker is a generic OIDC relying party, not tied to any provider:
+`worker/lib/oidc.ts` (authorization code + PKCE, discovery, JWKS, ID-token
+validation), `worker/lib/auth-routes.ts` (`/auth/login`, `/auth/callback`,
+`/auth/logout`), `worker/lib/session.ts` (rotating, expiring server-side sessions;
+`getSession` is the single authorization seam) and `worker/lib/authority.ts`
+(roles and member state resolved from D1 on every request). `test/oidc.test.ts`
+covers the protocol against an in-test provider (`test/mock-idp.ts`).
+
+== What the mock adds
+
+`scripts/mock-idp.mjs` is a runnable provider for `wrangler dev` plus a handler
+the tests drive through the real Worker:
+
+* discovery, JWKS (ES256), `/authorize` with PKCE and a persona picker, `/token`;
+* redirect URIs are loopback only; codes are single use and verifier-bound;
+* six personas (`itu-admin`, `itu-editor`, `member-aland`, `member-suspendia`,
+  `pending-claimant`, `unaffiliated`). The provider only asserts _who_ a persona is.
+  What they may do lives in D1, exactly as with a real provider.
+
+[source,sh]
+----
+cp .dev.vars.example .dev.vars        # AUTH_MODE=oidc, issuer http://127.0.0.1:8788
+npm run dev:idp                        # the mock provider
+node scripts/mock-idp.mjs sql > personas.sql
+wrangler d1 execute <local db> --local --file personas.sql   # idempotent
+----
+
+== Who may do what
+
+[cols="2,3"]
+|===
+| Persona | Result after sign-in
+| `itu-admin`, `itu-editor` | `itu-admin` / `itu-editor` role; may submit for any key. Admin API still needs Access.
+| `member-aland` | `member-submitter` bound to `MOCK-A`; may submit only for Aland.
+| `member-suspendia` | signed in, no roles (state suspended); submissions refused with 403.
+| `pending-claimant` | no roles until an administrator verifies the claim.
+| `unaffiliated`, any new sub | an inert account is created on first sign-in; no roles.
+|===
+
+== Moving to a real provider
+
+Only configuration changes; no code does:
+
+[cols="2,3"]
+|===
+| Setting | Mock -> real
+| `OIDC_ISSUER` | `https://...` issuer of the real provider (HTTPS required off loopback)
+| `OIDC_CLIENT_ID` | the client registered for ituob.org
+| `OIDC_CLIENT_SECRET` | Worker secret (never a var); `OIDC_CLIENT_AUTH=none` for a public client
+| `OIDC_AUTHORIZATION_ENDPOINT`, `OIDC_TOKEN_ENDPOINT`, `OIDC_JWKS_URI` | only if the provider has no discovery document
+| `OIDC_END_SESSION_ENDPOINT` | enables provider-side logout
+| `OIDC_SUB_KEY` | `issuer` to namespace subjects per provider
+|===
+
+Real subjects replace `mock-*` ids; roster rows and role grants are then made by the
+claim/verify flow (docs/membership-roles.adoc). The mock personas and `.dev.vars` are
+never deployed: `wrangler*.jsonc` name no issuer and no secret.
+
+== Tests
+
+`test/mock-idp-dev.test.ts`: sign-in, sign-out, replayed and forged cookies, expired
+session, first-time unknown user, suspended and pending members denied, role mapping,
+suspension taking effect on the next request, and the mock's own redirect/PKCE/code
+rules. Run with `npm run test:worker`.

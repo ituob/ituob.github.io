@@ -1,0 +1,7 @@
+# Local sign-in against the mock provider (docs/identity-mock-provider.adoc).
+# Copy to .dev.vars. Nothing here is a real credential.
+AUTH_MODE=oidc
+OIDC_ISSUER=http://127.0.0.1:8788
+OIDC_CLIENT_ID=ituob-local-dev
+OIDC_CLIENT_SECRET=local-dev-secret-not-real
+OIDC_CLIENT_AUTH=basic
