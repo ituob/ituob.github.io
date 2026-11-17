@@ -35,7 +35,24 @@ export const KEY_FIELD_PATTERN = /^[a-z][a-z0-9_]{0,63}$/;
 export const MAX_TITLE = 500;
 export const MAX_URL = 2048;
 
-const CONTROL = new RegExp("[\\u0000-\\u001f\\u007f\\u2028\\u2029]");
+const FORBIDDEN = new RegExp("[\\u0000-\\u001f\\u007f-\\u009f\\u2028\\u2029\\ufeff]");
+
+/** Detect unpaired UTF-16 surrogates without relying on newer String APIs. */
+function hasLoneSurrogate(value: string): boolean {
+  for (let i = 0; i < value.length; i++) {
+    const code = value.charCodeAt(i);
+    if (code >= 0xd800 && code <= 0xdbff) {
+      const next = value.charCodeAt(i + 1);
+      if (!(next >= 0xdc00 && next <= 0xdfff)) return true;
+      i++;
+    } else if (code >= 0xdc00 && code <= 0xdfff) return true;
+  }
+  return false;
+}
+
+function hasForbiddenCharacters(value: string): boolean {
+  return FORBIDDEN.test(value) || hasLoneSurrogate(value);
+}
 
 /** Filesystem slug for a new register id (same rule as slugForPublicationId). */
 export function catalogSlug(id: string): string {
@@ -48,17 +65,21 @@ export function normalizeCatalogEntry(input: CatalogEntryInput): CatalogEntryInp
   for (const [lang, text] of Object.entries(input.title ?? {})) {
     if (typeof text === "string" && text.trim() !== "") title[lang] = text.trim();
   }
-  const url = typeof input.url === "string" && input.url.trim() !== "" ? input.url.trim() : null;
+  let url = typeof input.url === "string" && input.url.trim() !== "" ? input.url.trim() : null;
+  if (url !== null && /^https:\/\//.test(url)) {
+    try { url = new URL(url).href; } catch { /* Keep invalid input intact for validation feedback. */ }
+  }
   const out: CatalogEntryInput = { id: String(input.id ?? "").trim(), title, url, recommendation: String(input.recommendation ?? "").trim() };
   if (input.key_field !== undefined) out.key_field = String(input.key_field).trim();
   return out;
 }
 
 export function validateUrl(url: string): string | null {
-  if (url.length > MAX_URL || CONTROL.test(url) || /\s/.test(url)) return "must be a single line without spaces and at most 2048 characters";
+  if (url.length > MAX_URL || hasForbiddenCharacters(url) || /[\\\s]/.test(url)) return "must be a single line without spaces and at most 2048 characters";
+  if (!/^https:\/\/[^/?#]+/.test(url)) return "must be an absolute HTTPS URL such as https://www.itu.int/...";
   let parsed: URL;
   try { parsed = new URL(url); } catch { return "must be an absolute URL such as https://www.itu.int/..."; }
-  if (!["https:", "http:"].includes(parsed.protocol) || !parsed.hostname) return "must be an http or https URL";
+  if (parsed.protocol !== "https:" || !parsed.hostname) return "must be an absolute HTTPS URL";
   if (parsed.username || parsed.password) return "must not contain credentials";
   return null;
 }
@@ -69,9 +90,15 @@ export function validateUrl(url: string): string | null {
  */
 export function validateCatalogEntry(raw: CatalogEntryInput, ctx: CatalogContext, original?: string): CatalogIssue[] {
   const issues: CatalogIssue[] = [];
+  const add = (path: string, code: CatalogIssueCode, message: string) => issues.push({ path, code, message });
+  // Inspect raw values before normalization can trim away forbidden characters.
+  for (const [lang, text] of Object.entries(raw.title ?? {})) {
+    if (typeof text === "string" && hasForbiddenCharacters(text)) add(`title.${lang}`, "type", "Use a single line of at most 500 characters.");
+  }
+  const forbiddenUrl = typeof raw.url === "string" && hasForbiddenCharacters(raw.url);
+  if (forbiddenUrl) add("url", "type", "The URL must be a single line without spaces and at most 2048 characters.");
   const input = normalizeCatalogEntry(raw);
   const editing = original !== undefined;
-  const add = (path: string, code: CatalogIssueCode, message: string) => issues.push({ path, code, message });
 
   if (editing) {
     if (input.id !== original) add("id", "mismatch", "The id of a service publication cannot be changed after it is created.");
@@ -90,12 +117,12 @@ export function validateCatalogEntry(raw: CatalogEntryInput, ctx: CatalogContext
 
   for (const lang of Object.keys(input.title)) {
     if (!(SUPPORTED_LANGUAGES as readonly string[]).includes(lang)) add(`title.${lang}`, "unknown", `${lang} is not a supported language.`);
-    else if (input.title[lang]!.length > MAX_TITLE || CONTROL.test(input.title[lang]!)) add(`title.${lang}`, "type", "Use a single line of at most 500 characters.");
+    else if (input.title[lang]!.length > MAX_TITLE) add(`title.${lang}`, "type", "Use a single line of at most 500 characters.");
   }
   if (!input.title.en) add("title.en", "required", "Enter the title in English.");
 
-  if (input.url !== null) {
-    const problem = validateUrl(input.url!);
+  if (!forbiddenUrl && typeof raw.url === "string" && raw.url.trim() !== "") {
+    const problem = validateUrl(raw.url);
     if (problem) add("url", "type", `The URL ${problem}.`);
   }
 

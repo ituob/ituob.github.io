@@ -7,7 +7,7 @@ import { applyRegisterEntry, parseRecommendations, parseRegisters } from "../../
 import { normalizeCatalogEntry, validateCatalogEntry, type CatalogContext, type CatalogEntryInput } from "../../src/lib/form/catalog-entry.ts";
 import { requireRole } from "./authz.ts";
 import { ConflictError, InvalidError, NotFoundError } from "./membership.ts";
-import { CATALOG_PATH, DEFAULT_CATALOG_REPO, PublisherNotConfigured, getPublisher, type CatalogSnapshot } from "./publisher.ts";
+import { CATALOG_PATH, CatalogPublishConflict, DEFAULT_CATALOG_REPO, PublisherNotConfigured, getPublisher, type CatalogSnapshot } from "./publisher.ts";
 import { UpstreamError, ValidationFailed } from "./submissions.ts";
 import type { Env, Session } from "./types.ts";
 
@@ -60,15 +60,16 @@ function shape(raw: Record<string, unknown>): CatalogEntryInput {
 /** Create (`original` undefined) or edit a register: validate, then open one review PR. */
 export async function proposeCatalogEntry(env: Env, session: Session, raw: Record<string, unknown>, original?: string) {
   staff(session);
-  const input = normalizeCatalogEntry(shape(raw));
+  const shaped = shape(raw);
   const snap = await snapshot(env);
   const { ctx } = view(snap);
-  const issues = validateCatalogEntry(input, ctx, original);
+  const issues = validateCatalogEntry(shaped, ctx, original);
   const invalid = issues.filter((i) => i.code !== "duplicate");
   if (invalid.some((i) => i.code === "unknown" && i.path === "id")) throw new NotFoundError(invalid.find((i) => i.path === "id")!.message);
   if (invalid.length) throw new ValidationFailed(invalid.map((i) => ({ path: i.path, code: i.code as "required", message: i.message })));
   if (issues.length) throw new ConflictError(issues[0]!.message);
 
+  const input = normalizeCatalogEntry(shaped);
   const content = applyRegisterEntry(snap.registers.text, input, original);
   const branch = `rt-cat-${await digest(`${snap.registers.blobSha}\n${content}`)}`;
   const verb = original === undefined ? "Add" : "Update";
@@ -81,6 +82,7 @@ export async function proposeCatalogEntry(env: Env, session: Session, raw: Recor
     return { pr: { number: pr.prNumber, url: pr.url, branch, commit_sha: pr.commitSha }, entry: input };
   } catch (e) {
     if (e instanceof PublisherNotConfigured) throw new UpstreamError("the catalog repository is not configured");
+    if (e instanceof CatalogPublishConflict) throw new ConflictError(e.message);
     if (e instanceof Error && e.message === "Catalog changed since it was read") throw new ConflictError("The catalog changed while you were editing. Reload and retry.");
     throw new UpstreamError("could not open the catalog review PR");
   }

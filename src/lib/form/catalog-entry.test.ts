@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { REGISTERS_YAML, RECOMMENDATIONS_YAML } from "../../../test/fixtures/catalog";
-import { catalogSlug, validateCatalogEntry, type CatalogContext, type CatalogEntryInput } from "./catalog-entry";
+import { catalogSlug, normalizeCatalogEntry, validateCatalogEntry, type CatalogContext, type CatalogEntryInput } from "./catalog-entry";
 import { applyRegisterEntry, parseRecommendations, parseRegisters } from "./catalog-yaml";
 
 const rows = parseRegisters(REGISTERS_YAML);
@@ -31,6 +31,22 @@ describe("catalog entry validation (shared by the form and the Worker)", () => {
     for (const url of ["not a url", "ftp://x.example/a", "javascript:alert(1)", "https://u:p@x.example/", "https://x.example/a b"]) {
       expect(codes({ ...fresh, url }), url).toEqual(["url:type"]);
     }
+  });
+  it("requires a literal HTTPS prefix and a valid HTTPS host", () => {
+    for (const url of ["http://x.example", "https:/x.example", "https:x.example", "HTTPS://x.example", "https:///x.example", "https://", "https://?q=x", "https:\\\\x.example", "https://x.example\\path"]) {
+      expect(codes({ ...fresh, url }), url).toEqual(["url:type"]);
+    }
+    expect(codes({ ...fresh, url: "https://x.example" })).toEqual([]);
+    expect(normalizeCatalogEntry({ ...fresh, url: "https://x.example" }).url).toBe("https://x.example/");
+  });
+  it("rejects every C0/C1 control, line separator, BOM, and lone surrogate before trimming", () => {
+    const forbidden = [...Array.from({ length: 0x20 }, (_, i) => String.fromCharCode(i)), ...Array.from({ length: 0x21 }, (_, i) => String.fromCharCode(0x7f + i)), "\u2028", "\u2029", "\ufeff", "\ud800", "\udfff"];
+    for (const char of forbidden) {
+      expect(codes({ ...fresh, title: { en: ` ${char}Title ` } }), `title U+${char.charCodeAt(0).toString(16)}`).toContain("title.en:type");
+      expect(codes({ ...fresh, url: `https://x.example/${char}` }), `url U+${char.charCodeAt(0).toString(16)}`).toContain("url:type");
+    }
+    expect(codes({ ...fresh, title: { en: "ITU 🌐" } })).toEqual([]);
+    expect(codes({ ...fresh, url: "https://x.example/🌐" })).toEqual([]);
   });
   it("requires an English title, a known language, a catalog recommendation and a key field", () => {
     expect(codes({ ...fresh, title: { fr: "Titre" } })).toEqual(["title.en:required"]);

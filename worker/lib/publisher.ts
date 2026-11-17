@@ -108,6 +108,9 @@ export interface PatchPublisher {
   bumpDataPin(req: PinBumpRequest): Promise<PinBump>;
 }
 
+/** A catalog request that cannot produce an active review change. */
+export class CatalogPublishConflict extends Error {}
+
 export class PublisherNotConfigured extends Error {
   constructor() {
     super("not configured");
@@ -216,6 +219,7 @@ export class FakePatchPublisher implements PatchPublisher {
     assertCatalogRequest(req);
     this.catalogRequests.push(req);
     if (this.failNext > 0) { this.failNext--; throw new Error("GitHub 502"); }
+    if (req.content === this.catalogFiles.registers) throw new CatalogPublishConflict("Catalog edit has no change");
     if (req.baseBlobSha !== FakePatchPublisher.blobSha(this.catalogFiles.registers)) throw new Error("Catalog changed since it was read");
     const hit = this.catalogByKey.get(req.idempotencyKey);
     if (hit) return hit;

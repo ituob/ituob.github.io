@@ -1,4 +1,4 @@
-import { assertCatalogRequest, DEFAULT_CATALOG_REPO, assertPatchBranch, assertMetadataRequest, assertMessageRequest, METADATA_BRANCH, MESSAGE_BRANCH, PublisherNotConfigured } from "./publisher.ts";
+import { assertCatalogRequest, CatalogPublishConflict, DEFAULT_CATALOG_REPO, assertPatchBranch, assertMetadataRequest, assertMessageRequest, METADATA_BRANCH, MESSAGE_BRANCH, PublisherNotConfigured } from "./publisher.ts";
 import type { CatalogSnapshot, OpenCatalogPrRequest, OpenPatchPrRequest, OpenMetadataPrRequest, OpenGeneralMessagePrRequest, OpenRevertPrRequest, OpenedPr, PatchPublisher, PinBump, PinBumpRequest, PublisherConfig, PullRequestState } from "./publisher.ts";
 
 type Json = Record<string, any>;
@@ -70,12 +70,14 @@ export class GitHubAppPatchPublisher implements PatchPublisher {
     if (existing) sha = requireSha(existing.object.sha);
     else {
       const current = await this.catalogFile(repo, req.path, base.sha);
+      if (current.text === req.content) throw new CatalogPublishConflict("Catalog edit has no change");
       if (current.blobSha !== req.baseBlobSha) throw new Error("Catalog changed since it was read");
       sha = await this.makeCommit(repo, base.sha, { path: req.path, mode: "100644", type: "blob", content: req.content }, message);
       sha = await this.createRef(repo, req.branch, sha);
     }
     const commit = await this.verifyChange(repo, sha, req.path, message, req.content);
     const pr = await this.pull(repo, req.branch, base.ref, req.title, req.body, sha);
+    if (pr.state !== "open" && !(pr.state === "closed" && pr.merged_at)) throw new CatalogPublishConflict("Catalog review PR was closed without merging. Submit a new change for review.");
     return { prNumber: pr.number, url: pr.html_url, commitSha: sha, baseSha: commit.parents[0].sha };
   }
   private async request(path: string, method = "GET", body?: unknown, token?: string): Promise<Json> {

@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { FakePatchPublisher, setPublisher } from "../worker/lib/publisher.ts";
+import { CatalogPublishConflict, FakePatchPublisher, setPublisher } from "../worker/lib/publisher.ts";
 import { parseRegisters } from "../src/lib/form/catalog-yaml.ts";
 import { RECOMMENDATIONS_YAML, REGISTERS_YAML } from "./fixtures/catalog.ts";
 import { activateMember, api, provisionItu, seedFixtures } from "./helpers.ts";
@@ -72,6 +72,18 @@ describe("catalog entry routes", () => {
     expect(fake.catalogRequests).toEqual([]);
   });
 
+  it("rejects forbidden raw Unicode before trimming and stores the normalized HTTPS href", async () => {
+    for (const char of ["\u0085", "\ufeff", "\u2028", "\ud800", "\udfff"]) {
+      expect((await create({ ...entry, title: { en: `${char}Title` } })).status).toBe(422);
+      expect((await create({ ...entry, url: `https://www.itu.int/${char}` })).status).toBe(422);
+    }
+    expect(fake.catalogRequests).toEqual([]);
+    const normalized = await create({ ...entry, url: "https://WWW.ITU.INT:443/a/../café" });
+    expect(normalized.status).toBe(202);
+    expect(normalized.json.entry.url).toBe("https://www.itu.int/caf%C3%A9");
+    expect(parseRegisters(fake.catalogRequests[0]!.content).at(-1)!.url).toBe(normalized.json.entry.url);
+  });
+
   it("edits title, url and recommendation but refuses an id change", async () => {
     const changed = await edit("DP", { id: "DP", title: { en: "Dialling", fr: "Numerotation" }, url: "https://www.itu.int/dp", recommendation: "E.118" });
     expect(changed.status).toBe(202);
@@ -82,6 +94,19 @@ describe("catalog entry routes", () => {
     expect(renamed.json.errors).toEqual([expect.objectContaining({ path: "id", code: "mismatch" })]);
     expect((await edit("NOPE", { id: "NOPE", title: { en: "x" }, recommendation: "E.164" })).status).toBe(404);
     expect(fake.catalogRequests).toHaveLength(1);
+  });
+
+  it("returns 409 for an identical edit and a closed unmerged review PR", async () => {
+    const input = { id: "DP", title: { en: "Dialling" }, recommendation: "E.164" };
+    expect((await edit("DP", input)).status).toBe(202);
+    fake.catalogFiles.registers = fake.catalogRequests[0]!.content;
+    const noop = await edit("DP", input);
+    expect(noop.status).toBe(409);
+    expect(JSON.stringify(noop.json)).toContain("no change");
+    fake.openCatalogPr = async () => { throw new CatalogPublishConflict("Catalog review PR was closed without merging"); };
+    const closed = await edit("DP", { ...input, title: { en: "Changed" } });
+    expect(closed.status).toBe(409);
+    expect(JSON.stringify(closed.json)).toContain("closed without merging");
   });
 
   it("reports an upstream failure as 502 and a moved catalog as 409", async () => {

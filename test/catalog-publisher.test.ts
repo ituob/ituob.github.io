@@ -44,10 +44,10 @@ function github(opts: { blob?: string; files?: Record<string, string> } = {}) {
     if (s === "/git/refs") { refs.set(body.ref.replace("refs/heads/", ""), body.sha); return ok({}, 201); }
     if (s.startsWith("/compare/")) return ok({ files: [{ filename: tree.tree[0].path, status: "modified" }] });
     if (s === "/pulls" && method === "GET") return ok(pr ? [pr] : []);
-    if (s === "/pulls") { pr = { number: 7, html_url: `https://github.com/${REPO}/pull/7`, head: { ref: body.head, sha: NEW, repo: { full_name: REPO } }, base: { ref: "main", repo: { full_name: REPO } } }; return ok(pr, 201); }
+    if (s === "/pulls") { pr = { state: "open", merged_at: null, number: 7, html_url: `https://github.com/${REPO}/pull/7`, head: { ref: body.head, sha: NEW, repo: { full_name: REPO } }, base: { ref: "main", repo: { full_name: REPO } } }; return ok(pr, 201); }
     return ok({}, 404);
   };
-  return { calls, transport, refs, get tree() { return tree; } };
+  return { calls, transport, refs, get tree() { return tree; }, closePr() { pr.state = "closed"; pr.merged_at = null; } };
 }
 const req = { repo: REPO, branch, path, content, baseBlobSha: BLOB, title: "Add NEW", body: "Review", idempotencyKey: branch };
 
@@ -66,6 +66,28 @@ describe("catalog publisher", () => {
     expect(gh.tree.tree).toEqual([{ path, mode: "100644", type: "blob", content }]);
     expect([...gh.refs.keys()]).toEqual([branch]);
     expect(gh.calls.filter((c) => c.method !== "GET" && !c.path.startsWith("/app/")).map((c) => c.path.replace(`/repos/${REPO}`, ""))).toEqual(["/git/trees", "/git/commits", "/git/refs", "/pulls"]);
+  });
+
+  it("rejects a no-change edit before creating any GitHub objects or refs", async () => {
+    const gh = github();
+    const publisher = new GitHubAppPatchPublisher(config, gh.transport);
+    for (let attempt = 0; attempt < 2; attempt++) {
+      await expect(publisher.openCatalogPr({ ...req, content: original })).rejects.toThrow("no change");
+    }
+    expect(gh.refs.size).toBe(0);
+    expect(gh.calls.filter((c) => c.method !== "GET" && !c.path.startsWith("/app/"))).toEqual([]);
+  });
+
+  it("refuses a closed unmerged catalog PR on retry with a clear error", async () => {
+    const gh = github();
+    const publisher = new GitHubAppPatchPublisher(config, gh.transport);
+    const first = await publisher.openCatalogPr(req);
+    expect(await publisher.openCatalogPr(req)).toEqual(first);
+    gh.closePr();
+    const writes = gh.calls.filter((c) => c.method === "POST").length;
+    await expect(publisher.openCatalogPr(req)).rejects.toThrow("closed without merging");
+    expect(gh.calls.filter((c) => c.method === "POST")).toHaveLength(writes);
+    expect([...gh.refs.keys()]).toEqual([branch]);
   });
 
   it("refuses a moved catalog file, another repository, another path and a non-catalog branch before writing", async () => {

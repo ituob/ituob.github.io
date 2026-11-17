@@ -32,13 +32,14 @@ const stable = (value: unknown): string => JSON.stringify(value, (_k, v) => v &&
 export function applyRegisterEntry(text: string, raw: CatalogEntryInput, original?: string): string {
   const input = normalizeCatalogEntry(raw);
   const before = parseRegisters(text);
-  const lines = text.split("\n");
+  const newline = text.includes("\r\n") ? "\r\n" : "\n";
+  const lines = text.split(/\r?\n/);
   let next: string[];
   if (original === undefined) {
     const tail = ["  - register_id: " + q(input.id), `    slug: ${q(catalogSlug(input.id))}`, `    recommendation: ${q(input.recommendation)}`, ...titleLines(input.title),
       ...(input.url ? [`    url: ${q(input.url)}`] : []), `    key_field: ${q(input.key_field!)}`, "    classification: textual", "    renderer: text-amendment"];
-    const body = text.replace(/\n*$/, "");
-    next = [...body.split("\n"), "", ...tail, ""];
+    const body = text.replace(/(?:\r?\n)*$/, "");
+    next = [...body.split(/\r?\n/), "", ...tail, ""];
   } else {
     const start = lines.findIndex((line) => {
       const m = /^  - register_id:\s*(.*?)\s*$/.exec(line);
@@ -60,7 +61,7 @@ export function applyRegisterEntry(text: string, raw: CatalogEntryInput, origina
     kept.splice(at, 0, `    recommendation: ${q(input.recommendation)}`, ...titleLines(input.title), ...(input.url ? [`    url: ${q(input.url)}`] : []));
     next = [...lines.slice(0, start), ...kept, ...lines.slice(end)];
   }
-  const result = next.join("\n");
+  const result = next.join(newline);
 
   // Round-trip proof: nothing but the intended entry may differ.
   const after = parseRegisters(result);
