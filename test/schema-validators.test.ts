@@ -72,6 +72,13 @@ describe("generated validators: crafted bad inputs", () => {
     expect(codes(validateClass("GeneralMiscCommunications", { contents: 5 }))).toEqual(["type:contents"]);
   });
 
+  it("accepts RegisterChange HashOrList data as an object or a list of objects", () => {
+    const envelope = { type: "ADD", identifier: { code: "sample" } };
+    expect(validateClass("RegisterChange", { ...envelope, data: { code: "999 99" } })).toEqual([]);
+    expect(validateClass("RegisterChange", { ...envelope, data: [{ code: "999 99" }, { code: "999 98" }] })).toEqual([]);
+    expect(codes(validateClass("RegisterChange", { ...envelope, data: [{ code: "999 99" }, "invalid"] }))).toEqual(["type:data"]);
+  });
+
   it("is generated from the ontology: ActionType members and the required identifier are present", () => {
     expect(ENUMS.ActionType).toEqual(["ADD", "SUP", "REP", "LIR", "MOD", "DEL", "SEED"]);
     expect(CLASSES.RegisterChange.identifier).toMatchObject({ kind: "class", ref: "Identifier", required: true });
@@ -90,7 +97,7 @@ describe("the Worker submission path calls the generated validators", () => {
   afterEach(() => setPublisher(null));
 
   const body = (payload: unknown) => ({ register_id: "E118_IIN", slug: "e118-iin", action_type: "ADD", payload });
-  const entry = { country_or_area: { en: "Aland" }, company_name: "Acme Telecom" };
+  const entry = { country_or_area: { en: "Aland" }, company_name: "Acme Telecom", issue_id_number: "89 358 01" };
   const mkDraft = async (payload: unknown) => {
     const r = await api("POST", "/api/me/submissions", { session: "member-A", body: body(payload) });
     expect(r.status).toBe(201);
@@ -102,13 +109,14 @@ describe("the Worker submission path calls the generated validators", () => {
     expect(codes(errs)).toEqual(["type:data.entries[0].tel"]);
   });
 
-  it("a draft with ontology errors is stored with them, and submit refuses it with field pointers", async () => {
-    const id = await mkDraft({ type: "ADD", data: { _class: "E118Amendment", entries: [{ ...entry, company_name: 7, tel: "x", extra: true }] } });
-    const rev = await db().prepare("SELECT validation FROM submission_revisions WHERE submission_id=?1 AND rev=1").bind(id).first<{ validation: string }>();
-    expect(codes(JSON.parse(rev!.validation).stage1)).toEqual(["type:data.entries[0].company_name", "type:data.entries[0].tel", "unknown:data.entries[0].extra"]);
-    const r = await api("POST", `/api/me/submissions/${id}/submit`, { session: "member-A", body: {} });
+  it("rejects ontology errors at create with field pointers and no partial durable writes", async () => {
+    const tables = ["submissions", "submission_revisions", "review_state", "audit_log"];
+    const snapshot = () => Promise.all(tables.map(table => db().prepare(`SELECT * FROM ${table} ORDER BY rowid`).all().then(r => r.results)));
+    const before = await snapshot();
+    const r = await api("POST", "/api/me/submissions", { session: "member-A", body: body({ type: "ADD", data: { _class: "E118Amendment", entries: [{ ...entry, company_name: 7, tel: "x", extra: true }] } }) });
     expect(r.status).toBe(422);
     expect(codes(r.json.errors)).toEqual(["type:data.entries[0].company_name", "type:data.entries[0].tel", "unknown:data.entries[0].extra"]);
+    expect(await snapshot()).toEqual(before);
   });
 
   it("a payload in the stored corpus shape submits", async () => {

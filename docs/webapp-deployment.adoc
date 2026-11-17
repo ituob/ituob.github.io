@@ -1,0 +1,182 @@
+= Webapp deployment configuration and preflight
+
+The site uses two independent Wrangler configurations:
+`wrangler.staging.jsonc` (`ituob-org-staging`, staging-www.ituob.org) and
+`wrangler.jsonc` (`ituob-org`, www.ituob.org plus apex redirect).
+The Worker handles authentication, APIs and administration before serving
+assets. `run_worker_first` belongs inside `assets`.
+
+The checked-in templates have no resource IDs and are deliberately
+*not deployment-ready*. They declare OIDC authentication, provider secret
+names and the reconciliation schedule. Generate bindings from authenticated
+resource information before deployment; do not invent IDs or deploy templates.
+`--check` fails on missing runtime declarations. Neither this command nor
+configuration generation deploys, creates resources, applies migrations or
+uploads secrets.
+
+== Read actual account resources first
+
+Use the existing CI credential or an authenticated Wrangler session with
+permission to inspect the intended account. Read-only commands:
+
+[source,sh]
+----
+npx wrangler whoami
+npx wrangler d1 list
+npx wrangler queues list
+npx wrangler secret list --config wrangler.staging.jsonc
+----
+
+The local implementation check returned `You are not authenticated. Please
+run wrangler login.` Both `CLOUDFLARE_API_TOKEN` and
+`CLOUDFLARE_ACCOUNT_ID` were absent in that shell. This does not establish
+whether existing CI credentials can access the account. Next, inspect those
+resources using the authorized CI credential or an authenticated session;
+record the actual account ID, D1 UUIDs/names and queue names.
+A writable `WRANGLER_LOG_PATH` can be supplied in restricted environments.
+Do not paste credentials into reports or configuration files.
+
+== Generate a reviewable configuration
+
+Create a JSON manifest containing `staging`, `production`, or both.
+Each environment has its own database, delivery queue, dead-letter queue,
+Access audience and callback. The following is a schema example: angle-bracket
+values must be replaced with verified values; the command rejects these
+placeholders. Select the approved patch repository/gitlink together:
+`ituob/itu-ob-data` with `data`, or
+`ituob/service-publications-docs` with `data-ob`. There is no default
+patch repository.
+
+[source,json]
+----
+{
+  "staging": {
+    "account_id": "<actual-32-hex-account-id>",
+    "database_id": "<actual-D1-database-UUID>",
+    "database_name": "<actual-database-name>",
+    "notify_queue": "<actual-notification-queue>",
+    "dead_letter_queue": "<actual-dead-letter-queue>",
+    "vars": {
+      "OIDC_ISSUER": "https://<actual-identity-issuer>",
+      "OIDC_CLIENT_ID": "<registered-staging-client-id>",
+      "ACCESS_TEAM_DOMAIN": "https://<team>.cloudflareaccess.com",
+      "ACCESS_AUD": "<staging-Access-application-audience>",
+      "MAIL_FROM": "<verified-sender-address>",
+      "PATCH_REPO": "ituob/service-publications-docs",
+      "GITHUB_APP_ID": "<actual-App-or-client-ID>",
+      "GITHUB_APP_INSTALLATION_ID": "<actual-numeric-installation-ID>",
+      "GITHUB_SITE_REPO": "ituob/ituob.github.io",
+      "GITHUB_DATA_GITLINK": "data-ob"
+    }
+  }
+}
+----
+
+The generator enables `AUTH_MODE=oidc`, defaults `OIDC_CLIENT_AUTH=basic`,
+sets the exact environment callback and defaults `GITHUB_STAGING_BRANCH`
+to `staging`. It accepts the existing optional OIDC knobs documented in
+`docs/identity-accounts.adoc`, including explicit endpoints when discovery
+is unavailable. A public client requires explicit `OIDC_CLIENT_AUTH=none`;
+otherwise `OIDC_CLIENT_SECRET` is declared required. Non-HTTPS/local
+endpoints, cross-environment callbacks and development authentication
+are refused. Unknown vars, including secret-value fields, are refused.
+
+[source,sh]
+----
+# Print JSON for review; no files or remote resources change.
+node scripts/configure-cloudflare.mjs --environment staging --input /secure/path/resources.json
+
+# After reviewing the generated diff, write only the selected local config.
+node scripts/configure-cloudflare.mjs --environment staging --input /secure/path/resources.json --write
+
+# Validate local declarations before deployment.
+node scripts/configure-cloudflare.mjs --environment staging --check
+----
+
+Repeat with `--environment production` and production resources only when
+that configuration is ready for review. One environment can be configured
+before the other. When both are present in the manifest or checked-in
+configs, shared D1 databases, same-account delivery/dead-letter queues
+and shared Access application audiences are rejected.
+If `CLOUDFLARE_ACCOUNT_ID` is present, the selected config must match it.
+Generated `.jsonc` files use strict JSON, without comments or trailing commas,
+so the standalone preflight needs no dependency installation.
+
+The generated config binds `DB` with `migrations_dir=migrations`, binds
+`NOTIFY_Q` as a producer and consumer, configures a distinct dead-letter
+queue, sets a batch size of 10 / timeout of 5 seconds / five retries,
+and schedules outbox maintenance and reconciliation every five
+minutes. D1 stores hashed session tokens; there is no invented session
+signing secret. Preserve the D1 schema and never substitute the local stub.
+
+== Configure secrets and provider permissions
+
+No secret values belong in the manifest or Wrangler `vars`.
+Each Worker declares these names with `secrets.required`:
+
+* `OIDC_CLIENT_SECRET` for `basic`/`post` clients;
+* `RESEND_API_KEY` for the notification sender;
+* `GITHUB_APP_PRIVATE_KEY`, a PKCS8 PEM private key for the registered App;
+* `GITHUB_WEBHOOK_SECRET` matching the App webhook configuration.
+
+Upload through the existing secure secret-management path or Wrangler's
+interactive `secret put NAME --config <selected-config>` command.
+`--check` validates declarations, *not remote secret presence or values*.
+Wrangler validates declared required secret presence when deploying.
+A present secret can still be invalid; staging runtime checks must exercise
+the provider integration. Keep staging and production credentials separate.
+
+Register exact OIDC callback URLs:
+`https://staging-www.ituob.org/auth/callback` and
+`https://www.ituob.org/auth/callback`. Verify actual identity registration,
+claims and logout behavior; the private service contract remains unverified.
+Configure Access policy/application audience for the selected environment's
+`/admin/*`, `/api/admin/*` and `/api/ci/*` namespaces as described in
+`docs/access-configuration.adoc`.
+
+The GitHub App needs repository contents and pull-request permissions for
+the explicitly selected patch/site repositories, the appropriate installation
+and the configured webhook endpoint/secret. Verify the installation can
+read the selected repositories before exercising writes. Register a verified
+Resend sender matching `MAIL_FROM`. These permissions/provider resources
+are operational requirements; local preflight does not query them.
+
+== CI and staged runtime proof
+
+The existing `build-deploy.yml` deploys staging on pushes to `staging`.
+Production deploy runs on `main` only when repository variable
+`CLOUDFLARE_DEPLOY_PRODUCTION` equals `true`.
+Both jobs use the existing `CLOUDFLARE_API_TOKEN` secret and
+`CLOUDFLARE_ACCOUNT_ID` repository variable.
+Each deploy job must run the selected `--check` command before invoking
+Wrangler; setting the account ID in that step also checks account alignment.
+The integrator owns that workflow wiring and final runtime readiness.
+Older gating descriptions in `docs/cloudflare-webapp.adoc` predate the
+current workflow; inspect the workflow before enabling a deployment.
+
+After runtime code/checks and reviewed configuration are ready, verify
+resources/secrets, apply the repository migrations to the selected staging
+D1 with `wrangler d1 migrations apply DB --remote --config
+wrangler.staging.jsonc`, and obtain the authorized staging deployment proof.
+Do not apply staging configuration/migrations to production.
+Check login/logout/session behavior, denied anonymous administration,
+Access-authenticated administration, a pending membership claim and its
+verification, queue delivery/retry behavior, GitHub PR publication and
+reconciliation. A build or dry run does not prove these live integrations.
+Record deployed revision, configuration, migration state and results.
+Production deployment is outside this implementation's authorization.
+
+== Outstanding operational values
+
+No authenticated account/resource inventory was obtained locally.
+For each environment obtain the actual account ID, D1 UUID/name,
+notification/dead-letter queue names, Access team/audience, registered OIDC
+issuer/client configuration, verified email sender, GitHub App/installation
+IDs and the approved repository/gitlink choice. Upload the required secret
+values separately. Confirm migrations, Access policies, provider permissions
+and staging runtime behavior before declaring operational readiness.
+
+Official references:
+https://developers.cloudflare.com/workers/wrangler/configuration/[Wrangler configuration],
+https://developers.cloudflare.com/workers/configuration/secrets/[Worker secrets],
+https://developers.cloudflare.com/queues/configuration/configure-queues/[Queues configuration].

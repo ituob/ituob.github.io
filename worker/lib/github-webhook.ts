@@ -205,6 +205,11 @@ async function onPullRequest(db: D1Database, p: any, d: Delivery): Promise<Respo
   const hit = await ourPr(db, repo, pull.head?.ref);
   if (!hit || hit.pr.pr_number !== pull.number) return ignored("not a pull request we created");
   const { pr, sub } = hit;
+  // GitHub signs the event body, but the branch can have moved since approval.
+  // Only the exact head persisted when this PR was opened is eligible to transition.
+  if (typeof pr.commit_sha !== "string" || !/^[0-9a-f]{40}$/i.test(pr.commit_sha)
+      || typeof pull.head?.sha !== "string" || pull.head.sha.toLowerCase() !== pr.commit_sha.toLowerCase())
+    return ignored("pull request head does not match the approved commit");
   return respond(merged ? await applyPrMerged(db, pr, sub, input) : await applyPrClosed(db, pr, sub, input));
 }
 

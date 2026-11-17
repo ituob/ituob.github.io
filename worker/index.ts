@@ -13,6 +13,9 @@ import { flushOutbox, sweep, type NotifyMessage } from "./lib/outbox.ts";
 import { getPublisher } from "./lib/publisher.ts";
 import { reconcile } from "./lib/reconciler.ts";
 import { handleQueue } from "./queue-consumer.ts";
+import { getAccessIdentity, StubMisconfigured } from "./lib/session.ts";
+import { ituSession } from "./submission-routes.ts";
+import { Forbidden, requireRole } from "./lib/authz.ts";
 import type { Env, RuntimeEnv } from "./lib/types.ts";
 
 function hasDatabase(env: RuntimeEnv): env is Env {
@@ -49,6 +52,25 @@ export default {
       return handleAuth(request, env, url);
     }
 
+    // Worker-first routing must preserve the admin gate even if an Access
+    // application is accidentally omitted from the edge configuration.
+    if (url.pathname === "/admin" || url.pathname.startsWith("/admin/")) {
+      if (!hasDatabase(env)) {
+        return Response.json({ error: "Webapp unavailable: DB binding is not configured." }, {
+          status: 503, headers: { "Cache-Control": "no-store" },
+        });
+      }
+      try {
+        const access = await getAccessIdentity(request, env);
+        if (!access) return new Response("Forbidden", { status: 403 });
+        requireRole(await ituSession(env, access), "itu-admin", "itu-editor");
+      } catch (error) {
+        if (error instanceof StubMisconfigured) return new Response("Server misconfigured", { status: 500 });
+        if (error instanceof Forbidden) return new Response("Forbidden", { status: 403 });
+        throw error;
+      }
+    }
+
     return env.ASSETS.fetch(request);
   },
   async queue(batch: MessageBatch<NotifyMessage>, env: RuntimeEnv): Promise<void> {
@@ -65,9 +87,9 @@ export default {
       return;
     }
     await sweep(env);
-    // Repair lost webhooks. The real publisher is unconfigured until the App exists: that is a skip, not a crash.
+    // Repair lost webhooks with the configured installation-scoped publisher.
     try {
-      await reconcile(env.DB, getPublisher());
+      await reconcile(env.DB, getPublisher(env));
     } catch (e) {
       console.log(JSON.stringify({ level: "error", event: "reconcile.failed", error: String(e) }));
     }

@@ -34,7 +34,9 @@ export async function reconcile(db: D1Database, publisher: PatchPublisher): Prom
   for (const pr of prs) {
     report.checked++;
     try {
-      const gh = await publisher.getPullRequest({ repo: pr.repo, prNumber: pr.pr_number! });
+      // The persisted commit is the head that was approved. A later push to the same
+      // branch must not be allowed to repair the submission as though it were approved.
+      const gh = await publisher.getPullRequest({ repo: pr.repo, prNumber: pr.pr_number!, expectedHeadSha: pr.commit_sha ?? "" });
       if (gh.state === "open") continue;
       const sub = await getSub(db, pr.submission_id);
       const input = { number: pr.pr_number!, mergeSha: gh.mergeSha, baseRef: gh.baseRef, d: null };

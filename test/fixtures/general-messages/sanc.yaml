@@ -1,0 +1,94 @@
+type: sanc
+contents:
+  en:
+    type: doc
+    content:
+    - type: paragraph
+      content:
+      - type: text
+        marks:
+        - type: strong
+        text: Note from TSB
+    - type: paragraph
+      content:
+      - type: text
+        text: 'At the request of the Administration of Singapore, the Director of
+          TSB has assigned the following signalling area/network code (SANC) for use
+          in the international part of the signalling system No. 7 network of this
+          country/geographical area, in accordance with Recommendation ITU-T Q.708
+          (03/99):'
+    - type: paragraph
+      content:
+      - type: text
+        text: " "
+    - type: table
+      content:
+      - type: table_row
+        content:
+        - type: table_cell
+          attrs:
+            colspan: 1
+            rowspan: 1
+            colwidth:
+          content:
+          - type: paragraph
+            content:
+            - type: text
+              marks:
+              - type: em
+              text: Country
+            - type: text
+              text: "/"
+            - type: text
+              marks:
+              - type: em
+              text: geographical area or signalling network
+        - type: table_cell
+          attrs:
+            colspan: 1
+            rowspan: 1
+            colwidth:
+          content:
+          - type: paragraph
+            content:
+            - type: text
+              marks:
+              - type: em
+              text: SANC
+      - type: table_row
+        content:
+        - type: table_cell
+          attrs:
+            colspan: 1
+            rowspan: 1
+            colwidth:
+          content:
+          - type: paragraph
+            content:
+            - type: text
+              text: Singapore (Republic of)
+        - type: table_cell
+          attrs:
+            colspan: 1
+            rowspan: 1
+            colwidth:
+          content:
+          - type: paragraph
+            content:
+            - type: text
+              text: 5-144
+    - type: paragraph
+      content:
+      - type: text
+        text: ____________
+    - type: paragraph
+      content:
+      - type: text
+        text: SANC:      Signalling Area/Network Code.
+      - type: hard_break
+      - type: text
+        text: Code de zone/réseau sémaphore (CZRS).
+      - type: hard_break
+      - type: text
+        text: Código de zona/red de señalización (CZRS).
+ob_issue_no: '1069'

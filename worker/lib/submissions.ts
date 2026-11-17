@@ -7,7 +7,7 @@ import { ConflictError, InvalidError, NotFoundError } from "./membership.ts";
 import { type OpenedPr, type PatchPublisher, branchName } from "./publisher.ts";
 import type { Session } from "./types.ts";
 import { ulid } from "./ulid.ts";
-import { ACTION_TYPES, type ActionType, type FieldError, registerKeysOf, validate } from "./validation.ts";
+import { ACTION_TYPES, type ActionType, type FieldError, registerKeysOf, submissionTargetErrors, validate } from "./validation.ts";
 
 export class ValidationFailed extends Error {
   constructor(public errors: FieldError[]) {
@@ -38,9 +38,9 @@ export interface Sub {
   updated_at: string;
 }
 
-export const DEFAULT_PATCH_REPO = "ituob/service-publications-docs";
+export const DEFAULT_PATCH_REPO = "ituob/itu-ob-data";
 const now = () => new Date().toISOString();
-const VALIDATOR_VERSION = "stage1-v1";
+const VALIDATOR_VERSION = "stage1-v2";
 
 /** Actor on a transition: a user, or the system (queue consumer). */
 export type Actor = { kind: "user"; id: string } | { kind: "system"; id: null } | { kind: "github"; id: null };
@@ -197,8 +197,8 @@ function parseCreate(b: Record<string, unknown>) {
   const register_id = typeof b.register_id === "string" ? b.register_id : "";
   const slug = typeof b.slug === "string" ? b.slug : "";
   const action_type = b.action_type as ActionType;
-  if (!/^[A-Z0-9_]{1,40}$/.test(register_id)) throw new InvalidError("register_id required");
-  if (!/^[a-z0-9]+(-[a-z0-9]+)*$/.test(slug)) throw new InvalidError("slug must be lowercase kebab-case");
+  const targetErrors = submissionTargetErrors(register_id, slug);
+  if (targetErrors.length) throw new ValidationFailed(targetErrors);
   if (!ACTION_TYPES.includes(action_type)) throw new InvalidError("action_type must be one of " + ACTION_TYPES.join(","));
   if (!b.payload || typeof b.payload !== "object" || Array.isArray(b.payload)) throw new InvalidError("payload must be an object");
   const corrects_id = b.corrects_id === undefined || b.corrects_id === null ? null : String(b.corrects_id);
@@ -206,16 +206,39 @@ function parseCreate(b: Record<string, unknown>) {
   return { register_id, slug, action_type, payload: b.payload as Record<string, unknown>, corrects_id };
 }
 
-/** Country binding on every payload write. LIR (no entries) is ITU-staff only. */
+/** Country binding on every payload write. Unscoped text and LIR are ITU-staff only. */
 async function bind(db: D1Database, session: Session, register_id: string, action: ActionType, payload: unknown) {
+  const data = (payload as { data?: { _class?: unknown } } | null)?.data;
+  if (data?._class === "TextAmendment" && !isItu(session))
+    throw new ValidationFailed([{
+      path: "data", code: "mismatch",
+      message: "Text amendments require an ITU editor or administrator because their country scope cannot be verified",
+    }]);
   const keys = registerKeysOf(register_id, payload);
-  if (action === "LIR" && !isItu(session)) throw new Forbidden();
+  if ((action === "LIR" || action === "SEED") && !isItu(session)) throw new Forbidden();
   // ITU roles are not key-bound; authorizeEntries needs a non-empty list to be callable.
-  if (keys.length === 0 && !isItu(session)) throw new InvalidError("no country/area key found in the entries");
+  if (keys.length === 0 && !isItu(session)) {
+    // An invalid class cannot supply a country field. Return its schema errors
+    // rather than hiding them behind the valid-but-unscoped payload error.
+    const errors = validate({ register_id, action_type: action, payload });
+    if (errors.length) throw new ValidationFailed(errors);
+    throw new InvalidError("no country/area key found in the entries");
+  }
   return authorizeEntries(db, session, keys.length ? keys : ["-"]);
 }
 
-export async function createSubmission(db: D1Database, session: Session | null, b: Record<string, unknown>): Promise<Sub> {
+/** SEED is the only full-state action: ITU staff only, and only while the register's replayed state is empty. */
+export type EmptyRegisterCheck = (slug: string) => Promise<boolean>;
+async function requireEmptyRegister(db: D1Database, action: ActionType, slug: string, isEmpty: EmptyRegisterCheck | undefined, selfId: string | null) {
+  if (action !== "SEED") return;
+  // One SEED per register: replay seeds once, so a second in-flight SEED would open a second full-state PR.
+  const other = await db.prepare(`SELECT id FROM submissions WHERE action_type='SEED' AND slug=?1 AND id IS NOT ?2 AND state NOT IN ('rejected','withdrawn') LIMIT 1`).bind(slug, selfId).first();
+  if (other) throw new ConflictError(`register ${slug} already has a SEED in progress; withdraw or finish it first`);
+  if (!isEmpty) throw new UpstreamError("register state cannot be checked; a SEED is refused");
+  if (!(await isEmpty(slug))) throw new ConflictError(`register ${slug} already has state; change it with ADD, REP or SUP actions, not a SEED`);
+}
+
+export async function createSubmission(db: D1Database, session: Session | null, b: Record<string, unknown>, isEmpty?: EmptyRegisterCheck): Promise<Sub> {
   const s = requireUser(session);
   const c = parseCreate(b);
   const snap = await bind(db, s, c.register_id, c.action_type, c.payload);
@@ -228,7 +251,9 @@ export async function createSubmission(db: D1Database, session: Session | null, 
   }
   const id = ulid();
   const t = now();
-  const errors = validate({ register_id: c.register_id, action_type: c.action_type, payload: c.payload });
+  const errors = validate({ register_id: c.register_id, slug: c.slug, action_type: c.action_type, payload: c.payload });
+  if (errors.length) throw new ValidationFailed(errors);
+  await requireEmptyRegister(db, c.action_type, c.slug, isEmpty, null);
   const rev = await revisionRow({ id }, 1, c.payload, errors, s.userId, t);
   const stmts = [
     db
@@ -269,13 +294,14 @@ async function newRevisionPayload(db: D1Database, s: Session, sub: Sub, b: Recor
   return payload as Record<string, unknown>;
 }
 
-/** Draft edit: a new immutable revision, no state change, audited. Invalid content is allowed in a draft. */
+/** Draft edit: a validated immutable revision, no state change, audited. */
 export async function editDraft(db: D1Database, session: Session | null, id: string, b: Record<string, unknown>) {
   const { s, sub } = await ownSub(db, session, id);
   if (sub.state !== "draft") throw new ConflictError(`illegal transition from ${sub.state}`);
   const payload = await newRevisionPayload(db, s, sub, b);
   const t = now();
-  const errors = validate({ register_id: sub.register_id, action_type: sub.action_type, payload });
+  const errors = validate({ register_id: sub.register_id, slug: sub.slug, action_type: sub.action_type, payload });
+  if (errors.length) throw new ValidationFailed(errors);
   const rev = await revisionRow(sub, sub.current_rev + 1, payload, errors, s.userId, t);
   return mutate(db, sub, {
     from: ["draft"], to: "draft", actor: { kind: "user", id: s.userId }, auditAction: "submission.draft_edited",
@@ -293,7 +319,7 @@ export async function submitDraft(db: D1Database, session: Session | null, id: s
     .first<{ payload_yaml: string }>();
   const payload = parsePayload(cur!.payload_yaml);
   await bind(db, s, sub.register_id, sub.action_type, payload); // authority re-checked at submit time
-  const errors = validate({ register_id: sub.register_id, action_type: sub.action_type, payload });
+  const errors = validate({ register_id: sub.register_id, slug: sub.slug, action_type: sub.action_type, payload });
   if (errors.length) throw new ValidationFailed(errors);
   return mutate(db, sub, { ...MOVES.submit, actor: { kind: "user", id: s.userId }, auditAction: "submission.state" });
 }
@@ -303,7 +329,7 @@ export async function reviseSubmission(db: D1Database, session: Session | null, 
   const { s, sub } = await ownSub(db, session, id);
   if (sub.state !== "changes_requested") throw new ConflictError(`illegal transition from ${sub.state}`);
   const payload = await newRevisionPayload(db, s, sub, b);
-  const errors = validate({ register_id: sub.register_id, action_type: sub.action_type, payload });
+  const errors = validate({ register_id: sub.register_id, slug: sub.slug, action_type: sub.action_type, payload });
   if (errors.length) throw new ValidationFailed(errors);
   const t = now();
   const rev = await revisionRow(sub, sub.current_rev + 1, payload, errors, s.userId, t);
@@ -370,9 +396,10 @@ export function finalYaml(sub: Sub, edition: number, seq: number, payloadYaml: s
  * happens afterwards in openPr (the "queue consumer"), so a GitHub outage never
  * un-approves anything.
  */
-export async function approve(db: D1Database, session: Session | null, id: string, b: Record<string, unknown>, repo: string) {
+export async function approve(db: D1Database, session: Session | null, id: string, b: Record<string, unknown>, repo: string, isEmpty?: EmptyRegisterCheck) {
   const s = reviewer(session);
   const sub = await getSub(db, id);
+  await requireEmptyRegister(db, sub.action_type, sub.slug, isEmpty, sub.id);
   const detail = selfReview(s, sub, b);
   if (sub.state !== "in_review") throw new ConflictError(`illegal transition from ${sub.state}`);
   const edition = b.target_edition;
@@ -381,7 +408,7 @@ export async function approve(db: D1Database, session: Session | null, id: strin
     .prepare(`SELECT payload_yaml FROM submission_revisions WHERE submission_id=?1 AND rev=?2`)
     .bind(sub.id, sub.current_rev)
     .first<{ payload_yaml: string }>();
-  const errors = validate({ register_id: sub.register_id, action_type: sub.action_type, payload: parsePayload(cur!.payload_yaml) });
+  const errors = validate({ register_id: sub.register_id, slug: sub.slug, action_type: sub.action_type, payload: parsePayload(cur!.payload_yaml) });
   if (errors.length) throw new ValidationFailed(errors);
 
   // Gaps in NNN are legal (design); a lost race burns one number, never reuses one.
@@ -540,14 +567,20 @@ export async function readSubmission(db: D1Database, session: Session | null, id
   const revisions = (await db.prepare(`SELECT rev,payload_yaml,payload_sha,validation,created_by,created_at FROM submission_revisions WHERE submission_id=?1 ORDER BY rev`).bind(id).all()).results;
   const history = (await db.prepare(`SELECT from_state,to_state,actor_id,actor_kind,reason,rev,at FROM review_state WHERE submission_id=?1 ORDER BY id`).bind(id).all()).results;
   const pr = await db.prepare(`SELECT repo,branch,path,pr_number,pr_state,attempts,last_error FROM submission_prs WHERE submission_id=?1 ORDER BY rev DESC LIMIT 1`).bind(id).first();
-  return { submission: sub, revisions, history, pr };
+  const affiliation = sub.affiliation_member_id
+    ? await db.prepare(`SELECT name FROM members WHERE id=?1`).bind(sub.affiliation_member_id).first<{ name: string }>()
+    : null;
+  return { submission: { ...sub, affiliation_member_name: affiliation?.name ?? null }, revisions, history, pr };
 }
 
 export async function listSubmissions(db: D1Database, session: Session | null, state: string | null, all: boolean) {
   const s = requireUser(session);
   if (all && !isItu(s)) throw new Forbidden();
-  const where = [all ? "1=1" : "proposer_id = ?1"];
+  const where = [all ? "1=1" : "s.proposer_id = ?1"];
   const args: unknown[] = all ? [] : [s.userId];
-  if (state) { args.push(state); where.push(`state = ?${args.length}`); }
-  return (await db.prepare(`SELECT * FROM submissions WHERE ${where.join(" AND ")} ORDER BY created_at, id`).bind(...args).all()).results;
+  if (state) { args.push(state); where.push(`s.state = ?${args.length}`); }
+  return (await db.prepare(`SELECT s.*, m.name AS affiliation_member_name FROM submissions s
+                            LEFT JOIN members m ON m.id=s.affiliation_member_id
+                            WHERE ${where.join(" AND ")}
+                            ORDER BY s.created_at, s.id`).bind(...args).all()).results;
 }

@@ -22,8 +22,21 @@ export interface Env {
   OIDC_SCOPES?: string;
   OIDC_SUB_KEY?: string;
   OIDC_ID_TOKEN_ALGS?: string;
-  /** Patch repository for approval PRs (design D1); default ituob/service-publications-docs. */
+  /** Authoritative action repository, explicitly configured for real publishing. */
   PATCH_REPO?: string;
+  /** Catalog repository (registers.yaml); defaults to ituob/service-publications-docs. */
+  CATALOG_REPO?: string;
+  /** GitHub App credentials; the private key is PKCS8 PEM in a Worker secret. */
+  GITHUB_APP_ID?: string;
+  GITHUB_APP_PRIVATE_KEY?: string;
+  GITHUB_APP_INSTALLATION_ID?: string;
+  GITHUB_SITE_REPO?: string;
+  /** Read-only token for repository reads (register state, existing messages). Unset: reads fail closed. */
+  GITHUB_READ_TOKEN?: string;
+  /** Repository holding the register datasets and the ob-issues patch log; default ituob/service-publications-docs. */
+  GITHUB_DATA_REPO?: string;
+  GITHUB_DATA_GITLINK?: string;
+  GITHUB_STAGING_BRANCH?: string;
   /** Cloudflare Access team origin and application AUD (docs/access-configuration.adoc); both required outside stub mode. */
   ACCESS_TEAM_DOMAIN?: string;
   ACCESS_AUD?: string;

@@ -31,8 +31,18 @@ export const discussionRoutes: Route[] = [
     handler: async ({ env, session, params }) => { await markRead(env.DB, session, params[0]!); return json({ ok: true }); } },
   { method: "PUT", pattern: /^\/api\/me\/notification-prefs$/, guard: "session",
     handler: async ({ request, env, session }) => json({ ok: true, ...(await setPrefs(env.DB, session, (await body(request)).level)) }) },
+  { method: "GET", pattern: /^\/api\/me\/notification-prefs$/, guard: "session",
+    handler: async ({ env, session }) => {
+      const row = await env.DB.prepare("SELECT level FROM notification_prefs WHERE user_id=?1").bind(session!.userId).first<{ level: string }>();
+      return json({ ok: true, level: row?.level ?? "all" });
+    } },
   { method: "PUT", pattern: /^\/api\/me\/handle$/, guard: "session",
     handler: async ({ request, env, session }) => json({ ok: true, ...(await setHandle(env.DB, session, (await body(request)).handle)) }) },
+  { method: "GET", pattern: /^\/api\/me\/handle$/, guard: "session",
+    handler: async ({ env, session }) => {
+      const row = await env.DB.prepare("SELECT handle FROM user_handles WHERE user_id=?1").bind(session!.userId).first<{ handle: string }>();
+      return json({ ok: true, handle: row?.handle ?? null });
+    } },
 
   // ITU equivalents (the role check is repeated server-side by ituSession).
   { method: "GET", pattern: re(`${adm}/comments`), guard: "access",

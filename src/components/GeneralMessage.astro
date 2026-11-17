@@ -1,0 +1,37 @@
+---
+import TextualMessage from "~/components/TextualMessage.astro";
+import TelephoneService from "~/components/TelephoneService.astro";
+import ServiceRestrictions, { type ServiceRestrictionItem } from "~/components/ServiceRestrictions.astro";
+import GeneralContent from "~/components/GeneralContent.astro";
+import AdocText from "~/components/AdocText.astro";
+import { loadGeneralAdoc } from "~/lib/loaders";
+import type { TextualGeneralMessage } from "~/lib/types";
+import type { Language } from "~/lib/catalogs";
+interface Props { message: TextualGeneralMessage; issueId: number; lang?: Language }
+const { message, issueId, lang = "en" } = Astro.props;
+// Structured legacy payloads coexist with opaque authored contents on the wire.
+const payload = message as unknown as { contents?: unknown; items?: Record<string, unknown>[]; notes?: string };
+const telephone = message.type === "telephone_service" || message.type === "telephone_service_2";
+const asset = typeof payload.contents === "string" && payload.contents.endsWith(".adoc")
+  ? loadGeneralAdoc(issueId, payload.contents) : null;
+---
+{message.type === "service_restrictions" && Array.isArray(payload.items) && (payload.items.length > 0 || !payload.contents) ? (
+  <ServiceRestrictions items={payload.items as unknown as ServiceRestrictionItem[]} lang={lang} />
+) : telephone && Array.isArray(payload.contents) && payload.contents.length > 0 ? (
+  <TelephoneService contents={payload.contents} lang={lang} />
+) : telephone && Array.isArray(payload.items) && payload.items.length > 0 ? (
+  payload.items.map(item => <Astro.self message={{ ...item, type: "telephone_service" } as TextualGeneralMessage} issueId={issueId} lang={lang} />)
+) : message.type === "sanc" && (Array.isArray(payload.items) || typeof payload.notes === "string") ? (
+  <div>
+    <GeneralContent content={payload.contents} lang={lang} />
+    {payload.items && payload.items.length > 0 && <table class="table-bulletin">
+      <thead><tr><th>Country / Geographical Area</th><th>SANC</th></tr></thead>
+      <tbody>{payload.items.map(item => <tr><td>{String(item.country ?? "")}</td><td>{String(item.sanc ?? "")}</td></tr>)}</tbody>
+    </table>}
+    {payload.notes && <GeneralContent content={payload.notes} lang={lang} />}
+  </div>
+) : asset !== null ? (
+  <AdocText text={asset} />
+) : (
+  <TextualMessage message={message} lang={lang} />
+)}
