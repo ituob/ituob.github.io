@@ -84,7 +84,7 @@ export function registerKeysOf(register_id: string, payload: unknown): string[] 
     if (k) keys.push(k);
     // Country/service and area/network registers also contain unscoped rows.
     // A member may never smuggle one into a country-bound batch; ITU staff can.
-    else if (field === "country_area_or_service" || field === "area_or_network") keys.push("");
+    else if (field === "country_area_or_service" || field === "area_or_network") return [];
   }
   return keys;
 }
