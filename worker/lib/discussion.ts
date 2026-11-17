@@ -356,17 +356,30 @@ export async function markRead(db: D1Database, session: Session | null, id: stri
   if (r.meta.changes !== 1) throw new NotFoundError("unknown notification");
 }
 
-export async function setPrefs(db: D1Database, session: Session | null, level: unknown): Promise<{ level: Level }> {
+export async function getPrefs(db: D1Database, session: Session | null): Promise<{ level: Level; delivery: "immediate" | "digest"; locale: string | null }> {
+  const s = user(session);
+  const row = await db.prepare(`SELECT p.level, p.delivery, u.locale FROM users u LEFT JOIN notification_prefs p ON p.user_id=u.id WHERE u.id=?1`)
+    .bind(s.userId).first<{ level: string | null; delivery: string | null; locale: string | null }>();
+  if (!row) throw new NotFoundError("unknown user");
+  return { level: (row.level ?? "all") as Level, delivery: (row.delivery ?? "immediate") as "immediate" | "digest", locale: row.locale };
+}
+
+export async function setPrefs(db: D1Database, session: Session | null, level: unknown, delivery?: unknown, locale?: unknown): Promise<{ level: Level; delivery: "immediate" | "digest"; locale: string | null }> {
   const s = user(session);
   if (level !== "all" && level !== "mentions" && level !== "none") throw new InvalidError("level must be all, mentions or none");
+  if (delivery !== undefined && delivery !== "immediate" && delivery !== "digest") throw new InvalidError("delivery must be immediate or digest");
+  if (locale !== undefined && locale !== null && (typeof locale !== "string" || locale.length > 35 || !/^[A-Za-z]{2,8}(?:-[A-Za-z0-9]{1,8})*$/.test(locale))) throw new InvalidError("locale must be a BCP 47 language tag of at most 35 characters or null");
   const t = now();
-  const old = await db.prepare(`SELECT level FROM notification_prefs WHERE user_id=?1`).bind(s.userId).first<{ level: string }>();
+  const old = await getPrefs(db, s);
+  const nextDelivery = delivery === undefined ? old.delivery : delivery;
+  const nextLocale = locale === undefined ? old.locale : locale;
   await run(db, [
-    db.prepare(`INSERT INTO notification_prefs (user_id,level,updated_at) VALUES (?1,?2,?3) ON CONFLICT (user_id) DO UPDATE SET level=?2, updated_at=?3`).bind(s.userId, level, t),
+    db.prepare(`INSERT INTO notification_prefs (user_id,level,delivery,updated_at) VALUES (?1,?2,?3,?4) ON CONFLICT (user_id) DO UPDATE SET level=?2, delivery=?3, updated_at=?4`).bind(s.userId, level, nextDelivery, t),
+    db.prepare(`UPDATE users SET locale=?2 WHERE id=?1`).bind(s.userId, nextLocale),
     ...(await auditStatements(db, [{
       at: t, actor_id: s.userId, actor_kind: "user", action: "prefs.changed", subject_type: "user", subject_id: s.userId,
-      submission_id: null, detail: { from: old?.level ?? "all", to: level },
+      submission_id: null, detail: { from: old, to: { level, delivery: nextDelivery, locale: nextLocale } },
     }])),
   ]);
-  return { level };
+  return { level: level as Level, delivery: nextDelivery as "immediate" | "digest", locale: nextLocale as string | null };
 }

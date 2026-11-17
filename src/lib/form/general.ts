@@ -1,5 +1,6 @@
 import { blankState, setField } from "./model.ts";
 import { classify } from "./corpus.ts";
+import { ANNEX_TYPE } from "./annexes.ts";
 
 // Names are UI choices only: corpus.classify owns the authoritative class binding.
 export const GENERAL_TYPES = ["approved_recommendations", "callback_procedures", "custom", "ipns", "iptn", "mid", "misc_communications", "org_changes", "running_annexes", "sanc", "service_restrictions", "telephone_service", "telephone_service_2"] as const;
@@ -11,6 +12,26 @@ export function generalBinding(type: unknown, sequence = 1): { className: string
   const binding = classify(relativePath, { type });
   if (!binding || binding.role !== "general") throw new Error("unsupported canonical general-message type");
   return { className: binding.className, relativePath };
+}
+
+/** A path with no sequence number: one record per issue. */
+export function isSingletonPath(relativePath: string): boolean {
+  return relativePath.startsWith("general/") || !relativePath.includes("/");
+}
+
+/**
+ * Staff draft types: the general messages plus the issue's annexes. Annexes
+ * are not a message (no `type`/`ob_issue_no` envelope, authored on their own
+ * page), so they are not in GENERAL_TYPES, but they share the draft, approval
+ * and review-PR flow, so every draft consumer binds through here.
+ */
+export function draftBinding(type: unknown, sequence = 1): { className: string; relativePath: string } {
+  if (type === ANNEX_TYPE) {
+    const binding = classify("annexes.yaml", null);
+    if (!binding || binding.role !== "annexes") throw new Error("annexes are not classified");
+    return { className: binding.className, relativePath: "annexes.yaml" };
+  }
+  return generalBinding(type, sequence);
 }
 
 /** New drafts use raw wire values; form nodes are produced by setField. */

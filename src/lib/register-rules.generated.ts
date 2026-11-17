@@ -6,9 +6,11 @@ export interface RegisterIdentity {
   keyFields: readonly string[];
   fallbackKeyFields: readonly (readonly string[])[];
   amendmentClass: string | null;
+  countryField: string | null;
 }
 export const REGISTER_IDENTITIES: Readonly<Record<string, RegisterIdentity>> = {
   "E118_IIN": {
+    "countryField": "country_or_area",
     "keyFields": [
       "issue_id_number"
     ],
@@ -16,6 +18,7 @@ export const REGISTER_IDENTITIES: Readonly<Record<string, RegisterIdentity>> = {
     "amendmentClass": "E118Amendment"
   },
   "DP": {
+    "countryField": "country_or_area",
     "keyFields": [
       "country_code"
     ],
@@ -23,6 +26,7 @@ export const REGISTER_IDENTITIES: Readonly<Record<string, RegisterIdentity>> = {
     "amendmentClass": "DPAmendment"
   },
   "E164_ACN": {
+    "countryField": "country_or_area",
     "keyFields": [
       "country_code"
     ],
@@ -30,6 +34,7 @@ export const REGISTER_IDENTITIES: Readonly<Record<string, RegisterIdentity>> = {
     "amendmentClass": "E164ACNAmendment"
   },
   "E164_CC": {
+    "countryField": "country_area_or_service",
     "keyFields": [
       "country_code"
     ],
@@ -41,6 +46,7 @@ export const REGISTER_IDENTITIES: Readonly<Record<string, RegisterIdentity>> = {
     "amendmentClass": "E164CCAmendment"
   },
   "E164_NOTE_N": {
+    "countryField": null,
     "keyFields": [
       "cc_ic"
     ],
@@ -48,6 +54,7 @@ export const REGISTER_IDENTITIES: Readonly<Record<string, RegisterIdentity>> = {
     "amendmentClass": "E164CCAmendment"
   },
   "E164_NOTE_O": {
+    "countryField": null,
     "keyFields": [
       "cc_ic"
     ],
@@ -55,6 +62,7 @@ export const REGISTER_IDENTITIES: Readonly<Record<string, RegisterIdentity>> = {
     "amendmentClass": "E164CCAmendment"
   },
   "E164_NOTE_PQ": {
+    "countryField": null,
     "keyFields": [
       "cc_ic"
     ],
@@ -62,6 +70,7 @@ export const REGISTER_IDENTITIES: Readonly<Record<string, RegisterIdentity>> = {
     "amendmentClass": "E164CCAmendment"
   },
   "NNP": {
+    "countryField": null,
     "keyFields": [
       "country_or_area"
     ],
@@ -69,6 +78,7 @@ export const REGISTER_IDENTITIES: Readonly<Record<string, RegisterIdentity>> = {
     "amendmentClass": null
   },
   "E212_MNC": {
+    "countryField": "country_or_area",
     "keyFields": [
       "mcc_mnc_codes"
     ],
@@ -76,6 +86,7 @@ export const REGISTER_IDENTITIES: Readonly<Record<string, RegisterIdentity>> = {
     "amendmentClass": "E212MNCAmendment"
   },
   "E212_SHARED_MCC": {
+    "countryField": null,
     "keyFields": [
       "mcc_mnc_codes"
     ],
@@ -83,6 +94,7 @@ export const REGISTER_IDENTITIES: Readonly<Record<string, RegisterIdentity>> = {
     "amendmentClass": "E212MNCAmendment"
   },
   "E212_ICC": {
+    "countryField": null,
     "keyFields": [
       "tmcc_code"
     ],
@@ -90,6 +102,7 @@ export const REGISTER_IDENTITIES: Readonly<Record<string, RegisterIdentity>> = {
     "amendmentClass": null
   },
   "E218_TRCC": {
+    "countryField": "country_or_area",
     "keyFields": [
       "tmcc_code"
     ],
@@ -97,6 +110,7 @@ export const REGISTER_IDENTITIES: Readonly<Record<string, RegisterIdentity>> = {
     "amendmentClass": "E218TRCCAmendment"
   },
   "F1": {
+    "countryField": null,
     "keyFields": [
       "code"
     ],
@@ -104,6 +118,7 @@ export const REGISTER_IDENTITIES: Readonly<Record<string, RegisterIdentity>> = {
     "amendmentClass": null
   },
   "F32_TDI": {
+    "countryField": "country_or_area",
     "keyFields": [
       "office_code"
     ],
@@ -111,6 +126,7 @@ export const REGISTER_IDENTITIES: Readonly<Record<string, RegisterIdentity>> = {
     "amendmentClass": "F32TDIAmendment"
   },
   "BUREAUFAX": {
+    "countryField": "country_or_area",
     "keyFields": [
       "bureaufax_number"
     ],
@@ -118,6 +134,7 @@ export const REGISTER_IDENTITIES: Readonly<Record<string, RegisterIdentity>> = {
     "amendmentClass": null
   },
   "F400_ADMD": {
+    "countryField": "country_or_area",
     "keyFields": [
       "admd_name"
     ],
@@ -125,6 +142,7 @@ export const REGISTER_IDENTITIES: Readonly<Record<string, RegisterIdentity>> = {
     "amendmentClass": "F400Amendment"
   },
   "M1400_ICC": {
+    "countryField": "country_or_area",
     "keyFields": [
       "carrier_code"
     ],
@@ -132,6 +150,7 @@ export const REGISTER_IDENTITIES: Readonly<Record<string, RegisterIdentity>> = {
     "amendmentClass": "M1400Amendment"
   },
   "Q708_ISPC": {
+    "countryField": "country",
     "keyFields": [
       "ipsc"
     ],
@@ -139,6 +158,7 @@ export const REGISTER_IDENTITIES: Readonly<Record<string, RegisterIdentity>> = {
     "amendmentClass": "Q708ISPCAmendment"
   },
   "Q708_SANC": {
+    "countryField": "area_or_network",
     "keyFields": [
       "code"
     ],
@@ -146,6 +166,7 @@ export const REGISTER_IDENTITIES: Readonly<Record<string, RegisterIdentity>> = {
     "amendmentClass": "Q708SANCAmendment"
   },
   "T35_NA": {
+    "countryField": "country",
     "keyFields": [
       "country"
     ],
@@ -153,6 +174,7 @@ export const REGISTER_IDENTITIES: Readonly<Record<string, RegisterIdentity>> = {
     "amendmentClass": "T35NAAmendment"
   },
   "T35_CC": {
+    "countryField": "country_or_area",
     "keyFields": [
       "code_bit"
     ],
@@ -160,6 +182,7 @@ export const REGISTER_IDENTITIES: Readonly<Record<string, RegisterIdentity>> = {
     "amendmentClass": null
   },
   "X121_DNIC": {
+    "countryField": "country_or_area",
     "keyFields": [
       "dnic_number"
     ],
@@ -167,6 +190,7 @@ export const REGISTER_IDENTITIES: Readonly<Record<string, RegisterIdentity>> = {
     "amendmentClass": "X121DNICAmendment"
   },
   "RR.25.1": {
+    "countryField": "country_or_area",
     "keyFields": [
       "country_or_area"
     ],
@@ -174,6 +198,7 @@ export const REGISTER_IDENTITIES: Readonly<Record<string, RegisterIdentity>> = {
     "amendmentClass": null
   },
   "List of Coast Stations and Special Service Stations": {
+    "countryField": null,
     "keyFields": [
       "callsign"
     ],
@@ -181,6 +206,7 @@ export const REGISTER_IDENTITIES: Readonly<Record<string, RegisterIdentity>> = {
     "amendmentClass": null
   },
   "R_SP_LM.V": {
+    "countryField": null,
     "keyFields": [
       "mmsi"
     ],
@@ -188,6 +214,7 @@ export const REGISTER_IDENTITIES: Readonly<Record<string, RegisterIdentity>> = {
     "amendmentClass": null
   },
   "R_SP_LN.VIII": {
+    "countryField": null,
     "keyFields": [
       "callsign"
     ],
@@ -200,7 +227,7 @@ export const AMENDMENT_COUNTRY_FIELDS: Readonly<Record<string, string | null>> =
   "Amendment": null,
   "E118Amendment": "country_or_area",
   "E164ACNAmendment": "country_or_area",
-  "E164CCAmendment": null,
+  "E164CCAmendment": "country_area_or_service",
   "E212MNCAmendment": "country_or_area",
   "E218TRCCAmendment": "country_or_area",
   "F32TDIAmendment": "country_or_area",
@@ -210,7 +237,7 @@ export const AMENDMENT_COUNTRY_FIELDS: Readonly<Record<string, string | null>> =
   "NNPAmendment": "country_or_area",
   "DPAmendment": "country_or_area",
   "Q708ISPCAmendment": "country",
-  "Q708SANCAmendment": null,
+  "Q708SANCAmendment": "area_or_network",
   "RR251Amendment": "country_or_area",
   "T35NAAmendment": "country",
   "X121DNICAmendment": "country_or_area",

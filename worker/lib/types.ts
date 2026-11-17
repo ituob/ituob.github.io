@@ -44,7 +44,7 @@ export interface Env {
   ACCESS_CI_CLIENT_IDS?: string;
   /** Who may adopt a PDF (candidate -> itu-adopted): comma list of `role:<role>` / `email:<address>`. Unset = `role:itu-editor,role:itu-admin`; a malformed value denies everyone. Owner-set; docs/pdf-adoption.adoc. */
   ADOPTION_APPROVERS?: string;
-  /** Email provider (queue consumer only): EMAIL_PROVIDER = "log" | "http"; see docs/email-configuration.adoc. */
+  /** Email provider (queue consumer only): EMAIL_PROVIDER = "recording" | "log" | "http"; see docs/email-configuration.adoc. */
   EMAIL_PROVIDER?: string;
   EMAIL_API_URL?: string;
   EMAIL_API_KEY?: string;

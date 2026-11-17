@@ -22,6 +22,11 @@ member state binding is also the authorization boundary for submissions.
 
 === How the roster arrives — decision
 
+Implemented bootstrap: see `roster-seed.adoc` and `npm run seed:roster`. The
+git-pinned country vocabulary seeds suspended candidates only, preserving
+existing decisions. It does not certify TSB eligibility or create staff accounts.
+The manual verified-list import below remains the authoritative refresh path.
+
 *Recommendation: manual seed from the TSB member list, reviewed in git,
 with an admin-only, diff-previewed re-import as the refresh path. No
 live sync in v1.*

@@ -127,8 +127,8 @@ string attribute or it cannot be authored.
 [cols="1,4,3,4,1,1",options="header"]
 |===
 | ID | Editor feature | Editor ref | Web app ref | PR | Status
-| F1 | Annex a publication to the issue (picker; running annexes first) | `new-item-prompts/annex.tsx`, `annexes/index.tsx` | none: no annex class in `class-description.generated.json`, no admin form | n/a | MISSING (blocks unless annexes.yaml is formally retired)
-| F2 | Set the annexed position date | `annexes/index.tsx:66-81` | none | n/a | MISSING (same decision as F1)
+| F1 | Annex a publication to the issue (picker; running annexes first) | `new-item-prompts/annex.tsx`, `annexes/index.tsx` | `AnnexEditor.vue` at `/admin/annexes`; `src/lib/form/annexes.ts` (shared browser/Worker rules, `pickerCandidates`, `runningAnnexes`); `src/pages/annex-index.json.ts`; draft type `annexes` at `ob-issues/N/annexes.yaml` through the general-message draft, approval and review-PR flow | this PR (base #110) | IN PR (the picker offers every id ever annexed plus free-text new id: the site has no publication catalogue, ids are an open set)
+| F2 | Set the annexed position date | `annexes/index.tsx:66-81` | `AnnexEditor.vue` date input; `validateAnnexes` rejects non-dates server side; `setAnnexPosition` keeps stored datasets | this PR (base #110) | IN PR
 | F3 | Annex dataset grid editor (typed fields, search, row add/move/delete) | `annexes/position-data.tsx` | none | n/a | DROPPED (registers replace datasets; 1 of 61 annex entries carried datasets)
 | F4 | Auto-fill annex datasets | `annexes/index.tsx:161-175` | replay | main | DROPPED
 | F5 | Display of annexes and running annexes on issue pages | n/a (published site) | `RunningAnnexes.astro` | main | DONE
@@ -222,8 +222,8 @@ impact:
   read-only. Each needs a model fix or a recorded drop.
 . *Editing and deleting existing general messages (D2, D3).* Only new drafts can
   be created; no replace-by-path, no delete.
-. *Annex authoring (F1, F2).* No class and no form. Decide: add an annexes class
-  and form, or retire `annexes.yaml` authoring and say so in #101.
+. *Annex authoring (F1, F2).* Authored in `AnnexEditor.vue` (in PR, base #110); not
+  retired: OB 1350 carries a live annex. Datasets (F3) are kept but not editable.
 . *Service-publication create/edit (G1).* Same kind of decision: a form, or a
   recorded "added in code" rule.
 . *New-issue defaults (B8).* Authors, ISSN and languages are retyped per issue.

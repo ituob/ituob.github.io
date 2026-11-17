@@ -214,7 +214,8 @@ export class GitHubAppPatchPublisher implements PatchPublisher {
     if (existing) sha = requireSha(existing.object.sha);
     else {
       const file = await this.optional(`${repo}/contents/${req.path}?ref=${base.sha}`);
-      if (deleting ? !file : !!file) throw new Error("Patch path conflicts with current data");
+      const updatingAnnexes = kind === "message" && (req as OpenGeneralMessagePrRequest).messageType === "annexes";
+      if (deleting ? !file : !!file && !updatingAnnexes) throw new Error("Patch path conflicts with current data");
       sha = await this.makeCommit(repo, base.sha, { path: req.path, mode: "100644", type: "blob", ...(deleting ? { sha: null } : { content }) }, message);
       sha = await this.createRef(repo, req.branch, sha);
     }
@@ -254,7 +255,7 @@ export class GitHubAppPatchPublisher implements PatchPublisher {
     if (kind === "message") {
       const match = /^rt-msg-([1-9]\d*)-([0-9A-Z]{26})-r([1-9]\d*)$/.exec(branch)!;
       const relative = filename.slice(`ob-issues/${match[1]}/`.length);
-      const type = relative.startsWith("general/") ? relative.slice(8, -5) : relative.split("/")[0];
+      const type = relative === "annexes.yaml" ? "annexes" : relative.startsWith("general/") ? relative.slice(8, -5) : relative.split("/")[0];
       try { assertMessageRequest({ edition: Number(match[1]), messageId: match[2], revision: Number(match[3]), messageType: type, branch, path: filename } as OpenGeneralMessagePrRequest); validPath = true; }
       catch { validPath = false; }
     }

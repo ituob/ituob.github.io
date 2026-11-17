@@ -152,13 +152,148 @@ export async function transitionNotifications(db: D1Database, t: TransitionInfo)
   return out;
 }
 
-export function renderEmail(n: { kind: string; payload: string; id: string; submission_id: string }): { subject: string; text: string } {
-  const p = JSON.parse(n.payload) as Record<string, any>;
+type EmailLocale = "en" | "fr" | "es" | "ru" | "zh" | "ar";
+export interface EmailRenderOptions { locale?: string | null; origin?: string }
+export interface RenderedEmail { subject: string; text: string; html: string; locale: EmailLocale }
+interface EmailNotification { kind: string; payload: string; id: string; submission_id: string }
+
+const EMAIL_COPY = {
+  en: {
+    event: "Event", actor: "By", reason: "Reason", comment: "Comment", open: "Open submission",
+    preferences: "Notification preferences", digest: "Notification digest", fallback: "Submission update",
+    events: {
+      "submission.submitted": "Submission received", "submission.in_review": "Submission under review",
+      "submission.changes_requested": "Changes requested", "submission.approved": "Submission approved",
+      "submission.rejected": "Submission rejected", "submission.withdrawn": "Submission withdrawn",
+      "submission.pr_opened": "Pull request opened", "submission.ci_failed": "Checks failed",
+      "submission.pr_merged": "Pull request merged", "submission.published": "Submission published",
+      "comment.mention": "You were mentioned", "comment.reply": "Reply to your comment",
+      "comment.created": "New comment", "discussion.closed": "Discussion closed", "discussion.reopened": "Discussion reopened",
+    },
+  },
+  fr: {
+    event: "Événement", actor: "Par", reason: "Motif", comment: "Commentaire", open: "Ouvrir la proposition",
+    preferences: "Préférences de notification", digest: "Résumé des notifications", fallback: "Mise à jour de la proposition",
+    events: {
+      "submission.submitted": "Proposition reçue", "submission.in_review": "Proposition en cours d’examen",
+      "submission.changes_requested": "Modifications demandées", "submission.approved": "Proposition approuvée",
+      "submission.rejected": "Proposition rejetée", "submission.withdrawn": "Proposition retirée",
+      "submission.pr_opened": "Demande de fusion ouverte", "submission.ci_failed": "Échec des vérifications",
+      "submission.pr_merged": "Demande de fusion intégrée", "submission.published": "Proposition publiée",
+      "comment.mention": "Vous avez été mentionné", "comment.reply": "Réponse à votre commentaire",
+      "comment.created": "Nouveau commentaire", "discussion.closed": "Discussion fermée", "discussion.reopened": "Discussion rouverte",
+    },
+  },
+  es: {
+    event: "Evento", actor: "Por", reason: "Motivo", comment: "Comentario", open: "Abrir la presentación",
+    preferences: "Preferencias de notificación", digest: "Resumen de notificaciones", fallback: "Actualización de la presentación",
+    events: {
+      "submission.submitted": "Presentación recibida", "submission.in_review": "Presentación en revisión",
+      "submission.changes_requested": "Cambios solicitados", "submission.approved": "Presentación aprobada",
+      "submission.rejected": "Presentación rechazada", "submission.withdrawn": "Presentación retirada",
+      "submission.pr_opened": "Solicitud de incorporación abierta", "submission.ci_failed": "Verificaciones fallidas",
+      "submission.pr_merged": "Solicitud de incorporación integrada", "submission.published": "Presentación publicada",
+      "comment.mention": "Te han mencionado", "comment.reply": "Respuesta a tu comentario",
+      "comment.created": "Nuevo comentario", "discussion.closed": "Discusión cerrada", "discussion.reopened": "Discusión reabierta",
+    },
+  },
+  ru: {
+    event: "Событие", actor: "Автор", reason: "Причина", comment: "Комментарий", open: "Открыть заявку",
+    preferences: "Настройки уведомлений", digest: "Сводка уведомлений", fallback: "Обновление заявки",
+    events: {
+      "submission.submitted": "Заявка получена", "submission.in_review": "Заявка на рассмотрении",
+      "submission.changes_requested": "Запрошены изменения", "submission.approved": "Заявка одобрена",
+      "submission.rejected": "Заявка отклонена", "submission.withdrawn": "Заявка отозвана",
+      "submission.pr_opened": "Запрос на слияние открыт", "submission.ci_failed": "Проверки не пройдены",
+      "submission.pr_merged": "Запрос на слияние принят", "submission.published": "Заявка опубликована",
+      "comment.mention": "Вас упомянули", "comment.reply": "Ответ на ваш комментарий",
+      "comment.created": "Новый комментарий", "discussion.closed": "Обсуждение закрыто", "discussion.reopened": "Обсуждение возобновлено",
+    },
+  },
+  zh: {
+    event: "事件", actor: "作者", reason: "原因", comment: "评论", open: "查看提交内容",
+    preferences: "通知偏好设置", digest: "通知摘要", fallback: "提交内容更新",
+    events: {
+      "submission.submitted": "已收到提交内容", "submission.in_review": "提交内容正在审核",
+      "submission.changes_requested": "需要修改", "submission.approved": "提交内容已批准",
+      "submission.rejected": "提交内容已拒绝", "submission.withdrawn": "提交内容已撤回",
+      "submission.pr_opened": "拉取请求已创建", "submission.ci_failed": "检查失败",
+      "submission.pr_merged": "拉取请求已合并", "submission.published": "提交内容已发布",
+      "comment.mention": "有人提到了您", "comment.reply": "您的评论收到回复",
+      "comment.created": "新评论", "discussion.closed": "讨论已关闭", "discussion.reopened": "讨论已重新开启",
+    },
+  },
+  ar: {
+    event: "الحدث", actor: "بواسطة", reason: "السبب", comment: "التعليق", open: "فتح الطلب",
+    preferences: "تفضيلات الإشعارات", digest: "ملخص الإشعارات", fallback: "تحديث الطلب",
+    events: {
+      "submission.submitted": "تم استلام الطلب", "submission.in_review": "الطلب قيد المراجعة",
+      "submission.changes_requested": "طُلبت تعديلات", "submission.approved": "تمت الموافقة على الطلب",
+      "submission.rejected": "تم رفض الطلب", "submission.withdrawn": "تم سحب الطلب",
+      "submission.pr_opened": "تم فتح طلب دمج", "submission.ci_failed": "فشلت الفحوصات",
+      "submission.pr_merged": "تم دمج طلب الدمج", "submission.published": "تم نشر الطلب",
+      "comment.mention": "تمت الإشارة إليك", "comment.reply": "رد على تعليقك",
+      "comment.created": "تعليق جديد", "discussion.closed": "تم إغلاق المناقشة", "discussion.reopened": "أُعيد فتح المناقشة",
+    },
+  },
+};
+
+function emailLocale(raw?: string | null): EmailLocale {
+  const language = raw?.trim().toLowerCase().split(/[-_]/)[0];
+  return language && Object.hasOwn(EMAIL_COPY, language) ? language as EmailLocale : "en";
+}
+
+function emailOrigin(raw?: string): string {
+  try {
+    const url = new URL(raw ?? "https://www.ituob.org");
+    if ((url.protocol === "https:" || url.protocol === "http:") && !url.username && !url.password) return url.origin;
+  } catch { /* Invalid configuration uses the public site. */ }
+  return "https://www.ituob.org";
+}
+
+function escapeEmailHtml(value: string): string {
+  return value.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);
+}
+
+function renderEmailEvent(n: EmailNotification, locale: EmailLocale, origin: string) {
+  const copy = EMAIL_COPY[locale];
+  const p = JSON.parse(n.payload) as Record<string, unknown>;
   const title = `${p.register_id ?? ""} ${p.slug ?? ""}`.trim();
-  const lines = [`Event: ${n.kind}`];
-  if (p.actor_name) lines.push(`By: ${p.actor_name}`);
-  if (p.reason) lines.push(`Reason: ${p.reason}`);
-  if (p.excerpt) lines.push(`Comment: ${p.excerpt}`);
-  lines.push(`Open: /me/discussions/?id=${encodeURIComponent(n.submission_id)}`, "", "Change what you receive under notification preferences.");
-  return { subject: `[ITU OB] ${title}: ${n.kind}`, text: lines.join("\n") };
+  const event = Object.hasOwn(copy.events, n.kind) ? (copy.events as Record<string, string>)[n.kind]! : copy.fallback;
+  const heading = title ? `${title}: ${event}` : event;
+  const separator = locale === "fr" ? " : " : ": ";
+  const lines = [`${copy.event}${separator}${event}`];
+  for (const [key, label] of [["actor_name", copy.actor], ["reason", copy.reason], ["excerpt", copy.comment]]) {
+    if (p[key!]) lines.push(`${label}${separator}${String(p[key!])}`);
+  }
+  const link = `${origin}/me/discussions/?id=${encodeURIComponent(n.submission_id)}`;
+  const text = [heading, ...lines, `${copy.open}${separator}${link}`].join("\n");
+  const html = `<section><h2>${escapeEmailHtml(heading)}</h2>${lines.map((line) => `<p>${escapeEmailHtml(line).replace(/\n/g, "<br>")}</p>`).join("")}<p><a href="${escapeEmailHtml(link)}">${escapeEmailHtml(copy.open)}</a></p></section>`;
+  return { heading, text, html };
+}
+
+function finishEmail(subject: string, text: string, html: string, locale: EmailLocale, origin: string): RenderedEmail {
+  const preferences = EMAIL_COPY[locale].preferences;
+  const link = `${origin}/api/me/notification-prefs`;
+  return {
+    subject, locale,
+    text: `${text}\n\n${preferences}: ${link}`,
+    html: `<!doctype html><html lang="${locale}"${locale === "ar" ? ' dir="rtl"' : ""}><head><meta charset="utf-8"><title>${escapeEmailHtml(subject)}</title></head><body>${html}<p><a href="${escapeEmailHtml(link)}">${escapeEmailHtml(preferences)}</a></p></body></html>`,
+  };
+}
+
+export function renderEmail(n: EmailNotification, options: EmailRenderOptions = {}): RenderedEmail {
+  const locale = emailLocale(options.locale);
+  const origin = emailOrigin(options.origin);
+  const event = renderEmailEvent(n, locale, origin);
+  return finishEmail(`[ITU OB] ${event.heading}`, event.text, event.html, locale, origin);
+}
+
+export function renderDigestEmail(notifications: EmailNotification[], options: EmailRenderOptions = {}): RenderedEmail {
+  const locale = emailLocale(options.locale);
+  const origin = emailOrigin(options.origin);
+  const heading = EMAIL_COPY[locale].digest;
+  const events = notifications.map((n) => renderEmailEvent(n, locale, origin));
+  return finishEmail(`[ITU OB] ${heading}`, [heading, ...events.map((event) => event.text)].join("\n\n"),
+    `<h1>${escapeEmailHtml(heading)}</h1>${events.map((event) => event.html).join("")}`, locale, origin);
 }

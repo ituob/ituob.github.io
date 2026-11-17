@@ -18,7 +18,8 @@
     "test:form": "vitest run --config vitest.form.config.ts",
     "typecheck:worker": "tsc -p worker/tsconfig.json",
     "check:bindings": "node scripts/check-bindings.mjs",
-    "test:bindings": "node --experimental-strip-types --test tests/check-bindings.test.ts"
+    "test:bindings": "node --experimental-strip-types --test tests/check-bindings.test.ts",
+    "seed:roster": "node scripts/seed-roster.mjs"
   },
   "dependencies": {
     "@astrojs/mdx": "^7.0.0",
