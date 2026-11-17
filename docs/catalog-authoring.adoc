@@ -1,0 +1,9 @@
+= Service-publication authoring
+
+`/admin/catalog` lets ITU editors and administrators create or edit a service publication (a register in `catalogs/registers.yaml` of the catalog repository, `ituob/service-publications-docs`). Fields: id (uppercase, fixed after creation), title (translatable, English required), authoritative URL, and recommendation (chosen from `catalogs/recommendations.yaml`). A new publication also needs the identity field of its entries (`key_field`), because the register rules are generated from it.
+
+The change is a review pull request, never a write to the default branch and never D1 state. `GET /api/admin/catalog` lists registers and recommendations from the catalog repository default branch. `POST /api/admin/catalog/registers` creates; `PUT /api/admin/catalog/registers/:id` edits. A different id in the body of a PUT is refused (422), a duplicate id on create is refused (409), and members and unaffiliated users receive 403.
+
+One validator, `src/lib/form/catalog-entry.ts`, runs in the browser and the Worker. `src/lib/form/catalog-yaml.ts` rewrites only the target entry of `registers.yaml`, keeps comments and other entries, and re-parses the result to prove nothing else changed. The publisher (`openCatalogPr`) may only modify `catalogs/registers.yaml` on a new `rt-cat-<12 hex>` branch, and only if the file is still the blob the change was computed from. `CATALOG_REPO` overrides the repository.
+
+New publications are textual. A structured register still needs a parser class and renderer in code, and `src/lib/catalogs.ts` is hand-maintained: it does not read the catalog, so a merged register becomes visible to the site only after the data pin moves and `catalogs.ts` lists it.

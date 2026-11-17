@@ -24,6 +24,32 @@ export interface OpenMetadataPrRequest extends OpenPatchPrRequest {
   edition: number;
   revision: number;
 }
+/** A change to catalogs/registers.yaml in the catalog repository (service-publications-docs). */
+export interface OpenCatalogPrRequest {
+  repo: string;
+  /** Always `rt-cat-<12 hex>`; derived from the new file bytes, so a retry reuses it. */
+  branch: string;
+  path: string;
+  content: string;
+  /** Git blob SHA of the file the content was computed from; a moved file refuses the change. */
+  baseBlobSha: string;
+  title: string;
+  body: string;
+  idempotencyKey: string;
+}
+export interface CatalogSnapshot {
+  repo: string;
+  baseSha: string;
+  registers: { text: string; blobSha: string };
+  recommendations: { text: string };
+}
+export const CATALOG_BRANCH = /^rt-cat-[0-9a-f]{12}$/;
+export const CATALOG_PATH = "catalogs/registers.yaml";
+export const DEFAULT_CATALOG_REPO = "ituob/service-publications-docs";
+export function assertCatalogRequest(req: OpenCatalogPrRequest): void {
+  if (!CATALOG_BRANCH.test(req.branch) || req.path !== CATALOG_PATH || !req.idempotencyKey || !req.baseBlobSha) throw new Error("Invalid catalog destination");
+}
+
 export interface OpenedPr {
   prNumber: number;
   commitSha: string;
@@ -66,6 +92,10 @@ export interface PatchPublisher {
   openPatchPr(req: OpenPatchPrRequest): Promise<OpenedPr>;
   openMetadataPr(req: OpenMetadataPrRequest): Promise<OpenedPr>;
   openGeneralMessagePr(req: OpenGeneralMessagePrRequest): Promise<OpenedPr>;
+  /** Read-only: registers.yaml and recommendations.yaml at the catalog repository's default branch. */
+  readCatalog(req: { repo: string }): Promise<CatalogSnapshot>;
+  /** A review PR (never a push to the default branch) that changes only catalogs/registers.yaml. */
+  openCatalogPr(req: OpenCatalogPrRequest): Promise<OpenedPr>;
   getGeneralMessagePullRequest(req: { repo: string; prNumber: number; expectedHeadSha?: string }): Promise<PullRequestState>;
   getMetadataPullRequest(req: { repo: string; prNumber: number; expectedHeadSha?: string }): Promise<PullRequestState>;
   /** Close the PR and delete the Worker-created branch (never merges, never touches other refs). */
@@ -117,6 +147,8 @@ export interface PublisherConfig {
   GITHUB_APP_PRIVATE_KEY?: string;
   GITHUB_APP_INSTALLATION_ID?: string;
   PATCH_REPO?: string;
+  /** Catalog repository for service-publication changes; defaults to ituob/service-publications-docs. */
+  CATALOG_REPO?: string;
   GITHUB_SITE_REPO?: string;
   GITHUB_DATA_GITLINK?: string;
   GITHUB_STAGING_BRANCH?: string;
@@ -166,6 +198,31 @@ export class FakePatchPublisher implements PatchPublisher {
   openGeneralMessagePr(req: OpenGeneralMessagePrRequest): Promise<OpenedPr> {
     assertMessageRequest(req);
     return this.open(req);
+  }
+  /** Test seam: the catalog files the fake repository serves. */
+  catalogFiles = { registers: "registers:\n", recommendations: "recommendations:\n" };
+  readonly catalogRequests: OpenCatalogPrRequest[] = [];
+  private catalogByKey = new Map<string, OpenedPr>();
+  static blobSha(text: string): string {
+    let h = 2166136261;
+    for (const ch of text) h = Math.imul(h ^ ch.codePointAt(0)!, 16777619) >>> 0;
+    return h.toString(16).padStart(8, "0").repeat(5);
+  }
+  async readCatalog(req: { repo: string }): Promise<CatalogSnapshot> {
+    if (req.repo !== DEFAULT_CATALOG_REPO) throw new Error("Repository is not the configured catalog repository");
+    return { repo: req.repo, baseSha: "a".repeat(40), registers: { text: this.catalogFiles.registers, blobSha: FakePatchPublisher.blobSha(this.catalogFiles.registers) }, recommendations: { text: this.catalogFiles.recommendations } };
+  }
+  async openCatalogPr(req: OpenCatalogPrRequest): Promise<OpenedPr> {
+    assertCatalogRequest(req);
+    this.catalogRequests.push(req);
+    if (this.failNext > 0) { this.failNext--; throw new Error("GitHub 502"); }
+    if (req.baseBlobSha !== FakePatchPublisher.blobSha(this.catalogFiles.registers)) throw new Error("Catalog changed since it was read");
+    const hit = this.catalogByKey.get(req.idempotencyKey);
+    if (hit) return hit;
+    const n = this.next++;
+    const pr = { prNumber: n, commitSha: `c${n}`.padEnd(40, "0"), baseSha: "a".repeat(40), url: `https://github.invalid/${req.repo}/pull/${n}` };
+    this.catalogByKey.set(req.idempotencyKey, pr);
+    return pr;
   }
   getGeneralMessagePullRequest(req: { repo: string; prNumber: number; expectedHeadSha?: string }): Promise<PullRequestState> { return this.getPullRequest(req); }
   async closePatchPr(req: { repo: string; branch: string; prNumber: number }): Promise<void> {
