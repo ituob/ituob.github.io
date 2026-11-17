@@ -174,7 +174,8 @@ export class GitHubAppPatchPublisher implements PatchPublisher {
     if (existing) sha = requireSha(existing.object.sha);
     else {
       const file = await this.optional(`${repo}/contents/${req.path}?ref=${base.sha}`);
-      if (deleting ? !file : !!file) throw new Error("Patch path conflicts with current data");
+      const updatingAnnexes = kind === "message" && (req as OpenGeneralMessagePrRequest).messageType === "annexes";
+      if (deleting ? !file : !!file && !updatingAnnexes) throw new Error("Patch path conflicts with current data");
       sha = await this.makeCommit(repo, base.sha, { path: req.path, mode: "100644", type: "blob", ...(deleting ? { sha: null } : { content }) }, message);
       sha = await this.createRef(repo, req.branch, sha);
     }

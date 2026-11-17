@@ -276,6 +276,22 @@ describe("general message PR protocol", () => {
       await expect(api.client().openGeneralMessagePr({ ...message, ...bad })).rejects.toThrow();
     expect(api.calls).toEqual([]);
   });
+  it("updates an existing annex file through one immutable PR and preserves retry bytes", async () => {
+    const api = new GitHub(); api.parentFiles = true;
+    const client = api.client();
+    const annex = { ...message, messageType: "annexes", path: "ob-issues/1300/annexes.yaml", content: "E212_MNC:\n  position_on: 2026-11-01\nOther: null\n" };
+    const first = await client.openGeneralMessagePr(annex);
+    expect(await client.openGeneralMessagePr(annex)).toEqual(first);
+    expect(api.entries.get(C)).toMatchObject({ path: annex.path, content: annex.content });
+    expect(api.prs).toHaveLength(1);
+    expect(api.prs[0].base.ref).toBe("main");
+    expect(api.refs.get(annex.branch)).toBe(C);
+    expect(api.calls.filter(c => c.method === "PATCH")).toEqual([]);
+    await expect(client.openGeneralMessagePr({ ...annex, content: "Other: null\n" })).rejects.toThrow(/requested publisher commit/);
+    const invalid = new GitHub(); invalid.parentFiles = true;
+    await expect(invalid.client().openGeneralMessagePr({ ...annex, path: message.path })).rejects.toThrow(/annexes path/);
+    expect(invalid.calls).toEqual([]);
+  });
   it("accepts recognized singleton paths and preserves existing canonical content", async () => {
     const api = new GitHub();
     await api.client().openGeneralMessagePr({ ...message, messageType: "running_annexes", path: "ob-issues/1300/general/running_annexes.yaml" });

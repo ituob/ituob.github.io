@@ -131,7 +131,7 @@ export async function approveGeneralMessage(db: D1Database, session: Session | n
   validateGeneralMessage(current.type,current.value);
   checkIssue(current.ob_issue_no,current.type,current.value);
   if (current.approved_at) return current;
-  const at = new Date().toISOString(), content = stringify(current.value,{lineWidth:0});
+  const at = new Date().toISOString(), content = stringify(current.value,{lineWidth:0, ...(current.type === ANNEX_TYPE ? { defaultKeyType: "QUOTE_DOUBLE" as const } : {})});
   const result = await run(db,[db.prepare(`UPDATE general_messages SET approved_at=?3,approved_by=?4,content_yaml=?5,updated_at=?3
     WHERE id=?1 AND revision=?2 AND approved_at IS NULL
     AND NOT EXISTS (SELECT 1 FROM general_message_prs WHERE message_id=?1)

@@ -24,6 +24,9 @@ export interface AnnexIssue {
 export const ANNEX_TYPE = "annexes";
 export const MAX_ANNEXES = 200;
 export const MAX_PUBLICATION_ID = 200;
+export const MAX_DATASET_DEPTH = 32;
+export const MAX_DATASET_NODES = 10_000;
+export const MAX_DATASET_CHARACTERS = 200_000;
 
 const isObject = (v: unknown): v is Record<string, unknown> => !!v && typeof v === "object" && !Array.isArray(v);
 
@@ -38,14 +41,46 @@ export function isPositionDate(v: unknown): v is string {
   return m[4] === undefined || (Number(m[4]) < 24 && Number(m[5]) < 60 && Number(m[6]) < 60);
 }
 
-/** The id is the YAML key: trimmed, printable, bounded. */
+/** Catalog codes (E212_MNC, RR.25.1) plus the historical prose ids in annexes.
+ * Keep legacy spellings explicit rather than permitting arbitrary YAML keys. */
 export function publicationIdError(id: string): string | null {
   if (id === "") return "publication id must not be empty";
   if (id !== id.trim()) return "publication id must not start or end with a space";
   if (id.length > MAX_PUBLICATION_ID) return `publication id must be at most ${MAX_PUBLICATION_ID} characters`;
   // eslint-disable-next-line no-control-regex
-  if (/[\u0000-\u001f\u007f]/.test(id)) return "publication id must not contain control characters";
-  if (id === "__proto__") return "publication id is reserved";
+  if (/[\u0000-\u001f\u007f-\u009f\u2028\u2029\ufeff\ud800-\udfff]/u.test(id)) return "publication id must not contain control characters";
+  if (!/^[A-Z][A-Z0-9]*(?:[_.][A-Z0-9]+)*$/.test(id)
+    && !/^Legal time 201[2-5]$/.test(id)
+    && id !== "International Telecommunication Union"
+    && id !== "List of Coast Stations and Special Service Stations") return "publication id must be a catalog code or a supported historical publication id";
+  return null;
+}
+
+/** Inspect iteratively before JSON/YAML serialization or generated validation can
+ * recurse. Budgets include keys, scalar contents and container punctuation. */
+function datasetError(dataset: Record<string, unknown>): string | null {
+  const pending: { value: unknown; depth: number }[] = [{ value: dataset, depth: 0 }];
+  let nodes = 0, characters = 0;
+  while (pending.length) {
+    const { value, depth } = pending.pop()!;
+    if (depth > MAX_DATASET_DEPTH) return `datasets nesting must not exceed ${MAX_DATASET_DEPTH}`;
+    if (++nodes > MAX_DATASET_NODES) return `datasets must not exceed ${MAX_DATASET_NODES} values`;
+    if (value !== null && typeof value === "object") {
+      const entries = Object.entries(value);
+      // Bound the queue before adding a wide container's children.
+      if (entries.length + nodes + pending.length > MAX_DATASET_NODES) return `datasets must not exceed ${MAX_DATASET_NODES} values`;
+      characters += 2 + Math.max(0, entries.length - 1);
+      for (const [key, child] of entries) {
+        if (!Array.isArray(value)) characters += JSON.stringify(key).length + 1;
+        pending.push({ value: child, depth: depth + 1 });
+      }
+    } else {
+      if (typeof value !== "string" && typeof value !== "number" && typeof value !== "boolean" && value !== null) return "datasets must contain JSON values";
+      if (typeof value === "number" && !Number.isFinite(value)) return "datasets must contain finite numbers";
+      characters += JSON.stringify(value).length;
+    }
+    if (characters > MAX_DATASET_CHARACTERS) return `datasets must not exceed ${MAX_DATASET_CHARACTERS} JSON characters`;
+  }
   return null;
 }
 
@@ -84,6 +119,10 @@ export function validateAnnexes(value: unknown): AnnexIssue[] {
     if ("datasets" in entry && !isObject(entry.datasets)) {
       errors.push({ path: `${id}.datasets`, code: "type", message: `${id}.datasets must be an object` });
       ok = false;
+    }
+    if (isObject(entry.datasets)) {
+      const message = datasetError(entry.datasets);
+      if (message) { errors.push({ path: `${id}.datasets`, code: "type", message }); ok = false; }
     }
     if (ok) clean[id] = entry;
   }
@@ -146,7 +185,10 @@ export function removeAnnex(wire: AnnexesWire, id: string): AnnexesWire {
 /** Set, change or clear the annexed position; datasets already stored are kept. */
 export function setAnnexPosition(wire: AnnexesWire, id: string, position: string): AnnexesWire {
   if (!Object.hasOwn(wire, id)) return wire;
-  const { position_on: _old, ...rest } = wire[id] ?? {};
-  const next = position === "" ? rest : { position_on: position, ...rest };
+  const { position_on: old, ...rest } = wire[id] ?? {};
+  // A date input edits only the day; retain the timestamp's time and precision.
+  const updated = position.length === 10 && old && isPositionDate(old) && old.length > 10
+    ? position + old.slice(10) : position;
+  const next = position === "" ? rest : { position_on: updated, ...rest };
   return { ...wire, [id]: Object.keys(next).length ? next : null };
 }

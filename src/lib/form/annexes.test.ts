@@ -68,7 +68,7 @@ describe("annex position editing keeps datasets (OB 1162)", () => {
   it("has a dataset entry in the real corpus file", () => expect(id).toBeTruthy());
   it("changing the date keeps datasets byte-for-byte; clearing keeps them too", () => {
     const changed = setAnnexPosition(wire, id, "2020-05-06");
-    expect(changed[id]?.position_on).toBe("2020-05-06");
+    expect(changed[id]?.position_on).toBe("2020-05-06" + wire[id].position_on.slice(10));
     expect(changed[id]?.datasets).toEqual(wire[id].datasets);
     const cleared = setAnnexPosition(wire, id, "");
     expect(cleared[id]?.position_on).toBeUndefined();
@@ -103,5 +103,43 @@ describe("annexes in the corpus", () => {
     }
     expect(n).toBeGreaterThan(200);
     expect(bad.slice(0, 10)).toEqual([]);
+  });
+});
+
+describe("breaker regressions", () => {
+  it("accepts every publication id in both publication catalogs", () => {
+    const dataRoot = process.env["OB_DATA_ROOT"] ?? join(here, "../../../data-ob");
+    for (const [file, collection, field] of [["registers", "registers", "register_id"], ["publications", "publications", "publication_id"]]) {
+      const catalog = parseYaml(readFileSync(join(dataRoot, "catalogs", `${file}.yaml`), "utf8"));
+      for (const entry of catalog[collection!]) expect(publicationIdError(entry[field!])).toBeNull();
+    }
+  });
+  it.each(["yes", "no", "on", "off", "2016-10-01", "<<", "1_000", "0b1", "1:30"])("rejects non-publication YAML 1.1 key %j", id => {
+    expect(validateAnnexes({ [id]: null })).not.toEqual([]);
+  });
+  it.each(["\u0000", "\u001f", "\u007f", "\u0080", "\u0085", "\u009f", "\u2028", "\u2029", "\ufeff", "\ud800", "\udfff"])("rejects unsafe Unicode in publication ids %j", ch => {
+    expect(publicationIdError(`SR${ch}A`)).not.toBeNull();
+  });
+  it("preserves the full Time suffix when editing or re-entering its day", () => {
+    const wire = { SR: { position_on: "2016-10-01T12:34:56.123Z", datasets: { x: 1 } }, DP: { position_on: "2016-10-01" } };
+    expect(setAnnexPosition(wire, "SR", "2016-10-01")).toEqual(wire);
+    expect(setAnnexPosition(wire, "SR", "2020-05-06")).toEqual({ ...wire, SR: { ...wire.SR, position_on: "2020-05-06T12:34:56.123Z" } });
+    expect(setAnnexPosition(wire, "DP", "2020-05-06").DP?.position_on).toBe("2020-05-06");
+  });
+  it("rejects deeply nested datasets without recursion or throwing", () => {
+    let datasets: Record<string, unknown> = {};
+    for (let i = 0; i < 20000; i++) datasets = { n: datasets };
+    expect(validateAnnexes({ SR: { datasets } })).toEqual(expect.arrayContaining([expect.objectContaining({ path: "SR.datasets", code: "type" })]));
+  });
+  it("accepts datasets at the depth boundary and rejects the next level", () => {
+    let datasets: Record<string, unknown> = {};
+    for (let i = 0; i < 32; i++) datasets = { n: datasets };
+    expect(validateAnnexes({ SR: { datasets } })).toEqual([]);
+    expect(validateAnnexes({ SR: { datasets: { n: datasets } } })[0]?.path).toBe("SR.datasets");
+  });
+  it("bounds dataset size for wide objects and large strings", () => {
+    for (const datasets of [{ x: "x".repeat(200001) }, Object.fromEntries(Array.from({ length: 10001 }, (_, i) => [`k${i}`, 1]))]) {
+      expect(validateAnnexes({ SR: { datasets } })).toEqual(expect.arrayContaining([expect.objectContaining({ path: "SR.datasets", code: "type" })]));
+    }
   });
 });

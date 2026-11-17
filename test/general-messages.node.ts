@@ -221,3 +221,22 @@ describe("annexes.yaml authoring (#101 F1/F2)", () => {
     await expect(createAnnex(editor,{SR:null})).rejects.toThrow();
   });
 });
+
+describe("annex breaker worker regressions", () => {
+  it("quotes annex keys for Ruby Psych and preserves String keys", async () => {
+    const saved = await createGeneralMessage(db, editor, { ob_issue_no: 1331, type: "annexes", value: { SR: { position_on: "2016-10-01" }, "Legal time 2013": null, ON: null, OFF: null, YES: null, NO: null } });
+    await approveGeneralMessage(db, admin, saved.id, 1);
+    const { content } = await generalMessageArtifact(db, saved.id);
+    expect(content).toContain('"SR":');
+    const { execFileSync } = await import("node:child_process");
+    expect(JSON.parse(execFileSync(process.env["RUBY"] ?? "ruby", ["-ryaml", "-rdate", "-rjson", "-e", "puts JSON.generate(YAML.safe_load(STDIN.read, permitted_classes:[Date,Time]).keys)"], { input: content, encoding: "utf8" }))).toEqual(["SR", "Legal time 2013", "ON", "OFF", "YES", "NO"]);
+  });
+  it("reports deep and oversized datasets as validation failures before writing", async () => {
+    let datasets: Record<string, unknown> = {};
+    for (let i = 0; i < 20000; i++) datasets = { n: datasets };
+    for (const bad of [datasets, { x: "x".repeat(200001) }]) {
+      await expect(createGeneralMessage(db, editor, { ob_issue_no: 1331, type: "annexes", value: { SR: { datasets: bad } } })).rejects.toBeInstanceOf(ValidationFailed);
+    }
+    expect(sqlite.prepare("SELECT count(*) n FROM general_messages").get()?.n).toBe(0);
+  });
+});
