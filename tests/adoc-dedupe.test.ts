@@ -88,6 +88,60 @@ test("messages without an asset reference are untouched", () => {
   assert.deepEqual(dedupeAssetTwins(msgs, loader), msgs);
 });
 
-test("normalizeText ignores quotes, colons, case and whitespace", () => {
-  assert.equal(normalizeText("“Vojvoda”  Stepa:"), normalizeText('"vojvoda" stepa'));
+test("normalizeText unifies quotes, dashes, whitespace, case; keeps digits and punctuation", () => {
+  assert.equal(normalizeText("“Vojvoda”  Stepa – 5—9"), normalizeText('"vojvoda" stepa - 5-9'));
+  assert.notEqual(normalizeText("3.5 MHz"), normalizeText("35 MHz"));
+});
+
+const dropped = (a: string, i: string) => {
+  const inl = {
+    type: "misc_communications",
+    contents: { en: { type: "doc", content: [{ type: "paragraph", content: [{ type: "text", text: i }] }] } },
+  };
+  return dedupeAssetTwins([ref, inl], () => a).length === 1;
+};
+
+test("different numbers, spacing, punctuation and marks are never merged", () => {
+  assert.equal(dropped("3.5 MHz", "35 MHz"), false);
+  assert.equal(dropped("from 5-9 May", "from 59 May"), false);
+  assert.equal(dropped("YU125VS", "YU12 5VS"), false);
+  assert.equal(dropped("+41 22 730 5111", "+412 27305111"), false);
+  assert.equal(dropped("Rs 1,000", "Rs 1.000"), false);
+  assert.equal(dropped("AB-C", "ABC"), false);
+  assert.equal(dropped("क्या", "कया"), false);
+  assert.equal(dropped("كَتَبَ", "كتب"), false);
+  assert.equal(dropped("café", "cafe"), false);
+  assert.equal(dropped("a b", "a"), false);
+});
+
+test("quote, dash, whitespace, case and composition differences still match", () => {
+  assert.equal(dropped('Club "Banjica" 5-9 May', "Club “Banjica”  5–9 may"), true);
+  assert.equal(dropped("café", "café"), true);
+});
+
+test("heading and trailing-colon structure is ignored", () => {
+  const para = (text: string) => ({ type: "paragraph", content: [{ type: "text", text }] });
+  const inl = {
+    type: "misc_communications",
+    contents: { en: { type: "doc", content: [para("Serbia"), para("Communication of 1.II.2019:"), para("Text here.")] } },
+  };
+  const a = "==== Serbia\n\n===== Communication of 1.II.2019\n\nText\nhere.\n";
+  assert.equal(dedupeAssetTwins([ref, inl], () => a).length, 1);
+});
+
+test("an inlined message with an extra field is not dropped", () => {
+  const inl = { ...pm("YT74DP"), title: "x" };
+  assert.deepEqual(dedupeAssetTwins([ref, inl], loader), [ref, inl]);
+});
+
+test("superscript and subscript leave non-markup text untouched", () => {
+  for (const t of ["x^2+y^2", "10^6-10^9", "(~5,~10)", "http://x.org/~user/a~b", "~~x~~", "a ^ b ^ c"]) {
+    assert.equal(adocInline(t), t);
+  }
+});
+
+test("constrained and embedded forms render", () => {
+  assert.equal(adocInline("125^th^"), "125<sup>th</sup>");
+  assert.equal(adocInline("73^rd^"), "73<sup>rd</sup>");
+  assert.equal(adocInline("H~2~O"), "H<sub>2</sub>O");
 });

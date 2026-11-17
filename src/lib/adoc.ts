@@ -9,16 +9,20 @@ function esc(s: string): string {
   return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
-/** Inline markup. Superscript/subscript follow AsciiDoc: `^x^` / `~x~`
- *  (no whitespace inside); `^^x^^` is kept for the older form. */
+/** Inline markup. Superscript/subscript: `^x^` / `~x~` around alphanumerics
+ *  (`^^x^^` kept for the older form). Known loss: a genuine `a^b^c` written
+ *  as plain text would render as superscript. */
 export function adocInline(s: string): string {
   return esc(s)
     .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
     .replace(/\*([^*]+)\*/g, "<strong>$1</strong>")
     .replace(/_([^_]+)_/g, "<em>$1</em>")
     .replace(/\^\^([^^]+)\^\^/g, "<sup>$1</sup>")
-    .replace(/\^([^\s^]+)\^/g, "<sup>$1</sup>")
-    .replace(/~([^\s~]+)~/g, "<sub>$1</sub>")
+    // Single marks wrap alphanumerics only and are not adjacent to the same
+    // mark, so `x^2+y^2`, `10^6-10^9`, `(~5,~10)`, `~user/a~b` and `~~x~~`
+    // stay literal while `125^th^` and `H~2~O` render.
+    .replace(/(?<!\^)\^([\p{L}\p{N}]+)\^(?!\^)/gu, "<sup>$1</sup>")
+    .replace(/(?<!~)~([\p{L}\p{N}]+)~(?!~)/gu, "<sub>$1</sub>")
     .replace(/`([^`]+)`/g, "<code>$1</code>");
 }
 

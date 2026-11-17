@@ -4,6 +4,13 @@
  * inlined as a ProseMirror document, both carrying the same text.
  * The asset-reference message is kept (it carries the heading
  * structure); the inlined twin is dropped.
+ *
+ * Equality is deliberately strict: markup is stripped, quotes and dashes
+ * are unified, whitespace runs collapse, text is NFC + lowercase. Digits,
+ * punctuation, spacing and combining marks all take part, so "3.5 MHz"
+ * and "35 MHz" never match. Heading/paragraph/line structure is ignored
+ * (blocks are joined by one space, and a block's trailing colon is
+ * dropped because asset headings and inlined lines differ in it).
  */
 
 interface MessageLike {
@@ -11,61 +18,114 @@ interface MessageLike {
   contents?: unknown;
 }
 
-/** Letters and digits only, lowercased: robust to quote style, trailing
- *  colons, markup and whitespace. */
 export function normalizeText(s: string): string {
-  return s.normalize("NFKC").toLowerCase().replace(/[^\p{L}\p{N}]+/gu, "");
+  return s
+    .normalize("NFC")
+    .replace(/[“”„‟«»]/g, '"')
+    .replace(/[‘’‚‛]/g, "'")
+    .replace(/[‐-―−]/g, "-")
+    .replace(/\s+/g, " ")
+    .trim()
+    .toLowerCase();
 }
 
-export function adocPlainText(adoc: string): string {
-  return adoc
-    .split("\n")
-    .map((l) => l.replace(/^={1,6}\s+/, "").replace(/^\*\s+/, ""))
-    .join(" ")
-    .replace(/\^\^?([^\s^]+)\^\^?/g, "$1")
-    .replace(/~([^\s~]+)~/g, "$1")
-    .replace(/[*_`]/g, "");
+function blockKey(block: string): string {
+  return normalizeText(block).replace(/\s*:$/, "");
 }
 
-function proseMirrorText(node: unknown): string {
-  if (!node || typeof node !== "object") return "";
-  const n = node as { text?: unknown; content?: unknown };
-  if (typeof n.text === "string") return n.text;
-  return Array.isArray(n.content) ? n.content.map(proseMirrorText).join(" ") : "";
+function stripAdocMarkup(s: string): string {
+  return s
+    .replace(/\*\*([^*]+)\*\*/g, "$1")
+    .replace(/\*([^*]+)\*/g, "$1")
+    .replace(/_([^_]+)_/g, "$1")
+    .replace(/\^\^([^^]+)\^\^/g, "$1")
+    .replace(/(?<!\^)\^([\p{L}\p{N}]+)\^(?!\^)/gu, "$1")
+    .replace(/(?<!~)~([\p{L}\p{N}]+)~(?!~)/gu, "$1")
+    .replace(/`([^`]+)`/g, "$1");
 }
 
-/** All inlined text of a message (every language), or null when the
- *  message is not an inlined ProseMirror message. */
-function inlinedText(m: MessageLike): string | null {
+/** Blocks of an AsciiDoc text: headings and bullets stand alone,
+ *  consecutive plain lines form one paragraph. */
+export function adocBlocks(adoc: string): string[] {
+  const blocks: string[] = [];
+  let para: string[] = [];
+  const flush = () => {
+    if (para.length) blocks.push(para.join(" "));
+    para = [];
+  };
+  for (const raw of adoc.split("\n")) {
+    const line = raw.trim();
+    const standalone = line.match(/^(?:={1,6}|\*)\s+(.+)$/);
+    if (!line) flush();
+    else if (standalone) {
+      flush();
+      blocks.push(standalone[1]!);
+    } else para.push(line);
+  }
+  flush();
+  return blocks.map(stripAdocMarkup);
+}
+
+interface PMNode {
+  type?: string;
+  text?: string;
+  content?: PMNode[];
+}
+
+/** Blocks of a ProseMirror node: a node whose children are all inline
+ *  yields one block (children concatenated); others recurse. */
+export function proseMirrorBlocks(node: unknown): string[] {
+  if (!node || typeof node !== "object") return [];
+  const n = node as PMNode;
+  if (typeof n.text === "string") return [n.text];
+  if (!Array.isArray(n.content)) return [];
+  const inline = n.content.every(
+    (c) => c && (typeof c.text === "string" || c.type === "hard_break" || c.type === "hardBreak"),
+  );
+  if (inline) {
+    return [n.content.map((c) => (typeof c.text === "string" ? c.text : " ")).join("")];
+  }
+  return n.content.flatMap(proseMirrorBlocks);
+}
+
+const joinBlocks = (blocks: string[]): string =>
+  blocks.map(blockKey).filter(Boolean).join(" ");
+
+/** Comparable text of an inlined message (all languages), or null when
+ *  the message is not an inlined ProseMirror message. */
+function inlinedKey(m: MessageLike): string | null {
   const c = m.contents;
   if (!c || typeof c !== "object" || Array.isArray(c)) return null;
-  return Object.values(c as Record<string, unknown>).map(proseMirrorText).join(" ");
+  return joinBlocks(Object.values(c as Record<string, unknown>).flatMap(proseMirrorBlocks));
+}
+
+/** Fields other than contents, compared so an inlined message carrying
+ *  extra data (e.g. a title) is never dropped as a twin. */
+function otherFields(m: MessageLike): string {
+  const { contents: _c, ...rest } = m as Record<string, unknown>;
+  return JSON.stringify(rest, Object.keys(rest).sort());
 }
 
 /**
- * Drop each inlined message whose text equals the text of an
- * asset-reference message of the same type. `adocFor` returns the asset
- * text (null when the asset is unreadable; such a reference cannot
- * prove a duplicate, so nothing is dropped for it).
+ * Drop each inlined message whose text and other fields equal those of
+ * an asset-reference message of the same type. `adocFor` returns the
+ * asset text (null when unreadable; such a reference proves nothing).
  */
 export function dedupeAssetTwins<T extends MessageLike>(
   messages: T[],
   adocFor: (m: T) => string | null,
 ): T[] {
-  const assetNorms = new Map<string, Set<string>>();
+  const assets = new Set<string>();
   for (const m of messages) {
     if (typeof m.contents !== "string") continue;
     const adoc = adocFor(m);
     if (adoc === null) continue;
-    const set = assetNorms.get(m.type) ?? new Set<string>();
-    set.add(normalizeText(adocPlainText(adoc)));
-    assetNorms.set(m.type, set);
+    assets.add(`${otherFields(m)}\u0000${joinBlocks(adocBlocks(adoc))}`);
   }
-  if (assetNorms.size === 0) return messages;
+  if (assets.size === 0) return messages;
   return messages.filter((m) => {
-    const inl = inlinedText(m);
-    if (inl === null) return true;
-    const norm = normalizeText(inl);
-    return !(norm && assetNorms.get(m.type)?.has(norm));
+    const key = inlinedKey(m);
+    if (key === null || key === "") return true;
+    return !assets.has(`${otherFields(m)}\u0000${key}`);
   });
 }
