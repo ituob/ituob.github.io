@@ -1,4 +1,5 @@
 import { AMENDMENT_COUNTRY_FIELDS, REGISTER_IDENTITIES } from '../register-rules.generated';
+import { PUBLICATION_BY_ID, REGISTERS } from '../catalogs';
 
 /**
  * Bulk import of an external full list (map row W2, #101 "Authoring is actions, not files").
@@ -21,14 +22,24 @@ export interface ImportPlan {
 type Row = Record<string, unknown>;
 const isRow = (v: unknown): v is Row => !!v && typeof v === 'object' && !Array.isArray(v);
 
+/** Replay's String#strip: ASCII whitespace only. A no-break space is data, not padding, so it is kept. */
+const strip = (text: string) => text.replace(/^[\t\n\v\f\r ]+|[\t\n\v\f\r ]+$/g, '');
 function part(value: unknown): string | null {
-  if (typeof value === 'string') return value.trim() || null;
+  if (typeof value === 'string') return strip(value) || null;
   if (!isRow(value)) return null;
   for (const language of ['fr', 'en', 'es', 'zh', 'ru', 'ar']) {
     const text = value[language];
-    if (typeof text === 'string' && text.trim()) return text.trim();
+    if (typeof text === 'string' && strip(text)) return strip(text);
   }
   return null;
+}
+/**
+ * True when the server accepts submissions for this register: it must name a catalog publication or register
+ * under exactly this slug (the server's submissionTargetErrors) and have a typed amendment class.
+ */
+export function importableRegister(registerId: string, slug: string): boolean {
+  const target = PUBLICATION_BY_ID.get(registerId) ?? REGISTERS.find(r => r.registerId === registerId);
+  return !!target && target.slug === slug && !!REGISTER_IDENTITIES[registerId]?.amendmentClass;
 }
 /** Replay's identity: the first field group that yields any part; parts joined in field order. */
 export function entryKey(registerId: string, row: Row): string | null {
@@ -46,7 +57,8 @@ const chunks = <T>(items: T[], size: number) => Array.from({ length: Math.ceil(i
 export function planImport(registerId: string, current: Row[], imported: unknown, options: { chunkSize?: number } = {}): ImportPlan {
   const plan: ImportPlan = { actions: [], added: 0, replaced: 0, superseded: 0, unchanged: 0, errors: [], blocked: null };
   const rules = REGISTER_IDENTITIES[registerId];
-  if (!rules?.amendmentClass) { plan.errors.push({ row: null, message: `${registerId} has no typed register class; use the text amendment form` }); return plan; }
+  const target = PUBLICATION_BY_ID.get(registerId) ?? REGISTERS.find(r => r.registerId === registerId);
+  if (!target || !rules?.amendmentClass) { plan.errors.push({ row: null, message: target ? `${registerId} has no typed register class; use the text amendment form` : `${registerId} is not a catalog register the server accepts submissions for` }); return plan; }
   if (!Array.isArray(imported) || imported.length === 0) { plan.errors.push({ row: null, message: 'The import must be a non-empty list of rows' }); return plan; }
   const size = Math.max(1, options.chunkSize ?? 50), cls = rules.amendmentClass;
   const next = new Map<string, Row>(), seen = new Set<string>();
@@ -77,7 +89,13 @@ export function planImport(registerId: string, current: Row[], imported: unknown
   }
   const country = AMENDMENT_COUNTRY_FIELDS[cls];
   const keep = [...new Set([...rules.keyFields, ...rules.fallbackKeyFields.flat(), ...(country ? [country] : [])])];
-  for (const [key, old] of now) if (!next.has(key)) sups.push(Object.fromEntries(keep.filter(f => old[f] !== undefined).map(f => [f, old[f]])));
+  for (const [key, old] of now) if (!next.has(key)) {
+    // The server requires the country field on every entry, so a row without one cannot be superseded.
+    if (country && part(old[country]) === null)
+      plan.errors.push({ row: null, message: `Cannot supersede "${key.split('\u0001').filter(Boolean).join(' ')}": the register row has no ${country}, which every SUP entry requires. Fix the row's ${country} first` });
+    sups.push(Object.fromEntries(keep.filter(f => old[f] !== undefined).map(f => [f, old[f]])));
+  }
+  if (plan.errors.length) return plan;
   plan.added = adds.length; plan.replaced = reps.length; plan.superseded = sups.length;
   for (const [type, rows] of [['ADD', adds], ['REP', reps], ['SUP', sups]] as const)
     for (const part of chunks(rows, size)) plan.actions.push({ type, data: { _class: cls, entries: part } });

@@ -2,6 +2,7 @@
 import Base from '../../layouts/Base.astro';
 import BulkImport from '../../components/admin/BulkImport.vue';
 import { listSnapshotSlugs, loadManifest } from '../../lib/snapshots';
-const registers = listSnapshotSlugs().flatMap(slug => { const m = loadManifest(slug); return m ? [{ slug, register_id: m.register_id, label: m.title.en ?? m.register_id }] : []; });
+import { importableRegister } from '../../lib/form/bulk-import';
+const registers = listSnapshotSlugs().flatMap(slug => { const m = loadManifest(slug); return m && importableRegister(m.register_id, slug) ? [{ slug, register_id: m.register_id, label: m.title.en ?? m.register_id }] : []; });
 ---
 <Base title="Bulk import"><h1>Bulk import as a patch series</h1><BulkImport registers={registers} client:load /><noscript>Enable JavaScript to import lists.</noscript></Base>

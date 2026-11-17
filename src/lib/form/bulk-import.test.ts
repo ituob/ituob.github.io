@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { payloadErrors } from '../admin-client';
-import { entryKey, planImport } from './bulk-import';
+import { REGISTER_IDENTITIES } from '../register-rules.generated';
+import { entryKey, importableRegister, planImport } from './bulk-import';
 
 const row = (code: string, extra: Record<string, unknown> = {}) => ({ country_or_area: { en: code }, company_name: `Co ${code}`, issue_id_number: `89 ${code}`, ...extra });
 const current = [row('A'), row('B'), row('C')];
@@ -44,5 +45,31 @@ describe('bulk import emits a patch series, never state', () => {
   it('identity uses the first available field group and trims parts', () => {
     expect(entryKey('E118_IIN', { issue_id_number: ' 89 1 ' })).toBe('89 1');
     expect(entryKey('E118_IIN', {})).toBeNull();
+  });
+  it('keeps a no-break space as data, so a register round-trips through its own current state', () => {
+    const nbsp = '\u00a0';
+    const rows = [{ mcc_mnc_codes: '240 01', networks: 'A', country_or_area: { en: 'Sweden' } }, { mcc_mnc_codes: nbsp, networks: nbsp, country_or_area: { en: ` Sweden ADD` } }];
+    expect(entryKey('E212_MNC', rows[1]!)).toBe(nbsp);
+    expect(entryKey('E212_MNC', { mcc_mnc_codes: ' \t' })).toBeNull(); // ASCII whitespace is still padding
+    expect(planImport('E212_MNC', rows, structuredClone(rows))).toMatchObject({ actions: [], errors: [], unchanged: 2 });
+  });
+  it('refuses to supersede a row the server could not accept, and says which and why', () => {
+    const noCountry = { issue_id_number: '89 9', company_name: 'No country' };
+    const plan = planImport('E118_IIN', [...current, noCountry], [row('A'), row('B'), row('C')]);
+    expect(plan.actions).toEqual([]);
+    expect(plan.errors).toEqual([{ row: null, message: expect.stringContaining('89 9') }]);
+    expect(plan.errors[0]!.message).toMatch(/country_or_area/);
+    expect(planImport('E118_IIN', current, [row('A'), row('B')]).errors).toEqual([]); // rows with a country still supersede
+  });
+  it('offers only registers the server accepts, and plans nothing for the others', () => {
+    for (const [id, slug] of [['E164_NOTE_N', 'e164-note-n'], ['E164_NOTE_O', 'e164-note-o'], ['E164_NOTE_PQ', 'e164-note-pq'], ['E212_SHARED_MCC', 'e212-shared-mcc'], ['E118_IIN', 'wrong-slug'], ['NOPE', 'nope']] as const) {
+      expect(importableRegister(id, slug), id).toBe(false);
+      expect(planImport(id, [], [{ a: 1 }]).errors, id).toHaveLength(1);
+    }
+    expect(importableRegister('E118_IIN', 'e118-iin')).toBe(true);
+    // The typed registers the server's catalog lacks are exactly these four; any other typed register is importable.
+    const typed = Object.keys(REGISTER_IDENTITIES).filter(k => REGISTER_IDENTITIES[k]!.amendmentClass);
+    expect(typed.filter(id => planImport(id, [], [{ x: 1 }]).errors[0]?.message.includes('not a catalog register')).sort())
+      .toEqual(['E164_NOTE_N', 'E164_NOTE_O', 'E164_NOTE_PQ', 'E212_SHARED_MCC']);
   });
 });

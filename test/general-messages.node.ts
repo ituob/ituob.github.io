@@ -162,6 +162,33 @@ describe("canonical general-message draft authoring", () => {
     await expect(deleteGeneralMessage(db,admin,approved.id,1)).rejects.toThrow(ConflictError);
     expect((await readGeneralMessage(db,editor,approved.id)).id).toBe(approved.id);
   });
+  it("deletes an approved-then-edited draft: the standing approval is gone, the stale snapshot goes with it", async () => {
+    const draft = await create();
+    await approveGeneralMessage(db,admin,draft.id,1);
+    const edited = await saveGeneralMessage(db,editor,draft.id,{expected_revision:1,value:{...draft.value,text:"Edited after approval"}});
+    expect(edited).toMatchObject({revision:2,approved_at:null});
+    expect(sqlite.prepare("SELECT count(*) n FROM general_message_approvals WHERE message_id=?").get(draft.id)?.n).toBe(1);
+    expect(await deleteGeneralMessage(db,editor,draft.id,2)).toEqual({id:draft.id,deleted:true});
+    expect(sqlite.prepare("SELECT count(*) n FROM general_message_approvals WHERE message_id=?").get(draft.id)?.n).toBe(0);
+    expect(sqlite.prepare("SELECT count(*) n FROM general_messages WHERE id=?").get(draft.id)?.n).toBe(0);
+    // Re-approved at the new revision it is protected again, and a refused delete removes nothing.
+    const again = await create();
+    await approveGeneralMessage(db,admin,again.id,1);
+    await expect(deleteGeneralMessage(db,admin,again.id,1)).rejects.toThrow(ConflictError);
+    expect(sqlite.prepare("SELECT count(*) n FROM general_message_approvals WHERE message_id=?").get(again.id)?.n).toBe(1);
+  });
+  it("imports only the canonical path of a type, and decides that before reading the repository", async () => {
+    const reader = new FakeRepoReader({
+      "o/r:ob-issues/5/approved_recommendations/001.yaml": "type: approved_recommendations\nob_issue_no: '5'\ncontents: {en: hello}\n",
+      "o/r:ob-issues/5/general/approved_recommendations.yaml": "type: approved_recommendations\nob_issue_no: '5'\ncontents: {en: hello}\n",
+      "o/r:ob-issues/5/general/misc_communications.yaml": "type: misc_communications\nob_issue_no: '5'\ntext: x\n",
+    });
+    for (const bad of ["ob-issues/5/approved_recommendations/001.yaml","ob-issues/5/running_annexes/002.yaml","ob-issues/5/general/misc_communications.yaml","ob-issues/5/misc_communications/000.yaml","ob-issues/5/general/001.yaml","ob-issues/5/meta/001.yaml","ob-issues/5/general/nope.yaml"])
+      await expect(importGeneralMessage(db,editor,{ob_issue_no:5,path:bad},reader,"o/r"),bad).rejects.toThrow(InvalidError);
+    expect(reader.reads).toEqual([]);
+    expect((await importGeneralMessage(db,editor,{ob_issue_no:5,path:"ob-issues/5/general/approved_recommendations.yaml"},reader,"o/r")).path).toBe("ob-issues/5/general/approved_recommendations.yaml");
+    expect(reader.reads).toEqual(["o/r:ob-issues/5/general/approved_recommendations.yaml"]);
+  });
   it("opens an existing remote record as a draft at its own path, and refuses bad paths, misses and duplicates", async () => {
     const path = "ob-issues/1331/misc_communications/004.yaml";
     const reader = new FakeRepoReader({ [`o/r:${path}`]: "type: misc_communications\nob_issue_no: '1331'\ntext: Old notice\n" });

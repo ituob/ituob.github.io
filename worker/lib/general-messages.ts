@@ -86,7 +86,18 @@ export async function saveGeneralMessage(db: D1Database, session: Session | null
   if (!result[0]?.meta.changes) throw new ConflictError("revision changed, issue frozen, or review PR reserved; reload before editing");
   return stored(db,id);
 }
-const existingPath = /^ob-issues\/([1-9]\d*)\/(?:general\/(approved_recommendations|running_annexes)|([a-z0-9_]+)\/\d{3})\.yaml$/;
+const existingPath = /^ob-issues\/([1-9]\d*)\/(general\/[a-z_]+|[a-z0-9_]+\/\d{3})\.yaml$/;
+/** The one canonical path of a record: generalBinding owns it (singletons under general/, the rest NNN-numbered). */
+function canonicalImport(no: number, path: unknown): string {
+  const match = typeof path === "string" ? existingPath.exec(path) : null;
+  const bad = () => new InvalidError("path must be the canonical existing ob-issues/<issue>/<type>/NNN.yaml or general/<type>.yaml record of that issue");
+  if (!match || Number(match[1]) !== no) throw bad();
+  const [dir, file] = match[2]!.split("/") as [string, string];
+  const type = dir === "general" ? file : dir;
+  try { if (generalBinding(type, dir === "general" ? 1 : Number(file)).relativePath !== `${match[2]}.yaml`) throw bad(); }
+  catch (error) { throw error instanceof InvalidError ? error : bad(); }
+  return type;
+}
 /**
  * Open an existing canonical record from the data repository as a draft (map row D3). The file is read
  * through the repository reader, must validate as its class exactly as a new draft does (nothing is
@@ -95,9 +106,7 @@ const existingPath = /^ob-issues\/([1-9]\d*)\/(?:general\/(approved_recommendati
  */
 export async function importGeneralMessage(db: D1Database, session: Session | null, input: { ob_issue_no: unknown; path: unknown }, reader: RepoReader, repo: string) {
   const actor = staff(session), no = editionNo(input.ob_issue_no);
-  const match = typeof input.path === "string" ? existingPath.exec(input.path) : null;
-  if (!match || Number(match[1]) !== no) throw new InvalidError("path must be an existing ob-issues/<issue>/<type>/NNN.yaml or general/<type>.yaml record of that issue");
-  const type = match[2] ?? match[3]!;
+  const type = canonicalImport(no, input.path);
   const text = await reader.read(repo, input.path as string);
   if (text === null) throw new NotFoundError("no such record in the data repository");
   let value: unknown;
@@ -113,17 +122,19 @@ export async function importGeneralMessage(db: D1Database, session: Session | nu
   return stored(db, id);
 }
 
-/** Remove a draft that is not yet under review. A reserved publication PR, an approved snapshot trail
- * or a frozen edition keep the record: published work is withdrawn through review, not deleted here. */
+/** Remove a draft that is not currently approved and not under review. A reserved publication PR, a standing
+ * approval or a frozen edition keep the record: published work is withdrawn through review, not deleted here.
+ * Approval snapshots of earlier revisions (saving clears the approval) go with the draft; the audit log keeps them. */
 export async function deleteGeneralMessage(db: D1Database, session: Session | null, id: string, revision: unknown) {
   const actor = staff(session), expected = expectedRevision(revision), current = await stored(db,id), at = new Date().toISOString();
   if (current.revision !== expected) throw new ConflictError("general-message revision changed; reload before deleting");
-  const result = await run(db,[db.prepare(`DELETE FROM general_messages WHERE id=?1 AND revision=?2
+  const deletable = `EXISTS (SELECT 1 FROM general_messages WHERE id=?1 AND revision=?2 AND approved_at IS NULL)
     AND NOT EXISTS (SELECT 1 FROM general_message_prs WHERE message_id=?1)
-    AND NOT EXISTS (SELECT 1 FROM general_message_approvals WHERE message_id=?1)
-    AND NOT EXISTS (SELECT 1 FROM editions WHERE ob_issue_no=?3 AND status IN ('composing','staged','published'))`).bind(id,expected,current.ob_issue_no),
+    AND NOT EXISTS (SELECT 1 FROM editions WHERE ob_issue_no=?3 AND status IN ('composing','staged','published'))`;
+  const result = await run(db,[db.prepare(`DELETE FROM general_message_approvals WHERE message_id=?1 AND ${deletable}`).bind(id,expected,current.ob_issue_no),
+    db.prepare(`DELETE FROM general_messages WHERE id=?1 AND ${deletable}`).bind(id,expected,current.ob_issue_no),
     ...await audit(db,actor,id,current.ob_issue_no,"general.message.deleted",expected,at)]);
-  if (!result[0]?.meta.changes) throw new ConflictError("message was approved, has a reserved review PR, or its issue is frozen; it cannot be deleted");
+  if (!result[1]?.meta.changes) throw new ConflictError("message is approved, has a reserved review PR, or its issue is frozen; it cannot be deleted");
   return { id, deleted: true };
 }
 export async function approveGeneralMessage(db: D1Database, session: Session | null, id: string, revision: unknown) {

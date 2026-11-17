@@ -1,4 +1,4 @@
-import { getRepoReader, SNAPSHOT_REPO_DEFAULT } from "./lib/repo-reader.ts";
+import { getRepoReader, DATA_REPO_DEFAULT } from "./lib/repo-reader.ts";
 import { approveGeneralMessage, importGeneralMessage, createGeneralMessage, deleteGeneralMessage, listGeneralMessages, readGeneralMessage, saveGeneralMessage } from "./lib/general-messages.ts";
 import { type Route, body, json } from "./lib/http.ts";
 import { ituSession } from "./submission-routes.ts";
@@ -12,7 +12,7 @@ export const generalMessageRoutes: Route[] = [
   } },
   { method: "POST", pattern: new RegExp(`^${base}/import$`), guard: "access", handler: async ({request,env,access}) => {
     const input=await body(request);
-    return json({ok:true,draft:await importGeneralMessage(env.DB,await ituSession(env,access!),{ob_issue_no:input.ob_issue_no,path:input.path},getRepoReader(env),env.GITHUB_DATA_REPO ?? SNAPSHOT_REPO_DEFAULT)});
+    return json({ok:true,draft:await importGeneralMessage(env.DB,await ituSession(env,access!),{ob_issue_no:input.ob_issue_no,path:input.path},getRepoReader(env),env.GITHUB_DATA_REPO ?? DATA_REPO_DEFAULT)});
   } },
   { method: "GET", pattern: new RegExp(`^${item}$`), guard: "access", handler: async ({env,access,params}) => json({ok:true,draft:await readGeneralMessage(env.DB,await ituSession(env,access!),params[0]!)}) },
   { method: "POST", pattern: new RegExp(`^${item}$`), guard: "access", handler: async ({request,env,access,params}) => {

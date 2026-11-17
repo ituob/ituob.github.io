@@ -6,6 +6,7 @@ import { describe, expect, it } from 'vitest';
 import * as general from './general';
 import * as model from './model';
 import * as yamlIo from './yaml-io';
+import * as invalidInput from './invalid-input';
 import { description } from './description';
 import * as client from '../admin-client';
 import { validateClass } from '../schema.validators.generated';
@@ -16,7 +17,7 @@ function proseControls(value: unknown) {
   const js = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 } }).outputText;
   const exports: any = {};
   const modules: Record<string, unknown> = { vue: Vue, './TranslationAssist.vue': {}, '../../lib/form/description': { description },
-    '../../lib/admin-client': client, '../../lib/form/model': model, '../../lib/form/yaml-io': yamlIo, '../../lib/form/general': general };
+    '../../lib/admin-client': client, '../../lib/form/model': model, '../../lib/form/yaml-io': yamlIo, '../../lib/form/general': general, '../../lib/form/invalid-input': invalidInput };
   new Function('require', 'exports', js)((name: string) => {
     if (!(name in modules)) throw new Error(`Unexpected component import: ${name}`);
     return modules[name];

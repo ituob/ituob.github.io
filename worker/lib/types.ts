@@ -37,7 +37,7 @@ export interface Env {
   GITHUB_SITE_REPO?: string;
   /** Read-only token for repository reads (register state, existing messages). Unset: reads fail closed. */
   GITHUB_READ_TOKEN?: string;
-  /** Repository holding register snapshots and canonical messages; default ituob/itu-ob-data. */
+  /** Repository holding the register datasets and the ob-issues patch log; default ituob/service-publications-docs. */
   GITHUB_DATA_REPO?: string;
   GITHUB_DATA_GITLINK?: string;
   GITHUB_STAGING_BRANCH?: string;

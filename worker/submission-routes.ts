@@ -3,7 +3,7 @@
 import { Forbidden } from "./lib/authz.ts";
 import { type Route, body, json } from "./lib/http.ts";
 import { resolveAuthority } from "./lib/authority.ts";
-import { getRepoReader, registerIsEmpty, SNAPSHOT_REPO_DEFAULT } from "./lib/repo-reader.ts";
+import { getRepoReader, registerIsEmpty, DATA_REPO_DEFAULT } from "./lib/repo-reader.ts";
 import { getPublisher } from "./lib/publisher.ts";
 import { requestRevert } from "./lib/revert.ts";
 import {
@@ -27,7 +27,7 @@ export async function ituSession(env: Env, access: AccessIdentity): Promise<Sess
 }
 
 /** Lazy: only a SEED reads the data repository, so a missing token never affects other actions. */
-const emptyCheck = (env: Env) => (slug: string) => registerIsEmpty(getRepoReader(env), env.GITHUB_DATA_REPO ?? SNAPSHOT_REPO_DEFAULT, slug);
+const emptyCheck = (env: Env) => (slug: string) => registerIsEmpty(getRepoReader(env), env.GITHUB_DATA_REPO ?? DATA_REPO_DEFAULT, slug);
 export const submissionRoutes: Route[] = [
   { method: "GET", pattern: re("/api/me/submissions"), guard: "session",
     handler: async ({ env, session, url }) => json({ ok: true, submissions: await listSubmissions(env.DB, session, url.searchParams.get("state"), false) }) },

@@ -4,7 +4,7 @@ import { api, ApiError } from '../../lib/admin-client';
 import { toFormState, toInstance, type FormNode } from '../../lib/form/model';
 import { validateClass, type SchemaIssue } from '../../lib/schema.validators.generated';
 import type { EditionMetadata } from '../../../worker/lib/edition-metadata';
-import { inheritedMetadata } from '../../lib/form/edition-defaults';
+import { inheritedMetadata, previousEdition } from '../../lib/form/edition-defaults';
 import type { IssueMetadataWire } from '../../lib/schema.generated';
 import SchemaNode from './SchemaNode.vue';
 
@@ -66,7 +66,7 @@ watch(() => props.issueNo, load, { immediate: true });
 <template>
   <section :aria-busy="busy" aria-label="Edition metadata">
     <h3>Issue {{ issueNo }} metadata and dates</h3>
-    <p v-if="!draft && previous">ISSN, languages and authors start from the latest published edition; review them before saving.</p>
+    <p v-if="!draft && previousEdition(issueNo, previous)">ISSN, languages and authors start from the latest published edition; review them before saving.</p>
     <p>Enter publication_date and cutoff_date as YYYY-MM-DD. Cutoff must be on or before publication. Scheduling requires an ITU administrator.</p>
     <p v-if="error" role="alert">{{ error }}</p><p v-if="notice" role="status">{{ notice }}</p>
     <ul v-if="errors.length" role="alert"><li v-for="(issue, index) in errors" :key="index">{{ issue.path }}: {{ issue.message }}</li></ul>

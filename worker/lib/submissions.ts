@@ -229,8 +229,11 @@ async function bind(db: D1Database, session: Session, register_id: string, actio
 
 /** SEED is the only full-state action: ITU staff only, and only while the register's replayed state is empty. */
 export type EmptyRegisterCheck = (slug: string) => Promise<boolean>;
-async function requireEmptyRegister(action: ActionType, slug: string, isEmpty?: EmptyRegisterCheck) {
+async function requireEmptyRegister(db: D1Database, action: ActionType, slug: string, isEmpty: EmptyRegisterCheck | undefined, selfId: string | null) {
   if (action !== "SEED") return;
+  // One SEED per register: replay seeds once, so a second in-flight SEED would open a second full-state PR.
+  const other = await db.prepare(`SELECT id FROM submissions WHERE action_type='SEED' AND slug=?1 AND id IS NOT ?2 AND state NOT IN ('rejected','withdrawn') LIMIT 1`).bind(slug, selfId).first();
+  if (other) throw new ConflictError(`register ${slug} already has a SEED in progress; withdraw or finish it first`);
   if (!isEmpty) throw new UpstreamError("register state cannot be checked; a SEED is refused");
   if (!(await isEmpty(slug))) throw new ConflictError(`register ${slug} already has state; change it with ADD, REP or SUP actions, not a SEED`);
 }
@@ -250,7 +253,7 @@ export async function createSubmission(db: D1Database, session: Session | null, 
   const t = now();
   const errors = validate({ register_id: c.register_id, slug: c.slug, action_type: c.action_type, payload: c.payload });
   if (errors.length) throw new ValidationFailed(errors);
-  await requireEmptyRegister(c.action_type, c.slug, isEmpty);
+  await requireEmptyRegister(db, c.action_type, c.slug, isEmpty, null);
   const rev = await revisionRow({ id }, 1, c.payload, errors, s.userId, t);
   const stmts = [
     db
@@ -396,7 +399,7 @@ export function finalYaml(sub: Sub, edition: number, seq: number, payloadYaml: s
 export async function approve(db: D1Database, session: Session | null, id: string, b: Record<string, unknown>, repo: string, isEmpty?: EmptyRegisterCheck) {
   const s = reviewer(session);
   const sub = await getSub(db, id);
-  await requireEmptyRegister(sub.action_type, sub.slug, isEmpty);
+  await requireEmptyRegister(db, sub.action_type, sub.slug, isEmpty, sub.id);
   const detail = selfReview(s, sub, b);
   if (sub.state !== "in_review") throw new ConflictError(`illegal transition from ${sub.state}`);
   const edition = b.target_edition;
