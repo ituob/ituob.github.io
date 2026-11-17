@@ -7,6 +7,7 @@
 // Phase 1 (docs/cloudflare-webapp.adoc): read-only API. Phases 2–4
 // add Access, D1, and the schema-form editor behind /api and /admin.
 
+import { legacyRedirectTarget } from "./lib/legacy-redirects.ts";
 import { handleAuth } from "./lib/auth-routes.ts";
 import { handleApi } from "./routes.ts";
 import { flushOutbox, sweep, type NotifyMessage } from "./lib/outbox.ts";
@@ -28,8 +29,11 @@ export default {
   async fetch(request: Request, env: RuntimeEnv): Promise<Response> {
     const url = new URL(request.url);
 
-    if (url.hostname === APEX_HOST) {
-      url.hostname = `www.${url.hostname}`;
+    const legacyTarget = legacyRedirectTarget(url.pathname);
+    if (legacyTarget || url.hostname === APEX_HOST || (url.protocol === "http:" && url.hostname === "www.ituob.org")) {
+      if (legacyTarget) url.pathname = legacyTarget;
+      if (url.hostname === APEX_HOST) url.hostname = `www.${url.hostname}`;
+      url.protocol = "https:";
       return Response.redirect(url.toString(), 301);
     }
 

@@ -64,6 +64,13 @@ jobs:
     - name: Install dependencies
       run: npm ci
 
+    - name: Verify legacy URL route coverage without rendering
+      run: |
+        git fetch origin production-jekyll:refs/remotes/origin/production-jekyll
+        node scripts/cutover-url-inventory.mjs --test --output "$RUNNER_TEMP/legacy-url-map.json"
+        node --test scripts/issue-language-routes.test.mjs scripts/cutover-url-inventory.test.mjs
+        node --experimental-strip-types --test tests/legacy-archive-scopes.test.ts
+
     - name: Verify generated register identities and country fields
       run: |
         node scripts/generate-register-rules.mjs data-ob/catalogs/registers.yaml

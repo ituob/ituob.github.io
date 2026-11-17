@@ -1,0 +1,407 @@
+= ituob.org cutover readiness: Jekyll to Astro + Cloudflare Worker
+:toc:
+
+Assessment date: 2026-11-17 (UTC).
+Status: *migration work can start; production cutover is not ready*.
+This is the missing hosting-migration step after normalization and website
+completion, before the editor and identity-service phases. It does not authorize
+a deployment or a DNS change. No PR is required to use this assessment as the
+basis of a migration issue.
+
+== Baseline and evidence
+
+[cols="2,4"]
+|===
+| Input | Inspected revision
+| `origin/main` | `49f704491a730b358c2a8405be0f6876a3408da9`
+| `origin/production-jekyll` | `8ef2eb431183bdb1257c632d340ee3476169a265`
+| `origin/claude-a/100-parity-fixes` | `44ef89245cc7b30b7044b2bfc3f00371fc6e5a3f`
+| Main `data` gitlink | `90f99728acd1e96d025ce0034fe43a38b572aa62`
+| Main `data-ob` gitlink | `7d94b1c1a6425396525dc6e153ee09eece74cd54`
+|===
+
+link:readiness-observations.json[Read-only operational observations] preserve the
+Pages API response, latest Pages build, main CI job outcomes, and parity input
+comparison. URLs and counts below are source/route evidence, not successful HTTP
+requests to a future Cloudflare deployment. Re-run the inventory against the
+chosen release candidate if source or data changes.
+
+== What serves production today
+
+GitHub Pages serves the *generated Jekyll snapshot* on
+`production-jekyll`, directory `/`, in `ituob/ituob.github.io`.
+The branch README identifies it as the restored build from Jekyll source
+`a95ab19`; this branch contains generated HTML, not the Astro source or a
+Jekyll `_config.yml` to rebuild in place.
+
+The live Pages API reports `build_type=legacy`, `status=built`,
+`source.branch=production-jekyll`, `source.path=/`,
+`cname=www.ituob.org`, HTTPS enforced, custom 404 enabled, and a certificate
+covering both `www.ituob.org` and `ituob.org`.
+The latest Pages build is the same `8ef2eb4` commit. Its exact publishing workflow
+is GitHub's dynamic `pages-build-deployment`, successful
+https://github.com/ituob/ituob.github.io/actions/runs/39744129486[run 39744129486]
+on 2026-10-22. There is no `.github/workflows` tree in the published branch.
+The current main branch's `Build and Deploy` workflow does *not* publish Pages.
+
+Read-only DNS lookup returns `www.ituob.org CNAME ituob.github.io.`.
+The apex nameservers are already `arturo.ns.cloudflare.com` and
+`melody.ns.cloudflare.com`; a registrar nameserver migration must not be assumed
+necessary. This observation does not establish the Cloudflare proxy setting,
+record ownership, apex routing configuration, or the deployed Worker versions.
+Export the actual zone and account configuration before making changes.
+
+== What the new stack must serve
+
+=== Build and deploy target
+
+`astro.config.mjs` selects static output, trailing slashes, canonical site
+`https://www.ituob.org`, Vue/MDX, sitemap generation, and register snapshots.
+The source of truth for building is `.github/workflows/build-deploy.yml`:
+
+. Check out recursive submodules; use Node 22 and Ruby 3.4.
+. Generate ontology wire types, validators and form descriptions; verify their
+  committed versions and register identities.
+. Project the pinned authored data with `scripts/project-authored-data.py`;
+  generate snapshots and set `OB_DATA_ROOT` to that exact projection.
+. Install dependencies, run binding/Worker/provider/form/data regression checks,
+  fetch and verify publication PDFs, build Astro, verify PDFs in dist and run
+  `astro check`.
+. Retain `authored-projection` and `site-dist`. The latter has three-day retention;
+  save a durable, checksummed release copy before the cutover window.
+
+Cloudflare receives this artifact; it must not independently rebuild the site.
+Production is Worker `ituob-org` (`wrangler.jsonc`), entrypoint `worker/index.ts`,
+with the `ASSETS` binding pointing at `dist/`. Both `www.ituob.org` and `ituob.org`
+are configured as custom domains. `workers_dev=false` means the older
+workers.dev testing instructions do not apply to these configs.
+
+Staging is the separate Worker `ituob-org-staging` at
+`staging-www.ituob.org` (`wrangler.staging.jsonc`). Staging deploys on a push to
+`staging`. Production deploys only on a push to `main` with repository variable
+`CLOUDFLARE_DEPLOY_PRODUCTION=true`. A manual workflow dispatch does not satisfy
+these deploy-job conditions. Plan an approved main push or a reviewed release
+workflow change; do not assume dispatch deploys the artifact.
+
+Read-only repository checks found `CLOUDFLARE_DEPLOY_PRODUCTION` absent (404),
+`CLOUDFLARE_ACCOUNT_ID` configured, the obsolete `CLOUDFLARE_DEPLOY=false`, and
+the secret name `CLOUDFLARE_API_TOKEN` present. Presence does not prove the account
+is the intended one or the token has valid scope.
+`node scripts/configure-cloudflare.mjs --check --environment production` fails:
+`An explicit Cloudflare account_id is required (32 hex characters).`
+The same check with the configured CI account variable supplied also fails:
+the checked-in Wrangler config still needs its explicit account declaration.
+The variable alone does not populate it. No account value is recorded here;
+remote resource verification remains outstanding.
+The checked-in production and staging configs have no DB or queue bindings.
+See link:../webapp-deployment.adoc[deployment configuration and preflight] for
+resource discovery and generated full-webapp configuration.
+
+*Preserve phase order:* the existing deployment preflight expects the full
+webapp's D1, queues, OIDC and provider configuration. This creates a dependency
+on later phases if used unchanged. Choose and implement a public-site-only
+production profile/preflight, with later-phase UI/routes disabled or clearly
+unavailable, or explicitly accept a separately provisioned full-webapp deployment.
+Do not make completion of the editor or identity service an accidental prerequisite
+for moving the read-only website. `worker/index.ts` can serve static assets without
+DB, but returns 503 for `/api/*`, `/auth*` and `/admin*` without it; that alone does
+not make the current CI preflight or member UI suitable for a public-only launch.
+
+=== URL compatibility
+
+The committed URL inventory and its reproduction instructions below enumerate
+actual HTML files in the published branch, including help pages. The new-page
+check uses concrete generated route parameters; a dynamic filename alone is not
+proof that a destination exists. Mapped destinations indicate a possible
+compatibility target, not an installed redirect or proof of content equivalence.
+
+link:old-url-map.adoc[Inventory method, reproduction and limitations] and
+link:old-url-map.json[every old HTML URL, candidate new route and missing-page flag]
+are generated by `scripts/cutover-url-inventory.mjs` without a site build.
+
+[cols="3,1,3"]
+|===
+| Old pattern | HTML paths | Candidate new route / disposition
+| `/` | 1 | `/`
+| `/404.html` | 1 | Special Astro `404.html`; verify host status behavior
+| `/issues/<number>-<language>/` | 313
+| English to `/issues/<number>/`; other languages to
+  `/issues/<number>/<language>/` only when concretely generated
+| `/messages/complement-to-itu-t-r <code>/` and optional `<year>/` | 106
+| `/recommendations/<code>/`; year archives lose their filter
+| `/messages/amending-sp <register-id> (<edition>)/` and optional `<year>/` | 205
+| Catalog-matched `/registers/<slug>/`; edition/year scope needs a decision
+| `/docs/` and nested help pages | 11 | No matching new help pages
+| `/_app_help/` and nested help copies | 11
+| No matching routes; underscore copies are not established public pages
+|===
+
+There are *648 tracked HTML paths*, with 637 public-shaped paths and 11 underscore
+help copies. A live HEAD probe returned 404 for `/_app_help/` and 200 for `/docs/`;
+only those roots were probed. The conservative inventory includes both sets
+rather than silently discarding old files. Directory and `index.html` spellings
+represent aliases of one counted page, not two pages.
+
+The final recorded inventory flags *25 paths without a verified new page*: all
+22 help/docs copies plus `/issues/1173-ru/`, `/issues/1173-zh/` and
+`/issues/1195-fr/`. Excluding the 11 underscore copies leaves *14 public-shaped
+paths without verified targets*. Two paths are unchanged, 322 have concrete
+redirect candidates, and *299 archive paths require a semantic replacement
+decision* because an overview does not preserve their year/edition scope. None
+of the legacy-path redirects is implemented by this assessment.
+
+For issue-language checks the final run uses the downloaded `authored-projection`
+from successful CI run
+https://github.com/ituob/ituob.github.io/actions/runs/44108114203[44108114203]
+(`0dddeec671782253e58f22fbce1bbe151764e6d7`), combined with the pinned catalogs
+and source-data gitlinks. The scoped comparison with main found only
+`src/lib/register-rules.generated.ts` changed among routes, libraries, gitlinks
+and the projection script; this is useful route evidence, not green main CI.
+Generated snapshot manifests used for register routes are separately hashed;
+snapshot-dependent rows remain conditional on the release producing them.
+The JSON records input hashes, provenance and all missing candidates. No missing
+language page is silently redirected to English.
+
+The map also inventories *5,140 non-HTML tracked paths*: seven have a same-path
+file in `public/`, and 5,133 do not. That includes repository data/cache files,
+not just intended public downloads. Four old asset paths lack same-path public
+files: `/assets/css/style.css`, its `.map`,
+`/assets/js/electron-helpers.js`, and `/assets/vendor/youtube-video.min.js`.
+Decide which old resource contracts to preserve, redirect or retire after checking
+live consumers; do not mistake the non-HTML path inventory for verified HTTP
+availability or byte equivalence. New publication PDFs also need manifest/hash
+verification in the release artifact.
+
+Implement a versioned compatibility map in the Worker before the ASSETS fallback
+(or an equivalently tested static-assets redirect layer). Preserve query strings,
+percent encoding, spaces, case and punctuation in legacy message paths; handle
+both directory URLs and explicit `index.html` aliases. Also check slashless
+requests, `http` to HTTPS and apex to www without loops or unnecessary chains.
+Use the inventory's exact old paths rather than guessing a single regular
+expression for all message names. Fragments never reach the server: verify old
+issue/message anchors against destination IDs and retain compatible anchors or
+document the lost deep-link behavior. Do not mass-redirect unmapped help pages
+to the homepage and call them compatible. Restore them, provide a meaningful
+replacement, or obtain explicit retirement approval and serve a deliberate 410.
+
+`worker/index.ts` currently implements only apex to www (301, retaining path and
+query), authentication/API handling, then ASSETS. There are no legacy issue,
+message or help redirects. Asset HTML handling is not a legacy content map.
+During the cutover probation period use temporary compatibility redirects if
+rollback is still expected; make them permanent only after the owner accepts
+results and cache implications. Genuine unknown paths must remain 404.
+
+=== Feeds, sitemap, 404, analytics and search
+
+[cols="1,3,3"]
+|===
+| Surface | Evidence | Required acceptance
+| Feeds
+| No root feed, sitemap or robots files were found in the published snapshot;
+  no feed endpoint exists in `src/pages`. Live HEAD probes of `/feed.xml`,
+  `/sitemap.xml` and `/robots.txt` also returned 404.
+| Confirm whether subscribers or external consumers use endpoints outside this
+  snapshot. Preserve any discovered endpoint; otherwise record that no existing
+  feed contract was found and decide whether a new feed is required.
+| Sitemap / indexing
+| `@astrojs/sitemap` is enabled with the www production origin.
+| Inspect the final artifact's sitemap index and children: only canonical public
+  content, all intended issues/registers/recommendations, no admin/member URLs
+  or staging host. Decide and add robots policy; keep staging out of indexing.
+| 404
+| Old `/404.html`; new `src/pages/404.astro`;
+  Wrangler uses `not_found_handling=404-page` with Worker-first routing.
+| Unknown ordinary paths return actual HTTP 404 and the custom page, not a
+  homepage/SPA 200. Check unknown API routes separately under the chosen profile.
+| Analytics
+| Published homepage loads Google tag `G-L3TCVBGNJ0`; no corresponding tracker
+  was found in the new layout/public sources.
+| Owner decides whether to retain this property or replace/retire it. Implement
+  the chosen tracking and consent behavior, verify production events, and avoid
+  sending staging traffic to the production property.
+| Search
+| `/search/` imports `/pagefind/pagefind-ui.js`; no Pagefind generation step
+  exists in `package.json` or the build workflow. Command palette separately
+  uses `src/pages/cmdk-index.json.ts`.
+| Add reproducible indexing/UI assets (including styling) or replace the search
+  implementation. Verify representative issue, register and recommendation
+  queries plus result links. Check command-palette/download targets too;
+  `/downloads/` is referenced but has no page on this baseline.
+|===
+
+`public/_headers` declares security headers and immutable Astro-asset caching.
+Check headers on actual ASSETS responses and separately on Worker-generated
+redirects/errors; a headers file alone is not runtime proof. Confirm valid TLS
+for both production names before public traffic moves.
+
+== Gaps and release gates
+
+[cols="1,4,2"]
+|===
+| Priority | Evidence / closure condition | Responsible
+| Blocking
+| URL inventory has unresolved destinations and no deployed compatibility map.
+  Resolve every flagged page or record an approved retirement; verify all retained
+  old URLs against the candidate artifact and then over HTTP.
+| Code; owner approves retirements
+| Blocking
+| Main build https://github.com/ituob/ituob.github.io/actions/runs/44108119390[44108119390]
+  at `49f7044` failed in Worker tests: `test/country-authorization.test.ts:50`,
+  expected 400, received 422 (521 passed, one failed). Subsequent build/deploy jobs
+  did not complete. Fix the contract/test mismatch and obtain green CI for the
+  exact release head; do not label the prior green `0dddeec` run a main-head pass.
+| Code
+| Blocking
+| Account/preflight not ready; actual Worker, domain attachment, certificates,
+  remote bindings and secret validity have not been verified. Select the
+  public-only deployment boundary before provisioning later-phase dependencies.
+| Code profile; owner/account operator
+| Blocking
+| Parity evidence is successful but belongs to a recorded fixture build, not the
+  final release artifact; see below. Revalidate the chosen candidate.
+| Code / release operator
+| Blocking
+| Search index generation missing; final sitemap, redirects, TLS and 404 runtime
+  evidence absent. Pass staged acceptance before the switch.
+| Code / release operator
+| Decision
+| Analytics continuity, undocumented feed consumers, intentional help-page
+  retirement and monitoring/rollback thresholds need explicit agreement.
+| Owner with code support
+| Documentation
+| `docs/cloudflare-webapp.adoc` still names `CLOUDFLARE_DEPLOY`, shows obsolete
+  workers.dev testing, suggests moving an already-Cloudflare zone and describes
+  obsolete Pages deployment architecture. Follow actual workflow/config and this
+  evidence; reconcile that runbook before execution.
+| Code
+|===
+
+=== Meaning of the parity result
+
+Both main's `docs/parity/printed-labels-notes/parity_report.md` and the inspected
+`claude-a/100-parity-fixes` branch report *429/429 local pages at least 95%, zero
+warn/fail/missing*: one homepage, 396 issue pages, 20 registers and 12
+recommendations. The accompanying README records 609 included Jekyll variants
+passing, with two cross-listed F.32/BUREAUFAX anomalies excluded. Those exceptions
+still require URL decisions; exclusion from scoring does not remove their URLs.
+
+The receipt records successful build source `df1c47d0`, a Jekyll reference at
+`a95ab19`, and its own corpus revisions (including OB 1350). At this main baseline,
+*18 of the receipt's 66 source hashes differ*, including loaders, layouts and
+issue/register templates (full list in `readiness-observations.json`).
+The README explicitly limits the comparison to classified pages and defers annex
+chronology. Therefore the zero-below-95 result establishes strong content-parity
+progress, not exhaustive old-URL coverage, current-main parity, hosting readiness,
+or proof of the deferred date behavior. Reuse the canonical auditor and worst-
+variant rules on the release candidate; retain source/data/HTML hashes and report
+any documented exceptions separately. Do not start another full local build to
+read this assessment.
+
+== Proposed cutover sequence
+
+These are future execution steps. Each external mutation needs its normal owner
+scheduling and account authority; none was performed for this assessment.
+
+. *Create the migration work item* from this assessment. Keep normalization and
+  display completion as predecessor gates; editor and identity are later work.
+  Assign a release operator, DNS/account operator and rollback decision maker.
+. *Complete code gaps*: finalize every inventory disposition, implement/test
+  redirects and anchors, repair release CI, complete search, indexing and the
+  analytics decision. Select the public-only production profile or agreed full
+  configuration. Reconcile the old deployment runbook. Do not enable production
+  deployment while those changes land.
+. *Prepare account and rollback evidence*: verify the correct Cloudflare account,
+  token permissions, zone authority, existing Workers/custom domains and TLS.
+  Export all affected DNS record values, TTLs/proxy modes, Pages settings,
+  custom-domain attachments and any existing Worker version. Record the current
+  Pages source commit/build and preserve its CNAME and branch untouched.
+  Confirm who can reverse each change. Never put secret values in this repository.
+. *Choose the release*: freeze a source head and both data gitlinks, get green CI,
+  retain immutable `site-dist` plus authored projection and checksums, validate
+  complete parity and file/size limits on that artifact. The October measurements
+  in the old runbook are not a current capacity check. A prior green artifact may
+  help investigation but is not automatically the approved release.
+. *Rehearse on staging*: deploy the approved candidate through an authorized
+  staging lane (future action). Prove concrete route coverage, all compatibility
+  redirects, encoded paths, representative anchors, search, downloads, sitemap,
+  headers and real 404s. Verify later-phase surfaces behave as agreed without
+  exposing an unfinished editor/identity flow. Save HTTP statuses, Location headers
+  and final destination results against the candidate hash.
+. *Set the window*: owner/Hassan approves the go-live date, acceptable outage/error
+  threshold and observation period; lower applicable TTLs in advance if useful.
+  Pause competing release automation. Ensure the GitHub origin remains reachable
+  while cached old DNS answers expire. Custom-domain deployment can itself alter
+  Cloudflare DNS: treat the first production deploy/domain attachment as a
+  potential traffic-switch operation, not a harmless preview.
+. *Execute the coordinated switch*: with the exact candidate ready and operators
+  present, configure production account/profile, enable
+  `CLOUDFLARE_DEPLOY_PRODUCTION` only for the approved release trigger, and deploy
+  `ituob-org` with the two intended custom domains. Resolve the existing www CNAME
+  versus Worker domain attachment under owner control; do not delete unrelated
+  records or change nameservers by rote. Verify the created DNS records and TLS
+  rather than assuming deployment succeeded. Where a preview is needed before
+  attachment, use an explicitly approved isolated hostname/config.
+. *Verify both names immediately*: HTTPS certificate, apex to www behavior,
+  homepage, all retained inventory URLs, final content, unknown-path 404, search,
+  sitemap, analytics and latency/error rates. Watch Worker logs and old origin
+  availability through DNS propagation. Stop automatic redeployment after the
+  selected head until acceptance is signed off.
+. *Accept or roll back*: invoke the procedure below on failed acceptance or the
+  agreed threshold. On acceptance, finalize permanent redirects, restore normal
+  TTLs and document deployed version/hash, DNS state and monitoring ownership.
+  Keep Pages and its branch through the agreed rollback period. Only afterward
+  may the owner remove Pages/domain settings; verify no stale GitHub-targeting
+  DNS remains before teardown.
+
+== Rollback
+
+. Freeze releases and set `CLOUDFLARE_DEPLOY_PRODUCTION` false/absent so a new main
+  push cannot immediately undo recovery. Record the failed deployment/version.
+. If a previously accepted Cloudflare version exists and is the desired recovery,
+  restore that exact version/artifact and domain configuration, then run the same
+  public checks. Before the first cutover, the recovery target is GitHub Pages.
+. For Pages recovery, remove/disable the conflicting Worker custom-domain
+  attachment or routing as required, then restore the exported www CNAME
+  (`ituob.github.io.`), apex records/redirect configuration, TTL and proxy modes.
+  Use the saved zone state, not guessed apex IPs. Confirm Pages remains built from
+  `production-jekyll:/` at the saved commit with its CNAME and valid HTTPS.
+. Check www and apex from independent resolvers, old issues/messages and a 404;
+  monitor until the restored DNS answers propagate. Some cached answers and
+  permanent redirects can outlive the switch, which is why the origin must remain
+  available and compatibility redirects should not become permanent prematurely.
+. Preserve incident evidence and reopen the failed gate before scheduling another
+  attempt. This read-only migration needs no data rollback; if a full webapp was
+  enabled, freeze writes and follow a separate D1/queue recovery plan. Do not
+  promise to reverse editorial writes by reverting website DNS.
+
+== Ownership and immediate next work
+
+*Code work can begin now*: compatibility map and missing-page dispositions,
+public-only deployment/preflight boundary, failed CI contract, Pagefind pipeline,
+robots/sitemap filtering, analytics wiring once decided, staged HTTP acceptance
+harness, durable release evidence, and runbook corrections.
+
+*Owner/Hassan or delegated account operator*: confirm Cloudflare account and
+permissions, provide verified account/resource configuration through the existing
+secure path, approve Analytics/feed/retirement decisions, choose go-live date and
+rollback criteria, approve the release hash, coordinate DNS/custom-domain/TLS
+changes, authorize the production trigger, and eventually retire Pages.
+Existing zone nameservers do not eliminate the need for zone-write authority.
+Editor and identity completion remain separate milestones unless the owner
+explicitly changes the deployment boundary.
+
+== Verification performed and NOT RUN
+
+Performed: `git fetch origin`; inspected pinned main, production snapshot and
+parity branch; read-only GitHub Pages/Actions/config-name checks, DNS lookup
+and five scoped live HEAD probes;
+source-hash comparison; production configuration preflight (failed as recorded);
+lightweight URL inventory generation and its focused checks; final changed-file
+review. Inventory inputs, invocation and limits are committed alongside the map.
+
+*NOT RUN*: full site build, new full parity render/audit, Cloudflare account login
+or resource mutation, remote binding/secret validation, deployment, production or
+staging DNS changes, release-candidate HTTP/browser acceptance, load/capacity
+measurement, analytics event verification, failover rehearsal, and any push to
+main/staging/production-jekyll. No PR was opened. CI observations above are existing
+runs, not a claimed new successful release check.

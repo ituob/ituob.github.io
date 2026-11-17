@@ -47,7 +47,9 @@ it("authorizes country/service and area/network registers, refusing unscoped row
       register_id: register, slug, action_type: "ADD", payload: { type: "ADD", data: { _class: cls, entries } },
     } });
     expect((await send([{ ...identity, [field]: { en: "Algeria" } }])).status).toBe(201);
+    // Missing country scope is rejected before validation, even for duplicate identities.
     expect((await send([{ ...identity, [field]: { en: "Algeria" } }, otherIdentity])).status).toBe(400);
+    expect((await send([{ ...identity, [field]: { en: "Algeria" } }, identity])).status).toBe(400);
     expect((await send([{ ...identity, [field]: { en: "Australia" } }])).status).toBe(403);
     // Duplicate identities fail stage 2 only after the whole batch is authorized.
     const before = await db().prepare("SELECT count(*) AS n FROM submission_revisions").first();
