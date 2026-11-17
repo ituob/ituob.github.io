@@ -49,6 +49,12 @@ it("authorizes country/service and area/network registers, refusing unscoped row
     expect((await send([{ ...identity, [field]: { en: "Algeria" } }])).status).toBe(201);
     expect((await send([{ ...identity, [field]: { en: "Algeria" } }, identity])).status).toBe(400);
     expect((await send([{ ...identity, [field]: { en: "Australia" } }])).status).toBe(403);
+    // Duplicate identities fail stage 2 only after the whole batch is authorized.
+    const before = await db().prepare("SELECT count(*) AS n FROM submission_revisions").first();
+    const row = { ...identity, [field]: { en: "Algeria" } };
+    expect((await send([row, row])).status).toBe(422);
+    expect((await send([row, { ...identity, [field]: { en: "Australia" } }])).status).toBe(403);
+    expect(await db().prepare("SELECT count(*) AS n FROM submission_revisions").first()).toEqual(before);
   }
 });
 

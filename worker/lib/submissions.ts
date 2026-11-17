@@ -236,7 +236,7 @@ function parseCreate(b: Record<string, unknown>) {
 }
 
 /** Country binding on every payload write. Unscoped text and LIR are ITU-staff only. */
-async function bind(db: D1Database, session: Session, register_id: string, action: ActionType, payload: unknown, assets?: Assets) {
+async function bind(db: D1Database, session: Session, register_id: string, action: ActionType, payload: unknown) {
   const data = (payload as { data?: { _class?: unknown } } | null)?.data;
   if (data?._class === "TextAmendment" && !isItu(session))
     throw new ValidationFailed([{
@@ -247,10 +247,8 @@ async function bind(db: D1Database, session: Session, register_id: string, actio
   if ((action === "LIR" || action === "SEED") && !isItu(session)) throw new Forbidden();
   // ITU roles are not key-bound; authorizeEntries needs a non-empty list to be callable.
   if (keys.length === 0 && !isItu(session)) {
-    // An invalid class cannot supply a country field. Return its schema errors
-    // rather than hiding them behind the valid-but-unscoped payload error.
-    const { errors, warnings } = await validateCurrent(assets, { register_id, action_type: action, payload });
-    if (errors.length) throw new ValidationFailed(errors, warnings);
+    // Establish country authority before evaluating content, including stage 2.
+    // Missing scope must not reveal validation results for unauthorized rows.
     throw new InvalidError("no country/area key found in the entries");
   }
   return authorizeEntries(db, session, keys.length ? keys : ["-"]);
@@ -270,7 +268,7 @@ async function requireEmptyRegister(db: D1Database, action: ActionType, slug: st
 export async function createSubmission(db: D1Database, session: Session | null, b: Record<string, unknown>, isEmpty?: EmptyRegisterCheck, assets?: Assets): Promise<Sub> {
   const s = requireUser(session);
   const c = parseCreate(b);
-  const snap = await bind(db, s, c.register_id, c.action_type, c.payload, assets);
+  const snap = await bind(db, s, c.register_id, c.action_type, c.payload);
   // A published submission is corrected by a NEW submission that names it (design "Withdrawal and the undo story").
   if (c.corrects_id) {
     const target = await db.prepare(`SELECT state, register_id FROM submissions WHERE id=?1`).bind(c.corrects_id).first<{ state: State; register_id: string }>();
@@ -319,7 +317,7 @@ async function ownSub(db: D1Database, session: Session | null, id: string): Prom
 async function newRevisionPayload(db: D1Database, s: Session, sub: Sub, b: Record<string, unknown>, assets?: Assets) {
   const payload = b.payload;
   if (!payload || typeof payload !== "object" || Array.isArray(payload)) throw new InvalidError("payload must be an object");
-  await bind(db, s, sub.register_id, sub.action_type, payload, assets);
+  await bind(db, s, sub.register_id, sub.action_type, payload);
   return payload as Record<string, unknown>;
 }
 
@@ -347,7 +345,7 @@ export async function submitDraft(db: D1Database, session: Session | null, id: s
     .bind(sub.id, sub.current_rev)
     .first<{ payload_yaml: string }>();
   const payload = parsePayload(cur!.payload_yaml);
-  await bind(db, s, sub.register_id, sub.action_type, payload, assets); // authority re-checked at submit time
+  await bind(db, s, sub.register_id, sub.action_type, payload); // authority re-checked at submit time
   const { errors, warnings } = await validateCurrent(assets, { register_id: sub.register_id, slug: sub.slug, action_type: sub.action_type, payload });
   if (errors.length) throw new ValidationFailed(errors, warnings);
   return { ...await mutate(db, sub, { ...MOVES.submit, actor: { kind: "user", id: s.userId }, auditAction: "submission.state" }), warnings };
