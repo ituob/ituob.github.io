@@ -10,18 +10,45 @@ the queue consumer (`worker/queue-consumer.ts`), never on a request path.
 [cols="2,1,3"]
 |===
 | Name | Kind | Meaning
-| `EMAIL_PROVIDER` | var | `log` (send nothing; one structured log line per message, no body) or `http` (real send). Unset or anything else: sending fails closed, rows retry and are counted, then dead-letter
+| `EMAIL_PROVIDER` | var | `recording` (persist messages in D1 without sending), `log` (send nothing; one structured log line per message, no body), or `http` (real send). Unset or anything else: sending fails closed, rows retry and are counted, then dead-letter
 | `EMAIL_API_URL` | var | `http` only. HTTPS endpoint, for example `https://api.resend.com/emails`. A non-HTTPS or invalid URL fails closed
 | `EMAIL_API_KEY` | *secret* | `http` only. Sent as `Authorization: Bearer <key>`
 | `MAIL_FROM` | var | `http` only. The `from` address, for example `ITU OB <noreply@ituob.org>`; the provider must have verified this sender/domain
 |===
 
-The `http` transport posts JSON `{from, to: [address], subject, text}` with
+The `http` transport posts JSON `{from, to: [address], subject, text, html}` with
 an `Idempotency-Key` header (the notification id, so a redelivery does not
 send twice) and requires a 2xx response containing `{"id": "..."}`; the id
 is stored as `notifications.email_provider_id`. This matches the Resend
 API; another provider needs a request-shape adapter. No account exists yet,
-so real delivery is unverified: use `log` until one does.
+so real delivery is unverified: use `recording` or `log` until one does.
+Text-only callers can omit `html`.
+
+The `recording` provider needs only the existing `DB` binding and the
+`recorded_emails` migration; it needs no provider account, credentials, or
+network access. It stores `to_address`, `subject`, `text_body`, `html_body`,
+`locale`, and `recorded_at`. Its deterministic id is
+`recording-<idempotencyKey>`; repeated delivery preserves the first stored
+message, including across sender instances. Recording succeeds only after
+the database write succeeds. Recorded bodies and addresses remain in D1,
+so use a local or staging database and apply the environment's data retention
+policy. Existing text-only messages record an empty HTML body and English locale.
+
+== Email content and language
+
+Notification and digest templates produce both plain text and HTML with human
+event titles. The recipient's `users.locale` selects English (`en`), French
+(`fr`), Spanish (`es`), Russian (`ru`), Chinese (`zh`), or Arabic (`ar`);
+regional variants such as `fr-CA` use their base language. Arabic HTML uses
+right-to-left direction. Missing or unsupported locales use English. Digest headings and
+event descriptions use the same language. HTML escapes event payloads,
+including author names, submission titles, reasons, and comment excerpts.
+
+Submission links are absolute and default to `https://www.ituob.org`.
+Renderers accept an `origin` option for a deployment-specific site origin.
+Every message also links to `/api/me/notification-prefs`, the authenticated
+preferences endpoint, where recipients can inspect their current preferences.
+The link requires a signed-in session; it does not unsubscribe without authentication.
 
 == OIDC (`AUTH_MODE=oidc`)
 
@@ -53,3 +80,40 @@ Full semantics and assumptions A1-A11: `docs/identity-accounts.adoc`.
 | `PATCH_REPO` | var | default `ituob/service-publications-docs`
 | `DB`, `NOTIFY_Q` bindings | binding | D1 database and the `ituob-notify` queue
 |===
+
+== Local recording workflow and digests
+
+Apply `migrations/0006_recorded_email.sql` to the local test database and choose
+`EMAIL_PROVIDER=recording` to exercise delivery without sending mail. The checked-in
+live Wrangler configurations remain unprovisioned; D1, queue and cron examples
+remain opt-in (`docs/cloudflare-bindings.adoc`). No provider credentials are needed.
+
+`GET /api/me/notification-prefs` returns `level`, `delivery` and `locale`.
+The authenticated `PUT` accepts `level` (`all`, `mentions`, `none`), optional
+`delivery` (`immediate`, `digest`), and optional `locale` (a language tag or `null`).
+Omitted delivery and locale preserve existing settings. Setting `level=none`
+disables email, including pending digests. The same recipient and suppression
+rules apply to both delivery modes and are rechecked by the consumer.
+
+Immediate notifications enter the queue after the request commits. Digest
+notifications stay in the durable `notifications` outbox until the first
+scheduled run after their UTC calendar day ends. A delayed cron includes all
+past days in one digest per recipient. The scheduled controller's timestamp
+provides the cutoff. Cron freezes each recipient's pending ids into a stable
+`digest_key`; retries reuse it. A request that commits after that snapshot
+gets a new group at a later run. The queue consumer renders and records the
+group as one email, then marks its notification rows sent. Cron itself never
+records or sends email. Missing queue bindings leave the outbox intact for a
+later flush; missing DB bindings retain the static-site/503 behavior.
+
+Recording errors use the same exponential queue retries and five-attempt cap
+as other delivery errors. `notification_counters.sent`, `failed`, `dlq` and
+`skipped_*` count notification outcomes (a two-notification digest counts two
+sent notifications and one recorded email). Repeated successful messages
+preserve the first recorded bodies and do not increment sent counters again.
+
+`GET /api/admin/recorded-emails` lists complete recorded messages behind the
+same Cloudflare Access gate as other admin routes. It is read-only and uses
+`Cache-Control: no-store`. `limit` defaults to 50 (valid range 1–100); pass the
+response's `nextCursor` as `cursor` to continue in id order. No mutation route
+is provided.
