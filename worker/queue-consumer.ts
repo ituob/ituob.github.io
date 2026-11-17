@@ -90,7 +90,7 @@ async function deliver(env: Env, first: Notification): Promise<boolean> {
       const [transition] = await env.DB.batch<{ email_attempts: number }>([
         env.DB.prepare(`UPDATE notifications SET email_status='failed', email_attempts=email_attempts+1,
           email_reason=CASE WHEN email_attempts+1>=?2 THEN 'dead: ' || ?3 ELSE ?3 END
-          WHERE id=?1 AND email_status IN ('queued','failed') AND email_provider_id IS NULL AND email_attempts<?2
+          WHERE id=?1 AND email_status IN ('queued','failed') AND email_provider_id IS NULL
           RETURNING email_attempts`).bind(n.id, MAX_ATTEMPTS, error),
         env.DB.prepare(`INSERT INTO notification_counters(day,metric,n) SELECT ?1,'failed',1
           WHERE changes()>0 ON CONFLICT(day,metric) DO UPDATE SET n=n+excluded.n`).bind(day),

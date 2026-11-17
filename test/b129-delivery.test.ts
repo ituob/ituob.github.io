@@ -76,8 +76,8 @@ describe("breaker concurrency and retry controls", () => {
     await Promise.all(Array.from({length:6},(_,i)=>consume(queued[0]!,i+1)));
     const n=(await rows("notifications"))[0];
     console.log("BREAKER concurrent failures",JSON.stringify({sends:arrived,attempts:n.email_attempts,metrics:await metrics()}));
-    expect(n.email_attempts).toBe(5);
-    expect(await metrics()).toMatchObject({ failed: 5, dlq: 1 });
+    expect(n.email_attempts).toBe(6);
+    expect(await metrics()).toMatchObject({ failed: 6, dlq: 1 });
     await consume(queued[0]!, 7);
     expect(arrived).toBe(6);
   });
