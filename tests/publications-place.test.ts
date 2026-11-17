@@ -171,3 +171,12 @@ test("verifyDist detects a changed PDF in dist", () => {
   writeFileSync(join(o.downloads, "a.pdf"), "changed");
   assert.match(verifyDist(o.manifest, o.downloads)[0]!, /sha256 mismatch/);
 });
+
+test("verifyDist ignores the downloads page itself but not unlisted PDFs", () => {
+  const nope = join(tmpdir(), "no-such-manifest.json");
+  const d = mkdtempSync(join(tmpdir(), "page-"));
+  writeFileSync(join(d, "index.html"), "<html></html>");
+  assert.deepEqual(verifyDist(nope, d), []);
+  writeFileSync(join(d, "Stray.PDF"), "x");
+  assert.match(verifyDist(nope, d)[0]!, /Stray\.PDF: in dist\/downloads but there is no manifest/);
+});

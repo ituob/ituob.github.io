@@ -96,10 +96,11 @@ function listFiles(dir: string, base: string = dir): string[] {
 
 /**
  * Post-build guard: dist/downloads must hold exactly the manifest's PDFs. An
- * absent manifest passes only when dist/downloads is empty or absent.
+ * absent manifest passes only when dist/downloads holds no PDF. Non-PDF files are
+ * the site's own pages (the downloads page builds to dist/downloads/index.html).
  */
 export function verifyDist(manifestFile: string, distDownloads: string): string[] {
-  const present = listFiles(distDownloads);
+  const present = listFiles(distDownloads).filter((f) => f.toLowerCase().endsWith(".pdf"));
   if (!existsSync(manifestFile)) return present.map((f) => `${f}: in dist/downloads but there is no manifest`);
   const { entries, rejected } = parseManifest(readFileSync(manifestFile, "utf8"));
   const errors = rejected.map((r) => `manifest entry rejected: ${r}`);
