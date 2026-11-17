@@ -28,7 +28,7 @@ Worker. Hiding or enabling a client control grants no authority.
   `https://<team>.cloudflareaccess.com`, and `ACCESS_AUD` to that exact AUD tag.
   A bare `<team>.cloudflareaccess.com` hostname is also accepted. These values
   identify the issuer and application; they are not signing secrets.
-. Configure production OIDC and the D1 binding/migrations independently.
+. Configure production OIDC, the email provider (`docs/email-configuration.adoc`) and the D1 binding/migrations independently.
   Provision Access policies and Worker vars in each environment; staging
   must use its own Access application's AUD tag.
 
@@ -36,10 +36,26 @@ The verifier reads only `Cf-Access-Jwt-Assertion`. It accepts RS256 tokens
 with a matching signing `kid` from the configured team's
 `/cdn-cgi/access/certs` JWKS endpoint, a matching issuer and audience, a
 finite unexpired `exp`, and valid `nbf`/`iat` when present. It requires a
-non-empty signed email address; normal Access application tokens omit
+non-empty signed email address for a human administrator; normal Access application tokens omit
 `email_verified`, but an explicitly present value must be `true`.
 It ignores the bare `Cf-Access-Authenticated-User-Email` header.
-Service tokens without an email cannot administer membership.
+A signed `common_name` classifies a service token, even if an email claim is
+also present. Set Worker var `ACCESS_CI_CLIENT_IDS` to a comma-separated
+allowlist of the exact approved Access service-token client IDs (the JWT's
+`common_name` values), for example `ci-client-a,ci-client-b`. Whitespace
+around configured IDs is ignored; missing or empty configuration allows no
+service tokens. Configure each environment separately and restrict the Access
+Service Auth policy to the same intended CI tokens. No client IDs are inferred
+from request headers, and an unlisted `common_name` never falls back to email.
+
+Only a verified, allowlisted service principal may enter `/api/ci/*`.
+Service principals cannot access administrative, member or session API routes,
+even when the request also carries a user cookie or a forgeable email header.
+The Worker verifies the token itself on every `/api/admin/*` and `/api/ci/*` request; `/admin/*` HTML pages are static assets protected only by the Access application at the edge, so the Access policy must cover them. Service principals never pass the human-only verifier. CI service tokens
+remain the sole CI-to-API write trust path; no CI write endpoint is implemented
+yet. Unknown CI reads return 404 after authentication; unknown CI writes return
+403 and perform no database operations. Human Access identities and identity
+sessions cannot authorize the CI namespace.
 
 JWKS is fetched on verification with a five-second timeout, without
 redirects or a persistent key cache. Current and previous published keys

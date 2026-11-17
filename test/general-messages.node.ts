@@ -56,7 +56,23 @@ describe("canonical general-message draft authoring", () => {
     }
     expect(() => validateGeneralMessage("../meta",{})).toThrow(InvalidError);
     expect(() => generalBinding("misc_communications",1000)).toThrow();
-    expect(validateGeneralMessage("sanc",{type:"sanc"}).className).toBe("GeneralSancs");
+    expect(validateGeneralMessage("sanc",{type:"sanc",items:[{country:"Example",sanc:"7-001"}]}).className).toBe("GeneralSancs");
+  });
+  const sancItem = {country:"Example",sanc:"7-001"};
+  it.each([
+    ["no items",{type:"sanc",ob_issue_no:"1331"}],
+    ["empty items",{type:"sanc",ob_issue_no:"1331",items:[]}],
+    ["an empty item",{type:"sanc",ob_issue_no:"1331",items:[{}]}],
+    ["an item without a code",{type:"sanc",ob_issue_no:"1331",items:[{country:"Example"}]}],
+    ["a blank country",{type:"sanc",ob_issue_no:"1331",items:[{country:"  ",sanc:"7-001"}]}],
+    ["null contents",{type:"sanc",ob_issue_no:"1331",items:[sancItem],contents:null}],
+    ["empty contents",{type:"sanc",ob_issue_no:"1331",items:[sancItem],contents:""}],
+    ["a 5 MB notes field",{type:"sanc",ob_issue_no:"1331",items:[sancItem],notes:"x".repeat(5*1024*1024)}],
+    ["non-string notes",{type:"sanc",ob_issue_no:"1331",items:[sancItem],notes:7}],
+    ["an oversized item field",{type:"sanc",ob_issue_no:"1331",items:[{country:"x".repeat(5000),sanc:"7-001"}]}],
+    ["too many items",{type:"sanc",ob_issue_no:"1331",items:Array.from({length:501},()=>sancItem)}],
+  ])("rejects a SANC message with %s",(_name,value) => {
+    expect(() => validateGeneralMessage("sanc",value)).toThrow(ValidationFailed);
   });
   it.each(["running_annexes","approved_recommendations","telephone_service_2"])("round-trips real canonical %s fixture through form, DB and exact approved YAML",async type => {
     const value = parse(readFileSync(`test/fixtures/general-messages/${type}.yaml`,"utf8"));

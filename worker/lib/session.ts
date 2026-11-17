@@ -1,8 +1,8 @@
 import { resolveAuthority } from "./authority.ts";
-import { verifyAccessIdentity } from "./access.ts";
 import { isLoopbackHost } from "./host.ts";
 import { oidcConfig, randomToken, sha256b64url } from "./oidc.ts";
-import type { AccessIdentity, Env, Session } from "./types.ts";
+import { verifyAccessIdentity, verifyAccessPrincipal } from "./access.ts";
+import type { AccessIdentity, AccessPrincipal, Env, Session } from "./types.ts";
 
 export { isLoopbackHost } from "./host.ts";
 
@@ -144,16 +144,33 @@ export async function getSession(request: Request, env: Env): Promise<Session | 
 }
 
 /**
- * Access seam: the verified Cf-Access-Jwt-Assertion identity. Verification
- * against the configured team JWKS is required outside the loopback stub.
- * Neither a bare email header nor an ordinary member session grants Access.
+ * Access seam: the verified Cf-Access-Jwt-Assertion identity (human email only;
+ * service tokens never become administrators). Loopback stub:
+ * `X-Stub-Access: <email>`. Otherwise the JWT is verified against the team JWKS
+ * (docs/access-configuration.adoc); missing config or any failure returns null.
  */
 export async function getAccessIdentity(
   request: Request,
   env: Env,
 ): Promise<AccessIdentity | null> {
   guardStubConfig(request, env);
-  if (!stubEnabled(request, env)) return verifyAccessIdentity(request, env);
-  const email = request.headers.get("X-Stub-Access");
-  return email ? { email } : null;
+  if (stubEnabled(request, env)) {
+    const email = request.headers.get("X-Stub-Access");
+    return email ? { email } : null;
+  }
+  return verifyAccessIdentity(request, env);
+}
+
+/** Principal for /api/ci/*: a verified, allowlisted service token only. Stub: `X-Stub-Access-Service: <client id>`. */
+export async function getAccessServicePrincipal(
+  request: Request,
+  env: Env,
+): Promise<AccessPrincipal | null> {
+  guardStubConfig(request, env);
+  if (stubEnabled(request, env)) {
+    const id = request.headers.get("X-Stub-Access-Service");
+    return id ? { kind: "service", clientId: id } : null;
+  }
+  const p = await verifyAccessPrincipal(request, env);
+  return p && "kind" in p ? p : null;
 }

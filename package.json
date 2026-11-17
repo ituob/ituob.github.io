@@ -10,6 +10,7 @@
     "build": "astro build",
     "preview": "astro preview",
     "check": "astro check",
+    "test": "node --experimental-strip-types --test tests/*.test.ts",
     "astro": "astro",
     "test:worker": "vitest run",
     "test:form": "vitest run --config vitest.form.config.ts",

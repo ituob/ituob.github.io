@@ -1,38 +1,44 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
-import { getEmailSender, ResendEmailSender, setEmailSender } from "../worker/lib/email.ts";
+import { describe, expect, it, vi } from "vitest";
+import { HttpEmailSender, LogEmailSender, UnconfiguredEmailSender, getEmailSender } from "../worker/lib/email.ts";
+import type { Env } from "../worker/lib/types.ts";
 
-afterEach(() => setEmailSender(null));
+const msg = { to: "m@example.org", subject: "S", text: "body", idempotencyKey: "n1" };
+const cfg = (e: Partial<Env>) => e as Env;
 
-const message = { to: "member@example.test", subject: "Submission reviewed", text: "Please revise your submission.", idempotencyKey: "notification-123" };
-
-describe("configured queued email delivery", () => {
-  it("sends plain text to Resend with a stable idempotency key", async () => {
-    const fetcher = vi.fn<typeof fetch>().mockResolvedValue(Response.json({ id: "email-123" }));
-    const sender = new ResendEmailSender({ RESEND_API_KEY: "test-secret", MAIL_FROM: "Bulletin <ob@example.test>" }, fetcher);
-    await expect(sender.send(message)).resolves.toEqual({ id: "email-123" });
-    const [url, init] = fetcher.mock.calls[0]!;
-    expect(url).toBe("https://api.resend.com/emails");
-    const headers = new Headers(init!.headers);
-    expect(headers.get("Authorization")).toBe("Bearer test-secret");
-    expect(headers.get("Idempotency-Key")).toBe(message.idempotencyKey);
-    expect(JSON.parse(String(init!.body))).toEqual({ from: "Bulletin <ob@example.test>", to: [message.to], subject: message.subject, text: message.text });
-    expect(init!.redirect).toBe("error");
+describe("email provider selection and transports", () => {
+  it("fails closed unless fully configured", async () => {
+    for (const e of [{}, { EMAIL_PROVIDER: "http" }, { EMAIL_PROVIDER: "http", EMAIL_API_URL: "http://insecure.example/", EMAIL_API_KEY: "k", MAIL_FROM: "a@b.c" },
+      { EMAIL_PROVIDER: "http", EMAIL_API_URL: "not a url", EMAIL_API_KEY: "k", MAIL_FROM: "a@b.c" }, { EMAIL_PROVIDER: "other" }]) {
+      const s = getEmailSender(cfg(e));
+      expect(s).toBeInstanceOf(UnconfiguredEmailSender);
+      await expect(s.send()).rejects.toThrow(/not configured/);
+    }
   });
-
-  it("fails closed without a sender address or API key", async () => {
-    const fetcher = vi.fn<typeof fetch>();
-    await expect(new ResendEmailSender({ RESEND_API_KEY: "test-secret" }, fetcher).send(message)).rejects.toThrow("not configured");
-    await expect(getEmailSender().send(message)).rejects.toThrow("not configured");
-    expect(fetcher).not.toHaveBeenCalled();
+  it("log provider sends nothing, logs no body, and is deterministic", async () => {
+    const spy = vi.spyOn(console, "log").mockImplementation(() => {});
+    const s = getEmailSender(cfg({ EMAIL_PROVIDER: "log" }));
+    expect(s).toBeInstanceOf(LogEmailSender);
+    expect(await s.send(msg)).toEqual({ id: "log-n1" });
+    const line = String(spy.mock.calls[0]![0]);
+    expect(line).toContain("email.logged");
+    expect(line).not.toContain("body");
+    spy.mockRestore();
   });
-
-  it("leaves upstream failures retryable without leaking provider response bodies", async () => {
-    const fetcher = vi.fn<typeof fetch>().mockResolvedValue(new Response("private upstream content", { status: 429 }));
-    await expect(new ResendEmailSender({ RESEND_API_KEY: "test-secret", MAIL_FROM: "ob@example.test" }, fetcher).send(message)).rejects.toThrow("email provider returned 429");
+  it("http provider posts JSON with bearer key and idempotency key", async () => {
+    const f = vi.fn<typeof fetch>(async () => Response.json({ id: "prov-1" }));
+    const s = getEmailSender(cfg({ EMAIL_PROVIDER: "http", EMAIL_API_URL: "https://api.mail.example/send", EMAIL_API_KEY: "secret", MAIL_FROM: "OB <ob@ituob.org>" }), f);
+    expect(s).toBeInstanceOf(HttpEmailSender);
+    expect(await s.send(msg)).toEqual({ id: "prov-1" });
+    const [url, init] = f.mock.calls[0]!;
+    expect(url).toBe("https://api.mail.example/send");
+    expect((init!.headers as Record<string, string>).Authorization).toBe("Bearer secret");
+    expect((init!.headers as Record<string, string>)["Idempotency-Key"]).toBe("n1");
+    expect(JSON.parse(init!.body as string)).toEqual({ from: "OB <ob@ituob.org>", to: ["m@example.org"], subject: "S", text: "body" });
   });
-
-  it("does not treat a malformed success as a delivered email", async () => {
-    const fetcher = vi.fn<typeof fetch>().mockResolvedValue(Response.json({ unexpected: "shape" }));
-    await expect(new ResendEmailSender({ RESEND_API_KEY: "test-secret", MAIL_FROM: "ob@example.test" }, fetcher).send(message)).rejects.toThrow("missing email id");
+  it("http provider throws on non-2xx and on a response without an id", async () => {
+    const mk = (r: () => Response) => new HttpEmailSender("https://x.example/", "k", "a@b.c", async () => r());
+    await expect(mk(() => new Response("no", { status: 503 })).send(msg)).rejects.toThrow(/503/);
+    await expect(mk(() => Response.json({})).send(msg)).rejects.toThrow(/id/);
+    await expect(mk(() => new Response("x")).send(msg)).rejects.toThrow(/id/);
   });
 });

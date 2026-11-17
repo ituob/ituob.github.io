@@ -5,12 +5,6 @@ export interface Env {
   DB: D1Database;
   /** "stub" enables the local stub; anything else (including unset) fails closed. */
   AUTH_MODE?: string;
-  /** Cloudflare Access team hostname and application audience; both required. */
-  ACCESS_TEAM_DOMAIN?: string;
-  ACCESS_AUD?: string;
-  /** Queue-consumer-only email credentials; never exposed to browser assets. */
-  RESEND_API_KEY?: string;
-  MAIL_FROM?: string;
   // OIDC relying party (AUTH_MODE="oidc"). Required: ISSUER, CLIENT_ID, and
   // CLIENT_SECRET (a Worker secret) unless OIDC_CLIENT_AUTH="none". All optional
   // knobs map to assumptions A1-A11 in docs/identity-accounts.adoc. No defaults
@@ -37,6 +31,16 @@ export interface Env {
   GITHUB_SITE_REPO?: string;
   GITHUB_DATA_GITLINK?: string;
   GITHUB_STAGING_BRANCH?: string;
+  /** Cloudflare Access team origin and application AUD (docs/access-configuration.adoc); both required outside stub mode. */
+  ACCESS_TEAM_DOMAIN?: string;
+  ACCESS_AUD?: string;
+  /** Comma-separated allowlist of signed Access service-token common_name IDs for /api/ci/*. */
+  ACCESS_CI_CLIENT_IDS?: string;
+  /** Email provider (queue consumer only): EMAIL_PROVIDER = "log" | "http"; see docs/email-configuration.adoc. */
+  EMAIL_PROVIDER?: string;
+  EMAIL_API_URL?: string;
+  EMAIL_API_KEY?: string;
+  MAIL_FROM?: string;
   /** GitHub webhook secret (Worker secret). Unset: /api/github/webhook fails closed with 503. */
   GITHUB_WEBHOOK_SECRET?: string;
   /** Notification carrier queue (`ituob-notify`); absent locally/unprovisioned: rows stay queued. */
@@ -54,3 +58,10 @@ export interface Session {
 export interface AccessIdentity {
   email: string;
 }
+
+/** Service principals are isolated from email-based administrative authority. */
+export interface AccessServicePrincipal {
+  kind: "service";
+  clientId: string;
+}
+export type AccessPrincipal = AccessIdentity | AccessServicePrincipal;
