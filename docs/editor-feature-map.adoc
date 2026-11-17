@@ -212,10 +212,11 @@ this PR adds complete corpus preservation evidence without duplicating those cha
 
 == Blocks Electron retirement
 
-Retirement still needs annex authoring (F1/F2) and service-publication catalog
-authoring (G1), or explicit owner decisions to retire those workflows. There is
-no generated annex class; catalogs are currently code. No retirement decision is
-implied by this PR.
+Annex authoring (F1/F2) and service-publication catalog authoring (G1) are
+available through `AnnexEditor.vue` and `CatalogEntryEditor.vue`. Annex dataset
+content is preserved without exposing dataset editing. Retirement still requires
+the live publication and deployment evidence below; no retirement decision is
+implied by this batch.
 
 PR #117 covers D2/D3, B8, C6, E5 and W2. PR #124 covers D7/D14/D15/D18.
 This PR completes the scheduling calendar (B6) and inline authoring help (B10) and proves unchanged source bytes
@@ -223,7 +224,6 @@ through the form and Worker lifecycle for every SANC, telephone, custom and mid
 record. Single-field edit regressions additionally assert unrelated YAML bytes
 remain exact. Calendar navigation and rendered dates stay within years 0000–9999.
 These remain IN PR until their dependencies merge.
-
 
 The Electron README archive notice remains pending until parity and deployment;
 the Electron repository has not been archived. Amendment header/prefill (E4) remains missing. Live repository, D1, identity and translation
