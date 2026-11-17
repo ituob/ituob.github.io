@@ -343,6 +343,8 @@ export interface GeneralCallbackProceduresWire {
 
 export interface GeneralCustomWire {
   type?: string;
+  title?: Record<string, unknown>;
+  recommendation?: string;
   text?: string;
   ob_issue_no?: string;
   contents?: Record<string, unknown>;
@@ -383,7 +385,7 @@ export interface GeneralMiscCommunicationsWire {
   type?: string;
   text?: string;
   ob_issue_no?: string;
-  contents?: Record<string, unknown>;
+  contents?: Record<string, unknown> | string;
 }
 
 export interface GeneralOrgChangesWire {
@@ -416,8 +418,8 @@ export interface GeneralSancsWire {
 
 export interface GeneralServiceRestrictionWire {
   country?: MultilingualStringWire;
-  ob?: string;
-  page?: string;
+  ob?: number;
+  page?: number;
 }
 
 export interface GeneralServiceRestrictionsWire {
@@ -429,7 +431,7 @@ export interface GeneralServiceRestrictionsWire {
 
 export interface GeneralTelephoneCommunicationWire {
   date?: string;
-  contents?: MultilingualStringWire;
+  contents?: Record<string, unknown>;
 }
 
 export interface GeneralTelephoneSectionWire {
@@ -489,11 +491,12 @@ export interface IssueGeneralWire {
 }
 
 export interface IssueMetadataWire {
-  id?: string;
+  id?: number;
+  incomplete?: boolean;
   publication_date?: string;
   cutoff_date?: string;
   issn?: string;
-  languages?: MultilingualStringWire;
+  languages?: Record<string, unknown>;
   authors?: IssueAuthorWire[];
 }
 

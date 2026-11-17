@@ -1,0 +1,558 @@
+= Discussion and notifications per submission (design note for #104)
+:toc:
+:toclevels: 2
+
+Status: DESIGN, no code. Depends on `docs/submission-workflow.adoc` (#103: `submissions`,
+`review_state`, `audit_log`, states) and on the #102/#105 contract
+(`docs/identity-accounts.adoc`, `docs/membership-roles.adoc`, commit
+90e0239): `users(id = identity 'sub')`, `members`, `memberships`, roles
+`itu-admin | itu-editor | member-submitter`, `getSession(request) ->
+{userId, roles, memberStateId|null} | null`, the affiliation snapshot
+and `affiliationOf(...)`. Those are referenced here, not redefined.
+
+== Invariants
+
+. No email is sent from a request path. Handlers write D1 rows and
+  enqueue; only the Queue consumer talks to the email provider.
+. A failure never loses a notification: the D1 row is the record, the
+  email is a delivery attempt of it.
+. Comment history is immutable: edit = new revision, delete = tombstone;
+  both are audited.
+. Route guards (contract): member-facing calls (read thread, comment,
+  edit own, delete own, inbox, prefs) are under session-guarded
+  `/api/me/*`; moderation under Access-guarded `/api/admin/*`; the
+  email-provider webhook is the single non-GET route that opts out of
+  both and verifies a signature. Everything else non-GET denies by default.
+
+== Facts and gaps in the shared contract
+
+* `users` has `id`, `email`, `display_name` only, no handle. `@username`
+  mentions need a unique, stable, human-typeable handle. This note owns
+  `user_handles` (below) and asks #102 to expose `users.display_name` for
+  seeding it. If #102 later adds a handle to `users`, this table becomes a view.
+* Email address is a cache of the `email` claim (not unique, may be
+  NULL, #102 A3). A user with no email gets in-app notifications only;
+  the dispatcher marks email deliveries `skipped:no_address`.
+* A freshly registered ("unaffiliated") account is not an involved
+  party in anything and receives nothing except what its own
+  membership-claim flow sends (owned by #105, using the same
+  dispatcher with `kind='account.*'`; out of scope here).
+
+== D1 schema (#104)
+
+[source,sql]
+----------------------------------------------------------------
+-- Handles for @mentions. Lower-case, [a-z0-9][a-z0-9._-]{2,31}, unique.
+CREATE TABLE user_handles (
+  user_id  TEXT PRIMARY KEY REFERENCES users(id),
+  handle   TEXT NOT NULL UNIQUE COLLATE NOCASE,
+  created_at TEXT NOT NULL
+);   -- a retired handle is kept in handle_history so old mentions still resolve to the right account
+CREATE TABLE handle_history (
+  handle TEXT PRIMARY KEY COLLATE NOCASE,
+  user_id TEXT NOT NULL REFERENCES users(id),
+  retired_at TEXT NOT NULL
+);
+
+-- One row per comment *identity*; content is in comment_revisions.
+CREATE TABLE comments (
+  id             TEXT PRIMARY KEY,                    -- ULID
+  submission_id  TEXT NOT NULL REFERENCES submissions(id),
+  parent_id      TEXT REFERENCES comments(id),        -- NULL = thread root
+  root_id        TEXT NOT NULL,                       -- id of the thread root (= id for a root)
+  author_id      TEXT NOT NULL REFERENCES users(id),
+  affiliation_kind TEXT NOT NULL CHECK (affiliation_kind IN ('itu','member')),   -- #105 snapshot
+  affiliation_member_id TEXT,
+  kind           TEXT NOT NULL DEFAULT 'comment'
+    CHECK (kind IN ('comment','system')),               -- 'system' = transition notes written by the app, never editable
+  anchor_rev     INTEGER,                             -- submission revision the anchor points into
+  anchor_path    TEXT,                                -- field anchor, e.g. data.entries[2].company_name
+  anchor_line    INTEGER,                             -- 1-based line in payload_yaml of anchor_rev
+  anchor_quote   TEXT,                                -- the anchored text at that revision (survives later re-numbering)
+  current_rev    INTEGER NOT NULL DEFAULT 1,
+  deleted_at     TEXT,                                -- tombstone marker; content is NOT erased
+  deleted_by     TEXT REFERENCES users(id),
+  delete_reason  TEXT,                                -- required for a moderator delete
+  created_at     TEXT NOT NULL
+);
+CREATE INDEX idx_c_sub ON comments(submission_id, created_at);
+CREATE INDEX idx_c_root ON comments(root_id, created_at);
+
+-- Immutable. Edit = INSERT a new rev; nothing here is ever UPDATEd.
+CREATE TABLE comment_revisions (
+  comment_id TEXT NOT NULL REFERENCES comments(id),
+  rev        INTEGER NOT NULL,
+  body       TEXT NOT NULL,         -- plain text; mentions as @handle in text, resolved list below
+  mentions   TEXT NOT NULL,         -- JSON [{handle,user_id}] resolved at write time
+  edited_by  TEXT NOT NULL REFERENCES users(id),
+  created_at TEXT NOT NULL,
+  PRIMARY KEY (comment_id, rev)
+);
+
+-- Close/reopen is a log, not a flag; submissions.discussion_closed (#103) is the cache.
+CREATE TABLE discussion_state_log (
+  id            INTEGER PRIMARY KEY AUTOINCREMENT,
+  submission_id TEXT NOT NULL REFERENCES submissions(id),
+  closed        INTEGER NOT NULL,       -- 1 = closed, 0 = reopened
+  actor_id      TEXT NOT NULL REFERENCES users(id),
+  reason        TEXT NOT NULL,          -- required both ways
+  at            TEXT NOT NULL
+);
+
+-- Who is involved in a submission (drives recipients; also lets "anyone else drawn in").
+CREATE TABLE submission_participants (
+  submission_id TEXT NOT NULL REFERENCES submissions(id),
+  user_id       TEXT NOT NULL REFERENCES users(id),
+  role          TEXT NOT NULL CHECK (role IN ('proposer','reviewer','mentioned','contact','watcher')),
+  added_by      TEXT,                   -- NULL = system
+  added_at      TEXT NOT NULL,
+  PRIMARY KEY (submission_id, user_id, role)
+);
+
+-- In-app inbox AND the durable notification record. One row per (event, recipient).
+CREATE TABLE notifications (
+  id            TEXT PRIMARY KEY,       -- ULID
+  user_id       TEXT NOT NULL REFERENCES users(id),     -- recipient
+  submission_id TEXT REFERENCES submissions(id),
+  kind          TEXT NOT NULL,          -- see event matrix, e.g. submission.submitted, comment.mention
+  ref_type      TEXT,                   -- 'review_state' | 'comment' | 'discussion_state_log' | 'submission_prs'
+  ref_id        TEXT,                   -- id of the thing that caused it
+  dedupe_key    TEXT NOT NULL,          -- {kind}:{ref_id}:{user_id}  -> exactly-once creation
+  payload       TEXT NOT NULL,          -- JSON for rendering (titles, actor display name, short excerpt)
+  read_at       TEXT,
+  created_at    TEXT NOT NULL,
+  -- email channel delivery state (inbox needs no delivery)
+  email_status  TEXT NOT NULL DEFAULT 'none'
+    CHECK (email_status IN ('none','queued','sent','delivered','bounced','complained','failed','skipped')),
+  email_reason  TEXT,                   -- skipped:prefs | skipped:no_address | skipped:suppressed | provider error text
+  email_attempts INTEGER NOT NULL DEFAULT 0,
+  email_provider_id TEXT,               -- provider message id, to correlate bounce webhooks
+  email_sent_at TEXT
+);
+CREATE UNIQUE INDEX idx_n_dedupe ON notifications(dedupe_key);
+CREATE INDEX idx_n_inbox ON notifications(user_id, read_at, created_at);
+CREATE INDEX idx_n_sub ON notifications(submission_id, created_at);
+
+CREATE TABLE notification_prefs (
+  user_id    TEXT PRIMARY KEY REFERENCES users(id),
+  level      TEXT NOT NULL DEFAULT 'all' CHECK (level IN ('all','mentions','none')),
+  updated_at TEXT NOT NULL
+);
+
+-- Addresses that bounced hard / complained: never email again until cleared.
+CREATE TABLE email_suppressions (
+  email       TEXT PRIMARY KEY COLLATE NOCASE,
+  reason      TEXT NOT NULL CHECK (reason IN ('hard_bounce','complaint','manual')),
+  first_seen  TEXT NOT NULL,
+  detail      TEXT
+);
+
+-- Counters for observability (also emitted as Analytics Engine data points).
+CREATE TABLE notification_counters (
+  day     TEXT NOT NULL,              -- YYYY-MM-DD
+  metric  TEXT NOT NULL,              -- sent | failed | bounced | complained | dlq | skipped_prefs ...
+  n       INTEGER NOT NULL,
+  PRIMARY KEY (day, metric)
+);
+----------------------------------------------------------------
+
+Audit: every comment create/revise/delete/restore, close/reopen and
+prefs change also writes an `audit_log` row (#103 table, verbs
+`comment.created`, `comment.revised`, `comment.deleted`,
+`discussion.closed`, `discussion.reopened`, `prefs.changed`) in the same
+`db.batch`, so a tombstone is visible in the audit trail as the issue
+requires. `audit_log.submission_id` makes the whole discussion
+retrievable by submission.
+
+== Threading and anchoring
+
+* Two levels: a root comment and replies (`parent_id` must be a root;
+  deeper nesting is flattened to the root as the parent, `root_id` =
+  root). Flat-ish threads read well in review. One thread per anchor is
+  the convention, not a constraint.
+* Anchors are optional. `anchor_path` points at a payload field of the
+  submission (`data.entries[2].company_name`, the same path vocabulary
+  the validators return, #103, xref:submission-workflow.adoc#validation[submit-time validation]), `anchor_line` at a line of
+  the YAML patch that the reviewer sees, and `anchor_rev` fixes *which
+  revision* both refer to, with `anchor_quote` storing the text. The
+  payload is immutable per revision, so an anchor can never dangle; the
+  UI shows "on rev 1 (outdated)" when `anchor_rev < current_rev` and, if
+  the quoted text still exists at the same path in the current rev,
+  offers "jump to current".
+* System comments (`kind='system'`): the Worker inserts one on every
+  #103 transition that carries a reason (changes_requested, rejected,
+  withdrawn, CI failure summary, PR opened with link, merged). They are
+  not editable or deletable by anyone, appear in the timeline in place,
+  and need no separate notification (the transition notification covers them).
+* Rendering: plain text, escaped on output, with autolinked URLs and
+  `@handle`. No HTML, no markdown for v1; this keeps the stored form
+  safe and the diff of revisions trivial. (The site's existing rendering stack
+  is for documents, not user input; allowing it for comments would widen the
+  XSS surface for no requirement.)
+* Limits: body 8,000 characters; 60 comments/hour/user, enforced with a
+  D1 count (Workers rate-limit binding as a later hardening).
+* Closed discussion (`submissions.discussion_closed = 1`): reads work,
+  new comments/edits are rejected for everyone except ITU roles, who may
+  still comment ("closing is for the proposer's side"). A submission in a
+  terminal state does not auto-close; moderators decide.
+
+== Revisions and tombstones
+
+[cols="2,4"]
+|===
+| Operation | Effect
+
+| Create | `comments` row + `comment_revisions` rev 1 + audit + (mentions, notifications) in one batch.
+| Edit (author, within the discussion being open) | New `comment_revisions` row, `comments.current_rev` +1. The UI shows "edited" with a revision list; every rev is visible to everyone who can read the thread. Notifications for *newly added* mentions only (a rev that re-mentions an already notified user does not notify again: `dedupe_key`).
+| Delete (author or moderator) | `comments.deleted_at/by/reason` set. The body is *not erased*; it is hidden behind "comment removed by {author or moderator}" for participants, and still returned to `itu-admin` in the audit view and to any party through the "full history" export. A moderator delete requires `delete_reason`. A tombstone cannot be edited; a *restore* is a moderator action that clears `deleted_at` (new audit row, old tombstone preserved in `audit_log`).
+| Author deleted account | Comments stay; author renders with the affiliation snapshot and a muted "deactivated" marker (see `affiliationOf`).
+|===
+
+No row of `comment_revisions` or `audit_log` is ever UPDATEd or DELETEd
+(the same grep-style test as #103).
+
+== Events -> recipients matrix
+
+Legend: P proposer, R assigned reviewers (`review_assignments`; if none,
+every `itu-editor`), E all `itu-editor`s, A `itu-admin`s, M mentioned
+users, C `contact` participants (e.g. the TSB country contact added by
+an editor), W watchers. `[a]` honours prefs level `all`; `[m]` honours
+`mentions` as well (these are "to me" events); nothing is sent under
+`none` for *email*, but the in-app inbox row is always created (the
+inbox is the durable record, `none` only silences email and the unread
+badge).
+
+[cols="3,3,3,2"]
+|===
+| Event (kind) | Source | Recipients | Level required
+
+| `submission.submitted`
+| `draft -> submitted`, also resubmission with the new rev
+| R (or E), +A if no editor exists
+| [a]
+
+| `submission.in_review`
+| `submitted -> in_review`
+| P, C
+| [a]
+
+| `submission.changes_requested`
+| `in_review -> changes_requested`
+| P, C, W
+| [a] (always email: it needs action; see rule 1 below)
+
+| `submission.approved`
+| `approved`
+| P, C, W, A
+| [a]
+
+| `submission.rejected`
+| `rejected`
+| P, C, W
+| [a] (always email)
+
+| `submission.withdrawn`
+| any `withdrawn`
+| P (if not the actor), R, C, W
+| [a]
+
+| `submission.pr_opened`
+| `pr_open`
+| P, W, A
+| [a]
+
+| `submission.ci_failed`
+| `ci_failed`
+| R, A
+| [a]
+
+| `submission.pr_merged`
+| `merged`
+| P, W, A
+| [a]
+
+| `submission.published` / `edition.published`
+| `published`
+| P, C, W, A
+| [a]
+
+| `comment.created`
+| new comment by X
+| all P/R/C/W of the submission except X
+| [a]
+
+| `comment.mention`
+| `@handle` in a new comment or a new rev
+| M, except X
+| [m] (sent even for `mentions`-only; suppressed for `none`)
+
+| `comment.reply`
+| reply to Y's comment
+| Y, except X
+| [m]
+
+| `discussion.closed` / `discussion.reopened`
+| moderator
+| P, R, C, W
+| [a]
+|===
+
+Rules:
+
+. *Actionable events (`changes_requested`, `rejected`) are emailed
+  even at level `mentions`*, because the proposer cannot progress otherwise.
+  `none` is honoured literally (inbox only) and the UI says so beside
+  the setting. This is a deliberate product choice; D3 below.
+. The actor never notifies themselves.
+. Who is a "reviewer" and "contact": `review_assignments` (#103), and
+  `submission_participants(role='contact')` added by an editor through
+  `/api/admin/...`. The TSB member contact for the affected country is
+  resolved by #105's member-state data (`members`/`memberships`) at the time
+  of adding; the row stores the user id, not the country, so later
+  membership changes do not widen access. A participant with no account
+  gets nothing (we do not email arbitrary addresses in v1: D5).
+. Access to the thread follows participation plus role: ITU roles read
+  every submission; the proposer, `contact` and `watcher` rows read
+  theirs; a `member-submitter` of another country reads nothing.
+  "Retrievable by any involved party" = `GET /api/me/submissions/{id}/history`
+  (comments with all revisions and tombstone markers, transitions,
+  notifications addressed to the caller) for participants, and the full
+  audit view under `/api/admin/` for ITU.
+. Mentions: only users who are *allowed to read the submission* can be
+  mentioned (so a mention never leaks it). Mentioning a non-participant
+  with read rights (any ITU role) adds a `mentioned` participant row.
+  Mentioning someone without read rights fails validation with the list
+  of handles that were refused; nothing is stored.
+
+== Mentions
+
+* Syntax `@handle`, regex `(?<![\w@])@([a-z0-9][a-z0-9._-]{2,31})`
+  (case-insensitive, no trailing dot). Resolution happens at write
+  time in the handler: handle -> `user_handles` (or `handle_history`),
+  stored as JSON in `comment_revisions.mentions`. Display re-renders
+  the *current* `display_name`, link target is the stable user id, so a
+  handle change does not break old mentions.
+* Handle assignment: seeded at first login from `display_name`
+  (slugified, de-duplicated with a numeric suffix); the user may change it once per 30
+  days (old one to `handle_history`). *Needs #102 sign-off*; fallback
+  if #102 refuses: mention by picker only (the UI writes the resolved
+  id; the text form is not parsed).
+* Autocomplete (`GET /api/me/submissions/{id}/mentionables?q=`) returns
+  only readable-submission users, with their `affiliationOf` label.
+* Preferences: `notification_prefs.level` default `all` for ITU roles
+  and proposers; `mentions` is the suggested default for `watcher`
+  and `contact` rows created by someone else (set at first add, the user
+  can change). Self-service at `PUT /api/me/notification-prefs`.
+
+== Delivery: Queues dispatcher
+
+[source]
+----------------------------------------------------------------
+request handler (any state change / comment)
+   │  one db.batch: domain rows + audit + notifications rows (email_status='queued' when an address exists and prefs allow)
+   │
+   ▼  after commit (ctx.waitUntil(env.NOTIFY_Q.send({notification_ids})))  — a send, never an email
+Queue `ituob-notify`  ──▶ consumer Worker (same script, `queue()` handler)
+   │   per message: load rows with email_status in ('queued','failed'), re-check prefs + suppressions, render template,
+   │   POST provider API with Idempotency-Key = notification.id, then UPDATE email_status='sent', provider id
+   │   retry: throw -> Queues redelivers (max_retries 5, exponential delay); after final failure -> DLQ `ituob-notify-dlq`
+   ▼
+provider webhook ──▶ POST /api/email/webhook (signature-verified)  → delivered | bounced | complained → email_status, suppressions, counters
+----------------------------------------------------------------
+
+Exactly-once *record*, at-least-once *send*:
+
+* Creation is idempotent by `dedupe_key` (`INSERT ... ON CONFLICT DO NOTHING`);
+  a retried request cannot produce a second notification.
+* If `queue.send` fails after the D1 commit (rare), the row stays
+  `queued`. A Cron Trigger every 5 minutes (`sweeper`) re-enqueues rows
+  in `queued` older than 5 min and rows in `failed` with attempts < 5.
+  This is why "failures are observable without losing the notification":
+  the D1 row is the source, the queue is only the carrier.
+* The provider's idempotency key (`notification.id`) makes the redelivery after a
+  crash between "provider accepted" and "D1 updated" safe (provider dedupes,
+  or at worst a duplicate email; documented as at-least-once).
+* Digest: v1 sends one email per notification. Batching burst events
+  (e.g. five comments in a minute) into one email is a consumer-side
+  coalesce on `(user_id, submission_id)` within the 30-second queue
+  batch window (`max_batch_timeout`), a later refinement, not v1 scope.
+* Email content: subject `[ITU OB] {submission title}: {event}`,
+  text + minimal HTML, deep link to the submission page (session-guarded; the
+  link carries no token), an excerpt of at most 280 characters of the
+  comment (not for `rejected`/`changes_requested` reasons: those are
+  shown in full, they are the point). Footer explains the level and
+  links to prefs. No tracking pixels.
+
+== Email provider on Workers
+
+*Recommendation: Resend* (HTTPS API called with `fetch` from the
+consumer; works on Workers without Node APIs; sending domain verified
+by DKIM/SPF CNAME+TXT records, DMARC; bounce/complaint webhooks; per-request
+idempotency key; free tier of a few thousand emails a month, far above
+this program's volume). Alternative: Postmark (stricter transactional
+reputation, same shape). `MailChannels` free sending for Workers ended
+in 2024 and is not an option (from training knowledge; verify before
+quoting it to anyone). Cloudflare's own sending (an `Email Sending`
+offering and the Email Workers `send_email` binding): the binding only
+delivers to *verified destination addresses* of Email Routing, which does
+not fit arbitrary users; whether Cloudflare's general outbound service
+is available on this account is *UNVERIFIED*, so the provider is
+behind a one-function interface (`sendEmail(msg): Promise<{id}>`) and
+the choice stays reversible.
+
+Account setup needed (Hassan -> ituob DNS/Cloudflare owner):
+
+. A Resend account owned by the program (not a personal one) with the
+  sending domain `mail.ituob.org` (sub-domain keeps the apex's reputation separate).
+. DNS records Resend gives (SPF include, DKIM CNAMEs, DMARC TXT
+  `p=none` first) added to the `ituob.org` zone, which is already on Cloudflare.
+. Worker secrets: `RESEND_API_KEY`, `RESEND_WEBHOOK_SECRET`; var `MAIL_FROM`
+  (`ITU OB <no-reply@mail.ituob.org>`) and `MAIL_REPLY_TO` (the existing OB mailbox, to be named by ITU).
+. Cloudflare Queues enabled on the account (Workers Paid plan: Queues is
+  not on the free tier, *UNVERIFIED* for the current plan; check the
+  account before the implementation card) and two queues created:
+  `ituob-notify`, `ituob-notify-dlq` (+ the `ituob-github` pair from #103).
+. Provider webhook URL registered: `https://www.ituob.org/api/email/webhook`
+  (and a staging endpoint on a staging sending domain or a provider "test" key,
+  so staging never emails real users: staging sends only to an
+  allow-list `STAGING_MAIL_ALLOWLIST`, else status `skipped:staging`).
+
+== Failure observability
+
+Three levels, none needing a human to go looking:
+
+. *Per-notification state.* `notifications.email_status/_reason/_attempts`,
+  visible to ITU admins at `/admin/notifications?status=failed` with a
+  "retry" (re-enqueue) and "mark undeliverable" action (audited).
+. *Counters.* `notification_counters` daily rows (`sent, failed, bounced,
+  complained, dlq, skipped_prefs, skipped_no_address`) updated in the same
+  statement as the state change, plus one Analytics Engine data point per
+  event (`dataset ituob_notify`), so dashboards and alerts do not need to
+  scan D1. `GET /api/admin/notifications/stats` returns the last 14 days.
+. *Logs and alerts.* Structured `console.log` JSON (`level, notification_id,
+  submission_id, kind, provider_status, attempt`) captured by Workers
+  Logs with `observability` enabled in `wrangler.jsonc`. A DLQ consumer
+  writes `email_status='failed'`, increments `dlq`, and
+  logs at error level; the cron sweeper raises a log-based alert when the
+  `queued` backlog is older than 15 minutes or the DLQ depth is > 0. Where
+  the alert goes (email to an ITU operator via the same pipeline is
+  circular; a Slack/webhook URL secret `ALERT_WEBHOOK`) is D4.
+
+Bounce policy ("left simple but observable"): a hard bounce or a
+complaint inserts the address into `email_suppressions` and sets
+`bounced`/`complained`; the dispatcher skips suppressed addresses
+(`skipped:suppressed`) and the inbox still shows the notification.
+Soft bounces are retried by the provider and recorded as the final
+state only. No automatic un-suppression; an admin can clear it. The
+user's account page shows a banner "we cannot deliver email to {address}".
+
+== Moderator controls
+
+* `POST /api/admin/submissions/{id}/discussion/close|reopen` with a
+  required `reason`; `itu-editor` and `itu-admin` (the Access-guarded
+  admin surface, with the handler checking the session role as #102/#105
+  specify). Writes `discussion_state_log`, flips
+  `submissions.discussion_closed`, audits, notifies P/R/C/W
+  (`discussion.closed/reopened`), and adds a system comment with the reason.
+* Moderator delete/restore of a comment (above), reason required.
+* A moderator cannot edit another person's comment text. Removal is
+  the only content intervention and it is a tombstone, so the original
+  stays in the history for the audit view.
+* A moderator may not moderate a discussion about their own submission
+  (same rule as review; `itu-admin` override with a reason).
+
+== Acceptance mapping
+
+[cols="3,4"]
+|===
+| Acceptance (#104) | How the design satisfies it
+
+| The proposer is notified at every transition of their submission
+| Every #103 transition kind appears in the matrix with P as recipient (except a self-withdrawal). The notification row is created in the same `db.batch` as the transition, so a transition without a notification cannot be committed. A spec enumerates the legal transitions from the #103 table and asserts a notification row for P per transition.
+
+| Reviewers are notified on new submissions and revisions
+| `submission.submitted` fires for the initial submit and for every resubmission (new rev).
+
+| A mention notifies the mentioned account, respecting preferences
+| `comment.mention`, level `mentions` and `all`; suppressed under `none` for email, inbox row still present.
+
+| No email is sent from a request path
+| The handler module has no import of the provider client; only the `queue()` handler does (a test greps imports). The request only calls `queue.send`.
+
+| Failures observable, notification not lost
+| D1 row first, `queued` sweeper, DLQ, counters, admin list.
+
+| The complete history is retrievable by any involved party
+| `GET /api/me/submissions/{id}/history`.
+|===
+
+== Test plan outline (for the implementation cards)
+
+* Pure functions with real instances, no mocks of our own code: recipient
+  resolver `(event, submission, participants, prefs) -> [{user, channel}]`,
+  mention parser, anchor resolver.
+* D1 via Miniflare/`vitest-pool-workers`: batch atomicity (kill after the
+  first statement -> nothing visible), dedupe key, revisions immutability
+  (no UPDATE statement exists), tombstone visibility per role.
+* Queue consumer with a fake provider object implementing the one-function
+  interface: success, 5xx -> retry, 4xx -> failed, redelivery after
+  crash -> single provider-visible send by idempotency key, bounce
+  webhook -> suppression.
+* Local run: `getSession` stub with users `proposer`, `editor`,
+  `member-B`, `unaffiliated` (identity note) against `wrangler dev`.
+
+[[open-decisions]]
+== Open decisions (with recommendations)
+
+[cols="1,4,4"]
+|===
+| # | Decision | Recommendation
+
+| D1
+| Email provider.
+| Resend, behind a one-function interface; Postmark as the swap-in.
+
+| D2
+| Handle source for `@username`: own table now vs a #102 column.
+| Own `user_handles` now; #102 to confirm it will not add a conflicting field.
+
+| D3
+| Do `changes_requested` and `rejected` email the proposer even at level `mentions`?
+| Yes (action required); `none` still silences email (the inbox keeps it).
+
+| D4
+| Where do operational alerts go?
+| A webhook URL secret (`ALERT_WEBHOOK`) to a channel ITU/Hassan name; not email.
+
+| D5
+| Email people without an account (e.g. a TSB contact who never registered)?
+| No in v1. The contact must have an account (#105 association); otherwise the editor is told "no account for this contact".
+
+| D6
+| Plain text vs markdown in comments.
+| Plain text + autolink + mentions in v1.
+
+| D7
+| Retention of comment revisions / tombstoned content.
+| Keep forever (the issue says history is immutable); revisit only with an explicit data-protection ruling.
+|===
+
+== Contradictions and gaps found
+
+. #104 says authors come from "the identity layer" and mentions resolve
+  against "accounts", but the identity contract has no handle/username
+  and `email`/`display_name` are nullable caches (#102 A3). Needs D2.
+. #104 says "email at minimum" for notifications and Cloudflare Workers
+  cannot send arbitrary email without a provider (Email Routing's
+  `send_email` is verified-destination only, to be confirmed).
+  The program needs an external provider account, not mentioned in #103/#104/#106.
+. #104 lists "PR opened / PR merged / issue published" as notification
+  events; those are webhook-driven (#103). If the GitHub App or webhook
+  is not set up, those three events never fire; the demo depends on it.
+. #104 says "plain text or the site's existing rendering stack". The
+  rendering stack is Astro/Vue for trusted documents; using it for
+  user-written comments is an XSS decision, so this note picks plain text.
+. #104 says history is immutable and deletions are tombstones, while
+  privacy law may eventually require erasure of personal data in
+  comments; this note keeps tombstoned text. Flag for Hassan if ITU
+  has a data-protection requirement (D7).
