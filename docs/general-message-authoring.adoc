@@ -6,18 +6,45 @@ The API is Access guarded under `/api/admin/general-messages`. GET lists staff d
 
 `generalMessageArtifact(db,id,expectedRevision)` returns `{id,ob_issue_no,type,class_name,path,revision,content}` for the current approved revision. The publisher must reserve these exact bytes in `general_message_prs` before any external request, require administrator authorization, check the authoritative base repository for path collisions, and open a reviewed PR. It must not write directly to the default branch. Publication and merge evidence belong to the publisher integration, not this draft API.
 
-New ordinary records receive `ob-issues/<issue>/<type>/<NNN>.yaml`; approved recommendations and running annexes use `general/approved_recommendations.yaml` and `general/running_annexes.yaml`. Sequence allocation is atomic within the draft database. Existing legacy Git files are not inventoried in D1: the publisher's base-repository collision check is required. This lane does not import or replace an existing remote record by path.
+New ordinary records receive `ob-issues/<issue>/<type>/<NNN>.yaml`; approved recommendations and running annexes use `general/approved_recommendations.yaml` and `general/running_annexes.yaml`. Sequence allocation is atomic within the draft database. Existing legacy Git files are not inventoried in D1: the publisher's base-repository collision check is required. POST `/import` opens an existing canonical record at its path through the configured repository reader. Approval proposes its replacement through review. Migration `0005_general_message_source.sql` retains imported source YAML independently of approval revisions; an unchanged form save and approval reuse those exact bytes. New drafts serialize normally. Large source, value and artifact fields use bounded gzip/base64 storage so the real telephone corpus fits D1 rows; API responses and publication artifacts always return decoded objects and exact YAML. Small database values stay plain. The storage codec bounds decoded fields to 32 MiB and encoded columns to 500 kB.
 
 == Coverage and remaining gaps
 
-Structured ontology fields are editable, including recommendation entries, running-annex links, nested telephone sections and communication dates. Plain prose is editable in string fields such as `GeneralMiscCommunications.text`/`contents`, `GeneralCustom.text`, and the other declared string attributes. `GeneralCustom.title` is a multilingual string and is editable per language.
+Structured ontology fields are editable, including recommendation entries,
+running-annex links, SANC country/code rows and notes, and nested telephone
+country/area sections, contacts and dated communications. Scalar and multilingual
+plain prose use textareas. Legacy rich-text objects remain read-only.
+PR #124 owns the ontology changes for telephone communication contents,
+multilingual custom titles, mid contents and SANC dispatch; they are not duplicated
+here. Inline help explains the schema controls and draft/review workflow.
 
-SANC creation and edits are unavailable: the corpus maps `sanc` to `GeneralSancs`, while the publishing service dispatches to `GeneralMessage`. The source model/dispatch must agree before typed SANC authoring can be accepted.
+Opaque legacy objects remain preserved. A no-op load/save/approval retains the
+complete original YAML, including comments, quoting, aliases and timestamps.
+Edited drafts serialize new YAML after validation; original source is retained
+so reverting the values restores the original bytes. Legacy singleton payloads
+are preserved without conversion. The editor never authors ProseMirror documents.
 
-Opaque Hash values, including multilingual ProseMirror documents, are preserved read-only. The editor does not provide ProseMirror authoring or a raw JSON substitute for prose. Telephone communication contents and `GeneralMid.contents` accept plain text (stored rich objects are preserved); generic callback contents, and legacy singleton payload Hashes still need an agreed ontology/editor representation before readable prose authoring parity can be claimed. Root fields `extra_links` and structured recommendation `items` follow the current generated schema; legacy singleton `payload` objects are preserved without conversion. Renderer support for each newly authored structured shape must be verified by the publishing service.
+Telephone communication contents and `GeneralMid.contents` accept plain text;
+stored rich objects remain read-only. `GeneralCustom.title` is editable per
+language. Generic callback contents and legacy singleton payload Hashes still
+need an agreed ontology/editor representation before prose authoring parity can
+be claimed. Root fields `extra_links` and structured recommendation `items`
+follow the generated schema. Renderer support for newly authored structured
+shapes must be verified by the publishing service.
+
 
 == Focused evidence
 
-`npx vitest run --config test/general-messages.config.ts` runs real migration and transaction SQL with Node SQLite, generated-validator rejection, authorization, stale revision protection, approval snapshots, exact YAML artifacts, audit rollback, and reservation locks. Canonical OB 1331 fixtures in `test/fixtures/general-messages` are drawn from service corpus checkout `23ce60948c16dfa609080c453d6b7a2220933756` (proof checkout `proof-123`). The singleton fixtures are unchanged; the telephone fixture is the smallest complete communication and its containing section extracted from the canonical record, retaining its opaque ProseMirror data. `test/general-messages.test.ts` provides host workerd/D1 concurrency and preservation checks; these require the suite cleanup to delete general-message tables before users. Local workerd cannot start in the sandbox (listen EPERM); Node SQLite evidence is not a claim that D1 has run.
+`npx vitest run --config test/general-messages.config.ts` runs real migration and transaction SQL with Node SQLite, generated-validator rejection, authorization, stale revision protection, approval snapshots, exact YAML artifacts, audit rollback, and reservation locks. Canonical OB 1331 fixtures in `test/fixtures/general-messages` are drawn from service corpus checkout `23ce60948c16dfa609080c453d6b7a2220933756` (proof checkout `proof-123`). The singleton fixtures are unchanged; the telephone fixture is the smallest complete communication and its containing section extracted from the canonical record, retaining its opaque ProseMirror data. `test/general-messages.test.ts` provides host workerd/D1 concurrency and preservation checks; these require the suite cleanup to delete general-message tables before users. Workerd/D1 checks and Node SQLite checks are reported separately in the PR delivery evidence.
 
-Focused checks at implementation handoff: 18 Node SQL/validator tests passed; Worker TypeScript passed; Astro check 0 errors and 0 warnings (one existing Base layout hint). focused-quality: general-message validation, optimistic writes, approval snapshots and UI preservation contracts; no remaining in-scope finding. Integration must include the shared edition-number helper, SchemaNode opaqueReadonly support, route registration, publisher collision checks and D1 cleanup.
+Corpus coverage is asserted for SANC (124), telephone_service_2 (377), custom
+(105), and mid (6); telephone_service has zero stored records. The form tests
+exercise the HTTP JSON bridge and Worker validators, while the Node SQLite tests
+exercise every record through import, form state, save, approval and artifact
+read. The workerd/D1 suite exercises source retention with two representative
+messages and real migrations. These local checks do not exercise remote GitHub
+replacement PRs or a deployed editor.
+
+focused-quality: preservation, storage/publication boundaries, scheduling calendar
+and authoring help; no remaining findings after correcting D1 size bounds and
+SQLite storage-marker handling.

@@ -1,5 +1,6 @@
 import { requireRole } from "./lib/authz.ts";
 import { generalMessageArtifact } from "./lib/general-messages.ts";
+import { unpackText } from "./lib/general-message-storage.ts";
 import { type Route, body, json } from "./lib/http.ts";
 import { ConflictError, InvalidError, NotFoundError } from "./lib/membership.ts";
 import { getPublisher } from "./lib/publisher.ts";
@@ -11,6 +12,7 @@ interface Review {
   pr_number: number | null; commit_sha: string | null; pr_url: string | null;
 }
 const read = (db: D1Database, id: string) => db.prepare("SELECT * FROM general_message_prs WHERE message_id=?1 ORDER BY revision DESC LIMIT 1").bind(id).first<Review>();
+const decodedReview = async (review: Review) => ({ ...review, content_yaml: await unpackText(review.content_yaml) });
 const path = "^/api/admin/general-messages/([0-9A-HJKMNP-TV-Z]{26})/review$";
 export const generalMessagePublicationRoutes: Route[] = [
   { method: "POST", pattern: new RegExp(path), guard: "access", handler: async ({ request, env, access, params }) => {
@@ -20,14 +22,17 @@ export const generalMessagePublicationRoutes: Route[] = [
     const artifact = await generalMessageArtifact(env.DB, params[0]!, revision);
     const repo = env.PATCH_REPO ?? DEFAULT_PATCH_REPO;
     const branch = `rt-msg-${artifact.ob_issue_no}-${artifact.id}-r${revision}`;
+    const approved = await env.DB.prepare("SELECT content_yaml FROM general_messages WHERE id=?1 AND revision=?2 AND approved_at IS NOT NULL")
+      .bind(artifact.id, revision).first<{ content_yaml: string }>();
+    if (!approved || await unpackText(approved.content_yaml) !== artifact.content) throw new ConflictError("general-message approval changed during review preparation");
     await env.DB.prepare(`INSERT INTO general_message_prs (message_id,revision,repo,branch,path,content_yaml)
       SELECT ?1,?2,?3,?4,?5,?6 FROM general_messages WHERE id=?1 AND revision=?2 AND approved_at IS NOT NULL AND content_yaml=?6
-      ON CONFLICT(message_id,revision) DO NOTHING`).bind(artifact.id, revision, repo, branch, artifact.path, artifact.content).run();
+      ON CONFLICT(message_id,revision) DO NOTHING`).bind(artifact.id, revision, repo, branch, artifact.path, approved.content_yaml).run();
     const reserved = await read(env.DB, artifact.id);
-    if (!reserved || reserved.revision !== revision || reserved.repo !== repo || reserved.branch !== branch || reserved.path !== artifact.path || reserved.content_yaml !== artifact.content)
+    if (!reserved || reserved.revision !== revision || reserved.repo !== repo || reserved.branch !== branch || reserved.path !== artifact.path || reserved.content_yaml !== approved.content_yaml)
       throw new ConflictError("general-message revision changed during review preparation");
     try {
-      const pr = await getPublisher(env).openGeneralMessagePr({ repo, branch, path: reserved.path, content: reserved.content_yaml,
+      const pr = await getPublisher(env).openGeneralMessagePr({ repo, branch, path: reserved.path, content: await unpackText(reserved.content_yaml),
         edition: artifact.ob_issue_no, revision, messageId: artifact.id, messageType: artifact.type,
         title: `OB ${artifact.ob_issue_no}: ${artifact.type}`, body: "Review the exact administrator-approved general message. This request does not publish the issue.",
         idempotencyKey: `general-${artifact.id}-r${revision}` });
@@ -36,7 +41,7 @@ export const generalMessagePublicationRoutes: Route[] = [
         .bind(artifact.id, revision, pr.prNumber, pr.commitSha, pr.url).run();
       const stored = (await read(env.DB, artifact.id))!;
       if (stored.pr_number !== pr.prNumber || stored.commit_sha !== pr.commitSha) throw new ConflictError("general-message review changed concurrently");
-      return json({ ok: true, pr: stored, pending: true }, 202);
+      return json({ ok: true, pr: await decodedReview(stored), pending: true }, 202);
     } catch (error) {
       if (error instanceof ConflictError) throw error;
       throw new UpstreamError(error instanceof Error ? error.message : "general-message review unavailable");
@@ -46,10 +51,10 @@ export const generalMessagePublicationRoutes: Route[] = [
     requireRole(await ituSession(env, access!), "itu-admin", "itu-editor");
     const stored = await read(env.DB, params[0]!);
     if (!stored) throw new NotFoundError("no general-message review has been prepared");
-    if (stored.pr_number === null) return json({ ok: true, pr: stored, pending: true, state: null });
+    if (stored.pr_number === null) return json({ ok: true, pr: await decodedReview(stored), pending: true, state: null });
     try {
       const state = await getPublisher(env).getGeneralMessagePullRequest({ repo: stored.repo, prNumber: stored.pr_number, expectedHeadSha: stored.commit_sha ?? "" });
-      return json({ ok: true, pr: stored, pending: !state.merged, state });
+      return json({ ok: true, pr: await decodedReview(stored), pending: !state.merged, state });
     } catch (error) { throw new UpstreamError(error instanceof Error ? error.message : "general-message review unavailable"); }
   } },
 ];

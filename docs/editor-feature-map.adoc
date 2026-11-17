@@ -53,11 +53,11 @@ Status values:
 | B3 | Browse service publications | `publication-browser/index.tsx` | `src/pages/registers/`, `datasets/` | main | DONE (read only; editing is G1)
 | B4 | Upcoming issues with current/next/past status, cutoff and publication dates | `issue-scheduler/upcoming.tsx` | public: `src/components/PlannedIssues.astro` | main | DONE
 | B5 | Same list inside the admin tool | same | `Composer.vue` editions list | #110 | IN PR
-| B6 | Calendar month view with cutoff/publication highlighting | `issue-scheduler/index.tsx` | none: dates are typed as `YYYY-MM-DD` in `EditionMetadata.vue` | n/a | MISSING (convenience only; does not block)
+| B6 | Calendar month view with cutoff/publication highlighting | `issue-scheduler/index.tsx` | `ScheduleCalendar.vue` highlights current form cutoff/publication dates in a UTC month grid with previous/next controls | this PR | IN PR
 | B7 | Create/schedule a new issue: pick dates, enter edition number; id must be > 0 and not exist | `issue-scheduler/schedule-form.tsx`, `main/issue-manager.ts:162-190` | `Composer.vue` open edition, `worker/lib/edition-number.ts`, `edition-metadata.ts`, `EditionMetadata.vue` | #110 | IN PR
-| B8 | New issue inherits ISSN, languages and authors from `defaults/issue/meta.yaml` | `issue-manager.ts:158-190` | none: `EditionMetadata.vue` starts from `{ id }` only | n/a | MISSING (blocks parity: the masthead would be hand-typed every issue)
+| B8 | New issue inherits ISSN, languages and authors from `defaults/issue/meta.yaml` | `issue-manager.ts:158-190` | `EditionMetadata.vue`, `edition-defaults.ts`: inherit masthead only from an earlier published edition | #117 | IN PR
 | B9 | "Save defaults" IPC | `model-issues-save-defaults` | n/a | n/a | DROPPED (no UI ever called it)
-| B10 | Help buttons linking to `ituob.org/docs/...` (schedule, per message type, amend/annex) | `index.tsx:152`, `message-editor.tsx:54-62` | none on `/admin` pages | n/a | MISSING (does not block; add links or inline help)
+| B10 | Help buttons linking to `ituob.org/docs/...` (schedule, per message type, amend/annex) | `index.tsx:152`, `message-editor.tsx:54-62` | Inline schedule, general-message and amendment help in `EditionMetadata.vue`, `GeneralMessageEditor.vue`, `SubmissionWorkspace.vue` | this PR | IN PR
 | B11 | Live refresh when another window changes an issue | `issue-scheduler/index.tsx:69-75` | n/a | n/a | DROPPED (single-page state; conflicts handled by revision checks, see C10)
 |===
 
@@ -71,7 +71,7 @@ Status values:
 | C3 | Meta: ISSN | `issue-editor/meta/index.tsx:28-52` | `IssueMetadata.issn` via `EditionMetadata.vue` | #110 | IN PR
 | C4 | Meta: publication and cutoff dates (legacy had no ordering check) | `meta/index.tsx:101-128` | `worker/lib/edition-metadata.ts`: ISO dates, cutoff <= publication | #110 | IN PR
 | C5 | Meta: authors with address and contacts (type, data, recommended); add and delete | `meta/authors.tsx` | `SchemaNode.vue` generic lists over `IssueAuthor`, `IssueContact` | #110 | IN PR
-| C6 | Drag-reorder authors and contacts | `widgets/dnd-sortable.tsx`, `meta/authors.tsx` | none: `SchemaNode.vue` lists only add and remove | n/a | MISSING (does not block)
+| C6 | Drag-reorder authors and contacts | `widgets/dnd-sortable.tsx`, `meta/authors.tsx` | `SchemaNode.vue` up/down controls; `move-item.test.ts` | #117 | IN PR
 | C7 | Meta: languages (en required; fr, ar, zh, ru, es) | `meta/index.tsx:55-98`, `models/languages.ts` | `IssueMetadata.languages` is an opaque `Hash`, edited as a JSON textarea in `SchemaNode.vue` | #110 | IN PR (usable, not friendly)
 | C8 | "Current language" selector switching all fields | same | none: every language key of a `MultilingualString` is shown | n/a | DROPPED (3 of 396 issues use a non-en language)
 | C9 | Delete an issue; "malformed issue, delete" fallback | `meta/index.tsx:131-152`, `index.tsx:186-209` | none | n/a | DROPPED (an unmerged issue is not in the data repo; removing a published one is a reviewed revert, not an editor action)
@@ -89,23 +89,23 @@ string attribute or it cannot be authored.
 |===
 | ID | Editor feature | Editor ref | Web app ref | PR | Status
 | D1 | Add-message menu with fixed order and one-per-type guard for running_annexes, approved_recommendations, telephone_service(_2), service_restrictions, callback_procedures | `new-item-prompts/general-message.tsx`, `models/issues.ts:89-103,141-158` | `GeneralMessageEditor.vue` type picker; `src/lib/form/general.ts` paths (singletons `general/<type>.yaml`, others `<type>/NNN.yaml`); `migrations/0003_general_messages.sql` UNIQUE path | #110 | IN PR
-| D2 | Delete a message | `issue-editor/index.tsx:240-247` | none: general-message routes only create, save, approve, open review | n/a | MISSING (blocks: a wrong draft cannot be removed)
-| D3 | Edit a message that already exists in the issue | `message-forms/*` | none: `docs/general-message-authoring.adoc` says it does not import or replace an existing remote record by path | n/a | MISSING (blocks: legacy edited existing issue files)
+| D2 | Delete a message | `issue-editor/index.tsx:240-247` | `POST /api/admin/general-messages/:id/delete`; revision, approval, review and edition guards | #117 | IN PR
+| D3 | Edit a message that already exists in the issue | `message-forms/*` | Canonical repository import through `RepoReader`; this PR retains imported source bytes through unchanged saves and approval, and patches edited YAML value ranges | #117, this PR | IN PR (live repository proof pending)
 | D4 | running_annexes: `extra_links` list; running list derived read-only | `message-forms/running_annexes.tsx` | `GeneralRunningAnnexes.extra_links` in `GeneralMessageEditor.vue`; derived list `RunningAnnexes.astro` | #110, main | IN PR (authoring), DONE (derived display)
 | D5 | approved_recommendations: by, procedures, items (code, version) | `message-forms/approved_recommendations.tsx:28-190` | `GeneralApprovedRecommendations` via `SchemaNode.vue` | #110 | IN PR (card title lookup from the recommendation store is not reproduced; legacy date format mix is an open normalisation question)
 | D6 | telephone_service_2 structure: add and delete country/area sections, area details, add and delete dated communications | `message-forms/telephone_service_2.tsx` | `GeneralTelephoneService` > `GeneralTelephoneSection` > `GeneralTelephoneCommunication` via `SchemaNode.vue` | #110 | IN PR
-| D7 | telephone communication body text | `telephone_service_2.tsx:457-537` | `GeneralTelephoneCommunication.contents` is an opaque `Hash`, shown read-only (`opaqueReadonly`) | #110 | MISSING (blocks: 377 of 396 legacy issues carry this message; new text cannot be written)
+| D7 | telephone communication body text | `telephone_service_2.tsx:457-537` | Generated `HashOrText` communication contents; corpus-wide byte-identical import/save/approval proof in this PR | #124, this PR | IN PR
 | D8 | telephone_service v1 | `message-forms/index.tsx` (renders "isn't supported yet") | n/a | n/a | DROPPED (0 corpus use, not creatable in legacy)
 | D9 | service_restrictions: items country, ob, page | `message-forms/service_restrictions.tsx` | `GeneralServiceRestrictions.items` | #110 | IN PR
 | D10 | callback_procedures (no content) | `message-forms/callback_procedures.tsx` | `GeneralCallbackProcedures` | #110 | IN PR
 | D11 | misc_communications prose | `message-forms/freeform.tsx` | `GeneralMiscCommunications.text` textarea | #110 | IN PR (rendering of newly authored shape unverified by the docs)
 | D12 | org_changes prose | same | `GeneralOrgChanges.text` textarea | #110 | IN PR (same caveat)
 | D13 | custom message: prose body | `message-forms/custom.tsx` | `GeneralCustom.text` textarea | #110 | IN PR
-| D14 | custom message: translatable title (legacy form always asks for one) | `custom.tsx` | `GeneralCustom.title` is an opaque `Hash`, read-only | #110 | MISSING (blocks: titles cannot be authored)
-| D15 | sanc (Q708 SANC) | freeform | `GeneralMessageEditor.vue` disables `sanc`: class and service dispatch disagree | #110 | MISSING (blocks: 124 legacy issues)
+| D14 | custom message: translatable title (legacy form always asks for one) | `custom.tsx` | Generated multilingual title; corpus-wide preservation proof in this PR | #124, this PR | IN PR
+| D15 | sanc (Q708 SANC) | freeform | Canonical `GeneralSancs` dispatch, typed rows and prose; corpus-wide byte-identical import/save/approval proof in this PR | #124, this PR | IN PR
 | D16 | iptn | freeform | `GeneralIptn.entries` (structured rows) | #110 | IN PR
 | D17 | ipns | freeform | `GeneralIpns` (network, mcc_mnc, date, notes) | #110 | IN PR
-| D18 | mid | freeform | `GeneralMid.contents` is an opaque `Hash`, read-only | #110 | MISSING (6 legacy issues; decide: add a text attribute or drop)
+| D18 | mid | freeform | Generated `HashOrText` contents; corpus-wide preservation proof in this PR | #124, this PR | IN PR
 | D19 | ProseMirror freeform editor (marks, tables) | `issue-editor/freeform-contents.tsx` | none | n/a | DROPPED (decision record: no ProseMirror)
 |===
 
@@ -118,7 +118,7 @@ string attribute or it cannot be authored.
 | E2 | Edit entries as dataset changes (add, replace, move) with a review list of operations | `message-forms/amendment.tsx:26-165` | `RegisterChange` with ADD/REP/MOD/SUP/DEL/LIR (`admin-client.ts` excludes SEED); two-stage validation `worker/lib/validation.ts`, `schema.validators.generated.ts`; revision history | #108, #110 | IN PR
 | E3 | Prose amendment for a non-register publication (ProseMirror tables) | `amendment.tsx:42-49` | `TextAmendment.text` plain textarea, ITU staff only (`worker/lib/submissions.ts:212`); catalog must say textual (`validation.ts:111-113`) | #108, #110 | IN PR (see <<task4>>)
 | E4 | Amendment header: recommendation title, SP URL, "amending position of DATE annexed to OB n" or "never annexed" warning; `position_on` prefilled from the latest annex | `amendment.tsx:106-128`, `amendment.tsx` prompt | none: `position_on` is a typed `Date` leaf | n/a | MISSING (does not block)
-| E5 | One amendment per publication per issue | `issue-editor/index.tsx:271-274` | no check found: composer places by edition and state only (`canPlace`), only `register_key` is UNIQUE | n/a | MISSING (blocks until a validator exists or the rule is formally dropped)
+| E5 | One amendment per publication per issue | `issue-editor/index.tsx:271-274` | Reviewed actions are independently ordered by edition sequence; multiple operations per publication are valid | #117 | DROPPED (superseded by per-action patches)
 | E6 | Auto-fill datasets from the previous annex plus later amendments | `issue-manager.ts:98-115` | register replay on the site (SEED/ADD/SUP/REP/MOD/DEL/LIR) | main | DROPPED (replaced by replay)
 |===
 
@@ -176,7 +176,7 @@ from parity.
 |===
 | ID | Requirement | Web app ref | PR | Status
 | W1 | Valid-by-construction forms from the ontology; byte-stable YAML round trip | `src/lib/form/model.ts`, `yaml-io.ts`, `exact.ts`, `form.test.ts` | #108 | IN PR
-| W2 | Bulk import of an external full list as a SEED/patch series through PR review | none: `admin-client.ts` removes `SEED` from `actionTypes`; the design is in `docs/submission-workflow.adoc` only | n/a | MISSING (required by #101; legacy had no bulk import)
+| W2 | Bulk import of an external full list as a SEED/patch series through PR review | `/admin/bulk`, `bulk-import.ts`, Worker validation and staff-only SEED; authoritative emptiness checked at creation and approval | #117 | IN PR (live repository proof pending)
 | W3 | Accounts, roles, membership and country authority | `worker/lib/oidc.ts`, `membership.ts`, `authz.ts` (#108); `MembersAdmin.vue`, `MembershipAccount.vue` (#110) | #108, #110 | IN PR
 | W4 | Review workflow: submit, request changes, approve, PR, merge, revert | `worker/lib/submissions.ts`, `reconciler.ts`, `revert.ts`, `github-webhook.ts` | #108 | IN PR
 | W5 | Discussion, mentions, inbox, notification email | `worker/lib/discussion.ts`, `notify.ts`, `email.ts`; `Discussion.vue`, `Inbox.vue` | #108, #110 | IN PR
@@ -206,61 +206,63 @@ from parity.
   encoding limits are stated in `docs/submission-workflow.adoc:493` but were not
   traced to code here.
 
-Related but separate: general-message prose (misc_communications, org_changes,
-custom) is also a textarea where the ontology has a `String` attribute (D11-D13).
-Where only a `Hash` exists (telephone communications, mid, custom title, sanc)
-nothing is editable, which is the main blocker below.
+General-message prose also uses scalar or multilingual plain text controls.
+PR #124 supplies the ontology changes for telephone, mid, custom title and SANC;
+this PR adds complete corpus preservation evidence without duplicating those changes.
 
 == Blocks Electron retirement
 
-Retirement needs "no remaining unique capability" (#101 acceptance). Ordered by
-impact:
+Retirement still needs annex authoring (F1/F2) and service-publication catalog
+authoring (G1), or explicit owner decisions to retire those workflows. There is
+no generated annex class; catalogs are currently code. No retirement decision is
+implied by this PR.
 
-. *Telephone communication text (D7).* 377 of 396 legacy issues carry it; the
-  field is read-only. Needs a plain-text attribute in the ontology plus form.
-. *sanc (D15), mid (D18), custom title (D14).* Authoring is unavailable or
-  read-only. Each needs a model fix or a recorded drop.
-. *Editing and deleting existing general messages (D2, D3).* Only new drafts can
-  be created; no replace-by-path, no delete.
-. *Annex authoring (F1, F2).* Authored in `AnnexEditor.vue` (in PR, base #110); not
-  retired: OB 1350 carries a live annex. Datasets (F3) are kept but not editable.
-. *Service-publication create/edit (G1).* Same kind of decision: a form, or a
-  recorded "added in code" rule.
-. *New-issue defaults (B8).* Authors, ISSN and languages are retyped per issue.
-. *Bulk import / SEED (W2).* Required by #101, absent.
-. *One amendment per publication per issue (E5).* No enforcement found.
+PR #117 covers D2/D3, B8, C6, E5 and W2. PR #124 covers D7/D14/D15/D18.
+This PR completes the scheduling calendar (B6) and inline authoring help (B10) and proves unchanged source bytes
+through the form and Worker lifecycle for every SANC, telephone, custom and mid
+record. Single-field edit regressions additionally assert unrelated YAML bytes
+remain exact. Calendar navigation and rendered dates stay within years 0000–9999.
+These remain IN PR until their dependencies merge.
 
-Preconditions that are not features: #108 and #110 are open drafts, so every
-IN PR row above is unshipped until both merge; identity provider, D1, GitHub App
-and secret provisioning were not verified here.
 
-Not blocking: calendar view (B6), author reorder (C6), help links (B10), amendment
-header and `position_on` prefill (E4).
+The Electron README archive notice remains pending until parity and deployment;
+the Electron repository has not been archived. Amendment header/prefill (E4) remains missing. Live repository, D1, identity and translation
+proof remain separate from local checks.
+
+== Corpus preservation evidence
+
+Corpus source: `itu-ob-data` checkout `2c0dae9c8094c3f97fa25526f05c9c908df54e26`.
+The follow-up corpus checks cover every stored record in each relevant directory:
+SANC 124, telephone_service_2 377, custom 105 and mid 6. The legacy
+telephone_service directory has zero records. Assertions cover source YAML,
+HTTP JSON, schema form state, Worker validation and saved YAML. The Node SQLite
+suite additionally imports, saves, approves and reads the artifact for all 612
+records. Synthetic edit/revert tests and workerd/D1 tests exercise source lifetime.
+Large general-message fields use bounded gzip/base64 storage inside D1, with
+plain YAML and objects restored at API and publication boundaries. Small records
+retain their existing database representation.
+The older legacy-issue counts in this map's initial assessment used a different
+data layout and are not the counts of current canonical YAML records.
 
 [[not-run]]
 == Not run
 
-* No test, typecheck, build or deploy was run for #108 or #110. Status comes from
-  reading code on the two branch heads above; test counts quoted by those PRs'
-  own docs were not re-run.
-* The ITU translation service was not contacted; the PR's own doc says its live
-  protocol was not observed.
-* Whether newly authored general-message shapes render on the public site was not
-  checked.
-* The 21 legacy amendment targets were not individually matched to the 13
-  structured and 7 textual catalog entries.
-* The editor was read, not launched. Issue counts (377 telephone_service_2, 124 sanc,
-  6 mid, 88 custom, of 396 issues) were measured by grepping `issues/*/general.yaml`
-  in a local `itu-ob-data` checkout at `e17484b`, which was not fetched from origin.
+* No remote D1 migration, deployment, Cloudflare Access or identity-provider test.
+* No live repository import, replacement PR or authoritative SEED-empty-register
+  check against the real data repository; repository-reader integration uses fakes.
+* No browser authoring or public-rendering acceptance for these changes.
+* No live translation-service check, Astro production build, or Electron launch.
+* The archive notice has not been applied to the separate Electron repository;
+  retirement awaits the remaining parity decisions and deployment.
 
 == Tally
 
-[cols="2,1"]
+[cols="2,1",options="header"]
 |===
-| Status (legacy rows A1-I3, 72 rows; D4 counted as IN PR) | Count
+| Status (legacy rows A1-I3) | Count
 | DONE | 5
-| IN PR | 34
-| MISSING | 15
-| DROPPED | 18
-| Web-only rows W1-W6 (IN PR 5, MISSING 1) | 6
+| IN PR | 44
+| MISSING | 4
+| DROPPED | 19
+| Web-only rows W1-W6 (all IN PR) | 6
 |===

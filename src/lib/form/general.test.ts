@@ -10,6 +10,7 @@ import * as invalidInput from './invalid-input';
 import { description } from './description';
 import * as client from '../admin-client';
 import { validateClass } from '../schema.validators.generated';
+import { validateGeneralMessage } from '../../../worker/lib/general-messages';
 
 function proseControls(value: unknown) {
   const file = 'src/components/admin/SchemaNode.vue';
@@ -91,5 +92,41 @@ describe('ontology-backed general fields (D7, D14, D15, D18)', () => {
     const value = { type: 'sanc', contents: 'Notice', items: [{ country: 'Example', sanc: '7-001' }] };
     expect(validateClass('GeneralSancs', value)).toEqual([]);
     expect(model.toInstance(model.toFormState('GeneralSancs', value).state)).toEqual(value);
+  });
+});
+
+
+describe('SANC rich document compatibility', () => {
+  const legacy = yamlIo.parseYaml(readFileSync('test/fixtures/general-messages/sanc.yaml', 'utf8')) as Record<string, unknown>;
+  it('validates the historical rich document without adding typed rows through form save', () => {
+    expect(legacy).not.toHaveProperty('items');
+    expect(validateGeneralMessage('sanc', legacy).value).toEqual(legacy);
+    const saved = model.toInstance(model.toFormState('GeneralSancs', legacy).state);
+    expect(saved).toEqual(legacy);
+    expect(validateGeneralMessage('sanc', saved).value).toEqual(legacy);
+  });
+  it.each([
+    { type: 'sanc' },
+    { type: 'sanc', contents: 'Notice' },
+    { type: 'sanc', contents: {} },
+    { type: 'sanc', contents: { en: {} } },
+    { type: 'sanc', contents: { en: { text: 'Not a document' } } },
+    { type: 'sanc', contents: { en: { type: 'doc', content: [] } } },
+    { type: 'sanc', contents: { en: { type: 'doc', content: [{ type: 'paragraph', content: [{ type: 'text', text: '  ' }] }] } } },
+    { ...legacy, items: [] },
+    { ...legacy, items: [{}] },
+    { ...legacy, items: [{ country: 'Example' }] },
+    { ...legacy, items: [{ country: ' ', sanc: '7-001' }] },
+    { ...legacy, notes: 7 },
+    { ...legacy, notes: 'x'.repeat(10_001) },
+  ])('rejects thin rich contents or invalid typed fields (case %#)', value => {
+    expect(() => validateGeneralMessage('sanc', value)).toThrow();
+  });
+  it('retains strict validation of valid typed rows and content limits', () => {
+    const items = [{ country: 'Example', sanc: '7-001' }];
+    expect(validateGeneralMessage('sanc', { type: 'sanc', items }).value).toEqual({ type: 'sanc', items });
+    expect(validateGeneralMessage('sanc', { ...legacy, items }).value).toEqual({ ...legacy, items });
+    const oversized = { type: 'sanc', contents: { en: { type: 'doc', content: [{ type: 'text', text: 'x'.repeat(200_001) }] } } };
+    expect(() => validateGeneralMessage('sanc', oversized)).toThrow();
   });
 });

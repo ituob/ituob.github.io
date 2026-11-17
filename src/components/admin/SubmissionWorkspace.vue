@@ -139,6 +139,11 @@ onMounted(() => perform(async () => { await list(); const id = new URLSearchPara
       <p v-if="detail?.submission.affiliation_kind">Submitted affiliation: {{ detail.submission.affiliation_kind === 'itu' ? 'ITU' : `Member State: ${detail.submission.affiliation_member_name || detail.submission.affiliation_member_id}` }}</p>
       <p v-if="detail"><a :href="`/me/discussions/?id=${encodeURIComponent(detail.submission.id)}${admin ? '&review=1' : ''}`">Discussion and review history</a></p>
       <p>This editor authors one action patch. Publication identifiers and edition metadata are assigned at approval.</p>
+      <details>
+        <summary>Amendment authoring help</summary>
+        <p>Choose the amendment class and enter its typed fields and rows. For Q.708 SANC, add the country and SANC code in each structured entry. Existing legacy prose is retained with the proposal when the editor supports it; rich-text content remains read-only.</p>
+        <p>ADD and REP need complete entries. MOD carries the changed values and identifying key; SUP and DEL carry the key. Textual amendments are staff-only patches.</p>
+      </details>
       <fieldset :disabled="busy || !creating"><legend>Action identity</legend>
         <label v-if="registers.length">Register <select @change="registerChange"><option value="">Choose a register</option><option v-for="r in registers" :key="r.slug" :value="r.slug">{{ r.label }}</option></select></label>
         <label>Register identifier <input v-model="registerId" required pattern="[A-Z0-9_]{1,40}" /></label>
