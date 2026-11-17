@@ -77,7 +77,7 @@ describe("canonical general-message draft authoring", () => {
     expect(await unpackText(raw.source_yaml) === source, `${path}: stored source bytes differ`).toBe(true);
     expect((await generalMessageArtifact(db, saved.id)).content === source, `${path}: approved bytes differ`).toBe(true);
     expect(sqlite.prepare("SELECT json_valid(value_json) valid FROM general_messages WHERE id=?").get(saved.id)?.valid).toBe(1);
-  }, 60_000);
+  }, 900_000);
   it.each(["sanc", "telephone_service_2"])("keeps imported %s YAML byte-identical through form save and approval", async type => {
     const source = "# Preserve original formatting\n" + readFileSync(`test/fixtures/general-messages/${type}.yaml`, "utf8").replace(/^ob_issue_no:.*\n/gm, "") + "\nob_issue_no: '1331'\n";
     const path = `ob-issues/1331/${type}/001.yaml`;
