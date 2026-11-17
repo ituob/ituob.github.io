@@ -1,0 +1,16 @@
+{
+  "jekyll_source": "a95ab19139e0c65271178c44362f60b48f7eed8c",
+  "data": "90f99728acd1e96d025ce0034fe43a38b572aa62",
+  "ruby": "3.1.7",
+  "exit_code": 0,
+  "duration_seconds": 2608.674,
+  "log_sha256": "72b898e93ee1e9bf50f6b505ae72f26889f29cbd99775d01b8566c01e5baca41",
+  "diagnostics": {
+    "localization_errors": 16,
+    "missing_annex_warnings": 1218,
+    "missing_title_warnings": 3457,
+    "missing_frontend_asset": 1,
+    "legacy_docs_destination_collisions": 2
+  },
+  "note": "Exit zero does not certify legacy rendering or frontend assets; compare only generated audited HTML. See reference-build.patch for adaptations."
+}
