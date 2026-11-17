@@ -1,0 +1,44 @@
+// OPT-IN EXAMPLE ONLY: provision resources and replace placeholder IDs before use.
+// Not selected by CI. See docs/cloudflare-bindings.adoc.
+// Production — www.ituob.org
+//
+// Worker-first: canonicalizes the apex, serves /api (Phase 1+), and
+// passes everything else to the ASSETS binding. See
+// docs/cloudflare-webapp.adoc.
+//
+// The ituob.org zone is on Cloudflare (pending nameserver activation);
+// the custom domain provisions its DNS record + certificate on deploy.
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "ituob-org",
+  "main": "worker/index.ts",
+  "compatibility_date": "2026-10-01",
+  "workers_dev": false,
+  "routes": [
+    { "pattern": "www.ituob.org", "custom_domain": true },
+    { "pattern": "ituob.org", "custom_domain": true }
+  ],
+  "run_worker_first": true,
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS",
+    "html_handling": "auto-trailing-slash",
+    "not_found_handling": "404-page"
+  },
+  // Bindings: docs/cloudflare-bindings.adoc. The database_id is a PLACEHOLDER
+  // until the owner runs `wrangler d1 create ituob-org-db` and pastes the real id.
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "ituob-org-db",
+      "database_id": "00000000-0000-0000-0000-000000000000",
+      "migrations_dir": "migrations"
+    }
+  ],
+  "queues": {
+    "producers": [{ "binding": "NOTIFY_Q", "queue": "ituob-notify" }],
+    "consumers": [{ "queue": "ituob-notify", "max_batch_size": 10, "max_retries": 5 }]
+  },
+  // scheduled(): outbox sweep (re-enqueues rows stale > 5 min) + reconcile.
+  "triggers": { "crons": ["*/5 * * * *"] }
+}

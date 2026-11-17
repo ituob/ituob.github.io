@@ -24,6 +24,7 @@ import { generalMessagePublicationRoutes } from "./general-message-publication-r
 import { editionMetadataRoutes } from "./edition-metadata-routes.ts";
 import { editionMetadataPublicationRoutes } from "./edition-metadata-publication-routes.ts";
 import { translationRoutes } from "./translation-routes.ts";
+import { adoptionRoutes } from "./adoption-routes.ts";
 import { composerRoutes } from "./composer-routes.ts";
 import { ituSession, submissionRoutes } from "./submission-routes.ts";
 import { webhookRoutes } from "./webhook-routes.ts";
@@ -32,6 +33,7 @@ import type { AccessIdentity, Env, Session } from "./lib/types.ts";
 const workflowAndAccountRoutes: Route[] = [
   ...submissionRoutes,
   ...composerRoutes,
+  ...adoptionRoutes,
   ...discussionRoutes,
   ...translationRoutes,
   ...editionMetadataRoutes,

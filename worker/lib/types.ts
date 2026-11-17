@@ -38,6 +38,8 @@ export interface Env {
   ACCESS_AUD?: string;
   /** Comma-separated allowlist of signed Access service-token common_name IDs for /api/ci/*. */
   ACCESS_CI_CLIENT_IDS?: string;
+  /** Who may adopt a PDF (candidate -> itu-adopted): comma list of `role:<role>` / `email:<address>`. Unset = `role:itu-editor,role:itu-admin`; a malformed value denies everyone. Owner-set; docs/pdf-adoption.adoc. */
+  ADOPTION_APPROVERS?: string;
   /** Email provider (queue consumer only): EMAIL_PROVIDER = "log" | "http"; see docs/email-configuration.adoc. */
   EMAIL_PROVIDER?: string;
   EMAIL_API_URL?: string;
@@ -48,6 +50,9 @@ export interface Env {
   /** Notification carrier queue (`ituob-notify`); absent locally/unprovisioned: rows stay queued. */
   NOTIFY_Q?: Queue<{ notification_ids: string[] }>;
 }
+
+/** Deployment can serve static assets before D1 is provisioned. */
+export type RuntimeEnv = Omit<Env, "DB"> & { DB?: D1Database };
 
 /** Shared contract with #102 (docs/identity-accounts.adoc). */
 export interface Session {

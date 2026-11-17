@@ -7,7 +7,7 @@ export interface AuditRow {
   actor_id: string | null;
   actor_kind: "user" | "system" | "github";
   action: string;
-  subject_type: "submission" | "comment" | "edition" | "user";
+  subject_type: "submission" | "comment" | "edition" | "user" | "publication";
   subject_id: string;
   submission_id: string | null;
   detail: Record<string, unknown> | null;
