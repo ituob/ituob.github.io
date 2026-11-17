@@ -303,9 +303,6 @@ export class GitHubAppPatchPublisher implements PatchPublisher {
     const repo = `/repos/${c.GITHUB_SITE_REPO}`;
     const production = (await this.request(repo)).default_branch as string;
     if (production === staging) throw new Error("Staging must not be the default branch");
-    const tip = requireSha((await this.request(`${repo}/git/ref/heads/${encode(staging)}`)).object.sha);
-    const pinned = await this.request(`${repo}/contents/${c.GITHUB_DATA_GITLINK}?ref=${tip}`);
-    if (pinned.sha !== req.freezeSha || !this.gitlinkMatches(pinned.submodule_git_url)) throw new Error("Staging does not pin the frozen data");
     const marker = `<!-- ituob-promotion:${await fingerprint([req.idempotencyKey, req.freezeSha])} -->`;
     const body = `Promote bulletin ${req.edition} (data pin ${req.freezeSha}) from ${staging} to ${production}.\n\n${marker}`;
     const owner = c.GITHUB_SITE_REPO.split("/")[0];
@@ -313,6 +310,11 @@ export class GitHubAppPatchPublisher implements PatchPublisher {
     const find = async () => ((await this.request(query)) as unknown as Json[]).filter((pr) => typeof pr.body === "string" && pr.body.includes(marker));
     let prs = await find();
     if (!prs.length) {
+      // A later edition may advance staging after this edition's promotion merged.
+      // Only a new promotion needs to use the current staging pin.
+      const tip = requireSha((await this.request(`${repo}/git/ref/heads/${encode(staging)}`)).object.sha);
+      const pinned = await this.request(`${repo}/contents/${c.GITHUB_DATA_GITLINK}?ref=${tip}`);
+      if (pinned.sha !== req.freezeSha || !this.gitlinkMatches(pinned.submodule_git_url)) throw new Error("Staging does not pin the frozen data");
       try { prs = [await this.request(`${repo}/pulls`, "POST", { head: staging, base: production, title: `Publish bulletin ${req.edition}`, body })]; }
       catch (error) {
         if (!(error instanceof GitHubFailure) || error.status !== 422) throw error;
@@ -334,6 +336,9 @@ export class GitHubAppPatchPublisher implements PatchPublisher {
     if (!run || run.status !== "completed" || run.conclusion !== "success") return pending("Exact merge commit awaits successful production deployment");
     const jobs = await this.request(`${repo}/actions/runs/${run.id}/jobs?filter=latest&per_page=100`);
     if (jobs.total_count > 100 || !jobs.jobs?.some((j: Json) => j.name === "deploy-cloudflare-production" && j.status === "completed" && j.conclusion === "success")) return pending("Production deployment job has not succeeded");
+    // Historical deployment evidence alone cannot confirm content reverted on main.
+    const current = await this.request(`${repo}/contents/${c.GITHUB_DATA_GITLINK}?ref=${encode(production)}`);
+    if (current.sha !== req.freezeSha || !this.gitlinkMatches(current.submodule_git_url)) return pending("Production no longer pins the frozen data");
     return { siteCommit: merged };
   }
   private gitlinkMatches(url: unknown): boolean {

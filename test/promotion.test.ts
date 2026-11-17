@@ -13,6 +13,8 @@ beforeAll(async () => {
 });
 
 class Site {
+  mainPin = FREEZE;
+  runSha = MERGED;
   calls: { path: string; method: string; body: any }[] = [];
   prs: any[] = [];
   stagingGitlink = FREEZE;
@@ -31,7 +33,7 @@ class Site {
     if (s === "/git/ref/heads/staging") return ok({ object: { sha: STAGING } });
     if (s === "/contents/data-ob") {
       const ref = u.searchParams.get("ref");
-      return ok({ sha: ref === STAGING || ref === MERGED ? this.stagingGitlink : "a".repeat(40), submodule_git_url: "https://github.com/org/data.git" });
+      return ok({ sha: ref === STAGING ? this.stagingGitlink : ref === MERGED ? FREEZE : this.mainPin, submodule_git_url: "https://github.com/org/data.git" });
     }
     if (s === "/pulls" && method === "GET") return ok(this.prs);
     if (s === "/pulls" && method === "POST") {
@@ -39,7 +41,7 @@ class Site {
       this.prs.push(pr); return ok(pr, 201);
     }
     if (s === "/pulls/9") return ok({ ...this.prs[0], merged: this.merged, merge_commit_sha: MERGED });
-    if (s === "/actions/runs") return ok({ workflow_runs: this.runStatus ? [{ id: 5, head_sha: MERGED, head_branch: "main", path: ".github/workflows/build-deploy.yml", event: "push", status: this.runStatus, conclusion: this.runStatus === "completed" ? "success" : null }] : [] });
+    if (s === "/actions/runs") return ok({ workflow_runs: this.runStatus ? [{ id: 5, head_sha: this.runSha, head_branch: "main", path: ".github/workflows/build-deploy.yml", event: "push", status: this.runStatus, conclusion: this.runStatus === "completed" ? "success" : null }] : [] });
     if (s === "/actions/runs/5/jobs") return ok({ total_count: 1, jobs: [{ name: this.jobName, status: "completed", conclusion: this.jobConclusion }] });
     throw new Error(`Unhandled ${method} ${s}`);
   };
@@ -65,6 +67,40 @@ describe("production promotion (fake GitHub transport)", () => {
     expect(await client.promoteToProduction(req)).toEqual({ siteCommit: MERGED });
     // The only writes ever made: the single PR creation. No merge, ref, tree, commit or PATCH call.
     expect(api.calls.filter((c) => c.method !== "GET" && !c.path.startsWith("/app/")).map((c) => `${c.method} ${c.path}`)).toEqual(["POST /repos/org/site/pulls"]);
+  });
+
+  // Regressions retained from the PR #125 breaker transport reproductions.
+  async function merged() {
+    const api = new Site(), client = api.client();
+    await client.promoteToProduction(req);
+    api.merged = true;
+    api.runStatus = "completed";
+    return { api, client };
+  }
+
+  it("rejects success for a different commit", async () => {
+    const { api, client } = await merged();
+    api.runSha = "e".repeat(40);
+    expect((await client.promoteToProduction(req)).pending).toBeDefined();
+  });
+
+  it("rejects completion after promotion has been reverted on main", async () => {
+    const { api, client } = await merged();
+    api.mainPin = "a".repeat(40);
+    const result = await client.promoteToProduction(req);
+    expect(result.pending?.reason).toContain("Production no longer pins the frozen data");
+    expect(result.siteCommit).toBe("");
+  });
+
+  it("finalizes a confirmed deployment once a later edition changes staging", async () => {
+    const { api, client } = await merged();
+    api.stagingGitlink = "e".repeat(40);
+    expect(await client.promoteToProduction(req)).toEqual({ siteCommit: MERGED });
+    api.jobConclusion = "failure";
+    expect((await client.promoteToProduction(req)).pending?.reason).toContain("job has not succeeded");
+    expect(api.prs).toHaveLength(1);
+    expect(api.calls.filter(c => c.method !== "GET" && !c.path.startsWith("/app/")).map(c => [c.method, c.path]))
+      .toEqual([["POST", "/repos/org/site/pulls"]]);
   });
 
   it("refuses a staging branch that no longer pins the frozen data, and a staging branch equal to the default", async () => {
