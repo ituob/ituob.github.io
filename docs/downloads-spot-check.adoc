@@ -1,0 +1,41 @@
+= Downloads spot-check
+
+Part of ituob/ituob.github.io#112. The check is automated: no human step is required.
+
+== What it proves
+
+For N publication x language entries sampled from the manifest
+(`src/data/publications-manifest.json`, default 5, deterministic and spread across
+the sorted entries; `--sample all` checks every entry), against the built site or a live host:
+
+* the PDF is served (not 404), with `Content-Type: application/pdf`, starts with `%PDF-`,
+  and its sha256 equals the manifest's;
+* the Downloads page links that PDF with the same language and sha256, and states
+  `as of OB No. <as_of_issue>`;
+* the edition card shows the status label for the manifest status
+  (`Generated from the patch log, pending ITU adoption` plus the unofficial-data
+  disclaimer for candidates; `Official ITU publication` without the disclaimer for adopted).
+
+Any mismatch exits 1 and names the file and the reason. An empty manifest passes with
+"nothing to check" unless `PUBLICATIONS_REQUIRED=true`.
+
+== Where it runs
+
+`build-deploy.yml` runs it after `npm run build` on every push, pull request and
+`workflow_dispatch`. The result is in the job summary and the `downloads-spot-check`
+artifact (`report.md`, `report.json`).
+
+== Repeat it by hand
+
+[source,sh]
+----
+# 1. place the producer's verified PDFs and manifest (needs gh auth)
+node --experimental-strip-types scripts/fetch-publications.ts fetch
+# 2. build, then check the built site
+npm run build
+node --experimental-strip-types scripts/spot-check-downloads.ts --dist dist --sample all
+# 3. after a staging deploy, check the live host with the same checks
+node --experimental-strip-types scripts/spot-check-downloads.ts --base-url https://<staging-host> --sample all
+----
+
+Checker tests: `npm run test:spot-check`.
