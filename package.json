@@ -14,6 +14,8 @@
     "astro": "astro",
     "dev:idp": "node scripts/mock-idp.mjs serve",
     "test:worker": "vitest run",
+    "test:spot-check": "vitest run --config vitest.spot-check.config.ts",
+    "spot-check:downloads": "node --experimental-strip-types scripts/spot-check-downloads.ts",
     "test:form": "vitest run --config vitest.form.config.ts",
     "typecheck:worker": "tsc -p worker/tsconfig.json",
     "check:bindings": "node scripts/check-bindings.mjs",
