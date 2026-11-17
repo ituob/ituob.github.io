@@ -57,62 +57,64 @@ onMounted(() => { load().catch(e => { error.value = e instanceof Error ? e.messa
 </script>
 
 <template>
-  <section>
-    <p>Create or edit a service publication. The change opens a review pull request against the catalog repository; nothing is published from here.</p>
-    <p v-if="notice" role="status">{{ notice }}</p>
-    <p v-if="error" role="alert">{{ error }}</p>
+  <section class="admin-form">
+    <p class="admin-help">Create or edit a service publication. The change opens a review pull request against the catalog repository; nothing is published from here.</p>
+    <p class="admin-status" v-if="notice" role="status">{{ notice }}</p>
+    <p class="admin-error" v-if="error" role="alert">{{ error }}</p>
 
     <h2>{{ editing === null ? 'New service publication' : `Edit ${editing}` }}</h2>
     <form @submit.prevent="submit" novalidate>
-      <label>Publication identifier
-        <input v-model="id" :readonly="editing !== null" :disabled="editing !== null" autocomplete="off" aria-describedby="id-help" @input="touched = true" />
+      <label class="admin-field admin-label">Publication identifier
+        <input class="admin-control" v-model="id" :readonly="editing !== null" :disabled="editing !== null" autocomplete="off" aria-describedby="id-help" @input="touched = true" />
       </label>
-      <p id="id-help">{{ editing === null ? 'Use an uppercase English id, e.g. BUREAUFAX. It cannot be changed after it is created.' : 'The id of a service publication cannot be changed after it is created.' }}</p>
-      <ul><li v-for="m in messages('id')" :key="m" role="alert">{{ m }}</li></ul>
+      <p class="admin-help" id="id-help">{{ editing === null ? 'Use an uppercase English id, e.g. BUREAUFAX. It cannot be changed after it is created.' : 'The id of a service publication cannot be changed after it is created.' }}</p>
+      <ul><li class="admin-error" v-for="m in messages('id')" :key="m" role="alert">{{ m }}</li></ul>
 
-      <fieldset>
+      <fieldset class="admin-fieldset">
         <legend>Title</legend>
-        <label v-for="lang in SUPPORTED_LANGUAGES" :key="lang">{{ lang }}{{ lang === 'en' ? ' (required)' : '' }}
-          <input :value="title[lang] ?? ''" @input="title = { ...title, [lang]: ($event.target as HTMLInputElement).value }; touched = true" />
+        <label class="admin-field admin-label" v-for="lang in SUPPORTED_LANGUAGES" :key="lang">{{ lang }}{{ lang === 'en' ? ' (required)' : '' }}
+          <input class="admin-control" :value="title[lang] ?? ''" @input="title = { ...title, [lang]: ($event.target as HTMLInputElement).value }; touched = true" />
         </label>
-        <ul><li v-for="m in messages('title')" :key="m" role="alert">{{ m }}</li></ul>
+        <ul><li class="admin-error" v-for="m in messages('title')" :key="m" role="alert">{{ m }}</li></ul>
       </fieldset>
 
-      <label>Authoritative resource URL
-        <input v-model="url" type="url" autocomplete="off" @input="touched = true" />
+      <label class="admin-field admin-label">Authoritative resource URL
+        <input class="admin-control" v-model="url" type="url" autocomplete="off" @input="touched = true" />
       </label>
-      <ul><li v-for="m in messages('url')" :key="m" role="alert">{{ m }}</li></ul>
+      <ul><li class="admin-error" v-for="m in messages('url')" :key="m" role="alert">{{ m }}</li></ul>
 
-      <label>Recommendation
-        <select v-model="recommendation" @change="touched = true">
+      <label class="admin-field admin-label">Recommendation
+        <select class="admin-control" v-model="recommendation" @change="touched = true">
           <option value="">Select a recommendation</option>
           <option v-for="r in recommendations" :key="r.code" :value="r.code">{{ r.code }} {{ r.title.en ?? '' }}</option>
         </select>
       </label>
-      <ul><li v-for="m in messages('recommendation')" :key="m" role="alert">{{ m }}</li></ul>
+      <ul><li class="admin-error" v-for="m in messages('recommendation')" :key="m" role="alert">{{ m }}</li></ul>
 
       <template v-if="editing === null">
-        <label>Identity field of the entries
-          <input v-model="keyField" autocomplete="off" @input="touched = true" />
+        <label class="admin-field admin-label">Identity field of the entries
+          <input class="admin-control" v-model="keyField" autocomplete="off" @input="touched = true" />
         </label>
-        <p>A new publication is textual. A structured register also needs a parser class and renderer in code.</p>
-        <ul><li v-for="m in messages('key_field')" :key="m" role="alert">{{ m }}</li></ul>
+        <p class="admin-help">A new publication is textual. A structured register also needs a parser class and renderer in code.</p>
+        <ul><li class="admin-error" v-for="m in messages('key_field')" :key="m" role="alert">{{ m }}</li></ul>
       </template>
 
-      <button type="submit" :disabled="busy || (touched && issues.length > 0)">{{ editing === null ? 'Open review PR to add' : 'Open review PR to update' }}</button>
-      <button v-if="editing !== null" type="button" @click="fresh">Cancel edit</button>
+      <button class="admin-button admin-button-primary" type="submit" :disabled="busy || (touched && issues.length > 0)">{{ editing === null ? 'Open review PR to add' : 'Open review PR to update' }}</button>
+      <button class="admin-button" v-if="editing !== null" type="button" @click="fresh">Cancel edit</button>
     </form>
 
     <h2>Existing publications</h2>
-    <table>
+    <div class="admin-table-scroll" tabindex="0" role="region" aria-label="Existing publications"><table class="admin-table">
       <thead><tr><th>Id</th><th>Title</th><th>Recommendation</th><th>URL</th><th></th></tr></thead>
       <tbody>
         <tr v-for="r in registers" :key="r.id">
           <td>{{ r.id }}</td><td>{{ r.title.en }}</td><td>{{ r.recommendation }}</td>
           <td><a v-if="r.url" :href="r.url" rel="noopener noreferrer">{{ r.url }}</a></td>
-          <td><button type="button" @click="edit(r)">Edit</button></td>
+          <td><button class="admin-button" type="button" @click="edit(r)">Edit</button></td>
         </tr>
       </tbody>
-    </table>
+    </table></div>
   </section>
 </template>
+
+<style src="../../styles/admin-forms.css"></style>
