@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import '../../styles/admin-forms.css';
 import { computed, onMounted, ref } from 'vue';
 import { api, ApiError } from '../../lib/admin-client';
 import { SUPPORTED_LANGUAGES } from '../../lib/catalogs';
@@ -116,5 +117,3 @@ onMounted(() => { load().catch(e => { error.value = e instanceof Error ? e.messa
     </table></div>
   </section>
 </template>
-
-<style src="../../styles/admin-forms.css"></style>

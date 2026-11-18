@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import '../../styles/admin-forms.css';
 import { ref } from 'vue';
 import { api } from '../../lib/admin-client';
 // Suggest-only: the suggestion never reaches the parent until the author presses Apply.
@@ -32,5 +33,3 @@ function apply() { emit('apply', suggestion.value); suggestion.value = ''; }
     </div>
   </div>
 </template>
-
-<style src="../../styles/admin-forms.css"></style>

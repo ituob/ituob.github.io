@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import '../../styles/admin-forms.css';
 import { computed, onMounted, ref, toRaw } from 'vue';
 import { api, ApiError } from '../../lib/admin-client';
 import { ANNEX_TYPE, annexPublication, pickerCandidates, positionDay, publicationIdError, removeAnnex, runningAnnexes, setAnnexPosition, validateAnnexes, type AnnexIndexEntry, type AnnexesWire, type AnnexIssue } from '../../lib/form/annexes';
@@ -105,5 +106,3 @@ onMounted(async () => {
     <details v-if="draft?.content_yaml"><summary>Exact approved YAML artifact</summary><pre>{{ draft.content_yaml }}</pre></details>
   </section>
 </template>
-
-<style src="../../styles/admin-forms.css"></style>

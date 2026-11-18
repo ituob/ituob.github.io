@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import '../../styles/admin-forms.css';
 import { onMounted, ref } from 'vue';
 import type { IssueMetadataWire } from '../../lib/schema.generated';
 import EditionMetadata from './EditionMetadata.vue';
@@ -80,5 +81,3 @@ onMounted(() => perform(refresh));
     <section><h2>Merged, unpublished submissions</h2><p class="admin-help" v-if="loaded && !submissions.length && !error">No merged submissions are waiting for publication.</p><ul><li v-for="submission in submissions" :key="submission.id"><p class="admin-help">{{ submission.register_id }} · {{ submission.action_type }} · {{ submission.id }} · {{ submission.state }} · Target OB {{ submission.target_edition }}<span v-if="submission.edition"> · Placed in OB {{ submission.edition }}</span><span v-if="submission.revert_state && submission.revert_state !== 'closed'"> · Revert {{ submission.revert_state }}</span></p><button class="admin-button" v-if="detail && canPlace(submission, detail.edition)" :disabled="busy" @click="place(submission)">Place in OB {{ detail.edition.ob_issue_no }}</button><a :href="`/admin/submissions/?id=${encodeURIComponent(submission.id)}`">Inspect submission</a></li></ul></section>
   </div>
 </template>
-
-<style src="../../styles/admin-forms.css"></style>

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import '../../styles/admin-forms.css';
 import { computed, ref, watch } from 'vue';
 import { canShiftCalendarMonth, calendarDays, calendarMonthTitle, initialCalendarMonth, scheduleDateLabel, shiftCalendarMonth } from '../../lib/form/schedule-calendar';
 
@@ -68,5 +69,3 @@ ul { display: flex; flex-wrap: wrap; gap: .5rem 1.5rem; padding-left: 1.25rem; }
 .swatch.cutoff { background: var(--color-amber-bg); }
 .swatch.publication { background: var(--accent-soft); }
 </style>
-
-<style src="../../styles/admin-forms.css"></style>

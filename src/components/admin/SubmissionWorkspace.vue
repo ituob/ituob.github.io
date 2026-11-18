@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import '../../styles/admin-forms.css';
 import { computed, onMounted, ref } from 'vue';
 import { parseYaml } from '../../lib/form/yaml-io';
 import { submissionFieldDiff } from '../../lib/submission-diff';
@@ -181,5 +182,3 @@ onMounted(() => perform(async () => { await list(); const id = new URLSearchPara
     </section>
   </div>
 </template>
-
-<style src="../../styles/admin-forms.css"></style>

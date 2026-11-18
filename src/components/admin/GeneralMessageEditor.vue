@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import '../../styles/admin-forms.css';
 import { computed, onMounted, ref } from 'vue';
 import { api, ApiError } from '../../lib/admin-client';
 import { GENERAL_TYPES, generalBinding, newGeneralState } from '../../lib/form/general';
@@ -111,5 +112,3 @@ fresh(); onMounted(() => perform(reload));
     <p class="admin-help">Paths are assigned by the server. Existing canonical repository files must pass a collision check before a review PR can open.</p>
   </section>
 </template>
-
-<style src="../../styles/admin-forms.css"></style>

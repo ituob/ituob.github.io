@@ -27,7 +27,8 @@ describe('shared admin form presentation', () => {
     const filename = `${directory}/${file}`;
     const { descriptor, errors } = parse(readFileSync(filename, 'utf8'));
     expect(errors).toEqual([]);
-    expect(descriptor.styles.some(style => style.src === '../../styles/admin-forms.css' && !style.scoped)).toBe(true);
+    expect(descriptor.scriptSetup?.content).toMatch(/import ['"]\.\.\/\.\.\/styles\/admin-forms\.css['"]/);
+    expect(descriptor.styles.some(style => style.src === '../../styles/admin-forms.css')).toBe(false);
     const source = descriptor.template!.content;
     expect(compileTemplate({ source, filename, id: 'admin-form-ui' }).errors).toEqual([]);
     const nodes = elements(baseParse(source));

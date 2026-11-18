@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import '../../styles/admin-forms.css';
 import { computed, ref } from 'vue';
 import { api, ApiError } from '../../lib/admin-client';
 import { parseYaml } from '../../lib/form/yaml-io';
@@ -59,5 +60,3 @@ async function createDrafts() {
     <p class="admin-help" v-if="results.some(r => r.ok)"><a href="/me/submissions/">Review and submit your drafts</a></p>
   </section>
 </template>
-
-<style src="../../styles/admin-forms.css"></style>

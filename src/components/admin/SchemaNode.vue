@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import '../../styles/admin-forms.css';
 import { computed, ref } from 'vue';
 import TranslationAssist from './TranslationAssist.vue';
 import { description } from '../../lib/form/description';
@@ -114,5 +115,3 @@ function replaceItem(index: number, child: FormNode) {
     <textarea class="admin-control" v-else :value="node.value instanceof YamlTimestamp ? node.value.text : String(node.value ?? '')" :disabled="readonly" rows="3" @input="input" />
   </label>
 </template>
-
-<style src="../../styles/admin-forms.css"></style>

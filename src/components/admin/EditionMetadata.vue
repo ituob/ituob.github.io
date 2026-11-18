@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import '../../styles/admin-forms.css';
 import { computed, ref, watch } from 'vue';
 import { api, ApiError } from '../../lib/admin-client';
 import { toFormState, toInstance, type FormNode } from '../../lib/form/model';
@@ -88,5 +89,3 @@ watch(() => props.issueNo, load, { immediate: true });
     <p class="admin-help" v-if="dirty">Unsaved changes. Save before scheduling.</p>
   </section>
 </template>
-
-<style src="../../styles/admin-forms.css"></style>
