@@ -100,6 +100,7 @@ export const listIssueIds = memoize((): number[] => {
 const ACTION_RE = /^(\d+)-([A-Z0-9]+)$/;
 
 import { existsSync } from "node:fs";
+import { loadManifest } from "./snapshots";
 function exists(path: string): boolean {
   return existsSync(path);
 }
@@ -356,6 +357,12 @@ export function loadListMetadata(pubId: string): ListMeta | null {
 
   _listMetaCache.set(pubId, null as any);
   return null;
+}
+
+/** Page for a publication slug: its dataset page, else its register page, else null (nothing to link). */
+export function publicationHref(slug: string): string | null {
+  if (listDatasetSlugs().includes(slug)) return `/datasets/${slug}/`;
+  return loadManifest(slug) ? `/registers/${slug}/` : null;
 }
 
 export const listDatasetSlugs = memoize((): string[] => {

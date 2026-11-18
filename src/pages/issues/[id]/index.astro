@@ -8,6 +8,7 @@ import {
   cumulativeAmendmentNumber,
   loadRegisterCatalog,
   lastAnnexBefore,
+  publicationHref,
 } from "~/lib/loaders";
 import { formatSwissDate } from "~/lib/format";
 import {
@@ -100,7 +101,7 @@ interface AmendmentItem {
   slug: string;
   amdNo: number;
   title: string;
-  datasetHref: string;
+  datasetHref: string | null;
   resourceHref: string | null;
   recCode: string | null;
   recVersion: string | null;
@@ -130,7 +131,7 @@ const amendmentsList: AmendmentItem[] = [];
       slug,
       amdNo: cumulativeAmendmentNumber(id, slug),
       title,
-      datasetHref: "/datasets/" + slug + "/",
+      datasetHref: publicationHref(slug),
       resourceHref: listMeta?.url ?? meta?.url ?? null,
       recCode,
       recVersion,
@@ -295,7 +296,7 @@ const authoritativeHref =
                 {a.amdNo > 0 && <span class="num"> {a.amdNo}</span>}
                 {" "}to
               </span>
-              <a class="text" href={a.datasetHref}>{a.title}</a>
+              {a.datasetHref ? <a class="text" href={a.datasetHref}>{a.title}</a> : <span>{a.title}</span>}
               <a id={a.anchorId} class="anchor" title="Link to this message" href={`/issues/${id}/#${a.anchorId}`}>#</a>
             </h3>
             {a.recCode && (

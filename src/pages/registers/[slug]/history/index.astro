@@ -72,9 +72,13 @@ const issues = [...byIssue.keys()].sort((a, b) => a - b);
         return (
           <li class="panel p-4">
             <header class="flex items-baseline gap-3 mb-2">
-              <a href={`/registers/${slug}/at/${n}/`} class="num font-mono font-semibold text-[var(--step-1)] no-underline hover:underline">
-                OB No. {n}
-              </a>
+              {manifest.touched_issues.includes(n) ? (
+                <a href={`/registers/${slug}/at/${n}/`} class="num font-mono font-semibold text-[var(--step-1)] no-underline hover:underline">
+                  OB No. {n}
+                </a>
+              ) : (
+                <span class="num font-mono font-semibold text-[var(--step-1)]">OB No. {n}</span>
+              )}
               {seed && (
                 <span class="chip" style="background: var(--accent); color: var(--bg);">★ Seed publication</span>
               )}
