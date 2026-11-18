@@ -196,6 +196,8 @@ export interface LoadedIssue {
     runningAnnexes: RunningAnnexesMessage | null;
     approvedRecommendations: ApprovedRecommendationsMessage | null;
     textual: TextualGeneralMessage[];
+    /** `textual` before asset-twin deduplication: what the Jekyll issue page rendered (one article per source message). */
+    textualWithTwins: TextualGeneralMessage[];
   };
   amendments: {
     /** Map slug → sequenced structured amendments. */

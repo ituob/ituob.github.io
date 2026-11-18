@@ -5,7 +5,7 @@ import {
   listIssueIds,
   loadDatasetMetadata,
   loadListMetadata,
-  cumulativeAmendmentNumber,
+  jekyllAmendmentNumber,
   loadRegisterCatalog,
   lastAnnexBefore,
   loadSourceMessageOrder,
@@ -48,9 +48,6 @@ const amendmentSlugs = [
     ...Object.keys(issue.amendments.structured),
     ...Object.keys(issue.amendments.textual),
     ...Object.keys(issue.amendments.placeholder),
-    ...loadRegisterCatalog()
-      .filter((r) => r.seed_issue === id && !r.external)
-      .map((r) => r.slug),
   ]),
 ].sort();
 // Jekyll looped over `amendments.messages` in authored order; keep it where
@@ -86,7 +83,7 @@ interface GeneralMessageItem {
 const generalList: GeneralMessageItem[] = [];
 {
   const queues = new Map<GeneralMessageType, TextualGeneralMessage[]>();
-  for (const m of issue.general.textual) {
+  for (const m of issue.general.textualWithTwins) {
     const arr = queues.get(m.type) ?? [];
     arr.push(m);
     queues.set(m.type, arr);
@@ -154,7 +151,7 @@ const amendmentsList: AmendmentItem[] = [];
     amendmentsList.push({
       anchorId: "amendments-" + n,
       slug,
-      amdNo: cumulativeAmendmentNumber(id, slug),
+      amdNo: jekyllAmendmentNumber(id, slug),
       title,
       datasetHref: "/datasets/" + slug + "/",
       resourceHref: listMeta?.url ?? meta?.url ?? null,
@@ -317,9 +314,9 @@ const authoritativeHref =
         <article class="message message--amendment">
           <header>
             <h3 class="title">
-              <span class="label" title="Amendment">
+              <span class="label" title={a.amdNo > 0 ? `Amendment no. ${a.amdNo} since specified position was published` : "Amendment "}>
                 Amd.
-                {a.amdNo > 0 && <span class="num"> {a.amdNo}</span>}
+                {a.amdNo > 0 && <span class="num"> no. {a.amdNo}</span>}
                 {" "}to
               </span>
               <a class="text" href={a.datasetHref}>{a.title}</a>
