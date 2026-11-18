@@ -91,10 +91,12 @@ jobs:
     - name: Jekyll build
       working-directory: ${{ runner.temp }}/jekyll
       run: bundle exec jekyll build --destination "$RUNNER_TEMP/reference-site" > "$RUNNER_TEMP/jekyll.log" 2>&1 || { tail -50 "$RUNNER_TEMP/jekyll.log"; exit 1; }
+    - name: Pack the reference site (its paths contain ':' which artifacts refuse)
+      run: tar -C "$RUNNER_TEMP" -czf "$RUNNER_TEMP/reference-site.tgz" reference-site
     - uses: actions/upload-artifact@v4
       with:
         name: parity-reference-site
-        path: ${{ runner.temp }}/reference-site
+        path: ${{ runner.temp }}/reference-site.tgz
         retention-days: 1
         if-no-files-found: error
 
@@ -131,7 +133,9 @@ jobs:
     - uses: actions/download-artifact@v4
       with:
         name: parity-reference-site
-        path: ${{ runner.temp }}/reference-site
+        path: ${{ runner.temp }}
+    - name: Unpack the reference site
+      run: tar -C "$RUNNER_TEMP" -xzf "$RUNNER_TEMP/reference-site.tgz"
     - name: Measure parity (fails below 95%)
       env:
         BUNDLE_GEMFILE: ${{ github.workspace }}/data-ob/ituob/Gemfile
