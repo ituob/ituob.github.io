@@ -82,7 +82,7 @@ function stop(code = 0) {
 }
 for (const signal of ['SIGINT', 'SIGTERM']) process.on(signal, () => stop());
 function start(args) {
-  const child = spawn(process.execPath, args, { cwd: root, stdio: 'inherit', env: { ...process.env, ASTRO_DEV_BACKGROUND: '1', ITUOB_DEV_LOCAL: '1', ...(existsSync(projection) ? { OB_DATA_ROOT: projection } : {}) } });
+  const child = spawn(process.execPath, args, { cwd: root, stdio: 'inherit', env: { ...process.env, ASTRO_DEV_BACKGROUND: '1', ITUOB_DEV_LOCAL: '1', PUBLIC_LOCAL_DEMO: '1', ...(existsSync(projection) ? { OB_DATA_ROOT: projection } : {}) } });
   children.push(child);
   child.on('error', error => { console.error(error); stop(1); });
   child.on('exit', code => { if (!stopping) stop(code || 1); });

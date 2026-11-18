@@ -34,7 +34,7 @@ import Base from "~/layouts/Base.astro";
         });
       } catch (e) {
         if (el) {
-          el.innerHTML = "<p style='color: var(--fg-muted); font-style: italic;'>Search index not yet generated. Run <code>npm run build</code> with Pagefind enabled.</p>";
+          el.innerHTML = "<p style='color: var(--fg-muted);'>Full-text search is not available in this preview. You can still browse the <a href='/issues/'>issues</a>, <a href='/registers/'>registers</a> and <a href='/recommendations/'>recommendations</a>.</p>";
         }
       }
     })();
