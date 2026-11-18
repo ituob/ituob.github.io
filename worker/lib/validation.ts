@@ -187,7 +187,7 @@ export const schemaStage: PayloadValidator = ({ payload }) => {
 };
 
 /** Replay's entry key (Strategies::Base.entry_key): raw primary parts, then nonblank fallback groups. */
-function entryKeyOf(entry: Record<string, unknown>, rules: RegisterIdentity): string | null {
+export function entryKeyOf(entry: Record<string, unknown>, rules: RegisterIdentity): string | null {
   for (const [index, group] of [rules.keyFields, ...rules.fallbackKeyFields].entries()) {
     const parts = group.map((f) => {
       const part = identityPart(entry[f]) ?? "";
