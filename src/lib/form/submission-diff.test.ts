@@ -35,10 +35,22 @@ describe("currentItemDiffs", () => {
       { path: "entries[0].note", before: '"keep"', after: "—" },
     ]);
   });
-  it("MOD compares only the fields it carries", () => {
+  it("MOD shows only the fields it changes", () => {
     expect(currentItemDiffs("MOD", payload({ code: "A", name: "New" }), current)![0]!.changes).toEqual([
       { path: "entries[0].name", before: '"Old"', after: '"New"' },
     ]);
+  });
+  it("MOD deep-merges hashes and ignores nulls like replay (no false deletions)", () => {
+    const cur = { available: true, items: [{ key: "A", status: "active" as const, entry: { code: "A", message: { en: "a", fr: "b" }, note: "n" } }] };
+    expect(currentItemDiffs("MOD", payload({ code: "A", message: { en: "x" } }), cur)![0]!.changes).toEqual([
+      { path: "entries[0].message.en", before: '"a"', after: '"x"' },
+    ]);
+    expect(currentItemDiffs("MOD", payload({ code: "A", note: null }), cur)![0]!.changes).toEqual([]);
+  });
+  it("MOD with merge_strategy replace_full compares like REP", () => {
+    const cur = { available: true, items: [{ key: "A", status: "active" as const, entry: { code: "A", message: { en: "a", fr: "b" } } }] };
+    const full = { merge_strategy: "replace_full", data: { entries: [{ code: "A", message: { en: "x" } }] } };
+    expect(currentItemDiffs("MOD", full, cur)![0]!.changes.map(c => c.path)).toEqual(["entries[0].message.en", "entries[0].message.fr"]);
   });
   it("SUP and DEL show the current item as removed", () => {
     for (const type of ["SUP", "DEL"]) expect(currentItemDiffs(type, payload({ code: "A" }), current)![0]!.changes.map(c => [c.path, c.after])).toEqual([

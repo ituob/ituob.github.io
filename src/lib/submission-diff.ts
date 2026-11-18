@@ -55,9 +55,21 @@ export interface CurrentItemDiff {
 
 /**
  * Field-level diff of each proposed entry against the register's CURRENT item (REP/MOD/SUP/DEL).
- * ADD has no before. MOD carries only the changed values, so only the fields it names are compared;
+ * ADD has no before. MOD is compared against the replay-equivalent merge (nested hashes merge, nulls ignored; merge_strategy replace_full acts as REP);
  * SUP/DEL show the whole current item as removed. Returns null when no current register data applies.
  */
+const isHash = (v: unknown): v is Record<string, unknown> => v !== null && typeof v === "object" && !Array.isArray(v);
+
+/** Replay's Strategies::Mod merge: Hash values merge recursively, null patch values are ignored. */
+function modMerge(base: Record<string, unknown>, patch: Record<string, unknown>): Record<string, unknown> {
+  const result = { ...base };
+  for (const [k, v] of Object.entries(patch)) {
+    if (isHash(v) && isHash(result[k])) result[k] = modMerge(result[k] as Record<string, unknown>, v);
+    else if (v !== null && v !== undefined) result[k] = v;
+  }
+  return result;
+}
+
 export function currentItemDiffs(actionType: string, payload: unknown, current: CurrentRegisterItems | undefined): CurrentItemDiff[] | null {
   if (actionType === "ADD" || !current?.available) return null;
   const data = (payload as { data?: { entries?: unknown } } | undefined)?.data;
@@ -66,9 +78,11 @@ export function currentItemDiffs(actionType: string, payload: unknown, current: 
   return current.items.map((item, index) => {
     const proposed = entries[index];
     const object = proposed !== null && typeof proposed === "object" && !Array.isArray(proposed) ? proposed as Record<string, unknown> : {};
-    let before: unknown = item.entry ?? undefined;
-    if (actionType === "MOD" && item.entry) before = Object.fromEntries(Object.keys(object).filter(k => Object.hasOwn(item.entry!, k)).map(k => [k, item.entry![k]]));
-    const after = actionType === "SUP" || actionType === "DEL" ? undefined : proposed;
+    const replace = actionType === "REP" || (actionType === "MOD" && (payload as { merge_strategy?: unknown }).merge_strategy === "replace_full");
+    const before: unknown = item.entry ?? undefined;
+    let after: unknown = proposed;
+    if (actionType === "SUP" || actionType === "DEL") after = undefined;
+    else if (!replace && item.entry) after = modMerge(item.entry, object);
     const changes = submissionFieldDiff(before, after).map(change => ({ ...change, path: change.path === "$" ? `entries[${index}]` : `entries[${index}].${change.path}` }));
     return { index, key: item.key, status: item.status, changes };
   });
