@@ -64,6 +64,14 @@ corpus-driven, as above.
   `message_types.custom.title`, which is empty), so the TOC shows blank
   entries (OB 1263 `general-3` and `general-6`; also OB 1034 and OB 969). We label the link with the message's own title. This is the one
   text difference in the TOC and removes unnamed links.
+* **Planned-issues table length is corpus-driven.** Jekyll
+  (`_plugins/issue_data_reader.rb#backfill_planned_issue` + `_layouts/issue.html`,
+  `limit:25`) lists every issue with a higher id than the current one, ascending,
+  capped at 25. We do the same (next 25 ids after this one). Production's corpus
+  ends at OB 1264 (`/issues/1265-en/` is a 404), ours runs to 1343, so pages whose
+  successors reach past 1264 differ: OB 1263 prod 1 row (1264) vs ours 25; OB 1250
+  prod 14 (1251-1264) vs 25; OB 1240 prod 24 vs 25. Where 25 successors exist on
+  both sides (OB 1100, 1200) the tables match. No code change.
 * **Header strip, title banner and contact-line wrapping** follow the new site
   design (header navigation, Sign in) and are out of scope for parity.
 
