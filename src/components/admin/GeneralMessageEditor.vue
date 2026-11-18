@@ -8,6 +8,8 @@ import { validateClass, type SchemaIssue } from '../../lib/schema.validators.gen
 import type { GeneralMessage } from '../../../worker/lib/general-messages';
 import SchemaNode from './SchemaNode.vue';
 
+defineProps<{ translation?: boolean }>();
+
 const drafts = ref<GeneralMessage[]>([]), draft = ref<GeneralMessage | null>(null);
 const issueNo = ref(1331), type = ref<string>('misc_communications');
 const node = ref<FormNode>(blankState('GeneralMiscCommunications'));
@@ -100,7 +102,7 @@ fresh(); onMounted(() => perform(reload));
         <p class="admin-help" v-else-if="type === 'telephone_service' || type === 'telephone_service_2'">For telephone notices, add a section for each country or area, include its international phone code and contact, then add communications with their publication dates.</p>
         <p class="admin-help" v-else>Use the structured fields for the message. Existing rich-text content is preserved read-only; plain prose can be entered in English, French, Spanish, Arabic, Russian and Chinese.</p>
       </details>
-      <SchemaNode :node="node" path="message" :opaque-readonly="true" :prose="true" @change="node=$event" @invalid="invalid" />
+      <SchemaNode :node="node" path="message" :translation="translation" :opaque-readonly="true" :prose="true" @change="node=$event" @invalid="invalid" />
       <button class="admin-button admin-button-primary" type="button" @click="save">Save draft</button>
       <button class="admin-button" type="button" :disabled="!draft || dirty || !!draft.approved_at" @click="approve">Approve saved revision (administrator)</button>
       <button class="admin-button" type="button" :disabled="!draft || !!draft.approved_at" @click="remove">Delete draft</button>

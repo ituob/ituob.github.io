@@ -7,6 +7,8 @@ import { blankState, toFormState, type FormNode } from '../../lib/form/model';
 import { actionPayload, actionTypes, amendmentClasses, api, ApiError, payloadErrors, revisionErrors } from '../../lib/admin-client';
 import type { SchemaIssue } from '../../lib/schema.validators.generated';
 import SchemaNode from './SchemaNode.vue';
+import AmendmentHeader from './AmendmentHeader.vue';
+import { prefillPosition } from '../../lib/form/amendment-header';
 const props = withDefaults(defineProps<{ admin?: boolean; create?: boolean; translation?: boolean; registers?: { register_id: string; slug: string; label: string }[] }>(), { registers: () => [] });
 interface Submission { id: string; register_id: string; slug: string; action_type: string; state: string; current_rev: number; affiliation_kind?: string; affiliation_member_id?: string | null; affiliation_member_name?: string | null }
 interface Revision { rev: number; payload_yaml: string; validation: string; created_at: string }
@@ -153,6 +155,7 @@ onMounted(() => perform(async () => { await list(); const id = new URLSearchPara
         <label class="admin-field admin-label">Amendment class <select class="admin-control" v-model="className" @change="node = blankState(className); inputErrors = {}"><option v-for="name in amendmentClasses" :key="name">{{ name }}</option></select></label>
         <label class="admin-field admin-label" v-if="creating">Corrects published submission (optional) <input class="admin-control" v-model="correctsId" /></label>
       </fieldset>
+      <AmendmentHeader :register-id="registerId" :label="registers.find(r => r.register_id === registerId)?.label" @prefill="day => { if (creating) node = prefillPosition(node, day); }" />
       <SchemaNode :node="node" path="data" :readonly="busy || !editable" :translation="translation" @change="node = $event" @invalid="invalid" />
       <fieldset class="admin-fieldset" :disabled="busy"><legend>Workflow</legend>
         <template v-if="editable && !admin">

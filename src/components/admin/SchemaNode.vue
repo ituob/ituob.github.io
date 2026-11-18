@@ -41,6 +41,7 @@ function languageInput(language: string, event: Event) {
 function languageValue(language: string): unknown {
   return props.node.kind === 'leaf' && isLanguageProse(props.node.value) ? props.node.value[language] : undefined;
 }
+const proseEnglish = computed(() => { const en = languageValue('en'); return typeof en === 'string' ? en : ''; });
 function leaf(value: unknown) { if (props.node.kind === 'leaf') emit('change', { ...props.node, value }); }
 function input(event: Event) {
   if (props.node.kind !== 'leaf') return;
@@ -104,6 +105,9 @@ function replaceItem(index: number, child: FormNode) {
           <textarea class="admin-control" v-if="languageValue(language) === undefined || typeof languageValue(language) === 'string'"
             :aria-label="`${path} ${language}`" :lang="language" :dir="language === 'ar' ? 'rtl' : 'auto'"
             :value="String(languageValue(language) ?? '')" :disabled="readonly" rows="5" @input="languageInput(language, $event)" />
+          <TranslationAssist v-if="translation && !readonly && language !== 'en' && proseEnglish.trim() && (languageValue(language) === undefined || typeof languageValue(language) === 'string')"
+            :source="proseEnglish" from="en" :to="language"
+            @apply="leaf(setProseLanguage(node.value, language, $event))" />
           <span v-else>Stored rich text is preserved read-only.</span>
         </span>
       </template>

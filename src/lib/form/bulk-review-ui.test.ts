@@ -16,7 +16,7 @@ async function workspace(admin = true) {
   const modules: Record<string, unknown> = {
     vue: Vue, 'vue/server-renderer': renderer, '../../lib/admin-client': client,
     '../../lib/form/model': model, '../../lib/form/yaml-io': yamlIo, '../../lib/submission-diff': submissionDiff,
-    './SchemaNode.vue': {}, '../../styles/admin-forms.css': {},
+    './SchemaNode.vue': {}, './AmendmentHeader.vue': {}, '../../lib/form/amendment-header': {}, '../../styles/admin-forms.css': {},
   };
   function evaluate(source: string) {
     const js = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 } }).outputText;
