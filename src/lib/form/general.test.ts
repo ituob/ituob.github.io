@@ -18,7 +18,7 @@ function proseControls(value: unknown) {
   const js = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 } }).outputText;
   const exports: any = {};
   const modules: Record<string, unknown> = { vue: Vue, './TranslationAssist.vue': {}, '../../lib/form/description': { description },
-    '../../lib/admin-client': client, '../../lib/form/model': model, '../../lib/form/yaml-io': yamlIo, '../../lib/form/general': general, '../../lib/form/invalid-input': invalidInput };
+    '../../lib/admin-client': client, '../../lib/form/model': model, '../../lib/form/yaml-io': yamlIo, '../../lib/form/general': general, '../../lib/form/invalid-input': invalidInput, '../../styles/admin-forms.css': {} };
   new Function('require', 'exports', js)((name: string) => {
     if (!(name in modules)) throw new Error(`Unexpected component import: ${name}`);
     return modules[name];
