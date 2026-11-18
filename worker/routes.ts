@@ -18,6 +18,7 @@ import { StubMisconfigured, getAccessIdentity, getAccessServicePrincipal, getSes
 import { type Route, body, json, str } from "./lib/http.ts";
 import { RepoReaderNotConfigured, RepoReadFailed } from "./lib/repo-reader.ts";
 import { UpstreamError, ValidationFailed } from "./lib/submissions.ts";
+import { notificationStats } from "./lib/email-feedback.ts";
 import { discussionRoutes } from "./discussion-routes.ts";
 import { catalogRoutes } from "./catalog-routes.ts";
 import { generalMessageRoutes } from "./general-message-routes.ts";
@@ -105,6 +106,12 @@ const membershipAdminRoutes: Route[] = [
     guard: "access",
     handler: async ({ env, url }) =>
       json({ ok: true, claims: await listClaims(env.DB, url.searchParams.get("status") ?? "pending") }),
+  },
+  {
+    method: "GET",
+    pattern: /^\/api\/admin\/notifications\/stats$/,
+    guard: "access",
+    handler: async ({ env }) => json(await notificationStats(env)),
   },
   {
     method: "GET",
