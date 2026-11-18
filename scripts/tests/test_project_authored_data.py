@@ -15,6 +15,16 @@ projection = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(projection)
 
 
+FAKE_NO_REGISTERS = """module Ituob
+  module Catalogs
+    module Registers
+      def self.all_register_ids = []
+    end
+  end
+end
+"""
+
+
 class ProjectionTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -69,6 +79,10 @@ FileUtils.mkdir_p(ENV.fetch('SNAPSHOTS_OUT'))
 File.write(File.join(ENV.fetch('SNAPSHOTS_OUT'), 'current.json'), File.read('datasets/changes.json'))
 puts 'Snapshots: 1 registers, 1 files written, 0 skipped, 0 errors'
 ''')
+        # Orchestration fixtures have no registers; the history step only needs to load.
+        self.write(self.service, "ituob/lib/ituob.rb", FAKE_NO_REGISTERS)
+        for library in ("support", "registers", "catalogs", "verifiers"):
+            self.write(self.service, f"ituob/lib/ituob/{library}.rb", "")
         self.service_ref = self.commit(self.service)
         # Execute actual Ruby without requiring gems for these orchestration fixtures.
         bindir = self.root / "bin"

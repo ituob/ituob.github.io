@@ -59,7 +59,7 @@ jobs:
         echo "OB_DATA_ROOT=$RUNNER_TEMP/ituob-site-projection" >> "$GITHUB_ENV"
 
     - name: Verify projection guards
-      run: python3 -m unittest discover -s scripts/tests -p test_project_authored_data.py
+      run: python3 -m unittest discover -s scripts/tests -p 'test_*.py'
 
     - name: Install dependencies
       run: npm ci

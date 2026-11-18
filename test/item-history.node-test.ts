@@ -1,7 +1,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { itemHistory, itemPath, itemRouteToken, listRegisterItems } from "../src/lib/item-history.ts";
-import type { RegisterState } from "../src/lib/snapshots.ts";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
+import type { ChangeHistoryEntry, RegisterState } from "../src/lib/snapshots.ts";
 
 const seed = { type: "SEED", ob_issue: 1000, identifier: { code: "__seed__" } } as const;
 const change = { type: "MOD", ob_issue: 1170, identifier: { position: "7" } } as const;
@@ -62,4 +63,30 @@ test("matches producer composite and multilingual key semantics without whitespa
   const items = listRegisterItems(composite, ["name", "number"]);
   assert.deepEqual(items.map(({ key }) => key), [" A B  | 0", "Fallback | ", "Français / 1 | 7"]);
   assert.equal(items[2]?.entry?.number, 7);
+});
+
+const snapshotRoot = new URL("../data/snapshots/", import.meta.url);
+const generated = existsSync(new URL("e212-mnc/current.json", snapshotRoot));
+const generatedState = (slug: string): RegisterState =>
+  JSON.parse(readFileSync(new URL(`${slug}/current.json`, snapshotRoot), "utf8"));
+const printed = (events: ChangeHistoryEntry[] | null) => (events ?? []).map(({ type, ob_issue }) => [type, ob_issue]);
+
+// D107-3: needs the CI-generated snapshots (data/snapshots is gitignored); skipped, not passed, without them.
+test("generated snapshots: Hungary 216 04 and Kenya 639 08 show every printed change, in bulletin order",
+  { skip: !generated && "data/snapshots not generated" }, () => {
+  const state = generatedState("e212-mnc");
+  // ADD printed before the seed issue (OB 1162) is merged in; SUP in OB 1170 is the replacement.
+  assert.deepEqual(printed(itemHistory(state, "216 04")), [["ADD", 1124], ["SEED", 1162], ["LIR", 1166], ["SUP", 1170]]);
+  assert.deepEqual(printed(itemHistory(state, "639 08")), [["ADD", 1140], ["SEED", 1162], ["SUP", 1170]]);
+});
+
+test("generated snapshots: every item history is in non-decreasing OB issue order",
+  { skip: !generated && "data/snapshots not generated" }, () => {
+  for (const slug of readdirSync(snapshotRoot)) {
+    const history = generatedState(slug).key_history ?? {};
+    for (const [key, events] of Object.entries(history)) {
+      const issues = events.map((event) => event.ob_issue ?? 0);
+      assert.deepEqual(issues, [...issues].sort((a, b) => a - b), `${slug} ${key}`);
+    }
+  }
 });

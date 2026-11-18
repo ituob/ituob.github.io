@@ -97,6 +97,11 @@ def project(data_root, service_root, data_ref, service_ref, snapshots_out, proje
         summary = re.findall(r"^Snapshots: .*?, ([0-9]+) errors$", result.stdout, re.MULTILINE)
         if summary != ["0"]:
             raise ValueError("snapshot generator did not report exactly one zero-error summary")
+        # Replay never applies amendments printed before a register's seed issue, so
+        # an item's history page would omit them. Merge those printed changes into
+        # key_history of the generated snapshots (existing items only).
+        run("bundle", "exec", "ruby", "-I", str(overlay / "ituob/lib"),
+            str(Path(__file__).with_name("add-pre-seed-item-history.rb")), str(snapshots))
         if authored:
             run(sys.executable, str(helper), "check", *stage_args)
         exact_head(data_root, data_ref)
