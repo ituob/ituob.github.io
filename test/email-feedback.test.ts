@@ -112,6 +112,34 @@ describe("bounce, complaint, idempotency, suppression", () => {
     expect(s).toEqual([{ email: EDITOR, reason: "hard_bounce", detail: "mailbox does not exist" }]);
   });
 
+  it("suppresses the address the message was sent to, not the user's current address", async () => {
+    const pid = await oneSent();
+    expect((await one(`SELECT email_to AS t FROM notifications WHERE email_provider_id=?1`, pid)).t).toBe(EDITOR);
+    await db().prepare(`UPDATE users SET email='new@example.test' WHERE id='itu-editor'`).run();
+    const body = event("email.bounced", pid, { to: [EDITOR], bounce: { type: "Permanent", message: "gone" } });
+    expect((await post(body)).status).toBe(200);
+    expect((await rows(`SELECT email FROM email_suppressions`)).map((r) => r.email)).toEqual([EDITOR]);
+  });
+
+  it("a row without a recorded address never suppresses a changed current address", async () => {
+    const pid = await oneSent();
+    await db().prepare(`UPDATE notifications SET email_to=NULL WHERE email_provider_id=?1`).bind(pid).run();
+    await db().prepare(`UPDATE users SET email='new@example.test' WHERE id='itu-editor'`).run();
+    const body = event("email.bounced", pid, { to: [EDITOR], bounce: { type: "Permanent", message: "gone" } });
+    expect((await post(body)).status).toBe(200);
+    expect(await rows(`SELECT email FROM email_suppressions`)).toEqual([]);
+  });
+
+  it("a redelivered (duplicate) event does not recreate a deleted suppression", async () => {
+    const pid = await oneSent();
+    const body = event("email.bounced", pid, { bounce: { type: "Permanent", message: "gone" } });
+    expect(((await (await post(body)).json()) as any).status).toBe("applied");
+    expect((await rows(`SELECT email FROM email_suppressions`)).length).toBe(1);
+    await db().prepare(`DELETE FROM email_suppressions`).run();
+    expect(((await (await post(body)).json()) as any).status).toBe("duplicate");
+    expect(await rows(`SELECT email FROM email_suppressions`)).toEqual([]);
+  });
+
   it("records a complaint (even after a bounce) as a complaint suppression, once", async () => {
     const pid = await oneSent();
     await post(event("email.delivered", pid));

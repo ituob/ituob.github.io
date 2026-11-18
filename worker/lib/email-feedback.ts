@@ -46,21 +46,22 @@ export const svixVerifier: WebhookVerifier = {
 };
 
 export type Feedback =
-  | { kind: "delivered" | "complained" | "bounced"; providerId: string; detail: string | null }
+  | { kind: "delivered" | "complained" | "bounced"; providerId: string; detail: string | null; to: string[] }
   | { kind: "ignored"; reason: string };
 
 /** Map a Resend-shaped event. Only a Permanent bounce suppresses; soft bounces are the provider's to retry (docs). */
 export function parseFeedback(payload: unknown): Feedback {
-  const p = payload as { type?: unknown; data?: { email_id?: unknown; bounce?: { type?: unknown; subType?: unknown; message?: unknown } } } | null;
+  const p = payload as { type?: unknown; data?: { email_id?: unknown; to?: unknown; bounce?: { type?: unknown; subType?: unknown; message?: unknown } } } | null;
   if (!p || typeof p !== "object" || typeof p.type !== "string") return { kind: "ignored", reason: "no event type" };
   const providerId = p.data?.email_id;
   if (p.type !== "email.bounced" && p.type !== "email.complained" && p.type !== "email.delivered") return { kind: "ignored", reason: "event" };
   if (typeof providerId !== "string" || providerId.length === 0 || providerId.length > 200) return { kind: "ignored", reason: "no email_id" };
-  if (p.type === "email.delivered") return { kind: "delivered", providerId, detail: null };
-  if (p.type === "email.complained") return { kind: "complained", providerId, detail: null };
+  const to = (Array.isArray(p.data?.to) ? p.data.to : [p.data?.to]).filter((x): x is string => typeof x === "string").map((x) => x.trim().toLowerCase());
+  if (p.type === "email.delivered") return { kind: "delivered", providerId, detail: null, to };
+  if (p.type === "email.complained") return { kind: "complained", providerId, detail: null, to };
   if (p.data?.bounce?.type !== "Permanent") return { kind: "ignored", reason: "soft bounce" };
   const msg = p.data.bounce.message;
-  return { kind: "bounced", providerId, detail: typeof msg === "string" ? msg.slice(0, 300) : null };
+  return { kind: "bounced", providerId, detail: typeof msg === "string" ? msg.slice(0, 300) : null, to };
 }
 
 const FROM: Record<"delivered" | "bounced" | "complained", string> = {
@@ -81,11 +82,17 @@ export async function applyFeedback(env: Env, f: Exclude<Feedback, { kind: "igno
         WHERE changes()>0 ON CONFLICT(day,metric) DO UPDATE SET n=n+excluded.n`).bind(day, f.kind),
   ];
   if (f.kind !== "delivered") {
+    // Suppress the address the message was SENT to (recorded at send time), never the user's current
+    // address (a login can change it). A row sent before the column existed has none: then only the
+    // user's current address, and only when the signed event's own recipient list names it.
+    // WHERE changes()>0 reads the counter statement above, which changes a row iff the status UPDATE did,
+    // so a redelivered event cannot recreate a suppression an admin deleted.
     // Never overwrites an existing row (a manual suppression stays manual).
     stmts.push(env.DB.prepare(`INSERT OR IGNORE INTO email_suppressions(email,reason,first_seen,detail)
-        SELECT DISTINCT u.email, ?2, ?3, ?4 FROM notifications n JOIN users u ON u.id=n.user_id
-        WHERE n.email_provider_id=?1 AND u.email IS NOT NULL AND u.email<>''`)
-      .bind(f.providerId, f.kind === "bounced" ? "hard_bounce" : "complaint", now.toISOString(), f.detail));
+        SELECT DISTINCT COALESCE(n.email_to, u.email), ?2, ?3, ?4 FROM notifications n JOIN users u ON u.id=n.user_id
+        WHERE changes()>0 AND n.email_provider_id=?1 AND COALESCE(n.email_to, u.email) IS NOT NULL AND COALESCE(n.email_to, u.email)<>''
+          AND (n.email_to IS NOT NULL OR lower(u.email) IN (SELECT value FROM json_each(?5)))`)
+      .bind(f.providerId, f.kind === "bounced" ? "hard_bounce" : "complaint", now.toISOString(), f.detail, JSON.stringify(f.to)));
   }
   const [update] = await env.DB.batch(stmts);
   return update!.meta.changes > 0 ? "applied" : "duplicate";
