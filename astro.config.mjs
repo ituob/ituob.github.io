@@ -22,6 +22,8 @@ const OOB_DATA_ROOT = resolve(projectRoot, "data");
 // https://astro.build/config
 export default defineConfig({
   site: "https://www.ituob.org",
+  // Keep source whitespace between inline elements (Astro 7 defaults to JSX rules).
+  compressHTML: true,
   ...(process.env.ITUOB_DEV_LOCAL === "1" ? { devToolbar: { enabled: false } } : {}),
   trailingSlash: "always",
   output: "static",

@@ -9,6 +9,7 @@ export default defineConfig({
   testDir: "./tests/visual",
   testMatch: /.*\.pw\.ts/,
   outputDir: "./test-results",
+  projects: [{ name: "chromium", use: { browserName: "chromium" } }],
   workers: 1,
   retries: 0,
   timeout: 120_000,
