@@ -4,6 +4,8 @@ import { listSnapshotSlugs, loadManifest, loadCurrentState } from "~/lib/snapsho
 import type { RegisterItem } from "~/lib/item-history";
 import { itemHistory, itemRouteToken, listRegisterItems } from "~/lib/item-history";
 import { formatCellValue } from "~/lib/values";
+import { duplicateHref } from "~/lib/form/duplicate";
+import { REGISTER_IDENTITIES } from "~/lib/register-rules.generated";
 
 export function getStaticPaths() {
   return listSnapshotSlugs().flatMap((slug) => {
@@ -23,12 +25,14 @@ const state = loadCurrentState(slug!);
 if (!manifest || !state) return Astro.redirect("/404/");
 const title = manifest.title.en ?? manifest.slug;
 const history = itemHistory(state, item.key);
+const duplicable = item.status === "active" && !!REGISTER_IDENTITIES[manifest.register_id]?.amendmentClass;
 ---
 <Base title={`${item.key} — ${title}`} masthead description={`Change history for item ${item.key} in ${title}.`}>
   <section class="rule-thin pt-6 pb-6">
     <p><a href={`/registers/${slug}/items/`}>← All register items</a> · <a href={`/registers/${slug}/`}>{title}</a></p>
     <h2 class="text-[var(--step-3)] mt-4">Item <code>{item.key}</code></h2>
     <p class="mt-2">Status: {item.status}</p>
+    {duplicable && <p class="mt-2"><a href={duplicateHref(slug!, item.key)}>Duplicate as new entry</a> (starts a new proposal prefilled from this entry; sign-in required)</p>}
   </section>
   {item.entry && (
     <section class="mb-6">
