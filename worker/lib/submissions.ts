@@ -277,7 +277,7 @@ async function requireEmptyRegister(db: D1Database, action: ActionType, slug: st
 /** A duplicate starts from a real, currently active register item; an unverifiable source is refused, not guessed. */
 async function requireDuplicateSource(assets: Assets | undefined, register_id: string, key: string) {
   if (!rulesFor(register_id)) throw new InvalidError("duplicate_of is not supported for this register");
-  let active: Set<string>;
+  let active: ReadonlySet<string>;
   try { active = registerStateFromSnapshot(register_id, await fetchSnapshot(assets, register_id)).active; }
   catch { throw new UpstreamError("register snapshot unavailable; the entry to duplicate cannot be verified"); }
   if (!active.has(key)) throw new ValidationFailed([{ path: "duplicate_of", code: "mismatch", message: `"${key}" is not an active item of this register` }]);
