@@ -332,5 +332,17 @@ export function setPublisher(p: PatchPublisher | null) {
   override = p;
 }
 export function getPublisher(config?: PublisherConfig): PatchPublisher {
-  return override ?? new GitHubAppPatchPublisher(config);
+  if (override) return override;
+  const real = new GitHubAppPatchPublisher(config);
+  const demo = config as { LOCAL_DEMO?: string; AUTH_MODE?: string; ACCESS_AUD?: string; DEMO_CATALOG_REGISTERS?: string; DEMO_CATALOG_RECOMMENDATIONS?: string } | undefined;
+  // LOCAL DEMO ONLY: the generated dev:local config carries a copy of the catalogs so the catalog page has
+  // content; every write still goes to the real (unconfigured) publisher and is refused. See localDemoEnabled().
+  if (demo?.LOCAL_DEMO === "1" && demo.AUTH_MODE === "oidc" && !demo.ACCESS_AUD && demo.DEMO_CATALOG_REGISTERS && demo.DEMO_CATALOG_RECOMMENDATIONS) {
+    return new Proxy(real, {
+      get: (target, prop, receiver) => prop === "readCatalog"
+        ? async (req: { repo: string }): Promise<CatalogSnapshot> => ({ repo: req.repo, baseSha: "demo", registers: { text: demo.DEMO_CATALOG_REGISTERS!, blobSha: "demo" }, recommendations: { text: demo.DEMO_CATALOG_RECOMMENDATIONS! } })
+        : Reflect.get(target, prop, receiver),
+    });
+  }
+  return real;
 }

@@ -158,7 +158,28 @@ export async function getAccessIdentity(
     const email = request.headers.get("X-Stub-Access");
     return email ? { email } : null;
   }
+  if (localDemoEnabled(request, env)) return localDemoAccess(request, env);
   return verifyAccessIdentity(request, env);
+}
+
+/**
+ * LOCAL DEMO ONLY (npm run dev:local). `LOCAL_DEMO=1` is injected by scripts/dev-local.mjs
+ * into its generated .local-dev/wrangler.json and appears in no deployed config
+ * (test/local-demo-access.test.ts). It also needs a loopback host and no
+ * configured Access application, so a production Worker (which always has ACCESS_AUD
+ * and is served on ituob.org) can never take this path.
+ */
+export function localDemoEnabled(request: Request, env: Env): boolean {
+  return env.LOCAL_DEMO === "1" && env.AUTH_MODE === "oidc" && !env.ACCESS_AUD && !env.ACCESS_TEAM_DOMAIN
+    && isLoopbackHost(new URL(request.url).hostname);
+}
+
+/** The mock IdP session stands in for the Access login: same email, the existing role checks still decide. */
+async function localDemoAccess(request: Request, env: Env): Promise<AccessIdentity | null> {
+  const session = await oidcSession(request, env);
+  if (!session) return null;
+  const user = await env.DB.prepare(`SELECT email FROM users WHERE id = ?1`).bind(session.userId).first<{ email: string | null }>();
+  return user?.email ? { email: user.email } : null;
 }
 
 /** Principal for /api/ci/*: a verified, allowlisted service token only. Stub: `X-Stub-Access-Service: <client id>`. */
