@@ -11,25 +11,38 @@ variant of it passes ≥95%.
 
 | verdict | count | percent |
 |---------|-------|---------|
-| pass (≥95%) | 422 | 100.0% |
-| warn (80-95%) | 0 | 0.0% |
+| pass (≥95%) | 421 | 99.8% |
+| warn (80-95%) | 1 | 0.2% |
 | fail (<80%) | 0 | 0.0% |
 | missing (no local) | 0 | 0.0% |
 | **total** | **422** | |
 
-## index — 1 pages, avg 99.8%, 1/1 pass
+## index — 1 pages, avg 98.5%, 1/1 pass
 
 _All pages pass ≥95% parity._
 
-## issue — 389 pages, avg 98.8%, 389/389 pass
+## issue — 389 pages, avg 98.7%, 388/389 pass
+
+### Pages below 95% coverage
+
+| page | coverage | variants | missing headings | missing links | missing tables |
+|------|----------|----------|------------------|---------------|----------------|
+| issue/669 | 90.1% | 1 | 2 | 0 | 0 |
+
+### Specific heading gaps (worst 3 pages)
+
+#### Issue 669
+
+Coverage: 90.1% — 2 missing headings:
+
+- amendments
+- abbreviations used in this section
+
+## recommendation — 12 pages, avg 99.0%, 12/12 pass
 
 _All pages pass ≥95% parity._
 
-## recommendation — 12 pages, avg 98.2%, 12/12 pass
-
-_All pages pass ≥95% parity._
-
-## register — 20 pages, avg 98.6%, 20/20 pass
+## register — 20 pages, avg 98.9%, 20/20 pass
 
 _All pages pass ≥95% parity._
 
@@ -42,5 +55,5 @@ attributing a register's data to two pages.
 
 | deployed page | coverage if forced | note |
 |---------------|--------------------|------|
-| messages/amending-sp F32_TDI (2011-04-15)/index.html | 99.6% | embeds the full OB-1000 BUREAUFAX annex (PARTIE II/III/V fax-booth tables); rendered at /registers/bureaufax/ |
-| messages/complement-to-itu-t-r F.32/2012/index.html | 99.6% | embeds the full OB-1000 BUREAUFAX annex (PARTIE II/III/V fax-booth tables); rendered at /registers/bureaufax/ |
+| messages/amending-sp F32_TDI (2011-04-15)/index.html | 100.0% | embeds the full OB-1000 BUREAUFAX annex (PARTIE II/III/V fax-booth tables); rendered at /registers/bureaufax/ |
+| messages/complement-to-itu-t-r F.32/2012/index.html | 100.0% | embeds the full OB-1000 BUREAUFAX annex (PARTIE II/III/V fax-booth tables); rendered at /registers/bureaufax/ |

@@ -16,6 +16,7 @@ truth: `_layouts/issue.html`, `_includes/issue/toc.html` at commit `4830a81e^`
 | Order of amendment articles (e.g. ISPC before NNP on OB 1263; List V first on OB 1300) | Same: Jekyll looped `amendments.messages`; the port sorted by dataset slug. | Same loader, `amendments.yaml` order. |
 | Two or more `custom` / `iptn` messages merged into one article | The port grouped by type. Jekyll emitted one `article.message` and one `general-N` anchor per message. | One article per message (OB 1263 has `general-3` and `general-6`, both `custom`). |
 | TOC link text "Amendments" | Production TOC reads "Amendments to&nbsp;service publications" (the section heading itself is "Amendments" on both). | TOC text restored. |
+| Amendments section missing on OB 669 (heading and abbreviations legend; production has both, with no articles) | `{% if amendments %}` is true when `amendments.yaml` exists, even with `messages: []`; the section and its TOC entry render. | Section rendered only when at least one amendment article existed. | Regression | Render the section and TOC entry whenever `amendments.yaml` is present (`hasAmendmentsFile`). |
 | TOC lacked the "Annexes" entry for issues that have annexes | Jekyll `toc.html` adds it when `num_annexes > 0`. | Added. |
 
 After the fix, OB 1263, 1262, 1250, 1200, 1056, 1034 and 969 match production on

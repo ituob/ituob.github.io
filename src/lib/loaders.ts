@@ -258,6 +258,9 @@ export interface SourceMessageOrder {
   general: string[];
   /** Amendment dataset slugs in authored order. */
   amendments: string[];
+  /** True when amendments.yaml exists, even with `messages: []`. Jekyll's
+   *  `{% if amendments %}` renders the section (and TOC entry) on presence. */
+  hasAmendmentsFile: boolean;
 }
 export const loadSourceMessageOrder = memoize((id: number): SourceMessageOrder | null => {
   const dir = join(listsRoot(), "..", "issues", String(id));
@@ -272,6 +275,7 @@ export const loadSourceMessageOrder = memoize((id: number): SourceMessageOrder |
   return {
     general: (general?.messages ?? []).map((m) => String(m.type ?? "")),
     amendments: slugs,
+    hasAmendmentsFile: amendments !== null,
   };
 });
 

@@ -134,6 +134,9 @@ interface AmendmentItem {
   hasPlaceholder: boolean;
 }
 const amendmentsList: AmendmentItem[] = [];
+// Jekyll: `{% if amendments %}` is true when amendments.yaml exists, even with
+// no messages (OB 669 renders the heading and legend with no articles).
+const showAmendments = (sourceOrder?.hasAmendmentsFile ?? false) || undefined;
 {
   let n = 0;
   for (const slug of amendmentSlugs) {
@@ -230,7 +233,7 @@ const authoritativeHref =
           </ul>
         )}
       </li>
-      {amendmentsList.length > 0 && (
+      {(amendmentsList.length > 0 || showAmendments) && (
         <li>
           <a href="#amendments">Amendments to&nbsp;service publications</a>
           <ul>
@@ -294,7 +297,7 @@ const authoritativeHref =
     })}
   </section>
 
-  {amendmentsList.length > 0 && (
+  {(amendmentsList.length > 0 || showAmendments) && (
     <section class="amendments" id="amendments">
       <h3>Amendments</h3>
       <section class="legend">
