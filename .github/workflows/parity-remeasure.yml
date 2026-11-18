@@ -116,7 +116,12 @@ jobs:
     - uses: ruby/setup-ruby@v1
       with:
         ruby-version: '3.4'
-    # Same projection and snapshot steps as build-deploy.yml.
+    # Same gem bundle, projection and snapshot steps as build-deploy.yml.
+    - name: Install the ituob gem bundle (data-ob/ituob/Gemfile)
+      working-directory: data-ob
+      env:
+        BUNDLE_GEMFILE: ituob/Gemfile
+      run: bundle install
     - name: Project pinned authored data and generate register snapshots
       run: |
         python3 scripts/project-authored-data.py \
