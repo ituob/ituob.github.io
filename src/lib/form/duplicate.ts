@@ -20,7 +20,24 @@ export function duplicateDraft(register_id: string, activeEntries: unknown[], ke
   if (!source) return null;
   const entry = structuredClone(source);
   delete entry.source_contents;
-  const usedKeys = rules.keyFields.some(f => entry[f] !== undefined && entry[f] !== null && entry[f] !== '') ? rules.keyFields : rules.fallbackKeyFields.find(g => g.some(f => entry[f])) ?? rules.keyFields;
-  for (const field of usedKeys) if (field in entry) entry[field] = typeof entry[field] === 'object' && entry[field] !== null ? {} : '';
+  // Clear every key group (primary and fallbacks) so the copy has no identity until the user enters one.
+  for (const field of [...rules.keyFields, ...rules.fallbackKeyFields.flat()]) if (field in entry) entry[field] = typeof entry[field] === 'object' && entry[field] !== null ? {} : '';
   return { register_id, amendmentClass: rules.amendmentClass, data: { _class: rules.amendmentClass, entries: [entry] } };
+}
+
+export interface DuplicateSource { register_id: string; slug: string; key: string }
+
+/** The key to send as duplicate_of: only while the form is still an ADD on the register it was copied from. */
+export function duplicateOfToSend(source: DuplicateSource | null, form: { register_id: string; slug: string; action: string }): string | undefined {
+  return source && form.action === 'ADD' && form.register_id === source.register_id && form.slug === source.slug ? source.key : undefined;
+}
+
+/** Load the public snapshot (plain JSON, not the `{ok:true}` API envelope) and build the draft for `key`. */
+export async function loadDuplicateDraft(fetcher: typeof fetch, register: { register_id: string; slug: string }, key: string): Promise<DuplicateDraft> {
+  const response = await fetcher(`/data/snapshots/${encodeURIComponent(register.slug)}/current.json`, { headers: { Accept: 'application/json' } });
+  if (!response.ok) throw new Error(`The register snapshot could not be loaded (HTTP ${response.status}).`);
+  const snapshot = await response.json() as { active_entries?: unknown };
+  const draft = duplicateDraft(register.register_id, Array.isArray(snapshot.active_entries) ? snapshot.active_entries : [], key);
+  if (!draft) throw new Error(`Entry "${key}" cannot be duplicated: it is not an active entry of this register.`);
+  return draft;
 }

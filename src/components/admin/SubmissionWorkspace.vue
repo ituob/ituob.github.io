@@ -6,7 +6,7 @@ import { submissionFieldDiff } from '../../lib/submission-diff';
 import { blankState, toFormState, type FormNode } from '../../lib/form/model';
 import { actionPayload, actionTypes, amendmentClasses, api, ApiError, payloadErrors, revisionErrors } from '../../lib/admin-client';
 import type { SchemaIssue } from '../../lib/schema.validators.generated';
-import { duplicateDraft } from '../../lib/form/duplicate';
+import { duplicateOfToSend, loadDuplicateDraft, type DuplicateSource } from '../../lib/form/duplicate';
 import SchemaNode from './SchemaNode.vue';
 const props = withDefaults(defineProps<{ admin?: boolean; create?: boolean; translation?: boolean; registers?: { register_id: string; slug: string; label: string }[] }>(), { registers: () => [] });
 interface Submission { id: string; register_id: string; slug: string; action_type: string; state: string; current_rev: number; affiliation_kind?: string; affiliation_member_id?: string | null; affiliation_member_name?: string | null }
@@ -23,7 +23,7 @@ const inputErrors = ref<Record<string, string>>({});
 function invalid(path: string, message: string) { if (message) inputErrors.value[path] = message; else for (const key of Object.keys(inputErrors.value)) if (key === path || key.startsWith(`${path}.`) || key.startsWith(`${path}[`)) delete inputErrors.value[key]; }
 const busy = ref(false), error = ref(''), notice = ref(''), errors = ref<SchemaIssue[]>([]);
 const reason = ref(''), edition = ref<number | null>(null), override = ref(false), filter = ref('');
-const creating = ref(props.create), correctsId = ref(''), duplicateOf = ref('');
+const creating = ref(props.create), correctsId = ref(''), duplicateSource = ref<DuplicateSource | null>(null);
 const prefix = computed(() => props.admin ? '/api/admin/submissions' : '/api/me/submissions');
 const editable = computed(() => creating.value || (!props.admin && ['draft', 'changes_requested'].includes(detail.value?.submission.state ?? '')));
 function revisionChanges(revision: Revision) {
@@ -81,7 +81,7 @@ async function load(id: string) {
   if (typeof window !== 'undefined') window.history.replaceState(null, '', `${window.location.pathname}?id=${encodeURIComponent(id)}`);
 }
 function start() {
-  creating.value = true; detail.value = null; selected.value = ''; existing.value = {}; correctsId.value = ''; duplicateOf.value = '';
+  creating.value = true; detail.value = null; selected.value = ''; existing.value = {}; correctsId.value = ''; duplicateSource.value = null;
   node.value = blankState(className.value); inputErrors.value = {}; errors.value = []; error.value = ''; notice.value = '';
   window.history.replaceState(null, '', window.location.pathname);
 }
@@ -97,7 +97,8 @@ async function save(submit = false) {
     if (localErrors.length) { errors.value = localErrors; throw new Error('Resolve the field errors before saving. Your changes remain in this form.'); }
     let id = selected.value;
     if (creating.value) {
-      const result = await api<{ submission: Submission }>('/api/me/submissions', 'POST', { register_id: registerId.value, slug: slug.value, action_type: action.value, payload, ...(correctsId.value ? { corrects_id: correctsId.value } : {}), ...(duplicateOf.value ? { duplicate_of: duplicateOf.value } : {}) });
+      const duplicateOf = duplicateOfToSend(duplicateSource.value, { register_id: registerId.value, slug: slug.value, action: action.value });
+      const result = await api<{ submission: Submission }>('/api/me/submissions', 'POST', { register_id: registerId.value, slug: slug.value, action_type: action.value, payload, ...(correctsId.value ? { corrects_id: correctsId.value } : {}), ...(duplicateOf ? { duplicate_of: duplicateOf } : {}) });
       id = result.submission.id;
     } else if (detail.value?.submission.state === 'changes_requested') {
       await api(`/api/me/submissions/${id}/revise`, 'POST', { payload });
@@ -120,11 +121,9 @@ async function transition(verb: string) {
 async function startDuplicate(register: string, key: string) {
   const option = props.registers.find(r => r.slug === register);
   if (!option) throw new Error('Unknown register for duplication.');
-  const snapshot = await api<{ active_entries?: unknown[] }>(`/data/snapshots/${encodeURIComponent(option.slug)}/current.json`);
-  const draft = duplicateDraft(option.register_id, snapshot.active_entries ?? [], key);
-  if (!draft) throw new Error(`Entry "${key}" cannot be duplicated: it is not an active entry of this register.`);
+  const draft = await loadDuplicateDraft(fetch, option, key);
   start();
-  registerId.value = option.register_id; slug.value = option.slug; action.value = 'ADD'; duplicateOf.value = key;
+  registerId.value = option.register_id; slug.value = option.slug; action.value = 'ADD'; duplicateSource.value = { register_id: option.register_id, slug: option.slug, key };
   className.value = draft.amendmentClass; node.value = toFormState(draft.amendmentClass, draft.data).state;
   notice.value = `Prefilled from ${key}. Enter the new entry's key before saving.`;
 }
