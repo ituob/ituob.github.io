@@ -83,9 +83,9 @@ fresh(); onMounted(() => perform(reload));
     <p class="admin-error" v-if="error" role="alert">{{ error }}</p><p class="admin-status" v-if="notice" role="status">{{ notice }}</p>
     <ul class="admin-error" v-if="errors.length" role="alert"><li v-for="(issue,index) in errors" :key="index">{{ issue.path }}: {{ issue.message }}</li></ul>
     <fieldset class="admin-fieldset" :disabled="busy"><legend>Saved drafts</legend>
-      <button class="admin-button" type="button" @click="perform(reload)">Reload list</button>
+      <button class="admin-button" type="button" @click="perform(async () => { await reload(); notice = 'List reloaded.'; })">Reload list</button>
       <button class="admin-button" v-for="item in drafts" :key="item.id" type="button" @click="accept(item)">{{ item.path }} · r{{ item.revision }}{{ item.approved_at ? ' · approved' : '' }}</button>
-      <button class="admin-button" type="button" @click="fresh">New message</button>
+      <button class="admin-button" type="button" @click="fresh(); notice = 'Started a new message.'">New message</button>
     </fieldset>
     <fieldset class="admin-fieldset" :disabled="busy"><legend>Open an existing record</legend>
       <label class="admin-field admin-label">Repository path <input class="admin-control" v-model="existingPath" placeholder="ob-issues/1331/misc_communications/001.yaml" /></label>

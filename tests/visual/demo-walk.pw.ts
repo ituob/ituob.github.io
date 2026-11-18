@@ -100,7 +100,7 @@ for (const [name, persona] of Object.entries(PERSONAS) as [Name, (typeof PERSONA
       for (const path of [...ME, ...ADMIN]) {
         await open(page, path);
         const found = await page.evaluate(() => [...document.querySelectorAll("button, [role=button], select, input:not([type=hidden])")]
-          .filter(el => (el as HTMLElement).offsetParent !== null)
+          .filter(el => (el as HTMLElement).offsetParent !== null && !el.closest("details:not([open])"))
           .filter(el => {
             const e = el as HTMLInputElement;
             const named = (e.getAttribute("aria-label") || e.getAttribute("aria-labelledby") || e.getAttribute("title") || (e.innerText ?? "").trim() || (e.labels?.length ?? 0) > 0);

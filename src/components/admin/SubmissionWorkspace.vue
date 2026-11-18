@@ -7,6 +7,7 @@ import { blankState, toFormState, type FormNode } from '../../lib/form/model';
 import { actionPayload, actionTypes, amendmentClasses, api, ApiError, payloadErrors, revisionErrors } from '../../lib/admin-client';
 import type { SchemaIssue } from '../../lib/schema.validators.generated';
 import SchemaNode from './SchemaNode.vue';
+import { demoMode } from '../../lib/demo-refusal';
 const props = withDefaults(defineProps<{ admin?: boolean; create?: boolean; translation?: boolean; registers?: { register_id: string; slug: string; label: string }[] }>(), { registers: () => [] });
 interface Submission { id: string; register_id: string; slug: string; action_type: string; state: string; current_rev: number; affiliation_kind?: string; affiliation_member_id?: string | null; affiliation_member_name?: string | null }
 interface Revision { rev: number; payload_yaml: string; validation: string; created_at: string }
@@ -120,13 +121,14 @@ onMounted(() => perform(async () => { await list(); const id = new URLSearchPara
 <template>
   <div class="admin-form workspace" :aria-busy="busy">
     <nav aria-label="Submission workspace"><a href="/me/">My account</a> · <a href="/me/submissions/">My submissions</a><template v-if="admin"> · <a href="/admin/">Administration</a></template></nav>
-    <p class="admin-help" v-if="admin">ITU review requires an authorized Cloudflare Access identity and an ITU role. Proposals are created through your member session.</p>
+    <p class="admin-help" v-if="admin && demoMode()">ITU review needs an ITU staff account. Proposals are created from a Member State delegate account.</p>
+    <p class="admin-help" v-else-if="admin">ITU review requires an authorized Cloudflare Access identity and an ITU role. Proposals are created through your member session.</p>
     <p class="admin-help" v-else>Proposals require sign-in and verified membership for the countries represented by the entries.</p>
     <p v-if="error" role="alert" class="admin-error">{{ error }}</p><p class="admin-status" v-if="notice" role="status">{{ notice }}</p>
     <ul v-if="errors.length" role="alert" class="admin-error"><li v-for="(issue, i) in errors" :key="i"><strong>{{ issue.path || 'payload' }}</strong>: {{ issue.message }}</li></ul>
     <fieldset class="admin-fieldset" :disabled="busy"><legend>Submissions</legend>
       <label class="admin-field admin-label">State filter <select class="admin-control" v-model="filter" @change="perform(list)"><option value="">All states</option><option v-for="state in ['draft','submitted','in_review','changes_requested','approved','pr_pending','pr_open','ci_failed','merged','published','withdrawn','rejected']" :key="state">{{ state }}</option></select></label>
-      <button class="admin-button" @click="perform(list)">Refresh</button><button class="admin-button" v-if="!admin" @click="start">New proposal</button>
+      <button class="admin-button" @click="perform(async () => { await list(); notice = 'List refreshed.'; })">Refresh</button><button class="admin-button" v-if="!admin" @click="start">New proposal</button>
       <button class="admin-button" v-if="admin" :disabled="!reviewCount" @click="startSelectedReviews">Start review for selected ({{ reviewCount }})</button>
       <p class="admin-help" v-if="!rows.length && !busy && !error">No submissions found.</p>
       <ul><li v-for="row in rows" :key="row.id"><label class="admin-field admin-label" v-if="admin && row.state === 'submitted'"><input class="admin-control" v-model="reviewIds" type="checkbox" :value="row.id" />Select {{ row.id }} for review</label><button class="admin-button" @click="perform(() => load(row.id))">{{ row.register_id }} · {{ row.action_type }} · {{ row.state }} · {{ row.id }}<span v-if="row.affiliation_kind === 'member'"> · Member State: {{ row.affiliation_member_name || row.affiliation_member_id }}</span><span v-else-if="row.affiliation_kind === 'itu'"> · ITU</span></button></li></ul>
