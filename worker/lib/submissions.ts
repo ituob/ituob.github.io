@@ -32,6 +32,7 @@ export interface Sub {
   action_type: ActionType;
   state: State;
   current_rev: number;
+  duplicate_of?: string | null;
   target_edition: number | null;
   seq: number | null;
   discussion_closed: number;
@@ -45,23 +46,28 @@ const now = () => new Date().toISOString();
 const VALIDATOR_VERSION = "stage2-v1";
 type Assets = Env["ASSETS"];
 
+/** The deployed current snapshot of a register; throws when it is unavailable or malformed. */
+async function fetchSnapshot(assets: Assets | undefined, register_id: string): Promise<{ active_entries: unknown[]; lapsed_keys: string[] }> {
+  const target = PUBLICATION_BY_ID.get(register_id) ?? REGISTERS.find(r => r.registerId === register_id);
+  if (!assets || !target) throw new Error("snapshot unavailable");
+  const response = await assets.fetch(new Request(`https://www.ituob.org/data/snapshots/${target.slug}/current.json`));
+  if (!response.ok) throw new Error("snapshot unavailable");
+  const snapshot: unknown = await response.json();
+  if (!snapshot || typeof snapshot !== "object" || Array.isArray(snapshot)) throw new Error("invalid snapshot");
+  const data = snapshot as { active_entries?: unknown; lapsed_keys?: unknown };
+  if (!Array.isArray(data.active_entries) || !Array.isArray(data.lapsed_keys) ||
+      !data.active_entries.every(e => !!e && typeof e === "object" && !Array.isArray(e)) ||
+      !data.lapsed_keys.every(k => typeof k === "string")) throw new Error("invalid snapshot");
+  return data as { active_entries: unknown[]; lapsed_keys: string[] };
+}
+
 /** Deployed assets may lag the register; CI replay remains authoritative. */
 async function validateCurrent(assets: Assets | undefined, ctx: ValidationContext) {
   let register_state;
   const warnings: FieldError[] = [];
   if (rulesFor(ctx.register_id)) {
-    const target = PUBLICATION_BY_ID.get(ctx.register_id) ?? REGISTERS.find(r => r.registerId === ctx.register_id);
     try {
-      if (!assets || !target) throw new Error("snapshot unavailable");
-      const response = await assets.fetch(new Request(`https://www.ituob.org/data/snapshots/${target.slug}/current.json`));
-      if (!response.ok) throw new Error("snapshot unavailable");
-      const snapshot: unknown = await response.json();
-      if (!snapshot || typeof snapshot !== "object" || Array.isArray(snapshot)) throw new Error("invalid snapshot");
-      const data = snapshot as { active_entries?: unknown; lapsed_keys?: unknown };
-      if (!Array.isArray(data.active_entries) || !Array.isArray(data.lapsed_keys) ||
-          !data.active_entries.every(e => !!e && typeof e === "object" && !Array.isArray(e)) ||
-          !data.lapsed_keys.every(k => typeof k === "string")) throw new Error("invalid snapshot");
-      register_state = { ...registerStateFromSnapshot(ctx.register_id, data as { active_entries: unknown[]; lapsed_keys: string[] }), stale: true };
+      register_state = { ...registerStateFromSnapshot(ctx.register_id, await fetchSnapshot(assets, ctx.register_id)), stale: true };
       warnings.push({ path: "register_state", code: "unknown", message: "Deployed snapshot freshness cannot be verified; state conflicts are advisory. CI replay is authoritative." });
     } catch {
       warnings.push({ path: "register_state", code: "unknown", message: "Register snapshot unavailable or unreadable; only within-payload checks ran. CI replay is authoritative." });
@@ -232,7 +238,10 @@ function parseCreate(b: Record<string, unknown>) {
   if (!b.payload || typeof b.payload !== "object" || Array.isArray(b.payload)) throw new InvalidError("payload must be an object");
   const corrects_id = b.corrects_id === undefined || b.corrects_id === null ? null : String(b.corrects_id);
   if (corrects_id !== null && !/^[0-9A-Z]{26}$/.test(corrects_id)) throw new InvalidError("corrects_id must be a submission id");
-  return { register_id, slug, action_type, payload: b.payload as Record<string, unknown>, corrects_id };
+  const dup = b.duplicate_of === undefined || b.duplicate_of === null ? null : b.duplicate_of;
+  if (dup !== null && (typeof dup !== "string" || dup.trim() === "" || dup.length > 500)) throw new InvalidError("duplicate_of must be a register item key");
+  if (dup !== null && action_type !== "ADD") throw new InvalidError("duplicate_of applies only to an ADD");
+  return { register_id, slug, action_type, payload: b.payload as Record<string, unknown>, corrects_id, duplicate_of: dup as string | null };
 }
 
 /** Country binding on every payload write. Unscoped text and LIR are ITU-staff only. */
@@ -265,6 +274,15 @@ async function requireEmptyRegister(db: D1Database, action: ActionType, slug: st
   if (!(await isEmpty(slug))) throw new ConflictError(`register ${slug} already has state; change it with ADD, REP or SUP actions, not a SEED`);
 }
 
+/** A duplicate starts from a real, currently active register item; an unverifiable source is refused, not guessed. */
+async function requireDuplicateSource(assets: Assets | undefined, register_id: string, key: string) {
+  if (!rulesFor(register_id)) throw new InvalidError("duplicate_of is not supported for this register");
+  let active: Set<string>;
+  try { active = registerStateFromSnapshot(register_id, await fetchSnapshot(assets, register_id)).active; }
+  catch { throw new UpstreamError("register snapshot unavailable; the entry to duplicate cannot be verified"); }
+  if (!active.has(key)) throw new ValidationFailed([{ path: "duplicate_of", code: "mismatch", message: `"${key}" is not an active item of this register` }]);
+}
+
 export async function createSubmission(db: D1Database, session: Session | null, b: Record<string, unknown>, isEmpty?: EmptyRegisterCheck, assets?: Assets): Promise<Sub> {
   const s = requireUser(session);
   const c = parseCreate(b);
@@ -276,6 +294,7 @@ export async function createSubmission(db: D1Database, session: Session | null, 
     if (target.state !== "published") throw new ConflictError(`only a published submission is corrected this way; it is ${target.state}`);
     if (target.register_id !== c.register_id) throw new InvalidError("a correction targets the same register");
   }
+  if (c.duplicate_of !== null) await requireDuplicateSource(assets, c.register_id, c.duplicate_of);
   const id = ulid();
   const t = now();
   const { errors, warnings } = await validateCurrent(assets, { register_id: c.register_id, slug: c.slug, action_type: c.action_type, payload: c.payload });
@@ -285,10 +304,10 @@ export async function createSubmission(db: D1Database, session: Session | null, 
   const stmts = [
     db
       .prepare(
-        `INSERT INTO submissions (id,proposer_id,affiliation_kind,affiliation_member_id,register_id,slug,action_type,state,current_rev,created_at,updated_at,version,corrects_id)
-         VALUES (?1,?2,?3,?4,?5,?6,?7,'draft',1,?8,?8,0,?9)`,
+        `INSERT INTO submissions (id,proposer_id,affiliation_kind,affiliation_member_id,register_id,slug,action_type,state,current_rev,created_at,updated_at,version,corrects_id,duplicate_of)
+         VALUES (?1,?2,?3,?4,?5,?6,?7,'draft',1,?8,?8,0,?9,?10)`,
       )
-      .bind(id, snap.submitted_by, snap.affiliation_kind, snap.affiliation_member_id, c.register_id, c.slug, c.action_type, t, c.corrects_id),
+      .bind(id, snap.submitted_by, snap.affiliation_kind, snap.affiliation_member_id, c.register_id, c.slug, c.action_type, t, c.corrects_id, c.duplicate_of),
     db
       .prepare(`INSERT INTO submission_revisions (${Object.keys(rev).join(",")}) VALUES (?1,?2,?3,?4,?5,?6,?7)`)
       .bind(...Object.values(rev)),
@@ -299,7 +318,7 @@ export async function createSubmission(db: D1Database, session: Session | null, 
       {
         at: t, actor_id: s.userId, actor_kind: "user", action: "submission.created", subject_type: "submission",
         subject_id: id, submission_id: id,
-        detail: { to: "draft", rev: 1, register_id: c.register_id, action_type: c.action_type, affiliation_kind: snap.affiliation_kind, affiliation_member_id: snap.affiliation_member_id, ...(c.corrects_id ? { corrects_id: c.corrects_id } : {}) },
+        detail: { to: "draft", rev: 1, register_id: c.register_id, action_type: c.action_type, affiliation_kind: snap.affiliation_kind, affiliation_member_id: snap.affiliation_member_id, ...(c.corrects_id ? { corrects_id: c.corrects_id } : {}), ...(c.duplicate_of !== null ? { duplicate_of: c.duplicate_of } : {}) },
       },
     ])),
   ];

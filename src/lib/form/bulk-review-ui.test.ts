@@ -7,6 +7,7 @@ import * as client from '../admin-client';
 import * as model from './model';
 import * as yamlIo from './yaml-io';
 import * as submissionDiff from '../submission-diff';
+import * as duplicate from './duplicate';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 // Exercise the real handlers and rendered controls without a browser dependency.
@@ -15,7 +16,7 @@ async function workspace(admin = true) {
   const { descriptor } = parse(readFileSync(filename, 'utf8'));
   const modules: Record<string, unknown> = {
     vue: Vue, 'vue/server-renderer': renderer, '../../lib/admin-client': client,
-    '../../lib/form/model': model, '../../lib/form/yaml-io': yamlIo, '../../lib/submission-diff': submissionDiff,
+    '../../lib/form/model': model, '../../lib/form/yaml-io': yamlIo, '../../lib/submission-diff': submissionDiff, '../../lib/form/duplicate': duplicate,
     './SchemaNode.vue': {}, '../../styles/admin-forms.css': {},
   };
   function evaluate(source: string) {
