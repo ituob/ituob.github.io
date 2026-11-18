@@ -27,15 +27,19 @@ afterEach(() => spy.mockRestore());
 
 class Browser {
   jar = new Map<string, string>();
+  constructor(readonly origin = "https://127.0.0.1:8443") {}
   async fetch(path: string, init: RequestInit & { json?: unknown } = {}) {
+    const url = new URL(path, this.origin);
     const headers = new Headers(init.headers);
     if (this.jar.size) headers.set("Cookie", [...this.jar].map(([k, v]) => `${k}=${v}`).join("; "));
     const method = init.method ?? "GET";
     if (method !== "GET") headers.set("Sec-Fetch-Site", "same-origin");
     if (init.json !== undefined) headers.set("Content-Type", "application/json");
-    const res = await worker.fetch(new Request(new URL(path, "http://localhost").toString(), { method, headers, body: init.json === undefined ? undefined : JSON.stringify(init.json), redirect: "manual" }), ENV);
+    const res = await worker.fetch(new Request(url.toString(), { method, headers, body: init.json === undefined ? undefined : JSON.stringify(init.json), redirect: "manual" }), ENV);
     for (const sc of res.headers.getSetCookie()) {
       const [pair, ...attrs] = sc.split(";");
+      // Enforce the cookie contract instead of accepting Secure cookies over HTTP.
+      if (url.protocol !== "https:" && attrs.some((a) => a.trim().toLowerCase() === "secure")) continue;
       const i = pair!.indexOf("=");
       const v = pair!.slice(i + 1);
       if (v === "" || attrs.some((a) => a.trim().toLowerCase() === "max-age=0")) this.jar.delete(pair!.slice(0, i));
@@ -43,15 +47,17 @@ class Browser {
     }
     return res;
   }
-  /** /auth/login -> mock picker page -> chosen persona -> /auth/callback. */
-  async signIn(persona: string) {
+  /** /auth/login -> mock sign-in form / account chooser -> /auth/callback. */
+  async signIn(persona: string, email?: string) {
     const start = await this.fetch("/auth/login");
     expect(start.status).toBe(302);
     const loc = start.headers.get("Location")!;
     const picker = await idp.handle(new Request(loc));
     expect(picker.status).toBe(200);
     expect(await picker.text()).toContain(`persona=${persona}`);
-    const chosen = await idp.handle(new Request(`${loc}&persona=${persona}`));
+    const chosen = await idp.handle(email === undefined
+      ? new Request(`${loc}&persona=${persona}`)
+      : new Request(loc, { method: "POST", body: new URLSearchParams({ email }) }));
     expect(chosen.status).toBe(302);
     const cb = new URL(chosen.headers.get("Location")!);
     return this.fetch(cb.pathname + cb.search);
@@ -63,6 +69,23 @@ const submission = (key: string) => ({ register_id: "E118_IIN", slug: "e118-iin"
 const propose = (b: Browser, key: string) => b.fetch("/api/me/submissions", { method: "POST", json: submission(key) });
 
 describe("sign-in and sign-out against the local mock provider", () => {
+  it("cannot complete the old HTTP flow because the browser rejects its Secure flow cookie", async () => {
+    const b = new Browser("http://127.0.0.1:8787");
+    expect((await b.signIn("member-aland")).status).toBe(400);
+    expect(b.jar.size).toBe(0);
+    expect((await b.whoami()).authenticated).toBe(false);
+  });
+
+  it("signs in through the email form with the existing account's identity and permissions", async () => {
+    const b = new Browser();
+    const cb = await b.signIn("member-aland", " DELEGATE@ALAND.MOCK.TEST ");
+    expect(cb.status).toBe(302);
+    expect(b.jar.has(SESSION)).toBe(true);
+    expect(await b.whoami()).toMatchObject({ authenticated: true, userId: PERSONAS["member-aland"].sub, roles: ["member-submitter"], memberStateId: "MOCK-A" });
+    expect((await propose(b, "Aland")).status).toBe(201);
+    expect((await propose(b, "Suspendia")).status).toBe(403);
+  });
+
   it("signs a persona in, keeps the session, and signs out", async () => {
     const b = new Browser();
     expect((await b.whoami()).authenticated).toBe(false);
@@ -182,6 +205,44 @@ describe("the mock provider itself", () => {
     for (const [k, v] of Object.entries(over)) u.searchParams.set(k, v);
     return u;
   };
+
+  it("renders an accessible email form with the OIDC request and a labelled test account chooser", async () => {
+    const url = await authorizeUrl();
+    const response = await idp.handle(new Request(url));
+    expect(response.status).toBe(200);
+    expect(response.headers.get("Cache-Control")).toBe("no-store");
+    const html = await response.text();
+    expect(html).toContain('<label for="email">Email address</label>');
+    expect(html).toContain('name="email" type="email" autocomplete="email" required');
+    expect(html).toContain('<button type="submit">Continue</button>');
+    expect(html).toContain('<summary>Test accounts</summary>');
+    expect(html).toContain("Local development only");
+    const action = html.match(/<form method="post" action="([^"]+)"/)![1]!.replaceAll("&amp;", "&");
+    expect(new URL(action, url).searchParams.toString()).toBe(url.searchParams.toString());
+    for (const [key, persona] of Object.entries(PERSONAS)) {
+      expect(html).toContain(`persona=${key}`);
+      expect(html).toContain(persona.email);
+    }
+  });
+
+  it.each(["", "unknown@mock.test", '\"><script>alert(1)</script>'])("rejects an unknown email (%s) without redirecting or losing the form", async (email) => {
+    const response = await idp.handle(new Request(await authorizeUrl(), { method: "POST", body: new URLSearchParams({ email }) }));
+    expect(response.status).toBe(400);
+    expect(response.headers.has("Location")).toBe(false);
+    const html = await response.text();
+    expect(html).toContain('role="alert"');
+    expect(html).toContain("Enter an email address from the test accounts below.");
+    expect(html).not.toContain("<script>");
+    expect(html).toContain('<button type="submit">Continue</button>');
+  });
+
+  it("still validates loopback redirects and PKCE before accepting an email submission", async () => {
+    for (const over of [{ redirect_uri: "https://evil.example/cb" }, { code_challenge: "" }, { client_id: "other" }]) {
+      const response = await idp.handle(new Request(await authorizeUrl(over), { method: "POST", body: new URLSearchParams({ email: PERSONAS["itu-admin"].email }) }));
+      expect(response.status).toBe(400);
+      expect(response.headers.has("Location")).toBe(false);
+    }
+  });
 
   it("refuses a redirect_uri off loopback, a wrong client and missing PKCE", async () => {
     for (const over of [{ redirect_uri: "https://evil.example/cb" }, { client_id: "other" }, { code_challenge: "" }, { code_challenge_method: "plain" }, { code_challenge_method: "" }]) {

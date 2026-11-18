@@ -63,6 +63,41 @@ const sha256b64url = async (s) => b64url(await crypto.subtle.digest("SHA-256", n
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
 const loopback = (u) => ["127.0.0.1", "localhost", "[::1]"].includes(new URL(u).hostname);
 
+function signInPage(url, personas, email = "", error = "") {
+  const action = new URL(url);
+  action.searchParams.delete("persona");
+  const items = Object.entries(personas).map(([key, persona]) => {
+    const choice = new URL(action);
+    choice.searchParams.set("persona", key);
+    return `<li><a href="${esc(choice.pathname + choice.search)}"><strong>${esc(persona.name)}</strong><span>${esc(persona.email)}</span></a></li>`;
+  }).join("");
+  return new Response(`<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sign in — ITU Operational Bulletin</title>
+<style>
+/* Standalone loopback page: fonts and palette mirror src/styles/global.css. */
+:root { color-scheme: light; --font-sans: Helvetica, Arial, sans-serif; --bg: #ffffff; --bg-2: #fafafa; --fg: #000000; --fg-2: #333333; --fg-3: #666666; --border: rgba(0,0,0,.12); --accent: #1aa1da; --link: #178ec4; }
+* { box-sizing: border-box; } body { margin: 0; color: var(--fg); background: var(--bg-2); font: 1rem/1.5 var(--font-sans); }
+header { background: var(--accent); color: white; padding: 1rem 5vw; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; }
+main { width: min(100% - 2rem, 30rem); margin: 3rem auto; padding: 2rem; background: var(--bg); border: 1px solid var(--border); border-radius: .5rem; }
+h1 { margin: 0; font-size: 2rem; line-height: 1.15; letter-spacing: -.022em; } p { color: var(--fg-2); } .notice { color: var(--fg-3); font-size: .875rem; }
+label { display: block; font-weight: 600; margin-bottom: .5rem; } input, button { width: 100%; font: inherit; border-radius: .25rem; padding: .75rem; }
+input { border: 1px solid var(--border); color: var(--fg); background: var(--bg); } button { margin-top: 1rem; border: 0; background: var(--link); color: white; font-weight: 600; cursor: pointer; }
+button:hover { background: #137aa8; } :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+details { margin-top: 2rem; border-top: 1px solid var(--border); padding-top: 1rem; } summary { cursor: pointer; font-weight: 600; }
+ul { list-style: none; padding: 0; margin-bottom: 0; } li + li { border-top: 1px solid var(--border); } a { display: block; padding: .75rem 0; color: var(--link); text-decoration: none; } a:hover { text-decoration: underline; } a span { display: block; color: var(--fg-3); overflow-wrap: anywhere; font-size: .875rem; }
+.error { color: #b42318; } @media (max-width: 400px) { main { padding: 1.25rem; margin: 1.5rem auto; } }
+</style></head><body><header>ITU Operational Bulletin</header><main>
+<h1>Sign in</h1><p>Continue with your email address.</p>
+<p class="notice" id="local-notice">Local development only. This mock identity provider signs in test accounts without a password. Use a test email below.</p>
+<form method="post" action="${esc(action.pathname + action.search)}">
+<label for="email">Email address</label><input id="email" name="email" type="email" autocomplete="email" required value="${esc(email)}" aria-describedby="local-notice${error ? " sign-in-error" : ""}"${error ? ' aria-invalid="true"' : ""}>
+${error ? `<p class="error" id="sign-in-error" role="alert">${esc(error)}</p>` : ""}
+<button type="submit">Continue</button></form>
+<details><summary>Test accounts</summary><p class="notice">Choose a local test account to sign in directly.</p><ul>${items}</ul></details>
+</main></body></html>`, { status: error ? 400 : 200, headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store" } });
+}
+
 /**
  * Returns { handle(Request) -> Promise<Response>, issuer }. Pure fetch-handler:
  * runs under Node (serve) and inside the Worker test pool (outbound-fetch shim).
@@ -85,7 +120,7 @@ export async function createMockIdp({
   };
   const err = (status, error) => Response.json({ error }, { status });
 
-  async function authorize(url) {
+  async function authorize(url, submittedEmail) {
     const p = url.searchParams;
     const redirect = p.get("redirect_uri");
     if (p.get("client_id") !== clientId || !redirect || !URL.canParse(redirect) || !loopback(redirect)) {
@@ -94,13 +129,14 @@ export async function createMockIdp({
     if (p.get("response_type") !== "code" || p.get("code_challenge_method") !== "S256" || !p.get("code_challenge") || !p.get("state") || !p.get("nonce")) {
       return new Response("response_type=code, S256 PKCE, state and nonce are required", { status: 400 });
     }
-    const who = p.get("persona");
-    if (!who) {
-      const items = Object.entries(personas)
-        .map(([key, pr]) => { const u = new URL(url); u.searchParams.set("persona", key); return `<li><a href="${esc(u.pathname + u.search)}">${esc(key)}</a> (${esc(pr.name)}, ${esc(pr.email)})</li>`; })
-        .join("");
-      return new Response(`<!doctype html><meta charset="utf-8"><title>Mock sign-in</title><h1>Mock identity provider</h1><p>Local development only. Pick who you are:</p><ul>${items}</ul>`, { headers: { "Content-Type": "text/html; charset=utf-8" } });
+    if (submittedEmail !== undefined) {
+      const email = submittedEmail.trim();
+      const match = Object.entries(personas).find(([, persona]) => persona.email.toLowerCase() === email.toLowerCase());
+      if (!match) return signInPage(url, personas, email, "Enter an email address from the test accounts below.");
+      p.set("persona", match[0]);
     }
+    const who = p.get("persona");
+    if (!who) return signInPage(url, personas);
     const persona = personas[who];
     if (!persona) return new Response("unknown persona", { status: 400 });
     const code = b64url(crypto.getRandomValues(new Uint8Array(16)));
@@ -149,6 +185,10 @@ export async function createMockIdp({
       }
       if (url.pathname === "/jwks") return Response.json({ keys: [jwk] });
       if (url.pathname === "/authorize" && req.method === "GET") return authorize(url);
+      if (url.pathname === "/authorize" && req.method === "POST") {
+        const form = new URLSearchParams(new TextDecoder().decode(await req.arrayBuffer()));
+        return authorize(url, form.get("email") ?? "");
+      }
       if (url.pathname === "/token" && req.method === "POST") return token(req);
       return new Response("not found", { status: 404 });
     },

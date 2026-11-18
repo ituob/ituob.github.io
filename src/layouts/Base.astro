@@ -8,6 +8,7 @@
 import "~/styles/global.css";
 import CommandPalette from "~/components/vue/CommandPalette.vue";
 import ReadingProgress from "~/components/vue/ReadingProgress.vue";
+import HeaderAccount from "~/components/account/HeaderAccount.vue";
 
 export interface Breadcrumb {
   label: string;
@@ -139,6 +140,7 @@ const navItems = [
             </a>
           ))}
         </nav>
+        <HeaderAccount client:load />
       </div>
       {breadcrumbs.length > 0 && (
         <div class="crumbs-strip">
@@ -186,3 +188,8 @@ const navItems = [
     <CommandPalette client:idle />
   </body>
 </html>
+
+<style>
+  header .bar { flex-wrap: wrap; }
+  header nav.sections { flex-wrap: wrap; }
+</style>
