@@ -34,3 +34,25 @@ test("a timestamp with a numeric offset is a Time like in Psych, so it takes par
   ];
   assert.equal(computeJekyllSeqNos(issues, (p) => p).get(2)?.get("P"), 1);
 });
+
+test("the same instant in a spelling Date.parse rejects still equals itself", () => {
+  const same = (a: string, b: string) => samePosition(jekyllPosition(a), jekyllPosition(b));
+  for (const spelling of ["2020-01-01T10:00:00+01", "2020-01-01T10:00:00 Z", "2020-01-01 10:00:00 +01:00", "2020-01-01T10:00:00+0100", "2020-01-01t10:00:00Z", "2020-01-01T10:00:00+99:99"]) {
+    assert.equal(same(spelling, spelling), true, spelling);
+  }
+  assert.equal(same("2020-01-01T10:00:00+01", "2020-01-01T09:00:00Z"), true);
+  assert.equal(same("2020-01-01T10:00:00 Z", "2020-01-01T10:00:00Z"), true);
+  assert.equal(same("2020-01-01 10:00:00 +01:00", "2020-01-01T09:00:00Z"), true);
+  assert.equal(same("2020-01-01T10:00:00+0100", "2020-01-01T09:00:00Z"), true);
+  assert.equal(same("2020-01-01T10:00:00+01", "2020-01-01T10:00:00Z"), false);
+  assert.equal(same("2020-01-01T10:00:00+99:99", "2020-01-01T10:00:00+99:98"), false);
+});
+
+test("a local-midnight 23:00Z timestamp equals the next bare date in any accepted spelling", () => {
+  const same = (a: string, b: string) => samePosition(jekyllPosition(a), jekyllPosition(b));
+  assert.equal(same("2015-01-01", "2014-12-31 23:00:00 Z"), true);
+  assert.equal(same("2015-01-01", "2014-12-31T23:00:00 Z"), true);
+  assert.equal(same("2015-01-01", "2014-12-31 23:00:00Z"), true);
+  assert.equal(same("2015-01-01", "2014-12-31T22:00:00Z"), false);
+  assert.equal(same("2015-01-01", "2014-12-31T23:00:00+01"), false);
+});

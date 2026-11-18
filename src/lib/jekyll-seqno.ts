@@ -32,12 +32,34 @@ export const jekyllPosition = (v: unknown): Position => {
 // timestamp at exactly 23:00:00Z qualifies; a UTC-midnight one (OB 1167
 // M1400_ICC `2014-09-15T00:00:00.000Z` vs `2014-09-15`) stays unequal, as in
 // Ruby, and production shows no number there.
-const localDay = (t: string) =>
-  /T23:00:00(\.0+)?Z$/.test(t) ? new Date(Date.parse(t) + 3600_000).toISOString().slice(0, 10) : null;
+/**
+ * The instant of a timestamp the YAML reader treats as a Time. `Date.parse` rejects some spellings Psych accepts
+ * (a space before the zone, an hour-only offset `+01`, a space separator), so those are rewritten to strict ISO
+ * first. NaN when the value still is not a real instant (`+99:99`).
+ */
+const instant = (t: string): number => {
+  const iso = t
+    .replace(/^(\d{4}-\d{2}-\d{2})[Tt ]/, "$1T")
+    .replace(/\s+(Z|[+-])/, "$1")
+    .replace(/([+-]\d{2})$/, "$1:00")
+    .replace(/([+-]\d{2})(\d{2})$/, "$1:$2");
+  return Date.parse(iso);
+};
+const isUtc = (t: string) => /(\d)\s*Z$/.test(t);
+
+const localDay = (t: string) => {
+  if (!/T23:00:00(\.0+)?\s*Z$/i.test(t.replace(/^(\d{4}-\d{2}-\d{2}) /, "$1T")) || !isUtc(t)) return null;
+  const at = instant(t);
+  return Number.isNaN(at) ? null : new Date(at + 3600_000).toISOString().slice(0, 10);
+};
 
 export const samePosition = (a: Position, b: Position) => {
   if (!a || !b || a.kind === "str" || b.kind === "str") return false;
-  if (a.kind === b.kind) return a.kind === "time" ? Date.parse(a.value) === Date.parse(b.value) : a.value === b.value;
+  if (a.kind === b.kind) {
+    if (a.kind !== "time") return a.value === b.value;
+    const [x, y] = [instant(a.value), instant(b.value)];
+    return Number.isNaN(x) || Number.isNaN(y) ? a.value === b.value : x === y;
+  }
   const [d, t] = a.kind === "date" ? [a, b] : [b, a];
   return d.value === localDay(t.value);
 };
