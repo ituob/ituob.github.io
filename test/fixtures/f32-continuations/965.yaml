@@ -1,0 +1,22 @@
+type: REP
+date_requested:
+date_active:
+ob_issue_no: '965'
+reference: OB-965
+identifier:
+  code: P 36 COL 2
+data:
+  _class: F32TDIAmendment
+  position: P 36 COL 2
+  description: P 36 Qatar LIR COL 2 REP Qatar Telecom (Qtel) Doha by Unitel
+  entries:
+  - country_or_area:
+      fr: QATAR
+    network_roa: Unitel
+    network_code: DH- -
+    telegraph_office_name:
+      en: All destinations
+    office_code: DHXX
+  notes:
+  - "* See Note published in present ITU Operational Bulletin No. 965 of 1.X.2010,
+    page"

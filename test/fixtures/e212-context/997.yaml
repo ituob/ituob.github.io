@@ -1,0 +1,35 @@
+type: REP
+date_requested:
+date_active:
+ob_issue_no: '997'
+reference: OB-997
+identifier:
+  code: P 11
+data:
+  _class: E212MNCAmendment
+  position: P 11
+  entries:
+  - mcc_mnc_codes: 628 01
+    country_or_area:
+      en: '["Gabon"]'
+    networks: LIBERTIS
+  - mcc_mnc_codes: 628 02
+    country_or_area:
+      en: '["Gabon"]'
+    networks: MOOV
+  - mcc_mnc_codes: 628 03
+    country_or_area:
+      en: '["Gabon"]'
+    networks: CELTEL
+  - mcc_mnc_codes: 628 04
+    country_or_area:
+      en: '["Gabon"]'
+    networks: USAN GABON
+  - mcc_mnc_codes: 628 05
+    country_or_area:
+      en: '["Gabon"]'
+    networks: Réseau de l’Administration Gabonaise (RAG)
+  notes:
+  - ______________
+  - "*         MCC : Mobile Country Code / Indicatif de pays du mobile / Indicativo
+    de país para el servicio móvil"

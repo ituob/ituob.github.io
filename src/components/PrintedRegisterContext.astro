@@ -1,4 +1,5 @@
 ---
+import type { ProseMirrorNode } from "../lib/types";
 import ProseMirror from "./ProseMirror.astro";
 import { loadPrintedContext, registerPrintedContext } from "../lib/printed-context";
 
@@ -9,8 +10,16 @@ interface Props {
 const { slug, issue } = Astro.props;
 // These registers contain printed form labels and prose outside typed entries.
 const registers = new Set(["t35-na", "e218-trcc", "e164-cc"]);
+// Printed action captions name the affected country outside the typed form.
+const textOf = (node: ProseMirrorNode): string => node.text ?? (node.content ?? []).map(textOf).join(" ");
+const issueContext = (id: number) => {
+  const nodes = loadPrintedContext(id, slug);
+  return ["t35-na", "e164-acn"].includes(slug)
+    ? nodes.filter((node) => /^P\s*\d+.*\b(?:ADD|LIR|SUP|REP|MOD)\b/.test(textOf(node)))
+    : nodes;
+};
 const groups = issue !== undefined
-  ? (slug === "e212-mnc" ? [{ issue, nodes: loadPrintedContext(issue, slug) }] : [])
+  ? (["e212-mnc", "t35-na", "e164-acn"].includes(slug) ? [{ issue, nodes: issueContext(issue) }] : [])
   : (registers.has(slug) ? registerPrintedContext(slug) : []);
 ---
 {groups.some((group) => group.nodes.length > 0) && (

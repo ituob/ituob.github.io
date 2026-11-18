@@ -9,7 +9,7 @@ import * as calendar from './schedule-calendar';
 import { YamlTimestamp } from './yaml-io';
 
 function evaluate(source: string) {
-  const modules: Record<string, unknown> = { vue: Vue, 'vue/server-renderer': renderer, '../../lib/form/schedule-calendar': calendar };
+  const modules: Record<string, unknown> = { vue: Vue, 'vue/server-renderer': renderer, '../../lib/form/schedule-calendar': calendar, '../../styles/admin-forms.css': {} };
   const js = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 } }).outputText;
   const result = { exports: {} as any };
   new Function('require', 'module', 'exports', js)((name: string) => {

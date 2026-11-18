@@ -1,0 +1,108 @@
+messages:
+  - target:
+      publication: E212_MNC
+    contents:
+      en:
+        type: doc
+        content:
+          - type: table
+            content:
+              - type: table_row
+                content:
+                  - type: table_cell
+                    attrs:
+                      colspan: 1
+                      rowspan: 1
+                      colwidth: null
+                    content:
+                      - type: paragraph
+                        content:
+                          - type: text
+                            text: Pays/zone géographique
+                  - type: table_cell
+                    attrs:
+                      colspan: 1
+                      rowspan: 1
+                      colwidth: null
+                    content:
+                      - type: paragraph
+                        content:
+                          - type: text
+                            text: MCC + MNC*
+                  - type: table_cell
+                    attrs:
+                      colspan: 1
+                      rowspan: 1
+                      colwidth: null
+                    content:
+                      - type: paragraph
+                        content:
+                          - type: text
+                            text: Nom de Réseau/Opérateur
+              - type: table_row
+                content:
+                  - type: table_cell
+                    attrs:
+                      colspan: 1
+                      rowspan: 1
+                      colwidth: null
+                    content:
+                      - type: paragraph
+                        content:
+                          - type: text
+                            text: Gabon
+                  - type: table_cell
+                    attrs:
+                      colspan: 1
+                      rowspan: 1
+                      colwidth: null
+                    content:
+                      - type: paragraph
+                        content:
+                          - type: text
+                            text: 628 01
+                      - type: paragraph
+                        content:
+                          - type: text
+                            text: 628 02
+                      - type: paragraph
+                        content:
+                          - type: text
+                            text: 628 03
+                      - type: paragraph
+                        content:
+                          - type: text
+                            text: 628 04
+                      - type: paragraph
+                        content:
+                          - type: text
+                            text: 628 05
+                  - type: table_cell
+                    attrs:
+                      colspan: 1
+                      rowspan: 1
+                      colwidth: null
+                    content:
+                      - type: paragraph
+                        content:
+                          - type: text
+                            text: LIBERTIS
+                      - type: paragraph
+                        content:
+                          - type: text
+                            text: MOOV
+                      - type: paragraph
+                        content:
+                          - type: text
+                            text: CELTEL
+                      - type: paragraph
+                        content:
+                          - type: text
+                            text: USAN GABON
+                      - type: paragraph
+                        content:
+                          - type: text
+                            text: "Réseau de "
+                          - type: hard_break
+                          - type: text
+                            text: l’Administration Gabonaise (RAG)
