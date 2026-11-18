@@ -8,12 +8,12 @@
   "local_pages": 422,
   "source_sha256": {
     "src/lib/printed-context.ts": "f6591422318d0d42c2e30b19eda730e30dac5b9a823904d7b076730325d987ab",
-    "src/lib/loaders.ts": "2f260d423333863af3e75b91be3450918a0e7349c4c52329ff45f1e4b1311dbb",
+    "src/lib/loaders.ts": "c9952a2a4d216a2fc5148f3ada5581695bc1fc35ebc35f0c05f53d9b8cdd7d95",
     "src/lib/ob-date.ts": "916013f23cf1563ae0d21b55b0735436c76671285f7c79d97c32de280bfaa4bc",
     "src/components/PrintedRegisterContext.astro": "e779d0251c6ffa44a13898d567673e8783c2fcc37f9e45cc9f484955a4c2d45f",
     "src/components/IncompleteBanner.astro": "521fad7721071afac359a4b0247ae826163dd29f94b06a53518525bca9056f78",
     "src/components/ProseMirror.astro": "aa98a540500ec769277aa321c5fbae10de1a163425bc9bf1302cf3b9efacbc43",
-    "src/pages/issues/[id]/index.astro": "5dba10fa058cc7cb64ea5dfb3b15db088b0d302da69962845731b409c2dacdb9",
+    "src/pages/issues/[id]/index.astro": "9fb41792b1adda589ac2c3eb7fc2c50b14eac1078c27bdd080dcd87f82a2dc4a",
     "src/pages/registers/[slug]/index.astro": "fc601a04f8cce199831e66a4ac008e29bac2fb7c80626c9f0065d5e73e6bf742",
     "package-lock.json": "058975c4ca203c5be28ea263c29b45670a9ff2080d2a99361eafd337d3396054"
   },
@@ -3472,11 +3472,11 @@
       "deployed": "issues/669-en/index.html",
       "local": "issues/669/index.html",
       "label": "issue/669",
-      "coverage": 0.9014778325123153,
-      "verdict": "fail",
+      "coverage": 1.0,
+      "verdict": "pass",
       "exclusion": null,
       "deployed_sha256": "bc67e0f7fb216c2976ea834db5f5bf38b8f8b83734aacfee16ab83d8d9832240",
-      "local_sha256": "cc93eefeb0b717398db1181d9174ed4ae3c5676d2dc0d96cf72b59570769ce4c"
+      "local_sha256": "09137913b4df08a60e3ef7b2cb08ea0084fedc9e0ae6002e74d077a3d13011da"
     },
     {
       "deployed": "issues/955-en/index.html",

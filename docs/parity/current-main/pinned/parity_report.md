@@ -11,8 +11,8 @@ variant of it passes ≥95%.
 
 | verdict | count | percent |
 |---------|-------|---------|
-| pass (≥95%) | 421 | 99.8% |
-| warn (80-95%) | 1 | 0.2% |
+| pass (≥95%) | 422 | 100.0% |
+| warn (80-95%) | 0 | 0.0% |
 | fail (<80%) | 0 | 0.0% |
 | missing (no local) | 0 | 0.0% |
 | **total** | **422** | |
@@ -21,22 +21,9 @@ variant of it passes ≥95%.
 
 _All pages pass ≥95% parity._
 
-## issue — 389 pages, avg 98.7%, 388/389 pass
+## issue — 389 pages, avg 98.7%, 389/389 pass
 
-### Pages below 95% coverage
-
-| page | coverage | variants | missing headings | missing links | missing tables |
-|------|----------|----------|------------------|---------------|----------------|
-| issue/669 | 90.1% | 1 | 2 | 0 | 0 |
-
-### Specific heading gaps (worst 3 pages)
-
-#### Issue 669
-
-Coverage: 90.1% — 2 missing headings:
-
-- amendments
-- abbreviations used in this section
+_All pages pass ≥95% parity._
 
 ## recommendation — 12 pages, avg 99.0%, 12/12 pass
 
