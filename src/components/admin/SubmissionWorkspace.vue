@@ -2,7 +2,7 @@
 import '../../styles/admin-forms.css';
 import { computed, onMounted, ref } from 'vue';
 import { parseYaml } from '../../lib/form/yaml-io';
-import { submissionFieldDiff } from '../../lib/submission-diff';
+import { currentItemDiffs, submissionFieldDiff, type CurrentRegisterItems } from '../../lib/submission-diff';
 import { blankState, toFormState, type FormNode } from '../../lib/form/model';
 import { actionPayload, actionTypes, amendmentClasses, api, ApiError, payloadErrors, revisionErrors } from '../../lib/admin-client';
 import type { SchemaIssue } from '../../lib/schema.validators.generated';
@@ -10,7 +10,7 @@ import SchemaNode from './SchemaNode.vue';
 const props = withDefaults(defineProps<{ admin?: boolean; create?: boolean; translation?: boolean; registers?: { register_id: string; slug: string; label: string }[] }>(), { registers: () => [] });
 interface Submission { id: string; register_id: string; slug: string; action_type: string; state: string; current_rev: number; affiliation_kind?: string; affiliation_member_id?: string | null; affiliation_member_name?: string | null }
 interface Revision { rev: number; payload_yaml: string; validation: string; created_at: string }
-interface Detail { ok: true; submission: Submission; revisions: Revision[]; history: { from_state: string; to_state: string; reason: string | null; at: string }[]; pr: { pr_number: number | null; pr_state: string; last_error: string | null } | null }
+interface Detail { ok: true; submission: Submission; revisions: Revision[]; current?: CurrentRegisterItems; history: { from_state: string; to_state: string; reason: string | null; at: string }[]; pr: { pr_number: number | null; pr_state: string; last_error: string | null } | null }
 const rows = ref<Submission[]>([]), detail = ref<Detail | null>(null);
 const reviewIds = ref<string[]>([]);
 const reviewResults = ref<{ id: string; success: boolean; message: string }[]>([]);
@@ -33,6 +33,7 @@ function revisionChanges(revision: Revision) {
   const after = parseYaml(revision.payload_yaml);
   return submissionFieldDiff(before, after);
 }
+const currentDiffs = computed(() => detail.value ? currentItemDiffs(detail.value.submission.action_type, existing.value, detail.value.current) : null);
 async function perform(work: () => Promise<void>) {
   busy.value = true; error.value = ''; notice.value = ''; errors.value = [];
   try { await work(); } catch (e) { error.value = e instanceof Error ? e.message : 'Request failed'; if (e instanceof ApiError) errors.value = e.errors; }
@@ -173,6 +174,18 @@ onMounted(() => perform(async () => { await list(); const id = new URLSearchPara
       </fieldset>
       <template v-if="detail"><h3>Publication status</h3><p class="admin-help" v-if="detail.pr">PR {{ detail.pr.pr_number ?? 'pending' }} · {{ detail.pr.pr_state }}<span v-if="detail.pr.last_error" class="admin-error"> · {{ detail.pr.last_error }}</span></p><p class="admin-help" v-else>No publication PR yet.</p>
       <h3>Review history</h3><ol><li v-for="(event, i) in detail.history" :key="i">{{ event.at }}: {{ event.from_state || 'new' }} → {{ event.to_state }}<span v-if="event.reason"> — {{ event.reason }}</span></li></ol>
+      <section v-if="detail.submission.action_type !== 'ADD'" aria-label="Changes against the current register">
+        <h3>Changes against the current register</h3>
+        <p class="admin-help" v-if="!currentDiffs">Current register item unavailable; compare with the revision history below. CI replay is authoritative.</p>
+        <template v-else>
+          <p class="admin-help">Compared with the deployed register snapshot, which may lag the register.</p>
+          <div v-for="item in currentDiffs" :key="item.index">
+            <h4>Item <code>{{ item.key || `entries[${item.index}]` }}</code><template v-if="item.status !== 'active'"> ({{ item.status === 'lapsed' ? 'lapsed in the register' : 'not found in the register' }})</template></h4>
+            <p class="admin-help" v-if="!item.changes.length">No field changes.</p>
+            <div v-else class="admin-table-scroll" tabindex="0" role="region" aria-label="Current register field changes"><table class="admin-table"><thead><tr><th scope="col">Field</th><th scope="col">Before (current)</th><th scope="col">After (proposed)</th></tr></thead><tbody><tr v-for="change in item.changes" :key="change.path"><th scope="row"><code>{{ change.path }}</code></th><td><pre>{{ change.before }}</pre></td><td><pre>{{ change.after }}</pre></td></tr></tbody></table></div>
+          </div>
+        </template>
+      </section>
       <h3>Revision history</h3><details v-for="revision in detail.revisions" :key="revision.rev"><summary>Revision {{ revision.rev }} · {{ revision.created_at }}</summary>
         <h4>Field changes {{ revision.rev === detail.revisions[0]?.rev ? '(new proposal)' : `from revision ${revision.rev - 1}` }}</h4>
         <p class="admin-help" v-if="!revisionChanges(revision).length">No field changes.</p>

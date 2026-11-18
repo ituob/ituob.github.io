@@ -8,7 +8,7 @@ import { ConflictError, InvalidError, NotFoundError } from "./membership.ts";
 import { type OpenedPr, type PatchPublisher, branchName } from "./publisher.ts";
 import type { Env, Session } from "./types.ts";
 import { ulid } from "./ulid.ts";
-import { ACTION_TYPES, type ActionType, type FieldError, registerKeysOf, submissionTargetErrors, rulesFor, registerStateFromSnapshot, validateWithWarnings, type ValidationContext } from "./validation.ts";
+import { ACTION_TYPES, type ActionType, type FieldError, registerKeysOf, submissionTargetErrors, rulesFor, entryKeyOf, registerStateFromSnapshot, validateWithWarnings, type ValidationContext } from "./validation.ts";
 
 export class ValidationFailed extends Error {
   constructor(public errors: FieldError[], public warnings: FieldError[] = []) {
@@ -587,7 +587,37 @@ export async function adminWithdraw(db: D1Database, session: Session | null, id:
 
 // ---------------------------------------------------------------- reads
 
-export async function readSubmission(db: D1Database, session: Session | null, id: string) {
+export interface CurrentItem { key: string; status: "active" | "lapsed" | "unknown"; entry: Record<string, unknown> | null }
+export type CurrentItems = { available: true; items: CurrentItem[] } | { available: false; items: [] };
+
+/**
+ * The register's current items for the entries a REP/MOD/SUP/DEL proposes to change, read from the
+ * deployed snapshot (the same source validateCurrent uses, so it may lag the register). ADD has no before.
+ */
+export async function currentItemsFor(assets: Assets | undefined, sub: Pick<Sub, "register_id" | "slug" | "action_type">, payload: unknown): Promise<CurrentItems> {
+  const none: CurrentItems = { available: false, items: [] };
+  const rules = rulesFor(sub.register_id);
+  const isObj = (v: unknown): v is Record<string, unknown> => !!v && typeof v === "object" && !Array.isArray(v);
+  if (!assets || !rules || sub.action_type === "ADD" || !isObj(payload) || !isObj(payload.data) || !Array.isArray(payload.data.entries)) return none;
+  try {
+    const response = await assets.fetch(new Request(`https://www.ituob.org/data/snapshots/${encodeURIComponent(sub.slug)}/current.json`));
+    if (!response.ok) return none;
+    const snapshot: unknown = await response.json();
+    if (!isObj(snapshot) || !Array.isArray(snapshot.active_entries) || !Array.isArray(snapshot.lapsed_keys)) return none;
+    const active = new Map<string, Record<string, unknown>>();
+    for (const e of snapshot.active_entries) { const k = isObj(e) ? entryKeyOf(e, rules) : null; if (k !== null && isObj(e)) active.set(k, e); }
+    const lapsed = new Set(snapshot.lapsed_keys.filter((k): k is string => typeof k === "string"));
+    const items = payload.data.entries.map((e): CurrentItem => {
+      const key = isObj(e) ? entryKeyOf(e, rules) : null;
+      if (key === null) return { key: "", status: "unknown", entry: null };
+      const entry = active.get(key);
+      return entry ? { key, status: "active", entry } : { key, status: lapsed.has(key) ? "lapsed" : "unknown", entry: null };
+    });
+    return { available: true, items };
+  } catch { return none; }
+}
+
+export async function readSubmission(db: D1Database, session: Session | null, id: string, assets?: Assets) {
   const s = requireUser(session);
   const sub = await getSub(db, id);
   if (sub.proposer_id !== s.userId && !isItu(s)) throw new NotFoundError("unknown submission");
@@ -597,7 +627,11 @@ export async function readSubmission(db: D1Database, session: Session | null, id
   const affiliation = sub.affiliation_member_id
     ? await db.prepare(`SELECT name FROM members WHERE id=?1`).bind(sub.affiliation_member_id).first<{ name: string }>()
     : null;
-  return { submission: { ...sub, affiliation_member_name: affiliation?.name ?? null }, revisions, history, pr };
+  const latest = revisions.find((r) => r.rev === sub.current_rev) as { payload_yaml?: string } | undefined;
+  let payload: unknown;
+  try { payload = latest?.payload_yaml ? parsePayload(latest.payload_yaml) : undefined; } catch { payload = undefined; }
+  const current = await currentItemsFor(assets, sub, payload);
+  return { submission: { ...sub, affiliation_member_name: affiliation?.name ?? null }, revisions, history, pr, current };
 }
 
 export async function listSubmissions(db: D1Database, session: Session | null, state: string | null, all: boolean) {
