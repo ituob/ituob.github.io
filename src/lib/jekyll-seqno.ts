@@ -14,23 +14,52 @@ export type Position = { kind: "date" | "time" | "str"; value: string } | null;
 export const jekyllPosition = (v: unknown): Position => {
   if (v === null || v === undefined || v === "") return null;
   const s = v instanceof Date ? v.toISOString() : String(v);
-  if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z$/.test(s)) return { kind: "time", value: s };
+  if (/^\d{4}-\d{2}-\d{2}[Tt ]\d{2}:\d{2}:\d{2}(\.\d+)?\s*(Z|[+-]\d{2}(:?\d{2})?)$/.test(s)) return { kind: "time", value: s };
   if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return { kind: "date", value: s };
   return { kind: "str", value: s };
 };
 
+// Mechanism (measured 2026-11-18, Ruby 3.4 + Psych, TZ=UTC and Europe/Zurich, with
+// and without jekyll/safe_yaml/activesupport): Date == Time is false for every
+// timestamp, and ActiveSupport would equal only T00:00:00Z. Neither explains the
+// T23:00:00Z rule below, so it stays empirical; DST (T22:00:00Z) is unobserved on
+// production and deliberately NOT treated as equal. A timestamp with a numeric
+// offset is a Time in Psych (`2015-01-01T00:00:00+01:00`), so it is kind "time".
+//
 // A bare date names the same position as a local-midnight timestamp one day
 // earlier in UTC (OB 1089 `2015-01-01` vs annex `2014-12-31T23:00:00Z`), which
 // the deployed site counted (OB 1100 ISPC shows no. 31 on production). Only a
 // timestamp at exactly 23:00:00Z qualifies; a UTC-midnight one (OB 1167
 // M1400_ICC `2014-09-15T00:00:00.000Z` vs `2014-09-15`) stays unequal, as in
 // Ruby, and production shows no number there.
-const localDay = (t: string) =>
-  /T23:00:00(\.0+)?Z$/.test(t) ? new Date(Date.parse(t) + 3600_000).toISOString().slice(0, 10) : null;
+/**
+ * The instant of a timestamp the YAML reader treats as a Time. `Date.parse` rejects some spellings Psych accepts
+ * (a space before the zone, an hour-only offset `+01`, a space separator), so those are rewritten to strict ISO
+ * first. NaN when the value still is not a real instant (`+99:99`).
+ */
+const instant = (t: string): number => {
+  const iso = t
+    .replace(/^(\d{4}-\d{2}-\d{2})[Tt ]/, "$1T")
+    .replace(/\s+(Z|[+-])/, "$1")
+    .replace(/([+-]\d{2})$/, "$1:00")
+    .replace(/([+-]\d{2})(\d{2})$/, "$1:$2");
+  return Date.parse(iso);
+};
+const isUtc = (t: string) => /(\d)\s*Z$/.test(t);
+
+const localDay = (t: string) => {
+  if (!/T23:00:00(\.0+)?\s*Z$/i.test(t.replace(/^(\d{4}-\d{2}-\d{2}) /, "$1T")) || !isUtc(t)) return null;
+  const at = instant(t);
+  return Number.isNaN(at) ? null : new Date(at + 3600_000).toISOString().slice(0, 10);
+};
 
 export const samePosition = (a: Position, b: Position) => {
   if (!a || !b || a.kind === "str" || b.kind === "str") return false;
-  if (a.kind === b.kind) return a.value === b.value;
+  if (a.kind === b.kind) {
+    if (a.kind !== "time") return a.value === b.value;
+    const [x, y] = [instant(a.value), instant(b.value)];
+    return Number.isNaN(x) || Number.isNaN(y) ? a.value === b.value : x === y;
+  }
   const [d, t] = a.kind === "date" ? [a, b] : [b, a];
   return d.value === localDay(t.value);
 };
