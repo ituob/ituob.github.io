@@ -14,11 +14,18 @@ export type Position = { kind: "date" | "time" | "str"; value: string } | null;
 export const jekyllPosition = (v: unknown): Position => {
   if (v === null || v === undefined || v === "") return null;
   const s = v instanceof Date ? v.toISOString() : String(v);
-  if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z$/.test(s)) return { kind: "time", value: s };
+  if (/^\d{4}-\d{2}-\d{2}[Tt ]\d{2}:\d{2}:\d{2}(\.\d+)?\s*(Z|[+-]\d{2}(:?\d{2})?)$/.test(s)) return { kind: "time", value: s };
   if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return { kind: "date", value: s };
   return { kind: "str", value: s };
 };
 
+// Mechanism (measured 2026-11-18, Ruby 3.4 + Psych, TZ=UTC and Europe/Zurich, with
+// and without jekyll/safe_yaml/activesupport): Date == Time is false for every
+// timestamp, and ActiveSupport would equal only T00:00:00Z. Neither explains the
+// T23:00:00Z rule below, so it stays empirical; DST (T22:00:00Z) is unobserved on
+// production and deliberately NOT treated as equal. A timestamp with a numeric
+// offset is a Time in Psych (`2015-01-01T00:00:00+01:00`), so it is kind "time".
+//
 // A bare date names the same position as a local-midnight timestamp one day
 // earlier in UTC (OB 1089 `2015-01-01` vs annex `2014-12-31T23:00:00Z`), which
 // the deployed site counted (OB 1100 ISPC shows no. 31 on production). Only a
@@ -30,7 +37,7 @@ const localDay = (t: string) =>
 
 export const samePosition = (a: Position, b: Position) => {
   if (!a || !b || a.kind === "str" || b.kind === "str") return false;
-  if (a.kind === b.kind) return a.value === b.value;
+  if (a.kind === b.kind) return a.kind === "time" ? Date.parse(a.value) === Date.parse(b.value) : a.value === b.value;
   const [d, t] = a.kind === "date" ? [a, b] : [b, a];
   return d.value === localDay(t.value);
 };
