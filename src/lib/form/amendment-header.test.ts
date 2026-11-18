@@ -1,7 +1,8 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import { blankState } from './model';
-import { amendmentHeader, positionPrefill, prefillPosition } from './amendment-header';
+import { blankState, setField } from './model';
+import { YamlTimestamp } from './yaml-io';
+import { amendmentHeader, applyPrefill, positionPrefill, prefillPosition, zurichPositionDay } from './amendment-header';
 import type { AnnexIndexEntry } from './annexes';
 
 const index: AnnexIndexEntry[] = [
@@ -14,7 +15,7 @@ const index: AnnexIndexEntry[] = [
 describe('amendment header', () => {
   it('names the latest annex issue and the position carried forward', () => {
     expect(amendmentHeader(index, 'Q708_SANC')).toEqual({ kind: 'annexed', annexedTo: 1200, positionOn: '2020-01-01' });
-    expect(amendmentHeader(index, 'X121_DNIC')).toEqual({ kind: 'annexed', annexedTo: 1150, positionOn: '2024-05-31' });
+    expect(amendmentHeader(index, 'X121_DNIC')).toEqual({ kind: 'annexed', annexedTo: 1150, positionOn: '2024-06-01' });
   });
   it('reports never annexed for an unknown publication or one with no known position', () => {
     expect(amendmentHeader(index, 'MISSING')).toEqual({ kind: 'never' });
@@ -24,6 +25,57 @@ describe('amendment header', () => {
   it('prefills position_on only when annexed', () => {
     expect(positionPrefill(amendmentHeader(index, 'Q708_SANC'))).toBe('2020-01-01');
     expect(positionPrefill({ kind: 'never' })).toBe('');
+  });
+});
+
+describe('zurichPositionDay', () => {
+  it.each([
+    ['2023-12-31T23:00:00.000Z', '2024-01-01'],
+    ['2024-06-30T22:00:00.000Z', '2024-07-01'],
+    ['2020-01-01T00:00:00.000Z', '2020-01-01'],
+    ['2024-05-31T12:00:00Z', '2024-05-31'],
+    ['2024-03-30T23:00:00.000Z', '2024-03-31'],
+    ['2024-03-31T22:00:00.000Z', '2024-04-01'],
+    ['2023-12-31', '2023-12-31'],
+  ])('%s is the Zurich day %s', (stored, day) => expect(zurichPositionDay(stored)).toBe(day));
+  it('is empty for nothing or an invalid value', () => {
+    expect(zurichPositionDay(null)).toBe('');
+    expect(zurichPositionDay(undefined)).toBe('');
+    expect(zurichPositionDay('2023-02-30')).toBe('');
+  });
+  it('shows the Zurich day in the header', () => {
+    const rows: AnnexIndexEntry[] = [{ issue: 5, publication_id: 'P', position_on: '2023-12-31T23:00:00.000Z' }];
+    expect(amendmentHeader(rows, 'P')).toEqual({ kind: 'annexed', annexedTo: 5, positionOn: '2024-01-01' });
+  });
+});
+
+describe('position_on prefill across registers', () => {
+  const text = (n: any) => { const v = n.fields.find((f: any) => f.attr.name === 'position_on').node?.value; return v === undefined || v === null ? '' : JSON.parse(JSON.stringify(v)); };
+  it('replaces its own earlier prefill when the register changes', () => {
+    const a = applyPrefill(blankState('Q708SANCAmendment'), '2020-01-01', '');
+    expect(text(a.node)).toBe('2020-01-01');
+    const b = applyPrefill(a.node, '2021-02-02', a.prefilled);
+    expect(text(b.node)).toBe('2021-02-02');
+    expect(b.prefilled).toBe('2021-02-02');
+  });
+  it('clears its own prefill when the new register was never annexed', () => {
+    const a = applyPrefill(blankState('Q708SANCAmendment'), '2020-01-01', '');
+    const b = applyPrefill(a.node, '', a.prefilled);
+    expect(text(b.node)).toBe('');
+    expect(b.prefilled).toBe('');
+  });
+  it('never overwrites a value the author typed', () => {
+    const a = applyPrefill(blankState('Q708SANCAmendment'), '2020-01-01', '');
+    const typed = setField(a.node as any, 'position_on', new YamlTimestamp('2019-09-09'));
+    const b = applyPrefill(typed, '2021-02-02', a.prefilled);
+    expect(b.node).toBe(typed);
+    expect(text(b.node)).toBe('2019-09-09');
+    expect(b.prefilled).toBe('');
+    expect(applyPrefill(b.node, '2022-03-03', b.prefilled).node).toBe(typed);
+  });
+  it('fills a fresh form (a changed amendment class) with the kept annexed day', () => {
+    const c = applyPrefill(blankState('Q708SANCAmendment'), '2020-01-01', '');
+    expect(text(c.node)).toBe('2020-01-01');
   });
 });
 

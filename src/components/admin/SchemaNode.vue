@@ -105,10 +105,10 @@ function replaceItem(index: number, child: FormNode) {
           <textarea class="admin-control" v-if="languageValue(language) === undefined || typeof languageValue(language) === 'string'"
             :aria-label="`${path} ${language}`" :lang="language" :dir="language === 'ar' ? 'rtl' : 'auto'"
             :value="String(languageValue(language) ?? '')" :disabled="readonly" rows="5" @input="languageInput(language, $event)" />
+          <span v-else>Stored rich text is preserved read-only.</span>
           <TranslationAssist v-if="translation && !readonly && language !== 'en' && proseEnglish.trim() && (languageValue(language) === undefined || typeof languageValue(language) === 'string')"
             :source="proseEnglish" from="en" :to="language"
             @apply="leaf(setProseLanguage(node.value, language, $event))" />
-          <span v-else>Stored rich text is preserved read-only.</span>
         </span>
       </template>
     </template>

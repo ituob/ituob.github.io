@@ -8,7 +8,7 @@ import { actionPayload, actionTypes, amendmentClasses, api, ApiError, payloadErr
 import type { SchemaIssue } from '../../lib/schema.validators.generated';
 import SchemaNode from './SchemaNode.vue';
 import AmendmentHeader from './AmendmentHeader.vue';
-import { prefillPosition } from '../../lib/form/amendment-header';
+import { applyPrefill } from '../../lib/form/amendment-header';
 const props = withDefaults(defineProps<{ admin?: boolean; create?: boolean; translation?: boolean; registers?: { register_id: string; slug: string; label: string }[] }>(), { registers: () => [] });
 interface Submission { id: string; register_id: string; slug: string; action_type: string; state: string; current_rev: number; affiliation_kind?: string; affiliation_member_id?: string | null; affiliation_member_name?: string | null }
 interface Revision { rev: number; payload_yaml: string; validation: string; created_at: string }
@@ -20,6 +20,10 @@ const reviewCount = computed(() => props.admin ? rows.value.filter(row => row.st
 const selected = ref(''), registerId = ref(''), slug = ref(''), action = ref(actionTypes[0] ?? 'ADD'), className = ref(amendmentClasses[0] ?? 'TextAmendment');
 const node = ref<FormNode>(blankState(className.value));
 const existing = ref<Record<string, unknown>>({});
+// The annexed position offered for the chosen register, and the value last prefilled (replaceable until the author edits it).
+let annexDay = '', prefilled = '';
+function prefillFrom(day: string) { annexDay = day; ({ node: node.value, prefilled } = applyPrefill(node.value, day, prefilled)); }
+function freshNode() { prefilled = ''; node.value = blankState(className.value); prefillFrom(annexDay); }
 const inputErrors = ref<Record<string, string>>({});
 function invalid(path: string, message: string) { if (message) inputErrors.value[path] = message; else for (const key of Object.keys(inputErrors.value)) if (key === path || key.startsWith(`${path}.`) || key.startsWith(`${path}[`)) delete inputErrors.value[key]; }
 const busy = ref(false), error = ref(''), notice = ref(''), errors = ref<SchemaIssue[]>([]);
@@ -83,7 +87,7 @@ async function load(id: string) {
 }
 function start() {
   creating.value = true; detail.value = null; selected.value = ''; existing.value = {}; correctsId.value = '';
-  node.value = blankState(className.value); inputErrors.value = {}; errors.value = []; error.value = ''; notice.value = '';
+  freshNode(); inputErrors.value = {}; errors.value = []; error.value = ''; notice.value = '';
   window.history.replaceState(null, '', window.location.pathname);
 }
 function registerChange(event: Event) {
@@ -152,10 +156,10 @@ onMounted(() => perform(async () => { await list(); const id = new URLSearchPara
         <label class="admin-field admin-label">Register identifier <input class="admin-control" v-model="registerId" required pattern="[A-Z0-9_]{1,40}" /></label>
         <label class="admin-field admin-label">Register slug <input class="admin-control" v-model="slug" required pattern="[a-z0-9]+(-[a-z0-9]+)*" /></label>
         <label class="admin-field admin-label">Action <select class="admin-control" v-model="action"><option v-for="type in actionTypes" :key="type">{{ type }}</option></select></label>
-        <label class="admin-field admin-label">Amendment class <select class="admin-control" v-model="className" @change="node = blankState(className); inputErrors = {}"><option v-for="name in amendmentClasses" :key="name">{{ name }}</option></select></label>
+        <label class="admin-field admin-label">Amendment class <select class="admin-control" v-model="className" @change="freshNode(); inputErrors = {}"><option v-for="name in amendmentClasses" :key="name">{{ name }}</option></select></label>
         <label class="admin-field admin-label" v-if="creating">Corrects published submission (optional) <input class="admin-control" v-model="correctsId" /></label>
       </fieldset>
-      <AmendmentHeader :register-id="registerId" :label="registers.find(r => r.register_id === registerId)?.label" @prefill="day => { if (creating) node = prefillPosition(node, day); }" />
+      <AmendmentHeader :register-id="registerId" :label="registers.find(r => r.register_id === registerId)?.label" @prefill="day => { if (creating) prefillFrom(day); }" />
       <SchemaNode :node="node" path="data" :readonly="busy || !editable" :translation="translation" @change="node = $event" @invalid="invalid" />
       <fieldset class="admin-fieldset" :disabled="busy"><legend>Workflow</legend>
         <template v-if="editable && !admin">
