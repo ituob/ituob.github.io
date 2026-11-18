@@ -16,11 +16,18 @@ const submissions = [
 
 export function demoSeedSql() {
   // Earlier seeds used 24/25-character ids, which the discussion client rejects (it needs 26); drop those rows so the corrected ones replace them.
+  // Every table that references submissions(id) (see migrations/*.sql, grep REFERENCES) is cleared first, children before parents, scoped to the
+  // old short-id submissions, so rows added since (real ULID ids: replies, notifications, state log, PRs, edition items) cannot block the delete.
+  const oldSub = `SELECT id FROM submissions WHERE id LIKE '01DEMO%' AND length(id) <> 26`;
+  // Comments of an old submission, old short-id comments, and any reply (parent_id) of either, however deep.
+  const oldComments = `WITH RECURSIVE old_c(id) AS (SELECT id FROM comments WHERE (id LIKE '01DEMO%' AND length(id) <> 26) OR submission_id IN (${oldSub}) UNION SELECT c.id FROM comments c JOIN old_c ON c.parent_id = old_c.id) SELECT id FROM old_c`;
   const out = [
-    `DELETE FROM notifications WHERE id LIKE '01DEMO%' AND length(id) <> 26;`,
-    `DELETE FROM comment_revisions WHERE comment_id LIKE '01DEMO%' AND length(comment_id) <> 26;`,
-    `DELETE FROM comments WHERE id LIKE '01DEMO%' AND length(id) <> 26;`,
-    ...["review_state", "submission_participants", "submission_revisions"].map(t => `DELETE FROM ${t} WHERE submission_id LIKE '01DEMO%' AND length(submission_id) <> 26;`),
+    `DELETE FROM comment_revisions WHERE comment_id IN (${oldComments});`,
+    `DELETE FROM comments WHERE id IN (${oldComments});`,
+    `DELETE FROM notifications WHERE (id LIKE '01DEMO%' AND length(id) <> 26) OR submission_id IN (${oldSub});`,
+    ...["discussion_state_log", "submission_prs", "submission_reverts", "edition_items", "webhook_deliveries", "review_state", "submission_participants", "submission_revisions"]
+      .map(t => `DELETE FROM ${t} WHERE submission_id IN (${oldSub});`),
+    `UPDATE submissions SET corrects_id = NULL WHERE corrects_id IN (${oldSub});`,
     `DELETE FROM submissions WHERE id LIKE '01DEMO%' AND length(id) <> 26;`,
   ];
   for (const s of submissions) {

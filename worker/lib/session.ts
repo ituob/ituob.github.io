@@ -1,5 +1,5 @@
 import { resolveAuthority } from "./authority.ts";
-import { isLoopbackHost } from "./host.ts";
+import { hasProductionMarker, isLoopbackHost } from "./host.ts";
 import { oidcConfig, randomToken, sha256b64url } from "./oidc.ts";
 import { verifyAccessIdentity, verifyAccessPrincipal } from "./access.ts";
 import type { AccessIdentity, AccessPrincipal, Env, Session } from "./types.ts";
@@ -169,14 +169,8 @@ export async function getAccessIdentity(
  * configured Access application, so a production Worker (which always has ACCESS_AUD
  * and is served on ituob.org) can never take this path.
  */
-/** Defence in depth: any of these present means a real deployment, so the demo path refuses even on a loopback URL. */
-const PRODUCTION_MARKERS = [
-  "ACCESS_AUD", "ACCESS_TEAM_DOMAIN", "ACCESS_CI_CLIENT_IDS", "ENVIRONMENT",
-  "GITHUB_APP_ID", "GITHUB_APP_PRIVATE_KEY", "GITHUB_APP_INSTALLATION_ID", "GITHUB_WEBHOOK_SECRET", "GITHUB_READ_TOKEN",
-  "RESEND_API_KEY", "EMAIL_API_KEY",
-];
 export function localDemoEnabled(request: Request, env: Env): boolean {
-  return env.LOCAL_DEMO === "1" && env.AUTH_MODE === "oidc" && !PRODUCTION_MARKERS.some(key => (env as unknown as Record<string, unknown>)[key])
+  return env.LOCAL_DEMO === "1" && env.AUTH_MODE === "oidc" && !hasProductionMarker(env)
     && isLoopbackHost(new URL(request.url).hostname);
 }
 
