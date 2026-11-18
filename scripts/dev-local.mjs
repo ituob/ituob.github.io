@@ -10,6 +10,16 @@ import net from 'node:net';
 import { personaSql } from './mock-idp.mjs';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
+const legacyRedirects = JSON.parse(readFileSync(resolve(root, 'worker/lib/legacy-redirects.json'), 'utf8'));
+// Mirror worker/lib/legacy-redirects.ts so only mapped HTML aliases reach the Worker.
+function legacyRedirectTarget(pathname) {
+  if (/%2f|%5c/i.test(pathname)) return null;
+  let path;
+  try { path = decodeURIComponent(pathname); } catch { return null; }
+  path = path.replace(/\/index\.html$/, '/');
+  if (!path.endsWith('/')) path += '/';
+  return legacyRedirects[path] ?? null;
+}
 const state = resolve(root, '.local-dev');
 // DEV_LOCAL_PORT_OFFSET lets a second instance run beside another one (used by test:visual).
 const shift = Number(process.env.DEV_LOCAL_PORT_OFFSET || 0);
@@ -67,7 +77,7 @@ start([wrangler, 'dev', '--local', '--config', config, '--persist-to', persisten
 
 server = https.createServer({ key: readFileSync(key), cert: readFileSync(cert) }, (req, res) => {
   const path = new URL(req.url, origin).pathname;
-  const worker = /^\/(api|auth)(\/|$)/.test(path);
+  const worker = /^\/(api|auth)(\/|$)/.test(path) || legacyRedirectTarget(path) !== null;
   const provider = path === '/authorize';
   const transport = worker ? https : http;
   const upstream = transport.request({ hostname: '127.0.0.1', port: worker ? ports.worker : provider ? ports.idp : ports.astro, path: req.url, method: req.method, headers: req.headers, ...(worker ? { ca: readFileSync(cert) } : {}) }, incoming => {
