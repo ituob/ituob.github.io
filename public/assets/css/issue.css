@@ -189,14 +189,13 @@ article.service-publication .title {
   font-weight: normal;
 }
 
-body.layout--issue > main > header, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul body.layout--issue > main > li, body.layout--issue > main nav.toc {
-  margin: 0 -2rem;
-}
-
+/* The bleed offsets the 5vw body padding, which only exists from 800px up (global.css). */
+@media screen and (min-width: 800px) {
 body.layout--issue > main > header, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul body.layout--issue > main > li, body.layout--issue > main nav.toc {
     margin-left: -5vw;
     margin-right: -5vw;
   }
+}
 
 body.layout--issue > main > header, body.layout--issue > main nav.with-js.fixable-bar div.menu-wrapper ul body.layout--issue > main > li {
   padding: 0;
@@ -551,4 +550,9 @@ body.layout--issue > main > section.planned-issues table td:empty, body.layout--
 
 body.layout--issue > main > section.planned-issues table {
   font-size: 80%;
+}
+
+/* Phones: the publication and authors rows hold fixed-width columns; let them wrap instead of overflowing. */
+@media screen and (max-width: 799px) {
+  body.layout--issue > main > header > .meta-row { flex-flow: row wrap; row-gap: 0.4rem; }
 }
