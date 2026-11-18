@@ -5,9 +5,10 @@ import {
   listIssueIds,
   loadDatasetMetadata,
   loadListMetadata,
-  cumulativeAmendmentNumber,
+  jekyllAmendmentNumber,
   loadRegisterCatalog,
   lastAnnexBefore,
+  loadSourceMessageOrder,
 } from "~/lib/loaders";
 import { formatSwissDate } from "~/lib/format";
 import {
@@ -40,29 +41,24 @@ if (!issue) {
 
 const lang: Language = "en";
 
-const presentGeneralTypes = MESSAGE_TYPE_ORDER.filter((t) => {
-  if (t === "running_annexes") return issue.general.runningAnnexes !== null;
-  if (t === "approved_recommendations") return issue.general.approvedRecommendations !== null;
-  return issue.general.textual.some((m) => m.type === t);
-});
-
-const textualByType = new Map<GeneralMessageType, TextualGeneralMessage[]>();
-for (const m of issue.general.textual) {
-  const arr = textualByType.get(m.type) ?? [];
-  arr.push(m);
-  textualByType.set(m.type, arr);
-}
+const sourceOrder = loadSourceMessageOrder(id);
 
 const amendmentSlugs = [
   ...new Set([
     ...Object.keys(issue.amendments.structured),
     ...Object.keys(issue.amendments.textual),
     ...Object.keys(issue.amendments.placeholder),
-    ...loadRegisterCatalog()
-      .filter((r) => r.seed_issue === id && !r.external)
-      .map((r) => r.slug),
   ]),
 ].sort();
+// Jekyll looped over `amendments.messages` in authored order; keep it where
+// the source has it, then any remaining datasets (e.g. register seeds) sorted.
+if (sourceOrder) {
+  const rank = (slug: string) => {
+    const i = sourceOrder.amendments.indexOf(slug);
+    return i < 0 ? Number.MAX_SAFE_INTEGER : i;
+  };
+  amendmentSlugs.sort((a, b) => rank(a) - rank(b) || a.localeCompare(b));
+}
 
 // Planned issues: the next ~25 editions after this one.
 const allIds = listIssueIds();
@@ -80,18 +76,45 @@ interface GeneralMessageItem {
   type: GeneralMessageType;
   anchorId: string;
   title: string;
+  /** The single textual message this article renders (null for annexes / recommendations). */
+  message: TextualGeneralMessage | null;
 }
+// Jekyll rendered one article per entry of `general.messages`, in authored order.
 const generalList: GeneralMessageItem[] = [];
 {
-  let n = 0;
+  const queues = new Map<GeneralMessageType, TextualGeneralMessage[]>();
+  for (const m of issue.general.textualWithTwins) {
+    const arr = queues.get(m.type) ?? [];
+    arr.push(m);
+    queues.set(m.type, arr);
+  }
+  let usedAnnexes = false;
+  let usedApproved = false;
+  const push = (type: GeneralMessageType, message: TextualGeneralMessage | null) => {
+    const customTitle = type === "custom" ? (message as { title?: { en?: string } } | null)?.title?.en : null;
+    generalList.push({
+      type,
+      anchorId: "general-" + (generalList.length + 1),
+      title: customTitle ?? GENERAL_TYPE_LABELS[type],
+      message,
+    });
+  };
+  const take = (type: string) => {
+    if (type === "running_annexes") {
+      if (!usedAnnexes && issue.general.runningAnnexes) { usedAnnexes = true; push("running_annexes", null); }
+    } else if (type === "approved_recommendations") {
+      if (!usedApproved && issue.general.approvedRecommendations) { usedApproved = true; push("approved_recommendations", null); }
+    } else {
+      const next = queues.get(type as GeneralMessageType)?.shift();
+      if (next) push(type as GeneralMessageType, next);
+    }
+  };
+  for (const t of sourceOrder?.general ?? []) take(t);
+  // Anything the source order did not place (issues authored after the Jekyll
+  // corpus, deduplicated twins) follows in canonical order.
   for (const t of MESSAGE_TYPE_ORDER) {
-    if (!presentGeneralTypes.includes(t)) continue;
-    n += 1;
-    const customTitle =
-      t === "custom" && textualByType.has(t)
-        ? (textualByType.get(t)![0] as { title?: { en?: string } })?.title?.en
-        : null;
-    generalList.push({ type: t, anchorId: "general-" + n, title: customTitle ?? GENERAL_TYPE_LABELS[t] });
+    take(t);
+    while ((queues.get(t as GeneralMessageType)?.length ?? 0) > 0) take(t);
   }
 }
 
@@ -111,6 +134,9 @@ interface AmendmentItem {
   hasPlaceholder: boolean;
 }
 const amendmentsList: AmendmentItem[] = [];
+// Jekyll: `{% if amendments %}` is true when amendments.yaml exists, even with
+// no messages (OB 669 renders the heading and legend with no articles).
+const showAmendments = (sourceOrder?.hasAmendmentsFile ?? false) || undefined;
 {
   let n = 0;
   for (const slug of amendmentSlugs) {
@@ -128,7 +154,7 @@ const amendmentsList: AmendmentItem[] = [];
     amendmentsList.push({
       anchorId: "amendments-" + n,
       slug,
-      amdNo: cumulativeAmendmentNumber(id, slug),
+      amdNo: jekyllAmendmentNumber(id, slug),
       title,
       datasetHref: "/datasets/" + slug + "/",
       resourceHref: listMeta?.url ?? meta?.url ?? null,
@@ -207,15 +233,18 @@ const authoritativeHref =
           </ul>
         )}
       </li>
-      {amendmentsList.length > 0 && (
+      {(amendmentsList.length > 0 || showAmendments) && (
         <li>
-          <a href="#amendments">Amendments</a>
+          <a href="#amendments">Amendments to&nbsp;service publications</a>
           <ul>
             {amendmentsList.map((a) => (
               <li><a href={"#" + a.anchorId}>{a.title}</a></li>
             ))}
           </ul>
         </li>
+      )}
+      {Object.keys(issue.annexes).length > 0 && (
+        <li><a href="#annexes">Annexes</a></li>
       )}
     </ul>
   </nav>
@@ -261,16 +290,14 @@ const authoritativeHref =
             {t === "approved_recommendations" && issue.general.approvedRecommendations && (
               <ApprovedRecommendations message={issue.general.approvedRecommendations} />
             )}
-            {textualByType.has(t) && textualByType.get(t)!.map((m) => (
-              <GeneralMessage message={m} issueId={id} lang={lang} />
-            ))}
+            {g.message && <GeneralMessage message={g.message} issueId={id} lang={lang} />}
           </div>
         </article>
       );
     })}
   </section>
 
-  {amendmentsList.length > 0 && (
+  {(amendmentsList.length > 0 || showAmendments) && (
     <section class="amendments" id="amendments">
       <h3>Amendments</h3>
       <section class="legend">
@@ -290,9 +317,9 @@ const authoritativeHref =
         <article class="message message--amendment">
           <header>
             <h3 class="title">
-              <span class="label" title="Amendment">
+              <span class="label" title={a.amdNo > 0 ? `Amendment no. ${a.amdNo} since specified position was published` : "Amendment "}>
                 Amd.
-                {a.amdNo > 0 && <span class="num"> {a.amdNo}</span>}
+                {a.amdNo > 0 && <span class="num"> no. {a.amdNo}</span>}
                 {" "}to
               </span>
               <a class="text" href={a.datasetHref}>{a.title}</a>

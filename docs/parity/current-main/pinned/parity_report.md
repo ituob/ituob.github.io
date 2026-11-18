@@ -17,19 +17,19 @@ variant of it passes ≥95%.
 | missing (no local) | 0 | 0.0% |
 | **total** | **422** | |
 
-## index — 1 pages, avg 99.8%, 1/1 pass
+## index — 1 pages, avg 98.5%, 1/1 pass
 
 _All pages pass ≥95% parity._
 
-## issue — 389 pages, avg 98.8%, 389/389 pass
+## issue — 389 pages, avg 98.7%, 389/389 pass
 
 _All pages pass ≥95% parity._
 
-## recommendation — 12 pages, avg 98.2%, 12/12 pass
+## recommendation — 12 pages, avg 99.0%, 12/12 pass
 
 _All pages pass ≥95% parity._
 
-## register — 20 pages, avg 98.6%, 20/20 pass
+## register — 20 pages, avg 98.9%, 20/20 pass
 
 _All pages pass ≥95% parity._
 
@@ -42,5 +42,5 @@ attributing a register's data to two pages.
 
 | deployed page | coverage if forced | note |
 |---------------|--------------------|------|
-| messages/amending-sp F32_TDI (2011-04-15)/index.html | 99.6% | embeds the full OB-1000 BUREAUFAX annex (PARTIE II/III/V fax-booth tables); rendered at /registers/bureaufax/ |
-| messages/complement-to-itu-t-r F.32/2012/index.html | 99.6% | embeds the full OB-1000 BUREAUFAX annex (PARTIE II/III/V fax-booth tables); rendered at /registers/bureaufax/ |
+| messages/amending-sp F32_TDI (2011-04-15)/index.html | 100.0% | embeds the full OB-1000 BUREAUFAX annex (PARTIE II/III/V fax-booth tables); rendered at /registers/bureaufax/ |
+| messages/complement-to-itu-t-r F.32/2012/index.html | 100.0% | embeds the full OB-1000 BUREAUFAX annex (PARTIE II/III/V fax-booth tables); rendered at /registers/bureaufax/ |

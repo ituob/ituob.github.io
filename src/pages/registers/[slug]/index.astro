@@ -14,7 +14,8 @@ import {
   loadCurrentState,
 } from "~/lib/snapshots";
 import { loadRegisterCatalog, listIssueIds, loadIssue, loadListMetadata, lastAnnexBefore } from "~/lib/loaders";
-import { obIssuesRoot, readYamlOrNull, join } from "~/lib/fs";
+import { obIssuesRoot, readYamlOrNull, readFileSync, dataRoot, join } from "~/lib/fs";
+import { parseReplaySkips, explainSkips } from "~/lib/replay-skips";
 import { formatSwissDate } from "~/lib/format";
 import TimelineScrubber from "~/components/TimelineScrubber.astro";
 import RegisterYearArchive from "~/components/RegisterYearArchive.astro";
@@ -56,8 +57,19 @@ const errorSummary = (() => {
   const parts: string[] = [];
   if (lir > 0) parts.push(`${lir} unmatched LIR repeats`);
   if (dup > 0) parts.push(`${dup} skipped duplicate entries`);
-  if (other > 0) parts.push(`${other} replay errors`);
+  if (other > 0) parts.push(`${other} unapplied change${other !== 1 ? "s" : ""}`);
   return parts.join(" + ");
+})();
+// Every unapplied change with its reason (ledger: data-ob docs/normalization/replay-skips.tsv).
+const skipDetails = (() => {
+  if (!state || state.error_count === 0) return [];
+  let ledger: ReturnType<typeof parseReplaySkips> = [];
+  try {
+    ledger = parseReplaySkips(readFileSync(join(dataRoot(), "docs", "normalization", "replay-skips.tsv"), "utf-8"));
+  } catch {
+    // Without the ledger every skip is still listed, marked unclassified.
+  }
+  return explainSkips((state.errors as string[]) ?? [], manifest?.register_id ?? catalogEntry?.register_id ?? slug!, ledger);
 })();
 const title = isExternal
   ? (catalogEntry?.title?.en ?? catalogEntry?.register_id ?? slug)
@@ -187,6 +199,20 @@ if (isExternal) {
           <> · Amended {state.history.filter(p => p.type !== "SEED").length} time{state.history.filter(p => p.type !== "SEED").length !== 1 ? "s" : ""} in subsequent editions</>
         )}
       </p>
+    )}
+    {!isExternal && skipDetails.length > 0 && (
+      <details class="register-skips mt-2 text-[var(--step--1)]" style="color: var(--fg-muted); font-family: var(--font-sans);">
+        <summary>Changes the replay could not apply, and why</summary>
+        <ul>
+          {skipDetails.map((sk) => (
+            <li>
+              <code>{sk.error}</code>
+              {" "}{sk.reason}
+              {sk.printRef && <> Printed at <code>{sk.printRef}</code>.</>}
+            </li>
+          ))}
+        </ul>
+      </details>
     )}
     {isExternal && (
       (() => {

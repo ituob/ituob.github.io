@@ -20,7 +20,7 @@ generated from the ontology, patches are the single source of truth).
 Status values:
 
 * *DONE*: present on `main`.
-* *IN PR*: present in the named open draft PR, not merged. Nothing in a PR counts as shipped.
+* *IN PR*: present in the named open PR (now the site batch PR #137), not merged. Nothing in a PR counts as shipped.
 * *MISSING*: no implementation found on `main`, #108 or #110. A note says whether it blocks retirement.
 * *DROPPED*: deliberately not carried, with the reason. Dropped rows never block retirement.
 
@@ -35,10 +35,10 @@ Status values:
 | A1 | Window set: home, issue-editor, publication-editor, batch-commit, settings; single instance | `renderer/index.tsx`, `main/index.ts:27-28` | `/admin/*`, `/me/*` pages | #110 | DROPPED (replaced by pages; each editor capability is mapped below)
 | A2 | Application menu | none defined: no `menuTemplate` or `Menu.buildFromTemplate` in `src/` (README's "Help menu, macOS only" has no code) | n/a | n/a | DROPPED (nothing to port)
 | A3 | Keyboard shortcuts | none: no accelerators or `globalShortcut` in `src/` | n/a | n/a | DROPPED
-| A4 | Local isomorphic-git clone of `itu-ob-data`, commit and push straight to master (no review) | coulomb `db/isogit-yaml`; `main/index.ts:36-45` | `worker/lib/submissions.ts`, `publisher.ts` (#108); `github-publisher.ts` (#110): branch + PR, never default branch | #108, #110 | IN PR
+| A4 | Local isomorphic-git clone of `itu-ob-data`, commit and push straight to master (no review) | coulomb `db/isogit-yaml`; `main/index.ts:36-45` | `worker/lib/submissions.ts`, `publisher.ts` (#108); `github-publisher.ts` (#110): branch + PR, never default branch | #108, #110 | DONE
 | A5 | Manual sync, startup sync gate, offline mode, diverged-history dead-end screen | `widgets/sync-status.tsx`, `home/index.tsx:52-77`, coulomb `status.js` | none needed: no clone; conflicts become PR conflicts | n/a | DROPPED (web needs network; no offline mode planned)
-| A6 | Per-user settings: repo URL, git username, author name and email; password in OS keychain | coulomb `base.js` settings; `settings/index.tsx` | OIDC login: `worker/lib/oidc.ts`, `session.ts`, `auth-routes.ts` (#108); `/me` (#110) | #108, #110 | IN PR (identity provider contract not verified here)
-| A7 | Commit author attribution from settings | coulomb `getCurrentCommitterInformation` | session user and hash-chained `audit_log` (`migrations/0001_init.sql`) | #108 | IN PR
+| A6 | Per-user settings: repo URL, git username, author name and email; password in OS keychain | coulomb `base.js` settings; `settings/index.tsx` | OIDC login: `worker/lib/oidc.ts`, `session.ts`, `auth-routes.ts` (#108); `/me` (#110) | #108, #110 | DONE (identity provider contract not verified here)
+| A7 | Commit author attribution from settings | coulomb `getCurrentCommitterInformation` | session user and hash-chained `audit_log` (`migrations/0001_init.sql`) | #108 | DONE
 | A8 | Settings buttons "Reset application data", "Enable DevTools" | `settings/index.tsx:12-28` | n/a | n/a | DROPPED (both IPC channels `clear-app-data` and `launch-devtools` have no listener: dead code)
 | A9 | Desktop packaging (dmg/mas/zip, win, linux), notarization, release workflow | `package.json` build, `.github/workflows` | Cloudflare deploy (`build-deploy.yml`) | n/a | DROPPED
 |===
@@ -52,10 +52,10 @@ Status values:
 | B2 | Browse recommendations (legacy says "not implemented yet"; no editor ever existed) | `home/index.tsx:96-100` | `src/pages/recommendations/` | main | DONE (read only)
 | B3 | Browse service publications | `publication-browser/index.tsx` | `src/pages/registers/`, `datasets/` | main | DONE (read only; editing is G1)
 | B4 | Upcoming issues with current/next/past status, cutoff and publication dates | `issue-scheduler/upcoming.tsx` | public: `src/components/PlannedIssues.astro` | main | DONE
-| B5 | Same list inside the admin tool | same | `Composer.vue` editions list | #110 | IN PR
+| B5 | Same list inside the admin tool | same | `Composer.vue` editions list | #110 | DONE
 | B6 | Calendar month view with cutoff/publication highlighting | `issue-scheduler/index.tsx` | `ScheduleCalendar.vue` highlights current form cutoff/publication dates in a UTC month grid with previous/next controls | this PR | IN PR
-| B7 | Create/schedule a new issue: pick dates, enter edition number; id must be > 0 and not exist | `issue-scheduler/schedule-form.tsx`, `main/issue-manager.ts:162-190` | `Composer.vue` open edition, `worker/lib/edition-number.ts`, `edition-metadata.ts`, `EditionMetadata.vue` | #110 | IN PR
-| B8 | New issue inherits ISSN, languages and authors from `defaults/issue/meta.yaml` | `issue-manager.ts:158-190` | `EditionMetadata.vue`, `edition-defaults.ts`: inherit masthead only from an earlier published edition | #117 | IN PR
+| B7 | Create/schedule a new issue: pick dates, enter edition number; id must be > 0 and not exist | `issue-scheduler/schedule-form.tsx`, `main/issue-manager.ts:162-190` | `Composer.vue` open edition, `worker/lib/edition-number.ts`, `edition-metadata.ts`, `EditionMetadata.vue` | #110 | DONE
+| B8 | New issue inherits ISSN, languages and authors from `defaults/issue/meta.yaml` | `issue-manager.ts:158-190` | `EditionMetadata.vue`, `edition-defaults.ts`: inherit masthead only from an earlier published edition | #117 | DONE
 | B9 | "Save defaults" IPC | `model-issues-save-defaults` | n/a | n/a | DROPPED (no UI ever called it)
 | B10 | Help buttons linking to `ituob.org/docs/...` (schedule, per message type, amend/annex) | `index.tsx:152`, `message-editor.tsx:54-62` | Inline schedule, general-message and amendment help in `EditionMetadata.vue`, `GeneralMessageEditor.vue`, `SubmissionWorkspace.vue` | this PR | IN PR
 | B11 | Live refresh when another window changes an issue | `issue-scheduler/index.tsx:69-75` | n/a | n/a | DROPPED (single-page state; conflicts handled by revision checks, see C10)
@@ -66,16 +66,16 @@ Status values:
 [cols="1,4,3,4,1,1",options="header"]
 |===
 | ID | Editor feature | Editor ref | Web app ref | PR | Status
-| C1 | One window per issue with Settings, General Messages, Amendments, Annexes lists | `issue-editor/index.tsx:279-398` | no per-issue view: composer (`Composer.vue`), `/admin/general`, `/admin/editor` | #110 | IN PR (different shape: authoring is per message, assembly is per edition)
-| C2 | Explicit Commit per object; "up to date" state | `widgets/change-status.tsx`, `index.tsx:110-136` | Save draft / Submit in `SubmissionWorkspace.vue`; D1 drafts | #110 | IN PR
-| C3 | Meta: ISSN | `issue-editor/meta/index.tsx:28-52` | `IssueMetadata.issn` via `EditionMetadata.vue` | #110 | IN PR
-| C4 | Meta: publication and cutoff dates (legacy had no ordering check) | `meta/index.tsx:101-128` | `worker/lib/edition-metadata.ts`: ISO dates, cutoff <= publication | #110 | IN PR
-| C5 | Meta: authors with address and contacts (type, data, recommended); add and delete | `meta/authors.tsx` | `SchemaNode.vue` generic lists over `IssueAuthor`, `IssueContact` | #110 | IN PR
-| C6 | Drag-reorder authors and contacts | `widgets/dnd-sortable.tsx`, `meta/authors.tsx` | `SchemaNode.vue` up/down controls; `move-item.test.ts` | #117 | IN PR
-| C7 | Meta: languages (en required; fr, ar, zh, ru, es) | `meta/index.tsx:55-98`, `models/languages.ts` | `IssueMetadata.languages` is an opaque `Hash`, edited as a JSON textarea in `SchemaNode.vue` | #110 | IN PR (usable, not friendly)
+| C1 | One window per issue with Settings, General Messages, Amendments, Annexes lists | `issue-editor/index.tsx:279-398` | no per-issue view: composer (`Composer.vue`), `/admin/general`, `/admin/editor` | #110 | DONE (different shape: authoring is per message, assembly is per edition)
+| C2 | Explicit Commit per object; "up to date" state | `widgets/change-status.tsx`, `index.tsx:110-136` | Save draft / Submit in `SubmissionWorkspace.vue`; D1 drafts | #110 | DONE
+| C3 | Meta: ISSN | `issue-editor/meta/index.tsx:28-52` | `IssueMetadata.issn` via `EditionMetadata.vue` | #110 | DONE
+| C4 | Meta: publication and cutoff dates (legacy had no ordering check) | `meta/index.tsx:101-128` | `worker/lib/edition-metadata.ts`: ISO dates, cutoff <= publication | #110 | DONE
+| C5 | Meta: authors with address and contacts (type, data, recommended); add and delete | `meta/authors.tsx` | `SchemaNode.vue` generic lists over `IssueAuthor`, `IssueContact` | #110 | DONE
+| C6 | Drag-reorder authors and contacts | `widgets/dnd-sortable.tsx`, `meta/authors.tsx` | `SchemaNode.vue` up/down controls; `move-item.test.ts` | #117 | DONE
+| C7 | Meta: languages (en required; fr, ar, zh, ru, es) | `meta/index.tsx:55-98`, `models/languages.ts` | `IssueMetadata.languages` is an opaque `Hash`, edited as a JSON textarea in `SchemaNode.vue` | #110 | DONE (usable, not friendly)
 | C8 | "Current language" selector switching all fields | same | none: every language key of a `MultilingualString` is shown | n/a | DROPPED (3 of 396 issues use a non-en language)
 | C9 | Delete an issue; "malformed issue, delete" fallback | `meta/index.tsx:131-152`, `index.tsx:186-209` | none | n/a | DROPPED (an unmerged issue is not in the data repo; removing a published one is a reviewed revert, not an editor action)
-| C10 | Reload on external change; operation lock around commit | `index.tsx:42-62,110-116` | optimistic `expected_revision` with 409, in `worker/lib/edition-metadata.ts`, `general-messages.ts` | #110 | IN PR
+| C10 | Reload on external change; operation lock around commit | `index.tsx:42-62,110-116` | optimistic `expected_revision` with 409, in `worker/lib/edition-metadata.ts`, `general-messages.ts` | #110 | DONE
 |===
 
 == 4. Issue editor: general messages
@@ -88,23 +88,23 @@ string attribute or it cannot be authored.
 [cols="1,4,3,4,1,1",options="header"]
 |===
 | ID | Editor feature | Editor ref | Web app ref | PR | Status
-| D1 | Add-message menu with fixed order and one-per-type guard for running_annexes, approved_recommendations, telephone_service(_2), service_restrictions, callback_procedures | `new-item-prompts/general-message.tsx`, `models/issues.ts:89-103,141-158` | `GeneralMessageEditor.vue` type picker; `src/lib/form/general.ts` paths (singletons `general/<type>.yaml`, others `<type>/NNN.yaml`); `migrations/0003_general_messages.sql` UNIQUE path | #110 | IN PR
-| D2 | Delete a message | `issue-editor/index.tsx:240-247` | `POST /api/admin/general-messages/:id/delete`; revision, approval, review and edition guards | #117 | IN PR
+| D1 | Add-message menu with fixed order and one-per-type guard for running_annexes, approved_recommendations, telephone_service(_2), service_restrictions, callback_procedures | `new-item-prompts/general-message.tsx`, `models/issues.ts:89-103,141-158` | `GeneralMessageEditor.vue` type picker; `src/lib/form/general.ts` paths (singletons `general/<type>.yaml`, others `<type>/NNN.yaml`); `migrations/0003_general_messages.sql` UNIQUE path | #110 | DONE
+| D2 | Delete a message | `issue-editor/index.tsx:240-247` | `POST /api/admin/general-messages/:id/delete`; revision, approval, review and edition guards | #117 | DONE
 | D3 | Edit a message that already exists in the issue | `message-forms/*` | Canonical repository import through `RepoReader`; this PR retains imported source bytes through unchanged saves and approval, and patches edited YAML value ranges | #117, this PR | IN PR (live repository proof pending)
-| D4 | running_annexes: `extra_links` list; running list derived read-only | `message-forms/running_annexes.tsx` | `GeneralRunningAnnexes.extra_links` in `GeneralMessageEditor.vue`; derived list `RunningAnnexes.astro` | #110, main | IN PR (authoring), DONE (derived display)
-| D5 | approved_recommendations: by, procedures, items (code, version) | `message-forms/approved_recommendations.tsx:28-190` | `GeneralApprovedRecommendations` via `SchemaNode.vue` | #110 | IN PR (card title lookup from the recommendation store is not reproduced; legacy date format mix is an open normalisation question)
-| D6 | telephone_service_2 structure: add and delete country/area sections, area details, add and delete dated communications | `message-forms/telephone_service_2.tsx` | `GeneralTelephoneService` > `GeneralTelephoneSection` > `GeneralTelephoneCommunication` via `SchemaNode.vue` | #110 | IN PR
+| D4 | running_annexes: `extra_links` list; running list derived read-only | `message-forms/running_annexes.tsx` | `GeneralRunningAnnexes.extra_links` in `GeneralMessageEditor.vue`; derived list `RunningAnnexes.astro` | #110, main | DONE
+| D5 | approved_recommendations: by, procedures, items (code, version) | `message-forms/approved_recommendations.tsx:28-190` | `GeneralApprovedRecommendations` via `SchemaNode.vue` | #110 | DONE (card title lookup from the recommendation store is not reproduced; legacy date format mix is an open normalisation question)
+| D6 | telephone_service_2 structure: add and delete country/area sections, area details, add and delete dated communications | `message-forms/telephone_service_2.tsx` | `GeneralTelephoneService` > `GeneralTelephoneSection` > `GeneralTelephoneCommunication` via `SchemaNode.vue` | #110 | DONE
 | D7 | telephone communication body text | `telephone_service_2.tsx:457-537` | Generated `HashOrText` communication contents; corpus-wide byte-identical import/save/approval proof in this PR | #124, this PR | IN PR
 | D8 | telephone_service v1 | `message-forms/index.tsx` (renders "isn't supported yet") | n/a | n/a | DROPPED (0 corpus use, not creatable in legacy)
-| D9 | service_restrictions: items country, ob, page | `message-forms/service_restrictions.tsx` | `GeneralServiceRestrictions.items` | #110 | IN PR
-| D10 | callback_procedures (no content) | `message-forms/callback_procedures.tsx` | `GeneralCallbackProcedures` | #110 | IN PR
-| D11 | misc_communications prose | `message-forms/freeform.tsx` | `GeneralMiscCommunications.text` textarea | #110 | IN PR (rendering of newly authored shape unverified by the docs)
-| D12 | org_changes prose | same | `GeneralOrgChanges.text` textarea | #110 | IN PR (same caveat)
-| D13 | custom message: prose body | `message-forms/custom.tsx` | `GeneralCustom.text` textarea | #110 | IN PR
+| D9 | service_restrictions: items country, ob, page | `message-forms/service_restrictions.tsx` | `GeneralServiceRestrictions.items` | #110 | DONE
+| D10 | callback_procedures (no content) | `message-forms/callback_procedures.tsx` | `GeneralCallbackProcedures` | #110 | DONE
+| D11 | misc_communications prose | `message-forms/freeform.tsx` | `GeneralMiscCommunications.text` textarea | #110 | DONE (rendering of newly authored shape unverified by the docs)
+| D12 | org_changes prose | same | `GeneralOrgChanges.text` textarea | #110 | DONE (same caveat)
+| D13 | custom message: prose body | `message-forms/custom.tsx` | `GeneralCustom.text` textarea | #110 | DONE
 | D14 | custom message: translatable title (legacy form always asks for one) | `custom.tsx` | Generated multilingual title; corpus-wide preservation proof in this PR | #124, this PR | IN PR
 | D15 | sanc (Q708 SANC) | freeform | Canonical `GeneralSancs` dispatch, typed rows and prose; corpus-wide byte-identical import/save/approval proof in this PR | #124, this PR | IN PR
-| D16 | iptn | freeform | `GeneralIptn.entries` (structured rows) | #110 | IN PR
-| D17 | ipns | freeform | `GeneralIpns` (network, mcc_mnc, date, notes) | #110 | IN PR
+| D16 | iptn | freeform | `GeneralIptn.entries` (structured rows) | #110 | DONE
+| D17 | ipns | freeform | `GeneralIpns` (network, mcc_mnc, date, notes) | #110 | DONE
 | D18 | mid | freeform | Generated `HashOrText` contents; corpus-wide preservation proof in this PR | #124, this PR | IN PR
 | D19 | ProseMirror freeform editor (marks, tables) | `issue-editor/freeform-contents.tsx` | none | n/a | DROPPED (decision record: no ProseMirror)
 |===
@@ -114,9 +114,9 @@ string attribute or it cannot be authored.
 [cols="1,4,3,4,1,1",options="header"]
 |===
 | ID | Editor feature | Editor ref | Web app ref | PR | Status
-| E1 | Create an amendment to a publication (picker; disabled if already amended) | `new-item-prompts/amendment.tsx` | `SubmissionWorkspace.vue` register select + amendment class + action | #110 | IN PR
-| E2 | Edit entries as dataset changes (add, replace, move) with a review list of operations | `message-forms/amendment.tsx:26-165` | `RegisterChange` with ADD/REP/MOD/SUP/DEL/LIR (`admin-client.ts` excludes SEED); two-stage validation `worker/lib/validation.ts`, `schema.validators.generated.ts`; revision history | #108, #110 | IN PR
-| E3 | Prose amendment for a non-register publication (ProseMirror tables) | `amendment.tsx:42-49` | `TextAmendment.text` plain textarea, ITU staff only (`worker/lib/submissions.ts:212`); catalog must say textual (`validation.ts:111-113`) | #108, #110 | IN PR (see <<task4>>)
+| E1 | Create an amendment to a publication (picker; disabled if already amended) | `new-item-prompts/amendment.tsx` | `SubmissionWorkspace.vue` register select + amendment class + action | #110 | DONE
+| E2 | Edit entries as dataset changes (add, replace, move) with a review list of operations | `message-forms/amendment.tsx:26-165` | `RegisterChange` with ADD/REP/MOD/SUP/DEL/LIR (`admin-client.ts` excludes SEED); two-stage validation `worker/lib/validation.ts`, `schema.validators.generated.ts`; revision history | #108, #110 | DONE
+| E3 | Prose amendment for a non-register publication (ProseMirror tables) | `amendment.tsx:42-49` | `TextAmendment.text` plain textarea, ITU staff only (`worker/lib/submissions.ts:212`); catalog must say textual (`validation.ts:111-113`) | #108, #110 | DONE (see <<task4>>)
 | E4 | Amendment header: recommendation title, SP URL, "amending position of DATE annexed to OB n" or "never annexed" warning; `position_on` prefilled from the latest annex | `amendment.tsx:106-128`, `amendment.tsx` prompt | none: `position_on` is a typed `Date` leaf | n/a | MISSING (does not block)
 | E5 | One amendment per publication per issue | `issue-editor/index.tsx:271-274` | Reviewed actions are independently ordered by edition sequence; multiple operations per publication are valid | #117 | DROPPED (superseded by per-action patches)
 | E6 | Auto-fill datasets from the previous annex plus later amendments | `issue-manager.ts:98-115` | register replay on the site (SEED/ADD/SUP/REP/MOD/DEL/LIR) | main | DROPPED (replaced by replay)
@@ -139,10 +139,10 @@ string attribute or it cannot be authored.
 [cols="1,4,3,4,1,1",options="header"]
 |===
 | ID | Editor feature | Editor ref | Web app ref | PR | Status
-| G1 | Create or edit a service publication: id (uppercase, fixed after create), title (translatable), authoritative URL, recommendation | `publication-editor/index.tsx`, `meta.tsx` | `/admin/catalog` (`CatalogEntryEditor.vue`, `worker/lib/catalog-entries.ts`): review PR against `catalogs/registers.yaml` in the catalog repository; `src/lib/catalogs.ts` stays hand-maintained | #120 | IN PR (see docs/catalog-authoring.adoc)
+| G1 | Create or edit a service publication: id (uppercase, fixed after create), title (translatable), authoritative URL, recommendation | `publication-editor/index.tsx`, `meta.tsx` | `/admin/catalog` (`CatalogEntryEditor.vue`, `worker/lib/catalog-entries.ts`): review PR against `catalogs/registers.yaml` in the catalog repository; `src/lib/catalogs.ts` stays hand-maintained | #120 | DONE (see docs/catalog-authoring.adoc)
 | G2 | Dataset specification designer | `publication-editor/dataset.tsx` | none | n/a | DROPPED (compiled register schemas replace it)
 | G3 | Delete publication | `publication-editor/index.tsx:356-362` | n/a | n/a | DROPPED (legacy shows "temporarily unavailable")
-| G4 | Field validators with a message list; Commit disabled while invalid | `form-validation/index.tsx` | generated validators client and server: `schema.validators.generated.ts`, `worker/lib/validation.ts`, `admin-client.ts payloadErrors` | #108, #110 | IN PR
+| G4 | Field validators with a message list; Commit disabled while invalid | `form-validation/index.tsx` | generated validators client and server: `schema.validators.generated.ts`, `worker/lib/validation.ts`, `admin-client.ts payloadErrors` | #108, #110 | DONE
 |===
 
 == 8. Batch commit and publishing
@@ -150,11 +150,11 @@ string attribute or it cannot be authored.
 [cols="1,4,3,4,1,1",options="header"]
 |===
 | ID | Editor feature | Editor ref | Web app ref | PR | Status
-| H1 | List of uncommitted changes with open links | `batch-commit/index.tsx:29-44` | `/me/submissions`, `SubmissionWorkspace.vue` list with state filter | #110 | IN PR
-| H2 | Select a subset and commit with a message | `batch-commit/index.tsx:119-197` | submit per proposal; the composer groups merged patches into an edition (`Composer.vue`, `worker/lib/composer.ts`) | #108, #110 | IN PR
-| H3 | Discard changes | `batch-commit/index.tsx:152-176` | withdraw while draft, submitted or changes_requested (`submission-routes.ts`) | #108 | IN PR (withdraw, not delete)
+| H1 | List of uncommitted changes with open links | `batch-commit/index.tsx:29-44` | `/me/submissions`, `SubmissionWorkspace.vue` list with state filter | #110 | DONE
+| H2 | Select a subset and commit with a message | `batch-commit/index.tsx:119-197` | submit per proposal; the composer groups merged patches into an edition (`Composer.vue`, `worker/lib/composer.ts`) | #108, #110 | DONE
+| H3 | Discard changes | `batch-commit/index.tsx:152-176` | withdraw while draft, submitted or changes_requested (`submission-routes.ts`) | #108 | DONE (withdraw, not delete)
 | H4 | Sync-paused warning; cross-window notify; IPC `remote-storage-trigger-*` | `batch-commit/index.tsx:161,187,204-209` | n/a | n/a | DROPPED (no sync; the two IPC calls have no listener)
-| H5 | Publish an issue: legacy pushes to master and the site build picks it up; the editor has no export, print or PDF function | none in `src/` | composer "publish through staging", metadata PR, GitHub publisher (`worker/lib/github-publisher.ts`, `edition-metadata-publication.ts`) | #110 | IN PR
+| H5 | Publish an issue: legacy pushes to master and the site build picks it up; the editor has no export, print or PDF function | none in `src/` | composer "publish through staging", metadata PR, GitHub publisher (`worker/lib/github-publisher.ts`, `edition-metadata-publication.ts`) | #110 | DONE
 |===
 
 == 9. Machine translation, localization, validation
@@ -162,9 +162,9 @@ string attribute or it cannot be authored.
 [cols="1,4,3,4,1,1",options="header"]
 |===
 | ID | Editor feature | Editor ref | Web app ref | PR | Status
-| I1 | ITU machine translation of a translated-text field (`wss://nmt.itu.int/marian_translate_<pair>`; only caller is the dataset grid cell editor) | `machine-translation.tsx`, `position-data.tsx:654-698` | `TranslationAssist.vue`, `worker/translation-routes.ts`, `worker/lib/translation.ts`: suggest-only, ITU staff, 2000 chars; mounted for `MultilingualString` fields of the action editor | #110 | IN PR (live protocol not observed; the general-message editor does not mount it)
-| I2 | Content localizer (six languages, English fallback; UI strings are English only) | coulomb localizer, `models/languages.ts` | `MultilingualString` language keys shown directly | #110 | IN PR (content); UI i18n DROPPED
-| I3 | Error toasts with server error lists | `toaster.ts`, `index.tsx:123-129` | `role="alert"` error list with field paths in each workspace | #110 | IN PR
+| I1 | ITU machine translation of a translated-text field (`wss://nmt.itu.int/marian_translate_<pair>`; only caller is the dataset grid cell editor) | `machine-translation.tsx`, `position-data.tsx:654-698` | `TranslationAssist.vue`, `worker/translation-routes.ts`, `worker/lib/translation.ts`: suggest-only, ITU staff, 2000 chars; mounted for `MultilingualString` fields of the action editor | #110 | DONE (live protocol not observed; the general-message editor does not mount it)
+| I2 | Content localizer (six languages, English fallback; UI strings are English only) | coulomb localizer, `models/languages.ts` | `MultilingualString` language keys shown directly | #110 | DONE (content); UI i18n DROPPED
+| I3 | Error toasts with server error lists | `toaster.ts`, `index.tsx:123-129` | `role="alert"` error list with field paths in each workspace | #110 | DONE
 |===
 
 == 10. Web-only requirements (no Electron equivalent)
@@ -175,12 +175,12 @@ from parity.
 [cols="1,4,4,1,1",options="header"]
 |===
 | ID | Requirement | Web app ref | PR | Status
-| W1 | Valid-by-construction forms from the ontology; byte-stable YAML round trip | `src/lib/form/model.ts`, `yaml-io.ts`, `exact.ts`, `form.test.ts` | #108 | IN PR
+| W1 | Valid-by-construction forms from the ontology; byte-stable YAML round trip | `src/lib/form/model.ts`, `yaml-io.ts`, `exact.ts`, `form.test.ts` | #108 | DONE
 | W2 | Bulk import of an external full list as a SEED/patch series through PR review | `/admin/bulk`, `bulk-import.ts`, Worker validation and staff-only SEED; authoritative emptiness checked at creation and approval | main | DONE
-| W3 | Accounts, roles, membership and country authority | `worker/lib/oidc.ts`, `membership.ts`, `authz.ts` (#108); `MembersAdmin.vue`, `MembershipAccount.vue` (#110) | #108, #110 | IN PR
-| W4 | Review workflow: submit, request changes, approve, PR, merge, revert | `worker/lib/submissions.ts`, `reconciler.ts`, `revert.ts`, `github-webhook.ts` | #108 | IN PR
-| W5 | Discussion, mentions, inbox, notification email | `worker/lib/discussion.ts`, `notify.ts`, `email.ts`; `Discussion.vue`, `Inbox.vue` | #108, #110 | IN PR
-| W6 | Edition composer for merged patches and general messages | `Composer.vue`, `worker/lib/composer.ts` | #108, #110 | IN PR
+| W3 | Accounts, roles, membership and country authority | `worker/lib/oidc.ts`, `membership.ts`, `authz.ts` (#108); `MembersAdmin.vue`, `MembershipAccount.vue` (#110) | #108, #110 | DONE
+| W4 | Review workflow: submit, request changes, approve, PR, merge, revert | `worker/lib/submissions.ts`, `reconciler.ts`, `revert.ts`, `github-webhook.ts` | #108 | DONE
+| W5 | Discussion, mentions, inbox, notification email | `worker/lib/discussion.ts`, `notify.ts`, `email.ts`; `Discussion.vue`, `Inbox.vue` | #108, #110 | DONE
+| W6 | Edition composer for merged patches and general messages | `Composer.vue`, `worker/lib/composer.ts` | #108, #110 | DONE
 |===
 
 [[task4]]
@@ -257,12 +257,22 @@ data layout and are not the counts of current canonical YAML records.
 
 == Tally
 
+Counted from the status column above on 2026-11-18, after reconciling with
+`docs/editor/electron-retirement.adoc` and the merged state of the cited pull
+requests (`gh pr view`: #108, #110, #117, #120, #121 and #124 merged into `main`;
+the earlier "IN PR" statuses and the counts below were from before those merges).
+The only MISSING row is E4 (amendment header and `position_on` prefill), which
+the retirement decision records as not blocking. The seven IN PR rows
+(B6, B10, D3, D7, D14, D15, D18) are carried by the open site batch PR #137
+(formerly #130) and count as shipped only when it merges.
+
 [cols="2,1",options="header"]
 |===
-| Status (legacy rows A1-I3) | Count
-| DONE | 5
-| IN PR | 44
-| MISSING | 4
+| Status (legacy rows A1-I3, 72 rows) | Count
+| DONE | 45
+| IN PR | 7
+| MISSING | 1
 | DROPPED | 19
-| Web-only rows W1-W6 (all IN PR) | 6
+| Web-only rows W1-W6 (all DONE) | 6
 |===
+

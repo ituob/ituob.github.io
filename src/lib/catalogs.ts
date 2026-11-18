@@ -260,7 +260,7 @@ export const GENERAL_TYPE_LABELS: Record<GeneralMessageType, string> = {
   iptn: "The International Public Telecommunication Numbering Plan",
   ipns:
     "International Identification Plan for Public Networks and Subscriptions",
-  mid: "Maritime Identification Digits (MID)",
+  mid: "Maritime Identification Digits",
   org_changes: "Changes in Administrations/ROAs and other entities or Organizations",
   misc_communications: "Other communications",
   service_restrictions: "Service Restrictions",
