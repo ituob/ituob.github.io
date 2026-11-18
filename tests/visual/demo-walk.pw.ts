@@ -82,7 +82,9 @@ for (const [name, persona] of Object.entries(PERSONAS) as [Name, (typeof PERSONA
           page.on("request", onRequest);
           const url = page.url();
           await button.click({ timeout: 4000 }).catch(() => undefined);
-          await page.waitForTimeout(700);
+          // The demo Worker can take a few seconds to answer; wait for the page to change (or 6 s) instead of a fixed 700 ms.
+          await page.waitForFunction(prev => (document.querySelector("main") as HTMLElement | null)?.innerText !== prev || document.querySelector("main :invalid") !== null, before, { timeout: 6000 }).catch(() => undefined);
+          await page.waitForTimeout(300);
           page.off("request", onRequest);
           const after = await mainText(page).catch(() => "");
           const invalid = await page.locator("main :invalid").count();

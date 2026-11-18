@@ -44,6 +44,12 @@ describe("local demo Access identity (dev:local only)", () => {
       expect(await adminGet(demoEnv(), "bootstrap-admin", host), host).toBe(403);
   });
 
+  it("is ignored when any production marker is present, even on a loopback URL", async () => {
+    await seedFixtures();
+    for (const marker of ["ACCESS_CI_CLIENT_IDS", "ENVIRONMENT", "GITHUB_APP_ID", "GITHUB_APP_PRIVATE_KEY", "GITHUB_WEBHOOK_SECRET", "RESEND_API_KEY"])
+      expect(await adminGet(demoEnv({ [marker]: "production" }), "bootstrap-admin"), marker).toBe(403);
+  });
+
   it("is ignored when an Access application is configured, as in production", async () => {
     await seedFixtures();
     expect(await adminGet(demoEnv({ ACCESS_AUD: "aud", ACCESS_TEAM_DOMAIN: "team.cloudflareaccess.com" }), "bootstrap-admin")).toBe(403);

@@ -4,6 +4,7 @@
  * Pagefind generates the /pagefind/ directory at build time.
  */
 import Base from "~/layouts/Base.astro";
+const demo = import.meta.env.PUBLIC_LOCAL_DEMO === "1";
 ---
 <Base title="Search" description="Search the ITU Operational Bulletin.">
   <main id="main" class="mx-auto max-w-[var(--measure)] px-4 py-8">
@@ -14,7 +15,7 @@ import Base from "~/layouts/Base.astro";
       Search across all ITU Operational Bulletin issues, datasets, and recommendations.
       Looking for a PDF? See <a href="/downloads/" class="underline">Downloads</a>.
     </p>
-    <div id="search-root">
+    <div id="search-root" data-demo={demo ? "1" : undefined}>
       <p style="color: var(--fg-muted); font-style: italic;">
         Search index loads after the page renders. If this persists, the index may not be built yet.
       </p>
@@ -34,7 +35,9 @@ import Base from "~/layouts/Base.astro";
         });
       } catch (e) {
         if (el) {
-          el.innerHTML = "<p style='color: var(--fg-muted);'>Full-text search is not available in this preview. You can still browse the <a href='/issues/'>issues</a>, <a href='/registers/'>registers</a> and <a href='/recommendations/'>recommendations</a>.</p>";
+          el.innerHTML = el.dataset.demo === "1"
+            ? "<p style='color: var(--fg-muted);'>Full-text search is not available in this preview. You can still browse the <a href='/issues/'>issues</a>, <a href='/registers/'>registers</a> and <a href='/recommendations/'>recommendations</a>.</p>"
+            : "<p style='color: var(--fg-muted); font-style: italic;'>Search index not yet generated. Run <code>npm run build</code> with Pagefind enabled.</p>";
         }
       }
     })();
