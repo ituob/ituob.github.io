@@ -51,6 +51,8 @@ export interface Env {
   MAIL_FROM?: string;
   /** GitHub webhook secret (Worker secret). Unset: /api/github/webhook fails closed with 503. */
   GITHUB_WEBHOOK_SECRET?: string;
+  /** Email-provider feedback webhook secret (Svix `whsec_...`, Worker secret). Unset: /api/email/webhook fails closed with 503. */
+  EMAIL_WEBHOOK_SECRET?: string;
   /** Notification carrier queue (`ituob-notify`); absent locally/unprovisioned: rows stay queued. */
   NOTIFY_Q?: Queue<{ notification_ids: string[] }>;
 }

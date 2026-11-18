@@ -78,6 +78,7 @@ Full semantics and assumptions A1-A11: `docs/identity-accounts.adoc`.
 | `ACCESS_TEAM_DOMAIN`, `ACCESS_AUD`, `ACCESS_CI_CLIENT_IDS` | var | See `docs/access-configuration.adoc`
 | `GITHUB_WEBHOOK_SECRET` | *secret* | Unset: the webhook route answers 503
 | `PATCH_REPO` | var | default `ituob/service-publications-docs`
+| `EMAIL_WEBHOOK_SECRET` | *secret* | Svix signing secret (`whsec_...`) of the provider's webhook endpoint for `POST /api/email/webhook`. Unset: the route answers 503. Not yet in the required-secrets lists of the wrangler files, because no provider account exists
 | `DB`, `NOTIFY_Q` bindings | binding | D1 database and the `ituob-notify` queue
 |===
 
@@ -117,3 +118,32 @@ same Cloudflare Access gate as other admin routes. It is read-only and uses
 `Cache-Control: no-store`. `limit` defaults to 50 (valid range 1–100); pass the
 response's `nextCursor` as `cursor` to continue in id order. No mutation route
 is provided.
+
+== Bounce and complaint feedback
+
+`POST /api/email/webhook` is public; its only trust path is the signature over the
+raw body (`worker/lib/email-feedback.ts`). It implements the Svix scheme used by
+Resend: `svix-id`, `svix-timestamp` (accepted within five minutes) and
+`svix-signature` (`v1,<base64 HMAC-SHA256>` of `<id>.<timestamp>.<body>`, any entry
+of a space-separated list). Unsigned, wrongly signed, stale or oversize (256 kB)
+requests are refused (401/413) before the body is parsed. Another provider needs
+another `WebhookVerifier` and event mapping.
+
+Events are matched to `notifications.email_provider_id`:
+
+* `email.delivered`: `sent` becomes `delivered`.
+* `email.bounced` with `bounce.type` `Permanent`: `sent`/`delivered` becomes `bounced`
+  and the recipient's address is inserted into `email_suppressions` (`hard_bounce`).
+  Soft (`Transient`, `Undetermined`) bounces are ignored: the provider retries them.
+* `email.complained`: becomes `complained`; the address is suppressed (`complaint`).
+
+Replays are harmless: transitions are conditional updates and counters use
+`changes()`, so a repeated event answers `duplicate` and counts nothing. An existing
+suppression row (including `manual`) is never overwritten. An unknown provider id
+answers 404 so the provider redelivers (the send may not be recorded yet). The queue
+consumer skips suppressed addresses (`skipped:suppressed`).
+
+`GET /api/admin/notifications/stats` (Access plus the `itu-admin` role) returns the
+last 14 days of `notification_counters` (`days`, `totals`), suppression counts by
+reason, the 20 most recent suppressions and notification counts by `email_status`.
+The admin page is `/admin/notifications/`.
