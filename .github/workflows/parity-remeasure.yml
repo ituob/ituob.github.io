@@ -7,7 +7,7 @@ name: Parity re-measure
 # in tests/parity-threshold.test.ts then pass).
 #
 # Triggers (a full run is about 45-60 minutes, mostly the Jekyll reference):
-#   - pull_request / push to main when a hashed rendering template, the corpus
+#   - pull_request, or push to main or claude-a/**, when a hashed rendering template, the corpus
 #     pins (data, data-ob), the scorer or this workflow changes
 #   - workflow_dispatch, any time
 # The ordinary build-deploy.yml run does NOT re-measure; it only checks the
@@ -15,7 +15,7 @@ name: Parity re-measure
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, "claude-a/**" ]
     paths:
       - 'src/lib/printed-context.ts'
       - 'src/lib/loaders.ts'
