@@ -88,6 +88,9 @@ jobs:
         BUNDLE_GEMFILE: data-ob/ituob/Gemfile
       run: bundle exec node --test test/parity-evidence-generator.test.mjs
 
+    - name: Replay-skip reasons and committed parity threshold (D100-1, D100-5)
+      run: node --experimental-strip-types --test tests/replay-skips.test.ts tests/parity-threshold.test.ts
+
     - name: Worker typecheck
       run: npm run typecheck:worker
 

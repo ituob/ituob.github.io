@@ -245,6 +245,34 @@ function generalIsEmpty(
   return true;
 }
 
+/** Message order of an issue as authored in the Jekyll-era source
+ *  (data/issues/N/general.yaml and amendments.yaml). The normalized ob-issues
+ *  projection groups messages by directory and loses the authored sequence,
+ *  which the original issue page (Jekyll `general.messages` / `amendments.messages`
+ *  loops) followed. Null when the source has no file for the issue (issues
+ *  authored after the Jekyll corpus freeze, OB 1344 onward). */
+export interface SourceMessageOrder {
+  /** General message types in authored order (one entry per message). */
+  general: string[];
+  /** Amendment dataset slugs in authored order. */
+  amendments: string[];
+}
+export const loadSourceMessageOrder = memoize((id: number): SourceMessageOrder | null => {
+  const dir = join(listsRoot(), "..", "issues", String(id));
+  const general = readYamlOrNull<{ messages?: { type?: string }[] }>(join(dir, "general.yaml"));
+  const amendments = readYamlOrNull<{ messages?: SourceAmendmentMessage[] }>(join(dir, "amendments.yaml"));
+  if (!general && !amendments) return null;
+  const slugs: string[] = [];
+  for (const m of amendments?.messages ?? []) {
+    const slug = m.target?.publication ? PUBLICATION_BY_ID.get(m.target.publication)?.slug : undefined;
+    if (slug && !slugs.includes(slug)) slugs.push(slug);
+  }
+  return {
+    general: (general?.messages ?? []).map((m) => String(m.type ?? "")),
+    amendments: slugs,
+  };
+});
+
 /** Load many issues — convenience. */
 export function loadIssues(ids: number[]): (LoadedIssue | null)[] {
   return ids.map((id) => loadIssue(id));

@@ -366,3 +366,27 @@ JS
   a controlled #109 rebuild on identical inputs, parser equivalence, all-corpus LML action validation, LML instance
   round-trip suite, LML seed validation/schema drift, and register state integrity
   against projections. Snapshot generation alone is not that integrity gate.
+
+## CI gate for the 95% threshold (D100-1)
+
+What CI checks on every pull request (`build-deploy.yml`, step "Replay-skip
+reasons and committed parity threshold"): `tests/parity-threshold.test.ts` reads
+the committed receipts in `docs/parity/current-main/{pinned,ob1350}/parity_variants.json`
+and fails if any included variant is below 95%, is not `pass`, or the included
+count disagrees with the payload. The scorer itself is covered by
+`test/parity-evidence-generator.test.mjs` (existing CI step). Current receipts:
+602/602 and 609/609 included variants pass, worst variant 95.57%.
+
+What CI does not re-measure on every pull request: the measurement needs a
+Jekyll reference build at the pinned data (recorded 2608 s, about 43 minutes,
+Ruby 3.1.7 with `reference-build.patch`) plus a full Astro build and the
+canonical walker, far beyond a pull-request budget. It runs by hand with the
+commands in "Original measurement and commands" and the result is committed as
+a new receipt. A receipt is attributable to the template sources through the
+`source_sha256` map in the same JSON, which makes a stale receipt visible
+(changed templates, unchanged hash); that comparison is a review step, not
+automated, because the hashes legitimately move with every template edit until
+the next measurement. The issue-page ordering change on `claude-a/parity-close`
+(see `docs/parity/issue-page-structure.md`) and the register-page skip reasons
+changed two hashed templates; the next full measurement must be rerun before the
+receipts are called current.
