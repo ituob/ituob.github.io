@@ -22,6 +22,7 @@ const OOB_DATA_ROOT = resolve(projectRoot, "data");
 // https://astro.build/config
 export default defineConfig({
   site: "https://www.ituob.org",
+  ...(process.env.ITUOB_DEV_LOCAL === "1" ? { devToolbar: { enabled: false } } : {}),
   trailingSlash: "always",
   output: "static",
   integrations: [vue(), mdx(), sitemap(), registerSnapshotsIntegration()],

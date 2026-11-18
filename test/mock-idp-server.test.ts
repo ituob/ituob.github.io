@@ -52,9 +52,11 @@ it("serves the sign-in form and exchanges its email submission for the selected 
     const page = await fetch(authorize);
     expect(page.status).toBe(200);
     const html = await page.text();
-    expect(html).toContain('<label for="email">Email address</label>');
-    expect(html).toContain('<button type="submit">Continue</button>');
+    expect(html).toContain('<label class="admin-label" for="email">Email address</label>');
+    expect(html).toContain('<button class="admin-button admin-button-primary" type="submit">Continue</button>');
     expect(html).toContain('<summary>Test accounts</summary>');
+    expect(html).toContain('.admin-control {');
+    expect(html).toContain('.admin-button-primary {');
     const action = html.match(/<form method="post" action="([^"]+)"/)![1]!.replaceAll("&amp;", "&");
     const response = await fetch(new URL(action, base), { method: "POST", body: new URLSearchParams({ email: "itu-editor@mock.test" }), redirect: "manual" });
     expect(response.status).toBe(302);

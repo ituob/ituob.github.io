@@ -212,9 +212,9 @@ describe("the mock provider itself", () => {
     expect(response.status).toBe(200);
     expect(response.headers.get("Cache-Control")).toBe("no-store");
     const html = await response.text();
-    expect(html).toContain('<label for="email">Email address</label>');
+    expect(html).toContain('<label class="admin-label" for="email">Email address</label>');
     expect(html).toContain('name="email" type="email" autocomplete="email" required');
-    expect(html).toContain('<button type="submit">Continue</button>');
+    expect(html).toContain('<button class="admin-button admin-button-primary" type="submit">Continue</button>');
     expect(html).toContain('<summary>Test accounts</summary>');
     expect(html).toContain("Local development only");
     const action = html.match(/<form method="post" action="([^"]+)"/)![1]!.replaceAll("&amp;", "&");
@@ -233,7 +233,7 @@ describe("the mock provider itself", () => {
     expect(html).toContain('role="alert"');
     expect(html).toContain("Enter an email address from the test accounts below.");
     expect(html).not.toContain("<script>");
-    expect(html).toContain('<button type="submit">Continue</button>');
+    expect(html).toContain('<button class="admin-button admin-button-primary" type="submit">Continue</button>');
   });
 
   it("still validates loopback redirects and PKCE before accepting an email submission", async () => {

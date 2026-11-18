@@ -63,7 +63,7 @@ const sha256b64url = async (s) => b64url(await crypto.subtle.digest("SHA-256", n
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
 const loopback = (u) => ["127.0.0.1", "localhost", "[::1]"].includes(new URL(u).hostname);
 
-function signInPage(url, personas, email = "", error = "") {
+function signInPage(url, personas, email = "", error = "", formStyles = "") {
   const action = new URL(url);
   action.searchParams.delete("persona");
   const items = Object.entries(personas).map(([key, persona]) => {
@@ -76,24 +76,22 @@ function signInPage(url, personas, email = "", error = "") {
 <title>Sign in — ITU Operational Bulletin</title>
 <style>
 /* Standalone loopback page: fonts and palette mirror src/styles/global.css. */
-:root { color-scheme: light; --font-sans: Helvetica, Arial, sans-serif; --bg: #ffffff; --bg-2: #fafafa; --fg: #000000; --fg-2: #333333; --fg-3: #666666; --border: rgba(0,0,0,.12); --accent: #1aa1da; --link: #178ec4; }
+:root { color-scheme: light; --font-sans: Helvetica, Arial, sans-serif; --bg: #ffffff; --bg-2: #fafafa; --fg: #000000; --fg-2: #333333; --fg-3: #666666; --border: rgba(0,0,0,.12); --accent: #1aa1da; --link: #178ec4; --fg-1: #1a1a1a; --border-2: rgba(0,0,0,.18); --radius-xs: 4px; --radius-sm: 6px; --step-0: .9375rem; --step--1: .875rem; --step--2: .8125rem; --line-height-body: 1.6; --line-height-tight: 1.25; --glass-bg: #fff; --glass-border-hover: rgba(0,0,0,.18); --accent-active: #137aa8; --accent-on: #fff; --bg-hover: #e3f4fb; --border-accent: rgba(26,161,218,.35); --color-red-500: #ef4444; --color-red-bg: rgba(239,68,68,.12); }
 * { box-sizing: border-box; } body { margin: 0; color: var(--fg); background: var(--bg-2); font: 1rem/1.5 var(--font-sans); }
 header { background: var(--accent); color: white; padding: 1rem 5vw; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; }
 main { width: min(100% - 2rem, 30rem); margin: 3rem auto; padding: 2rem; background: var(--bg); border: 1px solid var(--border); border-radius: .5rem; }
 h1 { margin: 0; font-size: 2rem; line-height: 1.15; letter-spacing: -.022em; } p { color: var(--fg-2); } .notice { color: var(--fg-3); font-size: .875rem; }
-label { display: block; font-weight: 600; margin-bottom: .5rem; } input, button { width: 100%; font: inherit; border-radius: .25rem; padding: .75rem; }
-input { border: 1px solid var(--border); color: var(--fg); background: var(--bg); } button { margin-top: 1rem; border: 0; background: var(--link); color: white; font-weight: 600; cursor: pointer; }
-button:hover { background: #137aa8; } :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 details { margin-top: 2rem; border-top: 1px solid var(--border); padding-top: 1rem; } summary { cursor: pointer; font-weight: 600; }
 ul { list-style: none; padding: 0; margin-bottom: 0; } li + li { border-top: 1px solid var(--border); } a { display: block; padding: .75rem 0; color: var(--link); text-decoration: none; } a:hover { text-decoration: underline; } a span { display: block; color: var(--fg-3); overflow-wrap: anywhere; font-size: .875rem; }
 .error { color: #b42318; } @media (max-width: 400px) { main { padding: 1.25rem; margin: 1.5rem auto; } }
+${formStyles}
 </style></head><body><header>ITU Operational Bulletin</header><main>
 <h1>Sign in</h1><p>Continue with your email address.</p>
 <p class="notice" id="local-notice">Local development only. This mock identity provider signs in test accounts without a password. Use a test email below.</p>
-<form method="post" action="${esc(action.pathname + action.search)}">
-<label for="email">Email address</label><input id="email" name="email" type="email" autocomplete="email" required value="${esc(email)}" aria-describedby="local-notice${error ? " sign-in-error" : ""}"${error ? ' aria-invalid="true"' : ""}>
-${error ? `<p class="error" id="sign-in-error" role="alert">${esc(error)}</p>` : ""}
-<button type="submit">Continue</button></form>
+<form method="post" action="${esc(action.pathname + action.search)}" class="admin-form">
+<label class="admin-label" for="email">Email address</label><input class="admin-control" id="email" name="email" type="email" autocomplete="email" required value="${esc(email)}" aria-describedby="local-notice${error ? " sign-in-error" : ""}"${error ? ' aria-invalid="true"' : ""}>
+${error ? `<p class="admin-error" id="sign-in-error" role="alert">${esc(error)}</p>` : ""}
+<button class="admin-button admin-button-primary" type="submit">Continue</button></form>
 <details><summary>Test accounts</summary><p class="notice">Choose a local test account to sign in directly.</p><ul>${items}</ul></details>
 </main></body></html>`, { status: error ? 400 : 200, headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store" } });
 }
@@ -105,7 +103,7 @@ ${error ? `<p class="error" id="sign-in-error" role="alert">${esc(error)}</p>` :
  */
 export async function createMockIdp({
   issuer = MOCK_ISSUER, clientId = MOCK_CLIENT_ID, clientSecret = MOCK_CLIENT_SECRET,
-  clientAuth = "basic", personas = PERSONAS, ttlSeconds = 300,
+  clientAuth = "basic", personas = PERSONAS, ttlSeconds = 300, formStyles = "",
 } = {}) {
   const pair = await crypto.subtle.generateKey({ name: "ECDSA", namedCurve: "P-256" }, true, ["sign", "verify"]);
   const jwk = { ...(await crypto.subtle.exportKey("jwk", pair.publicKey)), kid: "mock-1", use: "sig", alg: "ES256" };
@@ -132,11 +130,11 @@ export async function createMockIdp({
     if (submittedEmail !== undefined) {
       const email = submittedEmail.trim();
       const match = Object.entries(personas).find(([, persona]) => persona.email.toLowerCase() === email.toLowerCase());
-      if (!match) return signInPage(url, personas, email, "Enter an email address from the test accounts below.");
+      if (!match) return signInPage(url, personas, email, "Enter an email address from the test accounts below.", formStyles);
       p.set("persona", match[0]);
     }
     const who = p.get("persona");
-    if (!who) return signInPage(url, personas);
+    if (!who) return signInPage(url, personas, "", "", formStyles);
     const persona = personas[who];
     if (!persona) return new Response("unknown persona", { status: 400 });
     const code = b64url(crypto.getRandomValues(new Uint8Array(16)));
@@ -200,7 +198,9 @@ async function main() {
   if (cmd === "sql") return process.stdout.write(personaSql());
   if (cmd !== "serve") { console.error("usage: mock-idp.mjs serve [port] | sql"); process.exit(2); }
   const port = Number(arg ?? new URL(MOCK_ISSUER).port);
-  const idp = await createMockIdp({ issuer: `http://127.0.0.1:${port}` });
+  const { readFile } = await import("node:fs/promises");
+  const formStyles = await readFile(new URL("../src/styles/admin-forms.css", import.meta.url), "utf8");
+  const idp = await createMockIdp({ issuer: `http://127.0.0.1:${port}`, formStyles });
   const { createServer } = await import("node:http");
   createServer(async (nreq, nres) => {
     try {

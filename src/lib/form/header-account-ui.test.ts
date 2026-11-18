@@ -12,6 +12,7 @@ function headerAccount() {
   const { descriptor } = parse(readFileSync(filename, 'utf8'));
   const mounted: Array<() => Promise<void>> = [];
   const modules: Record<string, unknown> = {
+    "../../styles/admin-forms.css": {},
     vue: { ...Vue, onMounted: (hook: () => Promise<void>) => mounted.push(hook) },
     'vue/server-renderer': renderer,
     './api': accountApi,
@@ -74,7 +75,7 @@ describe('header account control', () => {
     expect(html).toContain(`<summary>${label}</summary>`);
     expect(html).toContain('aria-label="Account"');
     expect(html).toContain('href="/me/">My account</a>');
-    expect(html).toContain('<form method="post" action="/auth/logout"><button type="submit">Sign out</button></form>');
+    expect(html).toContain('<form class="admin-form" method="post" action="/auth/logout"><button class="admin-button" type="submit">Sign out</button></form>');
     expect(html).not.toContain('>Sign in</a>');
   });
 
