@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { blankState, setField, type FormNode } from './model';
 import { YamlTimestamp } from './yaml-io';
-import { amendmentHeader, applyPrefill, positionPrefill, prefillPosition, zurichPositionDay, registerPrefillDay, prefillDay, freshPrefill, NO_PREFILL } from './amendment-header';
+import { amendmentHeader, applyPrefill, positionPrefill, prefillPosition, zurichPositionDay, registerPrefillDay, prefillDay, freshPrefill, NO_PREFILL, sourceLines } from './amendment-header';
 import type { AnnexIndexEntry } from './annexes';
 
 const index: AnnexIndexEntry[] = [
@@ -116,5 +116,19 @@ describe('prefill across load and new (A-N2)', () => {
     r = prefillDay(r.state, r.node, registerPrefillDay(null));
     expect(posOf(r.node)).toBe('');
     expect(posOf(freshPrefill(r.state, blank()).node)).toBe('');
+  });
+});
+
+describe('amendment header source lines (legacy AmendmentMeta, amendment.tsx:93-103)', () => {
+  it('prints the recommendation with title and the SP resource, like the legacy header', () => {
+    expect(sourceLines({ recommendation: { body: 'ITU-T', code: 'E.129', version: '2013-01', title: 'Presentation of national numbers' }, url: 'http://www.itu.int/itu-t/inr/nnp/index.html' }))
+      .toEqual({ recommendation: 'Per ITU-T Rec. E.129 (2013-01) Presentation of national numbers', url: 'http://www.itu.int/itu-t/inr/nnp/index.html' });
+  });
+  it('falls back to body and code when the recommendation has no catalog title', () => {
+    expect(sourceLines({ recommendation: { body: 'ITU-T', code: 'F.170' } }).recommendation).toBe('Per ITU-T F.170');
+  });
+  it('omits what the publication does not have: no recommendation, empty url', () => {
+    expect(sourceLines({ recommendation: null, url: '' })).toEqual({ recommendation: null, url: null });
+    expect(sourceLines(undefined)).toEqual({ recommendation: null, url: null });
   });
 });

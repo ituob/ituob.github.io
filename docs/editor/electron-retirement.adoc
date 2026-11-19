@@ -113,9 +113,9 @@ editor wrote (`src/lib/form/electron-authoring.test.ts`).
 | Done
 
 | Amendment header, position_on prefill from latest annex (E4)
-| Plain date field
-| none
-| *Missing, does not block* (see below)
+| `AmendmentHeader.vue`: recommendation line, SP resource URL, "Amending position of DATE annexed to OB n" or never-annexed warning; `position_on` prefilled from the latest annex
+| `amendment-header.ts`, `register-source.ts`, `amendment-header.test.ts`
+| Done (in #137)
 
 | SEED
 | Bulk import plans one staff-only SEED for an empty register; server enforces staff
@@ -160,7 +160,6 @@ editor wrote (`src/lib/form/electron-authoring.test.ts`).
 
 == What does not block retirement
 
-* E4: the amendment header and `position_on` prefill. The date is entered by hand and checked by the validators. Track as a follow-up issue.
 * I1 on general messages and the friendlier language picker (C7).
 
 == What must happen outside this repository

@@ -9,9 +9,9 @@ import type { SchemaIssue } from '../../lib/schema.validators.generated';
 import { duplicateOfToSend, loadDuplicateDraft, type DuplicateSource } from '../../lib/form/duplicate';
 import SchemaNode from './SchemaNode.vue';
 import AmendmentHeader from './AmendmentHeader.vue';
-import { freshPrefill, NO_PREFILL, prefillDay, type PrefillState } from '../../lib/form/amendment-header';
+import { freshPrefill, NO_PREFILL, prefillDay, type PrefillState, type PublicationSource } from '../../lib/form/amendment-header';
 import { demoMode } from '../../lib/demo-refusal';
-const props = withDefaults(defineProps<{ admin?: boolean; create?: boolean; translation?: boolean; registers?: { register_id: string; slug: string; label: string }[] }>(), { registers: () => [] });
+const props = withDefaults(defineProps<{ admin?: boolean; create?: boolean; translation?: boolean; registers?: { register_id: string; slug: string; label: string; source?: PublicationSource }[] }>(), { registers: () => [] });
 interface Submission { id: string; register_id: string; slug: string; action_type: string; state: string; current_rev: number; affiliation_kind?: string; affiliation_member_id?: string | null; affiliation_member_name?: string | null }
 interface Revision { rev: number; payload_yaml: string; validation: string; created_at: string }
 interface Detail { ok: true; submission: Submission; revisions: Revision[]; current?: CurrentRegisterItems; history: { from_state: string; to_state: string; reason: string | null; at: string }[]; pr: { pr_number: number | null; pr_state: string; last_error: string | null } | null }
@@ -180,7 +180,7 @@ onMounted(() => perform(async () => {
         <label class="admin-field admin-label">Amendment class <select class="admin-control" v-model="className" @change="freshNode(); inputErrors = {}"><option v-for="name in amendmentClasses" :key="name">{{ name }}</option></select></label>
         <label class="admin-field admin-label" v-if="creating">Corrects published submission (optional) <input class="admin-control" v-model="correctsId" /></label>
       </fieldset>
-      <AmendmentHeader :register-id="registerId" :label="registers.find(r => r.register_id === registerId)?.label" @prefill="day => { if (creating) prefillFrom(day); }" />
+      <AmendmentHeader :register-id="registerId" :label="registers.find(r => r.register_id === registerId)?.label" :source="registers.find(r => r.register_id === registerId)?.source" @prefill="day => { if (creating) prefillFrom(day); }" />
       <SchemaNode :node="node" path="data" :readonly="busy || !editable" :translation="translation" @change="node = $event" @invalid="invalid" />
       <fieldset class="admin-fieldset" :disabled="busy"><legend>Workflow</legend>
         <template v-if="editable && !admin">

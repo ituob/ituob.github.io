@@ -65,3 +65,26 @@ export function prefillDay(state: PrefillState, node: FormNode, day: string): { 
 export function freshPrefill(state: PrefillState, blank: FormNode): { state: PrefillState; node: FormNode } {
   return prefillDay({ annexDay: state.annexDay, prefilled: "" }, blank, state.annexDay);
 }
+
+/**
+ * What the legacy AmendmentMeta printed above the position line (message-forms/amendment.tsx:93-103): "Per <recommendation>"
+ * and "SP resource: <url>", both from the publication record (publications.ts `recommendation` and `url`).
+ */
+export interface PublicationSource {
+  recommendation?: { body?: string; code: string; version?: string; title?: string } | null;
+  /** The SP resource of the publication (dataset or list metadata `url`), not the recommendation page. */
+  url?: string | null;
+}
+export interface SourceLines { recommendation: string | null; url: string | null }
+
+/** Legacy RecommendationTitle (widgets/publication-title.tsx:26-40): "BODY Rec. CODE (YYYY-MM) Title", or "BODY CODE (YYYY-MM)" without a catalog title. */
+export function sourceLines(source: PublicationSource | null | undefined): SourceLines {
+  const rec = source?.recommendation;
+  const version = rec?.version ? `(${String(rec.version).slice(0, 7)})` : "";
+  const join = (...parts: (string | undefined)[]) => parts.filter(Boolean).join(" ");
+  const recommendation = rec?.code
+    ? `Per ${rec.title ? join(rec.body, "Rec.", rec.code, version, rec.title) : join(rec.body, rec.code, version)}`
+    : null;
+  const url = source?.url?.trim() ? source.url.trim() : null;
+  return { recommendation, url };
+}
