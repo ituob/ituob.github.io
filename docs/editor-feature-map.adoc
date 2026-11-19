@@ -53,11 +53,11 @@ Status values:
 | B3 | Browse service publications | `publication-browser/index.tsx` | `src/pages/registers/`, `datasets/` | main | DONE (read only; editing is G1)
 | B4 | Upcoming issues with current/next/past status, cutoff and publication dates | `issue-scheduler/upcoming.tsx` | public: `src/components/PlannedIssues.astro` | main | DONE
 | B5 | Same list inside the admin tool | same | `Composer.vue` editions list | #110 | DONE
-| B6 | Calendar month view with cutoff/publication highlighting | `issue-scheduler/index.tsx` | `ScheduleCalendar.vue` highlights current form cutoff/publication dates in a UTC month grid with previous/next controls | this PR | IN PR
+| B6 | Calendar month view with cutoff/publication highlighting | `issue-scheduler/index.tsx` | `ScheduleCalendar.vue` highlights current form cutoff/publication dates in a UTC month grid with previous/next controls | this PR | DONE
 | B7 | Create/schedule a new issue: pick dates, enter edition number; id must be > 0 and not exist | `issue-scheduler/schedule-form.tsx`, `main/issue-manager.ts:162-190` | `Composer.vue` open edition, `worker/lib/edition-number.ts`, `edition-metadata.ts`, `EditionMetadata.vue` | #110 | DONE
 | B8 | New issue inherits ISSN, languages and authors from `defaults/issue/meta.yaml` | `issue-manager.ts:158-190` | `EditionMetadata.vue`, `edition-defaults.ts`: inherit masthead only from an earlier published edition | #117 | DONE
 | B9 | "Save defaults" IPC | `model-issues-save-defaults` | n/a | n/a | DROPPED (no UI ever called it)
-| B10 | Help buttons linking to `ituob.org/docs/...` (schedule, per message type, amend/annex) | `index.tsx:152`, `message-editor.tsx:54-62` | Inline schedule, general-message and amendment help in `EditionMetadata.vue`, `GeneralMessageEditor.vue`, `SubmissionWorkspace.vue` | this PR | IN PR
+| B10 | Help buttons linking to `ituob.org/docs/...` (schedule, per message type, amend/annex) | `index.tsx:152`, `message-editor.tsx:54-62` | Inline schedule, general-message and amendment help in `EditionMetadata.vue`, `GeneralMessageEditor.vue`, `SubmissionWorkspace.vue` | this PR | DONE
 | B11 | Live refresh when another window changes an issue | `issue-scheduler/index.tsx:69-75` | n/a | n/a | DROPPED (single-page state; conflicts handled by revision checks, see C10)
 |===
 
@@ -90,22 +90,22 @@ string attribute or it cannot be authored.
 | ID | Editor feature | Editor ref | Web app ref | PR | Status
 | D1 | Add-message menu with fixed order and one-per-type guard for running_annexes, approved_recommendations, telephone_service(_2), service_restrictions, callback_procedures | `new-item-prompts/general-message.tsx`, `models/issues.ts:89-103,141-158` | `GeneralMessageEditor.vue` type picker; `src/lib/form/general.ts` paths (singletons `general/<type>.yaml`, others `<type>/NNN.yaml`); `migrations/0003_general_messages.sql` UNIQUE path | #110 | DONE
 | D2 | Delete a message | `issue-editor/index.tsx:240-247` | `POST /api/admin/general-messages/:id/delete`; revision, approval, review and edition guards | #117 | DONE
-| D3 | Edit a message that already exists in the issue | `message-forms/*` | Canonical repository import through `RepoReader`; this PR retains imported source bytes through unchanged saves and approval, and patches edited YAML value ranges | #117, this PR | IN PR (live repository proof pending)
+| D3 | Edit a message that already exists in the issue | `message-forms/*` | Canonical repository import through `RepoReader`; this PR retains imported source bytes through unchanged saves and approval, and patches edited YAML value ranges | #117, this PR | DONE (live repository proof pending)
 | D4 | running_annexes: `extra_links` list; running list derived read-only | `message-forms/running_annexes.tsx` | `GeneralRunningAnnexes.extra_links` in `GeneralMessageEditor.vue`; derived list `RunningAnnexes.astro` | #110, main | DONE
 | D5 | approved_recommendations: by, procedures, items (code, version) | `message-forms/approved_recommendations.tsx:28-190` | `GeneralApprovedRecommendations` via `SchemaNode.vue` | #110 | DONE (card title lookup from the recommendation store is not reproduced; legacy date format mix is an open normalisation question)
 | D6 | telephone_service_2 structure: add and delete country/area sections, area details, add and delete dated communications | `message-forms/telephone_service_2.tsx` | `GeneralTelephoneService` > `GeneralTelephoneSection` > `GeneralTelephoneCommunication` via `SchemaNode.vue` | #110 | DONE
-| D7 | telephone communication body text | `telephone_service_2.tsx:457-537` | Generated `HashOrText` communication contents; corpus-wide byte-identical import/save/approval proof in this PR | #124, this PR | IN PR
+| D7 | telephone communication body text | `telephone_service_2.tsx:457-537` | Generated `HashOrText` communication contents; corpus-wide byte-identical import/save/approval proof in this PR | #124, this PR | DONE
 | D8 | telephone_service v1 | `message-forms/index.tsx` (renders "isn't supported yet") | n/a | n/a | DROPPED (0 corpus use, not creatable in legacy)
 | D9 | service_restrictions: items country, ob, page | `message-forms/service_restrictions.tsx` | `GeneralServiceRestrictions.items` | #110 | DONE
 | D10 | callback_procedures (no content) | `message-forms/callback_procedures.tsx` | `GeneralCallbackProcedures` | #110 | DONE
 | D11 | misc_communications prose | `message-forms/freeform.tsx` | `GeneralMiscCommunications.text` textarea | #110 | DONE (rendering of newly authored shape unverified by the docs)
 | D12 | org_changes prose | same | `GeneralOrgChanges.text` textarea | #110 | DONE (same caveat)
 | D13 | custom message: prose body | `message-forms/custom.tsx` | `GeneralCustom.text` textarea | #110 | DONE
-| D14 | custom message: translatable title (legacy form always asks for one) | `custom.tsx` | Generated multilingual title; corpus-wide preservation proof in this PR | #124, this PR | IN PR
-| D15 | sanc (Q708 SANC) | freeform | Canonical `GeneralSancs` dispatch, typed rows and prose; corpus-wide byte-identical import/save/approval proof in this PR | #124, this PR | IN PR
+| D14 | custom message: translatable title (legacy form always asks for one) | `custom.tsx` | Generated multilingual title; corpus-wide preservation proof in this PR | #124, this PR | DONE
+| D15 | sanc (Q708 SANC) | freeform | Canonical `GeneralSancs` dispatch, typed rows and prose; corpus-wide byte-identical import/save/approval proof in this PR | #124, this PR | DONE
 | D16 | iptn | freeform | `GeneralIptn.entries` (structured rows) | #110 | DONE
 | D17 | ipns | freeform | `GeneralIpns` (network, mcc_mnc, date, notes) | #110 | DONE
-| D18 | mid | freeform | Generated `HashOrText` contents; corpus-wide preservation proof in this PR | #124, this PR | IN PR
+| D18 | mid | freeform | Generated `HashOrText` contents; corpus-wide preservation proof in this PR | #124, this PR | DONE
 | D19 | ProseMirror freeform editor (marks, tables) | `issue-editor/freeform-contents.tsx` | none | n/a | DROPPED (decision record: no ProseMirror)
 |===
 
