@@ -162,10 +162,11 @@ Step 14. Notification outbox and recorded email
     submission.pr_merged -> admin@itu.example, delegate@austria.example
     submission.pr_opened -> admin@itu.example, delegate@austria.example
     submission.published -> delegate@austria.example
+    submission.scheduled -> delegate@austria.example
     submission.submitted -> editor@itu.example, editor@itu.example
   CHECK the member is told about review, approval, PR merge and publication: changes_requested, approved, pr_opened, pr_merged, published
-  queue messages handed to the consumer: 9; delivered by the consumer: 13
-  CHECK mail was recorded, never sent: 13 recorded emails
+  queue messages handed to the consumer: 10; delivered by the consumer: 14
+  CHECK mail was recorded, never sent: 14 recorded emails
   recorded emails (recipient: subjects):
     admin@itu.example: [ITU OB] E164_CC e164-cc: Pull request merged
     admin@itu.example: [ITU OB] E164_CC e164-cc: Pull request opened
@@ -173,6 +174,7 @@ Step 14. Notification outbox and recorded email
     delegate@austria.example: [ITU OB] E164_CC e164-cc: Changes requested
     delegate@austria.example: [ITU OB] E164_CC e164-cc: Pull request merged
     delegate@austria.example: [ITU OB] E164_CC e164-cc: Pull request opened
+    delegate@austria.example: [ITU OB] E164_CC e164-cc: Scheduled in an edition
     delegate@austria.example: [ITU OB] E164_CC e164-cc: Submission approved
     delegate@austria.example: [ITU OB] E164_CC e164-cc: Submission published
     delegate@austria.example: [ITU OB] E164_CC e164-cc: Submission under review
