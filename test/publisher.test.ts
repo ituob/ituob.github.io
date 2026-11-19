@@ -100,6 +100,13 @@ describe("GitHub App publisher", () => {
     await expect(new GitHubAppPatchPublisher().openPatchPr(req)).rejects.toBeInstanceOf(PublisherNotConfigured);
     const fake = new FakePatchPublisher(); setPublisher(fake); expect(getPublisher(config)).toBe(fake); setPublisher(null);
   });
+  it("serves the demo catalog only for a local demo config with no production marker", async () => {
+    const demo = { LOCAL_DEMO: "1", AUTH_MODE: "oidc", DEMO_CATALOG_REGISTERS: "r", DEMO_CATALOG_RECOMMENDATIONS: "c" };
+    const read = (cfg: object) => getPublisher(cfg as any).readCatalog({ repo: "o/r" } as any);
+    expect((await read(demo)).baseSha).toBe("demo");
+    for (const marker of ["ACCESS_AUD", "ACCESS_TEAM_DOMAIN", "ENVIRONMENT", "GITHUB_APP_ID", "RESEND_API_KEY"])
+      await expect(read({ ...demo, [marker]: "x" })).rejects.toBeInstanceOf(PublisherNotConfigured);
+  });
   it("signs a real App JWT, preserves bytes and reuses immutable branch/PR", async () => {
     const api = new GitHub(), client = api.client();
     const first = await client.openPatchPr(req);

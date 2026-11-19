@@ -6,7 +6,7 @@
  * in this frontmatter so the template stays type-checkable.
  */
 import { loadIssue, listIssueIds } from "~/lib/loaders";
-import { loadStateAtIssue, type RegisterState } from "~/lib/snapshots";
+import { loadStateAtIssue, hasSnapshotAt, type RegisterState } from "~/lib/snapshots";
 import { formatSwissDate } from "~/lib/format";
 import PrintedRegisterContext from "~/components/PrintedRegisterContext.astro";
 import StructuredAmendment from "~/components/StructuredAmendment.astro";
@@ -126,7 +126,7 @@ const orderedCards = cards.slice().reverse();
           <p class="mt-1 text-[var(--step--1)]" style="color: var(--fg-muted);">
             Date: {formatSwissDate(card.issueDate)}
             {" "}·{" "}
-            <a href={`/registers/${slug}/at/${card.obIssue}/`} class="no-underline hover:underline" style="color: var(--fg-subtle);">snapshot →</a>
+            {hasSnapshotAt(slug, card.obIssue) && <a href={`/registers/${slug}/at/${card.obIssue}/`} class="no-underline hover:underline" style="color: var(--fg-subtle);">snapshot →</a>}
           </p>
         )}
 

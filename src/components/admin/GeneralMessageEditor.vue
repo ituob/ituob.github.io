@@ -30,10 +30,11 @@ function invalid(path: string, message: string) {
   if (message) inputErrors.value[path] = message;
   else for (const key of Object.keys(inputErrors.value)) if (key === path || key.startsWith(`${path}.`) || key.startsWith(`${path}[`)) delete inputErrors.value[key];
 }
-async function perform(work: () => Promise<void>) {
-  busy.value = true; error.value = ''; notice.value = ''; errors.value = [];
+// `working` shows an immediate status line, so a slow answer never looks like a dead button.
+async function perform(work: () => Promise<void>, working = '') {
+  busy.value = true; error.value = ''; notice.value = working; errors.value = [];
   try { await work(); }
-  catch(e) { error.value = e instanceof Error ? e.message : 'General-message request failed'; if(e instanceof ApiError) errors.value = e.errors; }
+  catch(e) { notice.value = ''; error.value = e instanceof Error ? e.message : 'General-message request failed'; if(e instanceof ApiError) errors.value = e.errors; }
   finally { busy.value = false; }
 }
 async function reload() { drafts.value = (await api<{drafts:GeneralMessage[]}>(endpoint)).drafts.filter(item => item.type !== 'annexes'); }
@@ -42,12 +43,12 @@ async function save() {
     if(Object.keys(inputErrors.value).length) throw new Error('Resolve invalid fields before saving.');
     const value = { ...(toInstance(node.value) as Record<string,unknown>), ob_issue_no: String(issueNo.value) };
     errors.value = validateClass(className.value,value);
-    if(errors.value.length) return;
+    if(errors.value.length) { notice.value = ''; return; }
     const url = draft.value ? `${endpoint}/${draft.value.id}` : endpoint;
     const input = draft.value ? {value,expected_revision:draft.value.revision} : {value,type:type.value,ob_issue_no:issueNo.value};
     accept((await api<{draft:GeneralMessage}>(url,'POST',input)).draft);
     await reload(); notice.value = 'Draft saved. An administrator must approve this revision before publication review.';
-  });
+  }, 'Saving draft…');
 }
 async function approve() {
   if(!draft.value) return;
@@ -85,9 +86,9 @@ fresh(); onMounted(() => perform(reload));
     <p class="admin-error" v-if="error" role="alert">{{ error }}</p><p class="admin-status" v-if="notice" role="status">{{ notice }}</p>
     <ul class="admin-error" v-if="errors.length" role="alert"><li v-for="(issue,index) in errors" :key="index">{{ issue.path }}: {{ issue.message }}</li></ul>
     <fieldset class="admin-fieldset" :disabled="busy"><legend>Saved drafts</legend>
-      <button class="admin-button" type="button" @click="perform(reload)">Reload list</button>
+      <button class="admin-button" type="button" @click="perform(async () => { await reload(); notice = 'List reloaded.'; }, 'Reloading list…')">Reload list</button>
       <button class="admin-button" v-for="item in drafts" :key="item.id" type="button" @click="accept(item)">{{ item.path }} · r{{ item.revision }}{{ item.approved_at ? ' · approved' : '' }}</button>
-      <button class="admin-button" type="button" @click="fresh">New message</button>
+      <button class="admin-button" type="button" @click="fresh(); notice = 'Started a new message.'">New message</button>
     </fieldset>
     <fieldset class="admin-fieldset" :disabled="busy"><legend>Open an existing record</legend>
       <label class="admin-field admin-label">Repository path <input class="admin-control" v-model="existingPath" placeholder="ob-issues/1331/misc_communications/001.yaml" /></label>

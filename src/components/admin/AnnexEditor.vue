@@ -24,10 +24,11 @@ function load(no: number) {
   const found = drafts.value.find(item => item.type === ANNEX_TYPE && item.ob_issue_no === no) ?? null;
   draft.value = found; wire.value = structuredClone(toRaw((found?.value ?? published.value[no] ?? {}) as AnnexesWire)); errors.value = [];
 }
-async function perform(work: () => Promise<void>) {
-  busy.value = true; error.value = ''; notice.value = ''; errors.value = [];
+// `working` shows an immediate status line, so a slow answer never looks like a dead button.
+async function perform(work: () => Promise<void>, working = '') {
+  busy.value = true; error.value = ''; notice.value = working; errors.value = [];
   try { await work(); }
-  catch (e) { error.value = e instanceof Error ? e.message : 'Annex request failed'; if (e instanceof ApiError) errors.value = e.errors as AnnexIssue[]; }
+  catch (e) { notice.value = ''; error.value = e instanceof Error ? e.message : 'Annex request failed'; if (e instanceof ApiError) errors.value = e.errors as AnnexIssue[]; }
   finally { busy.value = false; }
 }
 async function reload() { drafts.value = (await api<{ drafts: GeneralMessage[] }>(endpoint)).drafts.filter(item => item.type === ANNEX_TYPE); load(issueNo.value); }
@@ -38,12 +39,12 @@ function position(id: string, value: string) { wire.value = setAnnexPosition(wir
 async function save() {
   await perform(async () => {
     errors.value = validateAnnexes(wire.value);
-    if (errors.value.length) return;
+    if (errors.value.length) { notice.value = ''; return; }
     const url = draft.value ? `${endpoint}/${draft.value.id}` : endpoint;
     const input = draft.value ? { value: wire.value, expected_revision: draft.value.revision } : { value: wire.value, type: ANNEX_TYPE, ob_issue_no: issueNo.value };
     accept((await api<{ draft: GeneralMessage }>(url, 'POST', input)).draft);
     await reload(); notice.value = 'Annexes saved. An administrator must approve this revision before publication review.';
-  });
+  }, 'Saving annexes…');
 }
 async function approve() {
   if (!draft.value) return;

@@ -14,7 +14,7 @@ import {
 } from "./lib/membership.ts";
 import { Forbidden, requireRole } from "./lib/authz.ts";
 import { sameOrigin } from "./lib/csrf.ts";
-import { StubMisconfigured, getAccessIdentity, getAccessServicePrincipal, getSession, takePendingSessionCookie } from "./lib/session.ts";
+import { StubMisconfigured, getAccessIdentity, localDemoEnabled, getAccessServicePrincipal, getSession, takePendingSessionCookie } from "./lib/session.ts";
 import { type Route, body, json, str } from "./lib/http.ts";
 import { RepoReaderNotConfigured, RepoReadFailed } from "./lib/repo-reader.ts";
 import { UpstreamError, ValidationFailed } from "./lib/submissions.ts";
@@ -218,8 +218,16 @@ function withRotation(request: Request, res: Response): Response {
   return new Response(res.body, { status: res.status, statusText: res.statusText, headers: h });
 }
 
+/** LOCAL DEMO ONLY: say plainly that the GitHub connection is absent instead of naming an unset configuration. */
+async function demoFriendly(request: Request, env: Env, res: Response): Promise<Response> {
+  if (!localDemoEnabled(request, env) || (res.status !== 502 && res.status !== 503)) return res;
+  const text = await res.clone().text();
+  if (!/not configured|could not (open|read)|GitHub/i.test(text)) return res;
+  return Response.json({ error: "Demo mode: this action needs the GitHub connection, which the local demo does not have. Nothing was changed." }, { status: res.status });
+}
+
 export async function handleApi(request: Request, env: Env, url: URL): Promise<Response> {
-  return withRotation(request, await handleApiInner(request, env, url));
+  return withRotation(request, await demoFriendly(request, env, await handleApiInner(request, env, url)));
 }
 
 async function handleApiInner(request: Request, env: Env, url: URL): Promise<Response> {

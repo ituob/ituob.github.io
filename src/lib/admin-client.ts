@@ -1,5 +1,6 @@
 import { description, type AttributeDescription } from './form/description';
 import { blankState, toInstance, type FormNode } from './form/model';
+import { explainRefusal } from './demo-refusal';
 import { AMENDMENT_CLASSES, validateClass, type SchemaIssue } from './schema.validators.generated';
 
 export const amendmentClasses = AMENDMENT_CLASSES.filter(name => !!description.classes[name]);
@@ -35,7 +36,8 @@ export async function api<T>(path: string, method = 'GET', body?: unknown): Prom
   let result: Record<string, unknown>;
   try { result = await response.json(); } catch { throw new ApiError('The server did not return JSON. Sign in or check the service connection.', response.status); }
   if (!response.ok || result.ok !== true) {
-    const message = response.status === 401 ? 'Sign in to access your submissions.' : response.status === 403 ? 'Access denied. Check your verified membership or ITU reviewer permissions.' : String(result.error ?? 'Request failed');
+    const demo = response.status === 403 ? await explainRefusal(path) : null;
+    const message = demo ?? (response.status === 401 ? 'Sign in to access your submissions.' : response.status === 403 ? 'Access denied. Check your verified membership or ITU reviewer permissions.' : String(result.error ?? 'Request failed'));
     throw new ApiError(message, response.status, Array.isArray(result.errors) ? result.errors as SchemaIssue[] : []);
   }
   return result as T;
