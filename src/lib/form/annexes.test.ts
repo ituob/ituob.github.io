@@ -3,7 +3,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import {
-  annexPublication, isPositionDate, pickerCandidates, publicationIdError, removeAnnex, runningAnnexes, setAnnexPosition,
+  annexPublication, isPositionDate, zurichMidnight, zurichPositionDay, pickerCandidates, publicationIdError, removeAnnex, runningAnnexes, setAnnexPosition,
   validateAnnexes, type AnnexIndexEntry,
 } from "./annexes.ts";
 import { classify } from "./corpus.ts";
@@ -77,7 +77,7 @@ describe("annex position editing keeps datasets (OB 1162)", () => {
   it("has a dataset entry in the real corpus file", () => expect(id).toBeTruthy());
   it("changing the date keeps datasets byte-for-byte; clearing keeps them too", () => {
     const changed = setAnnexPosition(wire, id, "2020-05-06");
-    expect(changed[id]?.position_on).toBe("2020-05-06" + wire[id].position_on.slice(10));
+    expect(changed[id]?.position_on).toBe("2020-05-05T22:00:00.000Z");
     expect(changed[id]?.datasets).toEqual(wire[id].datasets);
     const cleared = setAnnexPosition(wire, id, "");
     expect(cleared[id]?.position_on).toBeUndefined();
@@ -132,8 +132,22 @@ describe("breaker regressions", () => {
   it("preserves the full Time suffix when editing or re-entering its day", () => {
     const wire = { SR: { position_on: "2016-10-01T12:34:56.123Z", datasets: { x: 1 } }, DP: { position_on: "2016-10-01" } };
     expect(setAnnexPosition(wire, "SR", "2016-10-01")).toEqual(wire);
-    expect(setAnnexPosition(wire, "SR", "2020-05-06")).toEqual({ ...wire, SR: { ...wire.SR, position_on: "2020-05-06T12:34:56.123Z" } });
+    expect(setAnnexPosition(wire, "SR", "2020-05-06")).toEqual({ ...wire, SR: { ...wire.SR, position_on: "2020-05-05T22:00:00.000Z" } });
     expect(setAnnexPosition(wire, "DP", "2020-05-06").DP?.position_on).toBe("2020-05-06");
+  });
+  it("shows and edits the Zurich day (winter, summer, bare date)", () => {
+    expect(zurichPositionDay("2023-12-31T23:00:00.000Z")).toBe("2024-01-01");
+    expect(zurichPositionDay("2024-05-31T22:00:00.000Z")).toBe("2024-06-01");
+    expect(zurichPositionDay("2024-06-01")).toBe("2024-06-01");
+    expect(zurichMidnight("2024-01-02")).toBe("2024-01-01T23:00:00.000Z");
+    expect(zurichMidnight("2024-06-02")).toBe("2024-06-01T22:00:00.000Z");
+    const wire = { W: { position_on: "2023-12-31T23:00:00.000Z" }, S: { position_on: "2024-05-31T22:00:00.000Z" }, B: { position_on: "2024-06-01" } };
+    expect(setAnnexPosition(wire, "W", "2024-01-01")).toEqual(wire);
+    expect(setAnnexPosition(wire, "S", "2024-06-01")).toEqual(wire);
+    expect(setAnnexPosition(wire, "W", "2024-01-02").W?.position_on).toBe("2024-01-01T23:00:00.000Z");
+    expect(zurichPositionDay(setAnnexPosition(wire, "W", "2024-01-02").W?.position_on)).toBe("2024-01-02");
+    expect(setAnnexPosition(wire, "S", "2024-07-02").S?.position_on).toBe("2024-07-01T22:00:00.000Z");
+    expect(setAnnexPosition(wire, "B", "2024-06-02").B?.position_on).toBe("2024-06-02");
   });
   it("rejects deeply nested datasets without recursion or throwing", () => {
     let datasets: Record<string, unknown> = {};
