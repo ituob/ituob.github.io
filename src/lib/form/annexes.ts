@@ -116,6 +116,35 @@ export function positionDay(position: string | undefined): string {
   return position && isPositionDate(position) ? position.slice(0, 10) : "";
 }
 
+const ZURICH = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Zurich", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", hourCycle: "h23" });
+function zurichParts(at: Date): { day: string; hour: string } {
+  const parts = ZURICH.formatToParts(at);
+  const part = (type: string) => parts.find(p => p.type === type)?.value ?? "";
+  return { day: `${part("year")}-${part("month")}-${part("day")}`, hour: part("hour") };
+}
+
+/**
+ * The calendar day of a stored `position_on` as the ITU (Geneva) reads it. The corpus stores a Zurich midnight as
+ * T22:00Z (summer) or T23:00Z (winter), so the UTC date is the day before; a bare date is returned unchanged.
+ */
+export function zurichPositionDay(position: string | null | undefined): string {
+  const day = positionDay(position ?? undefined);
+  if (!day || !position || position.length === 10) return day;
+  const at = new Date(position);
+  return Number.isNaN(at.getTime()) ? day : zurichParts(at).day;
+}
+
+/** The instant of Zurich midnight starting `day` (YYYY-MM-DD): the previous UTC day at 22:00Z (summer) or 23:00Z (winter). */
+export function zurichMidnight(day: string): string {
+  const [y, m, d] = day.split("-").map(Number) as [number, number, number];
+  for (const hour of [22, 23]) {
+    const at = new Date(Date.UTC(y, m - 1, d - 1, hour));
+    const z = zurichParts(at);
+    if (z.day === day && z.hour === "00") return at.toISOString();
+  }
+  return `${day}T00:00:00.000Z`;
+}
+
 export interface AnnexIndexEntry { issue: number; publication_id: string; position_on: string | null }
 export interface AnnexCandidate {
   id: string;
@@ -166,9 +195,10 @@ export function removeAnnex(wire: AnnexesWire, id: string): AnnexesWire {
 export function setAnnexPosition(wire: AnnexesWire, id: string, position: string): AnnexesWire {
   if (!Object.hasOwn(wire, id)) return wire;
   const { position_on: old, ...rest } = wire[id] ?? {};
-  // A date input edits only the day; retain the timestamp's time and precision.
-  const updated = position.length === 10 && old && isPositionDate(old) && old.length > 10
-    ? position + old.slice(10) : position;
+  // A date input edits only the day, which the editor shows as the Zurich day. An unchanged day keeps the stored
+  // value byte for byte; a changed day on a timestamp is stored as that day's Zurich midnight.
+  const isStamp = position.length === 10 && old && isPositionDate(old) && old.length > 10;
+  const updated = isStamp ? (zurichPositionDay(old) === position ? old : zurichMidnight(position)) : position;
   const next = position === "" ? rest : { position_on: updated, ...rest };
   return { ...wire, [id]: Object.keys(next).length ? next : null };
 }

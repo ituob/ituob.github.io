@@ -2,7 +2,7 @@
 import '../../styles/admin-forms.css';
 import { computed, onMounted, ref, toRaw } from 'vue';
 import { api, ApiError } from '../../lib/admin-client';
-import { ANNEX_TYPE, annexPublication, pickerCandidates, positionDay, publicationIdError, removeAnnex, runningAnnexes, setAnnexPosition, validateAnnexes, type AnnexIndexEntry, type AnnexesWire, type AnnexIssue } from '../../lib/form/annexes';
+import { ANNEX_TYPE, annexPublication, pickerCandidates, zurichPositionDay, publicationIdError, removeAnnex, runningAnnexes, setAnnexPosition, validateAnnexes, type AnnexIndexEntry, type AnnexesWire, type AnnexIssue } from '../../lib/form/annexes';
 import type { GeneralMessage } from '../../../worker/lib/general-messages';
 
 const endpoint = '/api/admin/general-messages';
@@ -80,7 +80,7 @@ onMounted(async () => {
       <ul aria-label="Publications to annex">
         <li v-for="item in candidates.slice(0, 12)" :key="item.id">
           <button class="admin-button" type="button" :disabled="Object.hasOwn(wire, item.id)" :title="Object.hasOwn(wire, item.id) ? 'Already annexed to this issue' : undefined" @click="annex(item.id)">{{ item.id }}</button>
-          <small class="admin-help" v-if="item.running"> running since OB {{ item.annexed_to }}{{ item.position_on ? `, position ${positionDay(item.position_on) || item.position_on}` : ', position unknown' }}</small>
+          <small class="admin-help" v-if="item.running"> running since OB {{ item.annexed_to }}{{ item.position_on ? `, position ${zurichPositionDay(item.position_on) || item.position_on}` : ', position unknown' }}</small>
         </li>
       </ul>
       <button class="admin-button" v-if="canUseNewId" type="button" @click="annex(newId)">Use “{{ newId }}” as a new publication id</button>
@@ -90,8 +90,8 @@ onMounted(async () => {
       <ul v-else>
         <li v-for="[id, entry] in rows" :key="id">
           <strong>{{ id }}</strong>
-          <label class="admin-field admin-label"> Position <input class="admin-control" type="date" :value="positionDay(entry?.position_on)" :aria-label="`Position of ${id}`" @change="position(id, ($event.target as HTMLInputElement).value)" /></label>
-          <small class="admin-help" v-if="entry?.position_on && positionDay(entry.position_on) !== entry.position_on"> stored as {{ entry.position_on }}</small>
+          <label class="admin-field admin-label"> Position <input class="admin-control" type="date" :value="zurichPositionDay(entry?.position_on)" :aria-label="`Position of ${id}`" @change="position(id, ($event.target as HTMLInputElement).value)" /></label>
+          <small class="admin-help" v-if="entry?.position_on && zurichPositionDay(entry.position_on) !== entry.position_on"> stored as {{ entry.position_on }}</small>
           <small class="admin-help" v-if="!entry?.position_on"> position unspecified</small>
           <small class="admin-help" v-if="entry?.datasets"> carries datasets (kept)</small>
           <button class="admin-button" type="button" @click="remove(id)">Remove</button>

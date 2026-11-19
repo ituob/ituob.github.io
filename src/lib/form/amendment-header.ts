@@ -1,6 +1,6 @@
 import { clearField, setField, type FormNode } from "./model";
 import { YamlTimestamp } from "./yaml-io";
-import { positionDay, runningAnnexes, type AnnexIndexEntry } from "./annexes";
+import { runningAnnexes, zurichPositionDay, type AnnexIndexEntry } from "./annexes";
 
 /**
  * The amendment header of the legacy editor (message-forms/amendment.tsx AmendmentMeta):
@@ -12,20 +12,7 @@ export type AmendmentHeader =
   | { kind: "annexed"; annexedTo: number; positionOn: string }
   | { kind: "never" };
 
-const ZURICH_DAY = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Zurich", year: "numeric", month: "2-digit", day: "2-digit" });
-
-/**
- * The calendar day of a stored `position_on` as the ITU (Geneva) reads it. The corpus stores a Zurich midnight as
- * T22:00Z (summer) or T23:00Z (winter), so the UTC date is the day before; a bare date is returned unchanged.
- */
-export function zurichPositionDay(position: string | null | undefined): string {
-  const day = positionDay(position ?? undefined);
-  if (!day || !position || position.length === 10) return day;
-  const at = new Date(position);
-  if (Number.isNaN(at.getTime())) return day;
-  const part = (type: string) => ZURICH_DAY.formatToParts(at).find(p => p.type === type)?.value ?? "";
-  return `${part("year")}-${part("month")}-${part("day")}`;
-}
+export { zurichPositionDay };
 
 export function amendmentHeader(index: readonly AnnexIndexEntry[], publicationId: string): AmendmentHeader {
   const latest = runningAnnexes(index, Number.MAX_SAFE_INTEGER).find(c => c.id === publicationId);
@@ -60,4 +47,21 @@ export function applyPrefill(node: FormNode, day: string, prefilled: string): { 
 /** Fill an empty `position_on` of an amendment form with the annexed position; never overwrites an author's value. */
 export function prefillPosition(node: FormNode, day: string): FormNode {
   return applyPrefill(node, day, "").node;
+}
+
+/** The prefill day for the header state: empty when no register is chosen. */
+export function registerPrefillDay(header: AmendmentHeader | null): string {
+  return header ? positionPrefill(header) : "";
+}
+
+export interface PrefillState { annexDay: string; prefilled: string }
+export const NO_PREFILL: PrefillState = { annexDay: "", prefilled: "" };
+/** The register's day arrived (or was cleared): remember it and fill the form. */
+export function prefillDay(state: PrefillState, node: FormNode, day: string): { state: PrefillState; node: FormNode } {
+  const r = applyPrefill(node, day, state.prefilled);
+  return { state: { annexDay: day, prefilled: r.prefilled }, node: r.node };
+}
+/** A new blank form: prefill it with the remembered day. */
+export function freshPrefill(state: PrefillState, blank: FormNode): { state: PrefillState; node: FormNode } {
+  return prefillDay({ annexDay: state.annexDay, prefilled: "" }, blank, state.annexDay);
 }

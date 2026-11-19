@@ -8,7 +8,7 @@ import { actionPayload, actionTypes, amendmentClasses, api, ApiError, payloadErr
 import type { SchemaIssue } from '../../lib/schema.validators.generated';
 import SchemaNode from './SchemaNode.vue';
 import AmendmentHeader from './AmendmentHeader.vue';
-import { applyPrefill } from '../../lib/form/amendment-header';
+import { freshPrefill, NO_PREFILL, prefillDay, type PrefillState } from '../../lib/form/amendment-header';
 const props = withDefaults(defineProps<{ admin?: boolean; create?: boolean; translation?: boolean; registers?: { register_id: string; slug: string; label: string }[] }>(), { registers: () => [] });
 interface Submission { id: string; register_id: string; slug: string; action_type: string; state: string; current_rev: number; affiliation_kind?: string; affiliation_member_id?: string | null; affiliation_member_name?: string | null }
 interface Revision { rev: number; payload_yaml: string; validation: string; created_at: string }
@@ -21,9 +21,9 @@ const selected = ref(''), registerId = ref(''), slug = ref(''), action = ref(act
 const node = ref<FormNode>(blankState(className.value));
 const existing = ref<Record<string, unknown>>({});
 // The annexed position offered for the chosen register, and the value last prefilled (replaceable until the author edits it).
-let annexDay = '', prefilled = '';
-function prefillFrom(day: string) { annexDay = day; ({ node: node.value, prefilled } = applyPrefill(node.value, day, prefilled)); }
-function freshNode() { prefilled = ''; node.value = blankState(className.value); prefillFrom(annexDay); }
+let prefill: PrefillState = NO_PREFILL;
+function prefillFrom(day: string) { const r = prefillDay(prefill, node.value, day); prefill = r.state; node.value = r.node; }
+function freshNode() { const r = freshPrefill(prefill, blankState(className.value)); prefill = r.state; node.value = r.node; }
 const inputErrors = ref<Record<string, string>>({});
 function invalid(path: string, message: string) { if (message) inputErrors.value[path] = message; else for (const key of Object.keys(inputErrors.value)) if (key === path || key.startsWith(`${path}.`) || key.startsWith(`${path}[`)) delete inputErrors.value[key]; }
 const busy = ref(false), error = ref(''), notice = ref(''), errors = ref<SchemaIssue[]>([]);
@@ -79,7 +79,7 @@ async function load(id: string) {
   const data = payload.data as Record<string, unknown>;
   if (!data || typeof data._class !== 'string' || !amendmentClasses.includes(data._class)) throw new Error('This revision has an unsupported amendment class.');
   existing.value = payload; className.value = data._class; node.value = toFormState(data._class, data).state;
-  detail.value = result; selected.value = id; creating.value = false;
+  detail.value = result; selected.value = id; creating.value = false; prefill = NO_PREFILL;
   registerId.value = result.submission.register_id; slug.value = result.submission.slug; action.value = result.submission.action_type;
   errors.value = revisionErrors(rev.validation); inputErrors.value = {};
   reason.value = ''; override.value = false;

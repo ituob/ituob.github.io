@@ -1,8 +1,8 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import { blankState, setField } from './model';
+import { blankState, setField, type FormNode } from './model';
 import { YamlTimestamp } from './yaml-io';
-import { amendmentHeader, applyPrefill, positionPrefill, prefillPosition, zurichPositionDay } from './amendment-header';
+import { amendmentHeader, applyPrefill, positionPrefill, prefillPosition, zurichPositionDay, registerPrefillDay, prefillDay, freshPrefill, NO_PREFILL } from './amendment-header';
 import type { AnnexIndexEntry } from './annexes';
 
 const index: AnnexIndexEntry[] = [
@@ -96,5 +96,25 @@ describe('translation mount', () => {
     expect(readFileSync('src/pages/admin/general.astro', 'utf8')).toMatch(/<GeneralMessageEditor translation /);
     expect(readFileSync('src/components/admin/GeneralMessageEditor.vue', 'utf8')).toMatch(/<SchemaNode[^>]*:translation="translation"/);
     expect(readFileSync('src/components/admin/SchemaNode.vue', 'utf8')).toMatch(/<TranslationAssist[^>]*v-if="translation[^"]*language !== 'en'/s);
+  });
+});
+
+describe('prefill across load and new (A-N2)', () => {
+  const posOf = (n: FormNode) => { const f = n.kind === 'object' ? n.fields.find(x => x.attr.name === 'position_on') : undefined; const v = f?.node && f.node.kind === 'leaf' ? f.node.value : undefined; return v === undefined ? '' : String(v instanceof YamlTimestamp ? v.text : v); };
+  const blank = () => blankState('Q708SANCAmendment');
+  it('does not carry the previous register day into New after a load', () => {
+    let r = freshPrefill(NO_PREFILL, blank());
+    r = prefillDay(r.state, r.node, '2020-01-01');
+    expect(posOf(r.node)).toBe('2020-01-01');
+    const afterLoad = NO_PREFILL; // load() resets the state
+    expect(posOf(freshPrefill(afterLoad, blank()).node)).toBe('');
+    expect(posOf(freshPrefill(r.state, blank()).node)).toBe('2020-01-01');
+  });
+  it('clearing the register empties the prefill', () => {
+    expect(registerPrefillDay(null)).toBe('');
+    let r = prefillDay(NO_PREFILL, blank(), '2020-01-01');
+    r = prefillDay(r.state, r.node, registerPrefillDay(null));
+    expect(posOf(r.node)).toBe('');
+    expect(posOf(freshPrefill(r.state, blank()).node)).toBe('');
   });
 });
