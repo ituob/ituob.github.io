@@ -34,9 +34,10 @@ function revisionChanges(revision: Revision) {
   const after = parseYaml(revision.payload_yaml);
   return submissionFieldDiff(before, after);
 }
-async function perform(work: () => Promise<void>) {
-  busy.value = true; error.value = ''; notice.value = ''; errors.value = [];
-  try { await work(); } catch (e) { error.value = e instanceof Error ? e.message : 'Request failed'; if (e instanceof ApiError) errors.value = e.errors; }
+// `working` shows an immediate status line, so a slow answer never looks like a dead button.
+async function perform(work: () => Promise<void>, working = '') {
+  busy.value = true; error.value = ''; notice.value = working; errors.value = [];
+  try { await work(); } catch (e) { notice.value = ''; error.value = e instanceof Error ? e.message : 'Request failed'; if (e instanceof ApiError) errors.value = e.errors; }
   finally { busy.value = false; }
 }
 async function list() {
@@ -107,7 +108,7 @@ async function save(submit = false) {
     await load(id);
     if (submit) { await api(`/api/me/submissions/${id}/submit`, 'POST', {}); await load(id); }
     await list(); notice.value = submit ? 'Submitted for review.' : 'Draft saved.';
-  });
+  }, submit ? 'Submitting…' : 'Saving draft…');
 }
 async function transition(verb: string) {
   await perform(async () => {
@@ -128,7 +129,7 @@ onMounted(() => perform(async () => { await list(); const id = new URLSearchPara
     <ul v-if="errors.length" role="alert" class="admin-error"><li v-for="(issue, i) in errors" :key="i"><strong>{{ issue.path || 'payload' }}</strong>: {{ issue.message }}</li></ul>
     <fieldset class="admin-fieldset" :disabled="busy"><legend>Submissions</legend>
       <label class="admin-field admin-label">State filter <select class="admin-control" v-model="filter" @change="perform(list)"><option value="">All states</option><option v-for="state in ['draft','submitted','in_review','changes_requested','approved','pr_pending','pr_open','ci_failed','merged','published','withdrawn','rejected']" :key="state">{{ state }}</option></select></label>
-      <button class="admin-button" @click="perform(async () => { await list(); notice = 'List refreshed.'; })">Refresh</button><button class="admin-button" v-if="!admin" @click="start">New proposal</button>
+      <button class="admin-button" @click="perform(async () => { await list(); notice = 'List refreshed.'; }, 'Refreshing list…')">Refresh</button><button class="admin-button" v-if="!admin" @click="start">New proposal</button>
       <button class="admin-button" v-if="admin" :disabled="!reviewCount" @click="startSelectedReviews">Start review for selected ({{ reviewCount }})</button>
       <p class="admin-help" v-if="!rows.length && !busy && !error">No submissions found.</p>
       <ul><li v-for="row in rows" :key="row.id"><label class="admin-field admin-label" v-if="admin && row.state === 'submitted'"><input class="admin-control" v-model="reviewIds" type="checkbox" :value="row.id" />Select {{ row.id }} for review</label><button class="admin-button" @click="perform(() => load(row.id))">{{ row.register_id }} · {{ row.action_type }} · {{ row.state }} · {{ row.id }}<span v-if="row.affiliation_kind === 'member'"> · Member State: {{ row.affiliation_member_name || row.affiliation_member_id }}</span><span v-else-if="row.affiliation_kind === 'itu'"> · ITU</span></button></li></ul>

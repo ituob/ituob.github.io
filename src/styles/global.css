@@ -1,4 +1,9 @@
 @import "tailwindcss";
+/* Class scanning covers src only: the data and data-ob submodules hold >1 GB of registers, and scanning them stalls the dev server (vite fetchModule timeout on this file). */
+@source not "../../data";
+@source not "../../data-ob";
+@source not "../../seeds";
+@source not "../../docs";
 
 /* =============================================================================
    ITU Operational Bulletin — "MERCURY" design system.
