@@ -123,6 +123,8 @@ describe("event emission", () => {
     await adm(id, "start-review");
     expect((await adm(id, "approve", EDITOR, { target_edition: 1351 })).status).toBe(200);
     const kinds = (await notes("member-A")).map((n) => n.kind);
+    // approve commits approved -> pr_pending -> pr_open in one go; the transient pr_pending has no event of its own
+    expect(kinds).not.toContain("submission.pr_pending");
     expect(kinds).toEqual(["submission.in_review", "submission.changes_requested", "submission.in_review", "submission.approved", "submission.pr_opened"]);
     // the actor never notifies themselves; withdrawal by an admin reaches the proposer
     expect(await notes("itu-editor", "submission.in_review")).toHaveLength(0);

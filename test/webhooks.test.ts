@@ -227,9 +227,9 @@ describe("transitions", () => {
     const f = await hook("check_run", run(pr, "Instance-data validation", "failure"));
     expect(f.json).toMatchObject({ status: "applied", from: "pr_open", to: "ci_failed" });
     expect(JSON.parse((await one("SELECT checks FROM submission_prs WHERE submission_id=?1", id)).checks)).toMatchObject({ "run:Instance-data validation": "failure" });
-    // editors and admins hear about it (design matrix), with the failing check named
+    // the proposer, editors and admins hear about it (design matrix), with the failing check named
     const n = await rows("SELECT user_id, payload FROM notifications WHERE kind='submission.ci_failed' AND submission_id=?1", id);
-    expect(n.map((x) => x.user_id).sort()).toEqual(["bootstrap-admin", "itu-admin", "itu-editor"]);
+    expect(n.map((x) => x.user_id).sort()).toEqual(["bootstrap-admin", "itu-admin", "itu-editor", "member-A"]);
     expect(JSON.parse(n[0].payload).reason).toMatch(/Instance-data validation/);
     // a green suite does not recover while a recorded run is still failing
     expect((await hook("check_suite", suite(pr, "success"))).json).toMatchObject({ status: "applied", from: "ci_failed", to: "ci_failed" });
