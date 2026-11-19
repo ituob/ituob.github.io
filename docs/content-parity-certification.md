@@ -1,4 +1,23 @@
-# Content parity certification (partial), 2026-11-17
+# Content parity certification (partial), 2026-11-17, re-measured 2026-11-18
+
+## Hosted re-measure at OB 1350 (2026-11-18)
+
+The hosted `Parity re-measure` workflow rebuilt the Jekyll reference from
+itu-ob-data `e17484be` (OB 1350) and the Astro audit build on CI
+(run 44343774446, commit `97aaf9e5`, count-aware scoring via
+`test/generate_parity_evidence.rb`).
+
+| Measure | Result |
+|---|---|
+| Pages ≥95% (worst variant) | 429 / 429 |
+| Included variants ≥95% | 609 / 609 |
+| Variant min / median | 95.6% / 99.1% |
+
+Receipts: `docs/parity/ob1350/pinned/`. This closes the "OB 1344–1350 is
+outside the pinned reference" gap noted below; the sections after this one are
+the earlier OB 1343 receipts, kept as history. Print-to-patch coverage
+(direction D100-3) is a separate measure and is not certified here.
+
 
 Part of ituob/ituob.github.io#100. This is a bounded measurement, not a certification
 that every printed item survives as a structured patch. The reports and commands
