@@ -215,7 +215,7 @@ export async function mutate(db: D1Database, sub: Sub, o: MutateOpts): Promise<S
   stmts.push(...(await auditStatements(db, audit, guard(sub.id, v))));
   // #104: one event per committed state, written in this same batch (guarded by the new version).
   if (!o.noHistory)
-    stmts.push(...(await transitionNotifications(db, { sub, chain, actorId: o.actor.id, reason: o.reason ?? null, rev, at: t, version: v })));
+    stmts.push(...(await transitionNotifications(db, { sub, chain, actorId: o.actor.id, reason: o.reason ?? null, rev, at: t, version: v, edition: typeof o.detail?.edition === "number" ? o.detail.edition : null })));
   const res = await run(db, stmts);
   if (res[0]?.meta.changes !== 1) throw new ConflictError("submission changed concurrently");
   return getSub(db, sub.id);
