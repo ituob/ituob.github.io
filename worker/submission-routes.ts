@@ -39,7 +39,7 @@ export const submissionRoutes: Route[] = [
   { method: "POST", pattern: re("/api/me/submissions"), guard: "session",
     handler: async ({ request, env, session }) => submissionJson(await createSubmission(env.DB, session, await body(request), emptyCheck(env), env.ASSETS), 201) },
   { method: "GET", pattern: re(`/api/me/submissions/${ID}`), guard: "session",
-    handler: async ({ env, session, params }) => json({ ok: true, ...(await readSubmission(env.DB, session, params[0]!)) }) },
+    handler: async ({ env, session, params }) => json({ ok: true, ...(await readSubmission(env.DB, session, params[0]!, env.ASSETS)) }) },
   { method: "PUT", pattern: re(`/api/me/submissions/${ID}`), guard: "session",
     handler: async ({ request, env, session, params }) => submissionJson(await editDraft(env.DB, session, params[0]!, await body(request), env.ASSETS)) },
   { method: "POST", pattern: re(`/api/me/submissions/${ID}/submit`), guard: "session",
@@ -56,7 +56,7 @@ export const submissionRoutes: Route[] = [
     handler: async ({ env, access, url }) =>
       json({ ok: true, submissions: await listSubmissions(env.DB, await ituSession(env, access!), url.searchParams.get("state"), true) }) },
   { method: "GET", pattern: re(`/api/admin/submissions/${ID}`), guard: "access",
-    handler: async ({ env, access, params }) => json({ ok: true, ...(await readSubmission(env.DB, await ituSession(env, access!), params[0]!)) }) },
+    handler: async ({ env, access, params }) => json({ ok: true, ...(await readSubmission(env.DB, await ituSession(env, access!), params[0]!, env.ASSETS)) }) },
   ...(["start-review", "request-changes", "reject"] as const).map((verb): Route => ({
     method: "POST", pattern: re(`/api/admin/submissions/${ID}/${verb}`), guard: "access",
     handler: async ({ request, env, access, params }) =>

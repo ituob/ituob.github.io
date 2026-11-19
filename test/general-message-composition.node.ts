@@ -24,6 +24,7 @@ function sqliteDb() {
   sqlite.exec(readFileSync("migrations/0001_init.sql", "utf8"));
   sqlite.exec(readFileSync("migrations/0002_edition_metadata.sql", "utf8"));
   sqlite.exec(readFileSync("migrations/0003_general_messages.sql", "utf8"));
+  sqlite.exec(readFileSync("migrations/0005_general_message_source.sql", "utf8"));
   sqlite.exec("INSERT INTO users(id,email,created_at) VALUES ('admin','admin@example.test','2026-01-01'),('editor','editor@example.test','2026-01-01')");
   class Statement {
     constructor(readonly sql: string, readonly args: unknown[] = []) {}

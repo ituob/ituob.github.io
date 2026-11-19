@@ -15,6 +15,16 @@ projection = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(projection)
 
 
+FAKE_NO_REGISTERS = """module Ituob
+  module Catalogs
+    module Registers
+      def self.all_register_ids = []
+    end
+  end
+end
+"""
+
+
 class ProjectionTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -61,7 +71,7 @@ paths.each do |path|
   FileUtils.mkdir_p(File.dirname(target))
   File.binwrite(target, File.binread(path))
 end
-File.write('datasets/changes.json', JSON.generate(paths.map { |p| File.binread(p) }))
+File.write('datasets/changes.json', JSON.generate(paths.map { |p| File.read(p) }))
 ''')
         self.write(self.service, "scripts/generate_register_snapshots.rb", '''require 'json'
 require 'fileutils'
@@ -69,6 +79,10 @@ FileUtils.mkdir_p(ENV.fetch('SNAPSHOTS_OUT'))
 File.write(File.join(ENV.fetch('SNAPSHOTS_OUT'), 'current.json'), File.read('datasets/changes.json'))
 puts 'Snapshots: 1 registers, 1 files written, 0 skipped, 0 errors'
 ''')
+        # Orchestration fixtures have no registers; the history step only needs to load.
+        self.write(self.service, "ituob/lib/ituob.rb", FAKE_NO_REGISTERS)
+        for library in ("support", "registers", "catalogs", "verifiers"):
+            self.write(self.service, f"ituob/lib/ituob/{library}.rb", "")
         self.service_ref = self.commit(self.service)
         # Execute actual Ruby without requiring gems for these orchestration fixtures.
         bindir = self.root / "bin"
@@ -149,6 +163,158 @@ puts 'Snapshots: 1 registers, 1 files written, 0 skipped, 0 errors'
         self.service_ref = self.commit(self.service)
         self.assertEqual(self.run_projection(), "historical-only")
         self.assertEqual(json.loads((self.out / "current.json").read_text()), ["committed baseline"])
+        self.assert_inputs_preserved()
+
+    def yaml_json(self, path):
+        return json.loads(subprocess.check_output(
+            ["bundle", "exec", "ruby", "-ryaml", "-rjson", "-rdate", "-e",
+             "puts JSON.generate(YAML.safe_load(File.read(ARGV[0]), "
+             "permitted_classes: [Date, Time], aliases: true))", str(path)], text=True))
+
+    def e164_fixture(self):
+        # Source message extracted without editing from canonical data commit
+        # 90f99728acd1e96d025ce0034fe43a38b572aa62, issue 1001.
+        fixtures = SCRIPT.parent / "tests/fixtures/e164-acn"
+        source = (fixtures / "1001-source.yaml").read_bytes()
+        normalized = (fixtures / "1001-normalized.yaml").read_bytes()
+        self.write(self.data, "issues/1001/amendments.yaml", source)
+        self.data_ref = self.commit(self.data)
+        self.write(self.service, "ob-issues/1001/e164-acn/001-LIR.yaml", normalized)
+        record = "datasets/1015-E.164B/changes/1001-0001-LIR-55.yaml"
+        self.write(self.service, record, b"register: E164_ACN\n" + normalized)
+        self.service_ref = self.commit(self.service)
+        return fixtures, record
+
+    def test_source_multiline_patterns_reach_issue_and_snapshot_preserving_other_rows(self):
+        fixtures, record = self.e164_fixture()
+        original = self.yaml_json(fixtures / "1001-normalized.yaml")
+        source = self.yaml_json(fixtures / "1001-source.yaml")
+        row = source["messages"][0]["contents"]["en"]["content"][4]["content"][0]
+        # The fixture's Brazil table cell is the public source oracle.
+        patterns = [node["text"] for node in row["content"][2]["content"][0]["content"]
+                    if node["type"] == "text"]
+        self.assertEqual(len(patterns), 5)
+        expected = "\n".join(patterns)
+        self.assertNotEqual(original["data"]["entries"][0]["mobile_telephone_numbers"]["en"], expected)
+        self.write(self.service, "scripts/generate_register_snapshots.rb",
+                   "require 'yaml'\nrequire 'json'\nrequire 'fileutils'\n"
+                   "FileUtils.mkdir_p(ENV.fetch('SNAPSHOTS_OUT'))\n"
+                   f"data = YAML.safe_load(File.read('{record}'))\n"
+                   "File.write(File.join(ENV.fetch('SNAPSHOTS_OUT'), 'current.json'), JSON.generate(data))\n"
+                   "puts 'Snapshots: 1 registers, 1 files written, 0 skipped, 0 errors'\n")
+        self.service_ref = self.commit(self.service)
+        # A dirty legacy source must not override the pinned canonical bytes.
+        self.write(self.data, "issues/1001/amendments.yaml", "uncommitted source ignored\n")
+        self.run_projection()
+        projected = self.projected / "ob-issues/1001/e164-acn/001-LIR.yaml"
+        result = self.yaml_json(projected)
+        self.assertEqual(result["data"]["entries"][0]["mobile_telephone_numbers"]["en"], expected)
+        result["data"]["entries"][0]["mobile_telephone_numbers"]["en"] = original["data"]["entries"][0]["mobile_telephone_numbers"]["en"]
+        self.assertEqual(result, original)  # Every other field and row is preserved.
+        snapshot = json.loads((self.out / "current.json").read_text())
+        self.assertEqual(snapshot["data"]["entries"][0]["mobile_telephone_numbers"]["en"], expected)
+        self.assertEqual(snapshot["data"]["entries"][1:], original["data"]["entries"][1:])
+        before = {path: path.read_bytes() for path in (projected, self.projected / record)}
+        subprocess.run(["bundle", "exec", "ruby", str(SCRIPT.with_name("repair-historical-cells.rb")),
+                        str(self.data), self.data_ref, str(self.projected)], check=True)
+        self.assertEqual({path: path.read_bytes() for path in before}, before)
+        self.assertEqual(self.git(self.service, "status", "--porcelain"), "")
+
+    def test_source_row_identity_mismatch_preserves_projected_bytes(self):
+        fixtures, record = self.e164_fixture()
+        changed = (fixtures / "1001-normalized.yaml").read_bytes().replace(b"country_code: '55'", b"country_code: '999'")
+        self.write(self.service, "ob-issues/1001/e164-acn/001-LIR.yaml", changed)
+        self.write(self.service, record, b"register: E164_ACN\n" + changed)
+        self.service_ref = self.commit(self.service)
+        self.run_projection()
+        self.assertEqual((self.projected / "ob-issues/1001/e164-acn/001-LIR.yaml").read_bytes(), changed)
+        self.assertEqual((self.projected / record).read_bytes(), b"register: E164_ACN\n" + changed)
+        self.assert_inputs_preserved()
+
+    def test_authored_e164_rows_remain_byte_exact(self):
+        fixtures, _ = self.e164_fixture()
+        normalized = (fixtures / "1001-normalized.yaml").read_bytes()
+        self.write(self.data, "ob-issues/1001/meta.yaml", "issue: 1001\n")
+        self.write(self.data, "ob-issues/1001/e164-acn/001-LIR.yaml", normalized)
+        self.data_ref = self.commit(self.data)
+        self.run_projection()
+        self.assertEqual((self.projected / "ob-issues/1001/e164-acn/001-LIR.yaml").read_bytes(), normalized)
+        self.assert_inputs_preserved()
+
+    def e212_fixture(self):
+        # Unedited rows extracted from canonical issue 1007 at data commit
+        # 90f99728acd1e96d025ce0034fe43a38b572aa62, with real normalized/change rows.
+        fixtures = SCRIPT.parent / "tests/fixtures/e212-mnc"
+        self.write(self.data, "issues/1007/amendments.yaml", (fixtures / "1007-source.yaml").read_bytes())
+        self.data_ref = self.commit(self.data)
+        for seq in ("003", "004", "017"):
+            self.write(self.service, f"ob-issues/1007/e212-mnc/{seq}-ADD.yaml",
+                       (fixtures / f"{seq}-ADD.yaml").read_bytes())
+            self.write(self.service, f"datasets/1162-E.212/changes/1007-{seq}-ADD-fixture.yaml",
+                       (fixtures / f"{seq}-change.yaml").read_bytes())
+        self.service_ref = self.commit(self.service)
+        return fixtures
+
+    def test_complete_e212_network_cells_reach_projection_and_snapshot(self):
+        fixtures = self.e212_fixture()
+        rows = self.yaml_json(fixtures / "1007-source.yaml")["messages"][0]["contents"]["en"]["content"][0]["content"]
+        source_networks = {}
+        for row in rows:
+            cells = row["content"]
+            code = cells[1]["content"][0]["content"][0]["text"].replace(" ", "")
+            source_networks[code] = "\n".join("".join(n.get("text", "\n") for n in para["content"])
+                                               for para in cells[2]["content"])
+        self.assertEqual(len(source_networks), 3)
+        self.write(self.service, "scripts/generate_register_snapshots.rb",
+                   "require 'yaml'\nrequire 'json'\nrequire 'fileutils'\n"
+                   "FileUtils.mkdir_p(ENV.fetch('SNAPSHOTS_OUT'))\n"
+                   "rows = Dir['datasets/1162-E.212/changes/*.yaml'].sort.map { |p| YAML.safe_load(File.read(p)) }\n"
+                   "File.write(File.join(ENV.fetch('SNAPSHOTS_OUT'), 'current.json'), JSON.generate(rows))\n"
+                   "puts 'Snapshots: 1 registers, 1 files written, 0 skipped, 0 errors'\n")
+        self.service_ref = self.commit(self.service)
+        self.run_projection()
+        snapshots = json.loads((self.out / "current.json").read_text())
+        for seq, snapshot in zip(("003", "004", "017"), snapshots):
+            with self.subTest(sequence=seq):
+                path = self.projected / f"ob-issues/1007/e212-mnc/{seq}-ADD.yaml"
+                original = self.yaml_json(fixtures / f"{seq}-ADD.yaml")
+                result = self.yaml_json(path)
+                entry = result["data"]["entries"][0]
+                expected = (original["data"]["entries"][0]["networks"] if seq == "004"
+                            else source_networks[entry["mcc_mnc_codes"].replace(" ", "")])
+                self.assertEqual(entry["networks"], expected)
+                self.assertEqual(snapshot["data"]["networks"], expected)
+                entry["networks"] = original["data"]["entries"][0]["networks"]
+                self.assertEqual(result, original)
+        unchanged = self.projected / "ob-issues/1007/e212-mnc/004-ADD.yaml"
+        self.assertEqual(unchanged.read_bytes(), (fixtures / "004-ADD.yaml").read_bytes())
+        before = {p: p.read_bytes() for p in self.projected.rglob("*.yaml")}
+        subprocess.run(["bundle", "exec", "ruby", str(SCRIPT.with_name("repair-historical-cells.rb")),
+                        str(self.data), self.data_ref, str(self.projected)], check=True)
+        self.assertEqual({p: p.read_bytes() for p in before}, before)
+        self.assert_inputs_preserved()
+
+    def test_e212_code_spacing_does_not_prevent_source_match(self):
+        fixtures = self.e212_fixture()
+        source = (fixtures / "1007-source.yaml").read_bytes()
+        compact = source.replace(b"text: 342 600", b"text: '342600'")
+        self.assertNotEqual(compact, source)
+        self.write(self.data, "issues/1007/amendments.yaml", compact)
+        self.data_ref = self.commit(self.data)
+        self.run_projection()
+        entry = self.yaml_json(self.projected / "ob-issues/1007/e212-mnc/003-ADD.yaml")["data"]["entries"][0]
+        self.assertEqual(entry["mcc_mnc_codes"], "342 600")
+        self.assertEqual(entry["networks"], "Cable & Wireless (Barbados) Limited\ntrading as LIME")
+        self.assert_inputs_preserved()
+
+    def test_authored_e212_rows_remain_byte_exact(self):
+        fixtures = self.e212_fixture()
+        payload = (fixtures / "003-ADD.yaml").read_bytes()
+        self.write(self.data, "ob-issues/1007/meta.yaml", "issue: 1007\n")
+        self.write(self.data, "ob-issues/1007/e212-mnc/003-ADD.yaml", payload)
+        self.data_ref = self.commit(self.data)
+        self.run_projection()
+        self.assertEqual((self.projected / "ob-issues/1007/e212-mnc/003-ADD.yaml").read_bytes(), payload)
         self.assert_inputs_preserved()
 
     def test_requires_exact_shas_matching_checkouts(self):

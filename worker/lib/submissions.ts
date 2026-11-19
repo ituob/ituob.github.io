@@ -8,7 +8,7 @@ import { ConflictError, InvalidError, NotFoundError } from "./membership.ts";
 import { type OpenedPr, type PatchPublisher, branchName } from "./publisher.ts";
 import type { Env, Session } from "./types.ts";
 import { ulid } from "./ulid.ts";
-import { ACTION_TYPES, type ActionType, type FieldError, registerKeysOf, submissionTargetErrors, rulesFor, registerStateFromSnapshot, validateWithWarnings, type ValidationContext } from "./validation.ts";
+import { ACTION_TYPES, type ActionType, type FieldError, registerKeysOf, submissionTargetErrors, rulesFor, entryKeyOf, registerStateFromSnapshot, validateWithWarnings, type ValidationContext } from "./validation.ts";
 
 export class ValidationFailed extends Error {
   constructor(public errors: FieldError[], public warnings: FieldError[] = []) {
@@ -32,6 +32,7 @@ export interface Sub {
   action_type: ActionType;
   state: State;
   current_rev: number;
+  duplicate_of?: string | null;
   target_edition: number | null;
   seq: number | null;
   discussion_closed: number;
@@ -45,23 +46,28 @@ const now = () => new Date().toISOString();
 const VALIDATOR_VERSION = "stage2-v1";
 type Assets = Env["ASSETS"];
 
+/** The deployed current snapshot of a register; throws when it is unavailable or malformed. */
+async function fetchSnapshot(assets: Assets | undefined, register_id: string): Promise<{ active_entries: unknown[]; lapsed_keys: string[] }> {
+  const target = PUBLICATION_BY_ID.get(register_id) ?? REGISTERS.find(r => r.registerId === register_id);
+  if (!assets || !target) throw new Error("snapshot unavailable");
+  const response = await assets.fetch(new Request(`https://www.ituob.org/data/snapshots/${target.slug}/current.json`));
+  if (!response.ok) throw new Error("snapshot unavailable");
+  const snapshot: unknown = await response.json();
+  if (!snapshot || typeof snapshot !== "object" || Array.isArray(snapshot)) throw new Error("invalid snapshot");
+  const data = snapshot as { active_entries?: unknown; lapsed_keys?: unknown };
+  if (!Array.isArray(data.active_entries) || !Array.isArray(data.lapsed_keys) ||
+      !data.active_entries.every(e => !!e && typeof e === "object" && !Array.isArray(e)) ||
+      !data.lapsed_keys.every(k => typeof k === "string")) throw new Error("invalid snapshot");
+  return data as { active_entries: unknown[]; lapsed_keys: string[] };
+}
+
 /** Deployed assets may lag the register; CI replay remains authoritative. */
 async function validateCurrent(assets: Assets | undefined, ctx: ValidationContext) {
   let register_state;
   const warnings: FieldError[] = [];
   if (rulesFor(ctx.register_id)) {
-    const target = PUBLICATION_BY_ID.get(ctx.register_id) ?? REGISTERS.find(r => r.registerId === ctx.register_id);
     try {
-      if (!assets || !target) throw new Error("snapshot unavailable");
-      const response = await assets.fetch(new Request(`https://www.ituob.org/data/snapshots/${target.slug}/current.json`));
-      if (!response.ok) throw new Error("snapshot unavailable");
-      const snapshot: unknown = await response.json();
-      if (!snapshot || typeof snapshot !== "object" || Array.isArray(snapshot)) throw new Error("invalid snapshot");
-      const data = snapshot as { active_entries?: unknown; lapsed_keys?: unknown };
-      if (!Array.isArray(data.active_entries) || !Array.isArray(data.lapsed_keys) ||
-          !data.active_entries.every(e => !!e && typeof e === "object" && !Array.isArray(e)) ||
-          !data.lapsed_keys.every(k => typeof k === "string")) throw new Error("invalid snapshot");
-      register_state = { ...registerStateFromSnapshot(ctx.register_id, data as { active_entries: unknown[]; lapsed_keys: string[] }), stale: true };
+      register_state = { ...registerStateFromSnapshot(ctx.register_id, await fetchSnapshot(assets, ctx.register_id)), stale: true };
       warnings.push({ path: "register_state", code: "unknown", message: "Deployed snapshot freshness cannot be verified; state conflicts are advisory. CI replay is authoritative." });
     } catch {
       warnings.push({ path: "register_state", code: "unknown", message: "Register snapshot unavailable or unreadable; only within-payload checks ran. CI replay is authoritative." });
@@ -232,11 +238,14 @@ function parseCreate(b: Record<string, unknown>) {
   if (!b.payload || typeof b.payload !== "object" || Array.isArray(b.payload)) throw new InvalidError("payload must be an object");
   const corrects_id = b.corrects_id === undefined || b.corrects_id === null ? null : String(b.corrects_id);
   if (corrects_id !== null && !/^[0-9A-Z]{26}$/.test(corrects_id)) throw new InvalidError("corrects_id must be a submission id");
-  return { register_id, slug, action_type, payload: b.payload as Record<string, unknown>, corrects_id };
+  const dup = b.duplicate_of === undefined || b.duplicate_of === null ? null : b.duplicate_of;
+  if (dup !== null && (typeof dup !== "string" || dup.trim() === "" || dup.length > 500)) throw new InvalidError("duplicate_of must be a register item key");
+  if (dup !== null && action_type !== "ADD") throw new InvalidError("duplicate_of applies only to an ADD");
+  return { register_id, slug, action_type, payload: b.payload as Record<string, unknown>, corrects_id, duplicate_of: dup as string | null };
 }
 
 /** Country binding on every payload write. Unscoped text and LIR are ITU-staff only. */
-async function bind(db: D1Database, session: Session, register_id: string, action: ActionType, payload: unknown, assets?: Assets) {
+async function bind(db: D1Database, session: Session, register_id: string, action: ActionType, payload: unknown) {
   const data = (payload as { data?: { _class?: unknown } } | null)?.data;
   if (data?._class === "TextAmendment" && !isItu(session))
     throw new ValidationFailed([{
@@ -247,10 +256,8 @@ async function bind(db: D1Database, session: Session, register_id: string, actio
   if ((action === "LIR" || action === "SEED") && !isItu(session)) throw new Forbidden();
   // ITU roles are not key-bound; authorizeEntries needs a non-empty list to be callable.
   if (keys.length === 0 && !isItu(session)) {
-    // An invalid class cannot supply a country field. Return its schema errors
-    // rather than hiding them behind the valid-but-unscoped payload error.
-    const { errors, warnings } = await validateCurrent(assets, { register_id, action_type: action, payload });
-    if (errors.length) throw new ValidationFailed(errors, warnings);
+    // Establish country authority before evaluating content, including stage 2.
+    // Missing scope must not reveal validation results for unauthorized rows.
     throw new InvalidError("no country/area key found in the entries");
   }
   return authorizeEntries(db, session, keys.length ? keys : ["-"]);
@@ -267,10 +274,19 @@ async function requireEmptyRegister(db: D1Database, action: ActionType, slug: st
   if (!(await isEmpty(slug))) throw new ConflictError(`register ${slug} already has state; change it with ADD, REP or SUP actions, not a SEED`);
 }
 
+/** A duplicate starts from a real, currently active register item; an unverifiable source is refused, not guessed. */
+async function requireDuplicateSource(assets: Assets | undefined, register_id: string, key: string) {
+  if (!rulesFor(register_id)) throw new InvalidError("duplicate_of is not supported for this register");
+  let active: ReadonlySet<string>;
+  try { active = registerStateFromSnapshot(register_id, await fetchSnapshot(assets, register_id)).active; }
+  catch { throw new UpstreamError("register snapshot unavailable; the entry to duplicate cannot be verified"); }
+  if (!active.has(key)) throw new ValidationFailed([{ path: "duplicate_of", code: "mismatch", message: `"${key}" is not an active item of this register` }]);
+}
+
 export async function createSubmission(db: D1Database, session: Session | null, b: Record<string, unknown>, isEmpty?: EmptyRegisterCheck, assets?: Assets): Promise<Sub> {
   const s = requireUser(session);
   const c = parseCreate(b);
-  const snap = await bind(db, s, c.register_id, c.action_type, c.payload, assets);
+  const snap = await bind(db, s, c.register_id, c.action_type, c.payload);
   // A published submission is corrected by a NEW submission that names it (design "Withdrawal and the undo story").
   if (c.corrects_id) {
     const target = await db.prepare(`SELECT state, register_id FROM submissions WHERE id=?1`).bind(c.corrects_id).first<{ state: State; register_id: string }>();
@@ -278,6 +294,7 @@ export async function createSubmission(db: D1Database, session: Session | null, 
     if (target.state !== "published") throw new ConflictError(`only a published submission is corrected this way; it is ${target.state}`);
     if (target.register_id !== c.register_id) throw new InvalidError("a correction targets the same register");
   }
+  if (c.duplicate_of !== null) await requireDuplicateSource(assets, c.register_id, c.duplicate_of);
   const id = ulid();
   const t = now();
   const { errors, warnings } = await validateCurrent(assets, { register_id: c.register_id, slug: c.slug, action_type: c.action_type, payload: c.payload });
@@ -287,10 +304,10 @@ export async function createSubmission(db: D1Database, session: Session | null, 
   const stmts = [
     db
       .prepare(
-        `INSERT INTO submissions (id,proposer_id,affiliation_kind,affiliation_member_id,register_id,slug,action_type,state,current_rev,created_at,updated_at,version,corrects_id)
-         VALUES (?1,?2,?3,?4,?5,?6,?7,'draft',1,?8,?8,0,?9)`,
+        `INSERT INTO submissions (id,proposer_id,affiliation_kind,affiliation_member_id,register_id,slug,action_type,state,current_rev,created_at,updated_at,version,corrects_id,duplicate_of)
+         VALUES (?1,?2,?3,?4,?5,?6,?7,'draft',1,?8,?8,0,?9,?10)`,
       )
-      .bind(id, snap.submitted_by, snap.affiliation_kind, snap.affiliation_member_id, c.register_id, c.slug, c.action_type, t, c.corrects_id),
+      .bind(id, snap.submitted_by, snap.affiliation_kind, snap.affiliation_member_id, c.register_id, c.slug, c.action_type, t, c.corrects_id, c.duplicate_of),
     db
       .prepare(`INSERT INTO submission_revisions (${Object.keys(rev).join(",")}) VALUES (?1,?2,?3,?4,?5,?6,?7)`)
       .bind(...Object.values(rev)),
@@ -301,7 +318,7 @@ export async function createSubmission(db: D1Database, session: Session | null, 
       {
         at: t, actor_id: s.userId, actor_kind: "user", action: "submission.created", subject_type: "submission",
         subject_id: id, submission_id: id,
-        detail: { to: "draft", rev: 1, register_id: c.register_id, action_type: c.action_type, affiliation_kind: snap.affiliation_kind, affiliation_member_id: snap.affiliation_member_id, ...(c.corrects_id ? { corrects_id: c.corrects_id } : {}) },
+        detail: { to: "draft", rev: 1, register_id: c.register_id, action_type: c.action_type, affiliation_kind: snap.affiliation_kind, affiliation_member_id: snap.affiliation_member_id, ...(c.corrects_id ? { corrects_id: c.corrects_id } : {}), ...(c.duplicate_of !== null ? { duplicate_of: c.duplicate_of } : {}) },
       },
     ])),
   ];
@@ -319,7 +336,7 @@ async function ownSub(db: D1Database, session: Session | null, id: string): Prom
 async function newRevisionPayload(db: D1Database, s: Session, sub: Sub, b: Record<string, unknown>, assets?: Assets) {
   const payload = b.payload;
   if (!payload || typeof payload !== "object" || Array.isArray(payload)) throw new InvalidError("payload must be an object");
-  await bind(db, s, sub.register_id, sub.action_type, payload, assets);
+  await bind(db, s, sub.register_id, sub.action_type, payload);
   return payload as Record<string, unknown>;
 }
 
@@ -347,7 +364,7 @@ export async function submitDraft(db: D1Database, session: Session | null, id: s
     .bind(sub.id, sub.current_rev)
     .first<{ payload_yaml: string }>();
   const payload = parsePayload(cur!.payload_yaml);
-  await bind(db, s, sub.register_id, sub.action_type, payload, assets); // authority re-checked at submit time
+  await bind(db, s, sub.register_id, sub.action_type, payload); // authority re-checked at submit time
   const { errors, warnings } = await validateCurrent(assets, { register_id: sub.register_id, slug: sub.slug, action_type: sub.action_type, payload });
   if (errors.length) throw new ValidationFailed(errors, warnings);
   return { ...await mutate(db, sub, { ...MOVES.submit, actor: { kind: "user", id: s.userId }, auditAction: "submission.state" }), warnings };
@@ -589,7 +606,37 @@ export async function adminWithdraw(db: D1Database, session: Session | null, id:
 
 // ---------------------------------------------------------------- reads
 
-export async function readSubmission(db: D1Database, session: Session | null, id: string) {
+export interface CurrentItem { key: string; status: "active" | "lapsed" | "unknown"; entry: Record<string, unknown> | null }
+export type CurrentItems = { available: true; items: CurrentItem[] } | { available: false; items: [] };
+
+/**
+ * The register's current items for the entries a REP/MOD/SUP/DEL proposes to change, read from the
+ * deployed snapshot (the same source validateCurrent uses, so it may lag the register). ADD has no before.
+ */
+export async function currentItemsFor(assets: Assets | undefined, sub: Pick<Sub, "register_id" | "slug" | "action_type">, payload: unknown): Promise<CurrentItems> {
+  const none: CurrentItems = { available: false, items: [] };
+  const rules = rulesFor(sub.register_id);
+  const isObj = (v: unknown): v is Record<string, unknown> => !!v && typeof v === "object" && !Array.isArray(v);
+  if (!assets || !rules || sub.action_type === "ADD" || !isObj(payload) || !isObj(payload.data) || !Array.isArray(payload.data.entries)) return none;
+  try {
+    const response = await assets.fetch(new Request(`https://www.ituob.org/data/snapshots/${encodeURIComponent(sub.slug)}/current.json`));
+    if (!response.ok) return none;
+    const snapshot: unknown = await response.json();
+    if (!isObj(snapshot) || !Array.isArray(snapshot.active_entries) || !Array.isArray(snapshot.lapsed_keys)) return none;
+    const active = new Map<string, Record<string, unknown>>();
+    for (const e of snapshot.active_entries) { const k = isObj(e) ? entryKeyOf(e, rules) : null; if (k !== null && isObj(e)) active.set(k, e); }
+    const lapsed = new Set(snapshot.lapsed_keys.filter((k): k is string => typeof k === "string"));
+    const items = payload.data.entries.map((e): CurrentItem => {
+      const key = isObj(e) ? entryKeyOf(e, rules) : null;
+      if (key === null) return { key: "", status: "unknown", entry: null };
+      const entry = active.get(key);
+      return entry ? { key, status: "active", entry } : { key, status: lapsed.has(key) ? "lapsed" : "unknown", entry: null };
+    });
+    return { available: true, items };
+  } catch { return none; }
+}
+
+export async function readSubmission(db: D1Database, session: Session | null, id: string, assets?: Assets) {
   const s = requireUser(session);
   const sub = await getSub(db, id);
   if (sub.proposer_id !== s.userId && !isItu(s)) throw new NotFoundError("unknown submission");
@@ -599,7 +646,11 @@ export async function readSubmission(db: D1Database, session: Session | null, id
   const affiliation = sub.affiliation_member_id
     ? await db.prepare(`SELECT name FROM members WHERE id=?1`).bind(sub.affiliation_member_id).first<{ name: string }>()
     : null;
-  return { submission: { ...sub, affiliation_member_name: affiliation?.name ?? null }, revisions, history, pr };
+  const latest = revisions.find((r) => r.rev === sub.current_rev) as { payload_yaml?: string } | undefined;
+  let payload: unknown;
+  try { payload = latest?.payload_yaml ? parsePayload(latest.payload_yaml) : undefined; } catch { payload = undefined; }
+  const current = await currentItemsFor(assets, sub, payload);
+  return { submission: { ...sub, affiliation_member_name: affiliation?.name ?? null }, revisions, history, pr, current };
 }
 
 export async function listSubmissions(db: D1Database, session: Session | null, state: string | null, all: boolean) {

@@ -8,6 +8,7 @@
 import "~/styles/global.css";
 import CommandPalette from "~/components/vue/CommandPalette.vue";
 import ReadingProgress from "~/components/vue/ReadingProgress.vue";
+import HeaderAccount from "~/components/account/HeaderAccount.vue";
 
 export interface Breadcrumb {
   label: string;
@@ -125,10 +126,10 @@ const navItems = [
 
     <header class="no-print">
       <div class="bar">
-        <a href="/" class="brand" aria-label="ITU Operational Bulletin — home">
+        <a href="/" class="brand" aria-label="ITU Operational Bulletin online — home">
           <img src="/assets/logo-inverse.png" alt="ITU" width="34" height="34" />
           <span class="masthead">
-            <span class="publication-name">Operational Bulletin</span>
+            <span class="publication-name">Operational Bulletin{" "}</span>
             <span class="online">online</span>
           </span>
         </a>
@@ -139,6 +140,7 @@ const navItems = [
             </a>
           ))}
         </nav>
+        <HeaderAccount client:load />
       </div>
       {breadcrumbs.length > 0 && (
         <div class="crumbs-strip">
@@ -186,3 +188,8 @@ const navItems = [
     <CommandPalette client:idle />
   </body>
 </html>
+
+<style>
+  header .bar { flex-wrap: wrap; }
+  header nav.sections { flex-wrap: wrap; }
+</style>

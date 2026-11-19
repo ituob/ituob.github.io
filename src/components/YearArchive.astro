@@ -10,10 +10,12 @@ import { listIssueIds, loadIssue } from "~/lib/loaders";
 export interface Props {
   /** Max issues to show per year. Default: show all. */
   maxPerYear?: number;
+  /** Limit the grid to a scoped archive's source issues. */
+  issueIds?: number[];
 }
-const { maxPerYear } = Astro.props;
+const { maxPerYear, issueIds } = Astro.props;
 
-const ids = listIssueIds();
+const ids = issueIds ?? listIssueIds();
 const byYear = new Map<number, number[]>();
 
 for (const id of ids) {

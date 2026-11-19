@@ -10,9 +10,12 @@ interface Props {
   isExternal: boolean;
   touchedIssues: number[];
   amendingIssueIds: number[];
+  /** Scoped edition archives use their own year destinations. */
+  archiveYears?: { year: number; href: string }[];
+  selectedYear?: number;
 }
 
-const { slug, isExternal, touchedIssues, amendingIssueIds } = Astro.props;
+const { slug, isExternal, touchedIssues, amendingIssueIds, archiveYears, selectedYear } = Astro.props;
 
 const issues = isExternal ? amendingIssueIds : touchedIssues;
 const years = new Set<number>();
@@ -21,8 +24,8 @@ for (const id of issues) {
   const iso = issue?.meta?.publication_date;
   if (iso) years.add(Number.parseInt(iso.slice(0, 4), 10));
 }
-const sortedYears = [...years].sort((a, b) => b - a);
-const currentYear = sortedYears[0] ?? 0;
+const sortedYears = [...new Set(archiveYears?.map((entry) => entry.year) ?? years)].sort((a, b) => b - a);
+const currentYear = selectedYear ?? sortedYears[0] ?? 0;
 
 /** First issue id published in the given year, for the archive link. */
 function firstIssueOfYear(year: number): number | undefined {
@@ -37,15 +40,15 @@ function firstIssueOfYear(year: number): number | undefined {
   <nav class="rule-thin pt-3 mb-6" aria-label="Year archive">
     <p class="text-[var(--step--1)]" style="font-family: var(--font-sans); color: var(--fg-muted);">
       Showing data for <span class="num">{currentYear}</span>.
-      {sortedYears.length > 1 && (
+      {sortedYears.some((year) => year !== currentYear) && (
         <>
-          {" "}Browse previous years (subsequent editions):{" "}
-          {sortedYears.slice(1).map((y, i) => {
+          {" "}{archiveYears ? "Browse years in this edition:" : "Browse previous years (subsequent editions):"}{" "}
+          {sortedYears.filter((year) => year !== currentYear).map((y, i) => {
             const target = firstIssueOfYear(y);
             return (
               <>
                 {i > 0 && " "}
-                <a href={`/registers/${slug}/at/${target}/`} class="num">{y}</a>
+                <a href={archiveYears?.find((entry) => entry.year === y)?.href ?? `/registers/${slug}/at/${target}/`} class="num">{y}</a>
               </>
             );
           })}

@@ -6,6 +6,9 @@ import * as client from '../admin-client';
 import * as model from './model';
 import * as yamlIo from './yaml-io';
 import * as submissionDiff from '../submission-diff';
+import * as duplicate from './duplicate';
+import * as amendmentHeader from './amendment-header';
+import * as demoRefusal from '../demo-refusal';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { actionPayload, actionTypes, amendmentClasses, api, ApiError, initialValue, payloadErrors, revisionErrors } from '../admin-client';
 import { description } from './description';
@@ -72,7 +75,7 @@ function workspace() {
   const { descriptor } = parse(readFileSync(filename, 'utf8'));
   const source = compileScript(descriptor, { id: 'workspace-test' }).content;
   const js = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 } }).outputText;
-  const modules: Record<string, unknown> = { vue: Vue, '../../lib/admin-client': client, '../../lib/form/model': model, '../../lib/form/yaml-io': yamlIo, '../../lib/submission-diff': submissionDiff, './SchemaNode.vue': {} };
+  const modules: Record<string, unknown> = { vue: Vue, '../../lib/admin-client': client, '../../lib/form/model': model, '../../lib/form/yaml-io': yamlIo, '../../lib/submission-diff': submissionDiff, '../../lib/form/duplicate': duplicate, './SchemaNode.vue': {}, './AmendmentHeader.vue': {}, '../../lib/form/amendment-header': amendmentHeader, '../../lib/demo-refusal': demoRefusal, '../../styles/admin-forms.css': {} };
   const result = { exports: {} as any };
   new Function('require', 'module', 'exports', js)((name: string) => {
     if (!(name in modules)) throw new Error(`Unexpected component import: ${name}`);
@@ -89,6 +92,24 @@ function workspace() {
 }
 
 describe('workspace durable draft boundary', () => {
+  it('loads a REP and exposes a field diff against the current register item, plus the revision history', async () => {
+    const yaml = (name: string) => `type: REP\ndata:\n  _class: E118Amendment\n  entries:\n    - company_name: ${name}\n      issue_id_number: "1"\n`;
+    const detail = {
+      ok: true, history: [], pr: null,
+      submission: { id: 'S', register_id: 'E118_IIN', slug: 'e118-iin', action_type: 'REP', state: 'in_review', current_rev: 2 },
+      revisions: [{ rev: 1, payload_yaml: yaml('One'), validation: '{}', created_at: 't' }, { rev: 2, payload_yaml: yaml('Two'), validation: '{}', created_at: 't' }],
+      current: { available: true, items: [{ key: '1', status: 'active', entry: { company_name: 'Old', issue_id_number: '1' } }] },
+    };
+    vi.stubGlobal('fetch', vi.fn(async () => Response.json(detail)));
+    const view = workspace();
+    const { renderToString } = await import('vue/server-renderer');
+    await renderToString(view.app);
+    const state = view.state();
+    await state.load('S');
+    expect(state.currentDiffs.value[0].changes).toEqual([{ path: 'entries[0].company_name', before: '"Old"', after: '"Two"' }]);
+    expect(state.revisionChanges(detail.revisions[1])).toEqual([{ path: 'data.entries[0].company_name', before: '"One"', after: '"Two"' }]);
+    expect(state.revisionChanges(detail.revisions[0]).every((c: { before: string }) => c.before === '—')).toBe(true);
+  });
   it('keeps invalid input local on save and submit, shows field errors and never claims success', async () => {
     const fetcher = vi.fn(); vi.stubGlobal('fetch', fetcher);
     const view = workspace();

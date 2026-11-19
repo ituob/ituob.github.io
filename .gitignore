@@ -28,6 +28,9 @@ npm-debug.log*
 .env
 .env.local
 .env.*.local
+.dev.vars
+.dev.vars.*
+!.dev.vars.example
 
 # spd PDF artifact, placed by scripts/fetch-publications.ts at build time
 public/downloads/
@@ -35,3 +38,8 @@ src/data/publications-manifest.json
 
 # Wrangler local D1 state
 .wrangler/
+
+# Local HTTPS demo certificate, configuration and database
+.local-dev/
+test-results/
+playwright-report/

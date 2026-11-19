@@ -1,0 +1,23 @@
+---
+import { MESSAGE_TYPE_METADATA } from "~/lib/catalogs";
+import type { TextualGeneralMessage } from "~/lib/types";
+interface Props { message: TextualGeneralMessage }
+const { message } = Astro.props;
+const meta = MESSAGE_TYPE_METADATA[message.type] ?? {};
+const authored = message as TextualGeneralMessage & { recommendation?: typeof meta.recommendation; url?: string };
+const rec = authored.recommendation ?? meta.recommendation;
+const url = authored.url ?? meta.url;
+---
+{(rec || url) && (
+  <p class="text-[var(--step--1)] mb-3" style="color: var(--fg-subtle); font-family: var(--font-sans);">
+    {rec && (
+      <span>
+        In accordance with {rec.body ?? "ITU-T"} Recommendation {rec.code}{rec.version ? ` (${rec.version})` : ""}
+      </span>
+    )}
+    {rec && url && <span class="mx-2">·</span>}
+    {url && (
+      <a href={url} rel="external" class="hover:underline">Authoritative resource</a>
+    )}
+  </p>
+)}

@@ -1,0 +1,84 @@
+---
+import Base from "~/layouts/Base.astro";
+import RecommendationTimeline from "~/components/RecommendationTimeline.astro";
+import RegisterYearArchive from "~/components/RegisterYearArchive.astro";
+import YearArchive from "~/components/YearArchive.astro";
+import { generalMessagesForRec, lastAnnexBefore, loadIssue, loadRegisterCatalog, registersAmendedInIssue } from "~/lib/loaders";
+import { groupHistoryByIssue, loadStateAtIssue, type ChangeHistoryEntry } from "~/lib/snapshots";
+import { legacyArchiveScopes, type LegacyArchiveScope } from "~/lib/legacy-archive-scopes";
+import type { GeneralMessageType } from "~/lib/catalogs";
+
+interface Props { scope: LegacyArchiveScope }
+const { scope } = Astro.props;
+const catalog = loadRegisterCatalog();
+const register = catalog.find((entry) => entry.slug === scope.slug);
+const title = scope.kind === "recommendation"
+  ? `ITU-T Recommendation ${scope.code}`
+  : register?.title.en ?? scope.publication ?? scope.slug!;
+const overview = scope.kind === "recommendation"
+  ? `/recommendations/${scope.code}/`
+  : `/registers/${scope.slug}/`;
+
+interface Block {
+  id: number;
+  date: string | null;
+  positionOn: string | null;
+  positionOnIssue: number | null;
+  hasApprovals: boolean;
+  generalMessages: { type: GeneralMessageType; message: any }[];
+  registers: { slug: string; title: string; changes: ChangeHistoryEntry[] }[];
+}
+
+const yearGroups = new Map<number, Block[]>();
+for (const id of scope.issueIds) {
+  const issue = loadIssue(id);
+  const date = issue?.meta?.publication_date ?? null;
+  // Keep source issue links below even when a normalized payload is unavailable.
+  if (!issue || !date) continue;
+  const year = Number.parseInt(date.slice(0, 4), 10);
+  const slugs = scope.kind === "register" ? [scope.slug!] : registersAmendedInIssue(scope.code!, id);
+  const registers = slugs.map((slug) => {
+    const state = loadStateAtIssue(slug, id);
+    return {
+      slug,
+      title: catalog.find((entry) => entry.slug === slug)?.title.en ?? slug,
+      changes: state ? groupHistoryByIssue(state).get(id) ?? [] : [],
+    };
+  });
+  const ref = scope.publication ? lastAnnexBefore(id, scope.publication) : null;
+  const blocks = yearGroups.get(year) ?? [];
+  blocks.push({
+    id, date,
+    positionOn: ref?.positionOn ?? null,
+    positionOnIssue: ref?.issueId ?? null,
+    hasApprovals: scope.kind === "recommendation" && !!issue.general.approvedRecommendations?.payload?.items?.[scope.code!],
+    generalMessages: scope.kind === "recommendation"
+      ? generalMessagesForRec(scope.code!, id).map((message) => ({ type: message.type, message })) : [],
+    registers,
+  });
+  yearGroups.set(year, blocks);
+}
+const years = [...yearGroups.keys()].sort((a, b) => b - a);
+const unavailableIssueIds = scope.issueIds.filter((id) => !loadIssue(id)?.meta?.publication_date);
+const archiveYears = legacyArchiveScopes.filter((entry) =>
+  entry.kind === "register" && entry.slug === scope.slug && entry.edition === scope.edition && entry.year !== undefined,
+).map((entry) => ({ year: entry.year!, href: entry.new_route }));
+const scopeLabel = [scope.edition ? `Edition: ${scope.edition}` : null, scope.year ? String(scope.year) : null].filter(Boolean).join(" · ");
+---
+<Base title={`${title} — ${scopeLabel}`} wide description={`Archived messages for ${title}. ${scopeLabel}.`}>
+  <header class="mb-8">
+    <p class="text-[var(--step--1)]"><a href={overview}>All editions and years</a></p>
+    <h1 class="mt-3 text-[var(--step-3)]" style="font-family: var(--font-display);">{title}</h1>
+    <p class="mt-2">{scopeLabel}</p>
+    <p class="mt-2 text-[var(--step--1)]">{scope.issueIds.length} source Bulletin issue{scope.issueIds.length === 1 ? "" : "s"} in this archive.</p>
+  </header>
+  {scope.kind === "register" && (
+    <RegisterYearArchive slug={scope.slug!} isExternal={true} touchedIssues={[]} amendingIssueIds={scope.issueIds}
+      archiveYears={archiveYears.length ? archiveYears : undefined} selectedYear={scope.year ?? years[0]} />
+  )}
+  <RecommendationTimeline years={years} yearGroups={yearGroups} lang="en" />
+  <section class="rule-thin pt-3 mt-6" aria-label="Archive source issues">
+    <YearArchive issueIds={scope.issueIds} />
+    {unavailableIssueIds.length > 0 && <p>Source issues: {unavailableIssueIds.map((id) => <a class="mr-3" href={`/issues/${id}/`}>OB {id}</a>)}</p>}
+  </section>
+</Base>

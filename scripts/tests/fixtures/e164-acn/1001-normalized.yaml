@@ -1,0 +1,27 @@
+type: LIR
+date_requested:
+date_active:
+ob_issue_no: '1001'
+reference: OB-1001
+identifier:
+  code: '6'
+data:
+  _class: E164ACNAmendment
+  position: '6'
+  entries:
+  - country_or_area:
+      en: Brazil (Federal Republic of)
+    country_code: '55'
+    mobile_telephone_numbers:
+      en: area code + 6XXX XXXX
+  - country_or_area:
+      en: Burkina Faso
+    country_code: '226'
+    mobile_telephone_numbers:
+      en: 60, 68, 7
+  - country_or_area:
+      en: Lebanon
+    country_code: '961'
+    mobile_telephone_numbers:
+      en: 3, 70, 71, 760, 761, 763-769
+  notes: []

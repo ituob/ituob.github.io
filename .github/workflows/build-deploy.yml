@@ -15,6 +15,8 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      PUBLICATIONS_REQUIRED: "true"
     steps:
     - uses: actions/checkout@v4
       with:
@@ -57,10 +59,17 @@ jobs:
         echo "OB_DATA_ROOT=$RUNNER_TEMP/ituob-site-projection" >> "$GITHUB_ENV"
 
     - name: Verify projection guards
-      run: python3 -m unittest discover -s scripts/tests -p test_project_authored_data.py
+      run: python3 -m unittest discover -s scripts/tests -p 'test_*.py'
 
     - name: Install dependencies
       run: npm ci
+
+    - name: Verify legacy URL route coverage without rendering
+      run: |
+        git fetch origin production-jekyll:refs/remotes/origin/production-jekyll
+        node scripts/cutover-url-inventory.mjs --test --output "$RUNNER_TEMP/legacy-url-map.json"
+        node --test scripts/issue-language-routes.test.mjs scripts/cutover-url-inventory.test.mjs
+        node --experimental-strip-types --test tests/legacy-archive-scopes.test.ts
 
     - name: Verify generated register identities and country fields
       run: |
@@ -73,6 +82,14 @@ jobs:
 
     - name: Worker tests
       run: npx vitest run
+
+    - name: Count-aware parity evidence regression tests
+      env:
+        BUNDLE_GEMFILE: data-ob/ituob/Gemfile
+      run: bundle exec node --test test/parity-evidence-generator.test.mjs
+
+    - name: Replay-skip reasons and committed parity threshold (D100-1, D100-5)
+      run: node --experimental-strip-types --test tests/replay-skips.test.ts tests/parity-threshold.test.ts
 
     - name: Worker typecheck
       run: npm run typecheck:worker
@@ -90,7 +107,10 @@ jobs:
       run: |
         node --experimental-strip-types --test test/item-history.node-test.ts
         node --experimental-transform-types --test test/textual-validation.node-test.ts
-        node --test test/parity-render.node-test.mjs
+        node --experimental-strip-types --test test/*render.node-test.mjs test/empty-amendments.node-test.mjs
+
+    - name: Downloads spot-check tests
+      run: npx vitest run --config vitest.spot-check.config.ts
 
     # Round-trips every form-driven file in data-ob through the form model.
     - name: Form round-trip tests
@@ -99,8 +119,8 @@ jobs:
     - name: Publication artifact selection tests
       run: node --experimental-strip-types --test tests/fetch-publications.test.ts
 
-    # Published PDFs from ituob/service-publications-docs CI. No run or artifact
-    # yet = empty listing; a sha256 mismatch fails the build.
+    # Published PDFs from ituob/service-publications-docs main CI are required.
+    # Missing artifacts, an empty catalog or a sha256 mismatch fail the build.
     - name: Fetch and verify publication PDFs
       env:
         GH_TOKEN: ${{ github.token }}
@@ -111,6 +131,20 @@ jobs:
 
     - name: Verify PDFs in dist match the manifest
       run: node --experimental-strip-types scripts/fetch-publications.ts verify-dist
+
+    # Checks every publication x language entry in the manifest and proves the built
+    # site serves each PDF (sha256, %PDF), links it, and shows the right status label
+    # (ituob.github.io#112). Report: job summary + the downloads-spot-check artifact.
+    - name: Downloads spot-check on the built site
+      run: node --experimental-strip-types scripts/spot-check-downloads.ts --dist dist --sample all
+
+    - name: Retain the downloads spot-check report
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: downloads-spot-check
+        path: spot-check-report
+        if-no-files-found: ignore
 
     - name: Run TypeScript check
       run: npm run check
@@ -191,7 +225,7 @@ jobs:
 
   content-parity-audit:
     needs: build
-    if: github.event_name == 'pull_request'
+    if: github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4

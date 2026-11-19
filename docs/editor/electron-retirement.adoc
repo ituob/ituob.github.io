@@ -1,0 +1,190 @@
+= Retiring the Electron editor: parity and archive notice
+:toc:
+:toclevels: 2
+
+Closes the last task of https://github.com/ituob/ituob.github.io/issues/101[#101]
+("Retire Electron"). Source of truth for the row detail is
+`docs/editor-feature-map.adoc` (IDs below are its IDs); this file is the
+retirement decision: what each legacy feature became, what is left, and the text
+of the notice for the Electron repository.
+
+Legacy editor: `ituob/itu-ob-editor` at `74b1564`. Web editor: this branch
+(`claude-a/101-electron-final`, on top of #130) plus `main` for the pieces that
+merged there (#110, #117, #120, #121, #124).
+
+== Where each piece lives
+
+[cols="1,2",options="header"]
+|===
+| Location | Meaning
+| main | merged: #110 screens, #117 parity, #120 catalog form (G1), #121 annexes (F1, F2), #124 telephone, custom title, SANC and mid (D6, D7, D14, D15, D18)
+| #130 | open: byte preservation for 612 stored records, scheduling calendar (B6), inline help (B10)
+|===
+
+The earlier belief that telephone, custom title, mid and SANC authoring, SEED
+and annexes were still missing is out of date: #124, #121 and #117 closed them.
+What this branch adds is proof that an authored record has the shape the old
+editor wrote (`src/lib/form/electron-authoring.test.ts`).
+
+== Parity table
+
+[cols="2,3,3,2",options="header"]
+|===
+| Legacy feature (map IDs) | Web editor | Evidence | Status
+
+| Windows, menu, shortcuts, packaging, dead settings buttons (A1-A3, A8, A9)
+| Pages under `/admin` and `/me`; the legacy menu, shortcuts and two settings buttons never had code
+| `src/pages/admin/*.astro`
+| Dropped, nothing to port
+
+| Local git clone, commit straight to master (A4, A7)
+| Draft, review, branch and PR; author from the session; audit log
+| `worker/lib/submissions.ts`, `github-publisher.ts`, `migrations/0001_init.sql`
+| Replaced (safer by design)
+
+| Sync, offline mode, settings, keychain (A5, A6)
+| OIDC login; no clone, so no sync or offline mode
+| `worker/lib/oidc.ts`, `session.ts`
+| Replaced; identity provider unverified live
+
+| Browse editions, recommendations, publications, upcoming issues (B1-B5)
+| Public pages and composer edition list
+| `src/pages/issues`, `PlannedIssues.astro`, `Composer.vue`
+| Done
+
+| Calendar with cutoff and publication dates (B6)
+| UTC month grid with navigation
+| `ScheduleCalendar.vue`, `schedule-calendar.test.ts`
+| Done in #130
+
+| Schedule a new issue, inherit masthead (B7, B8)
+| Edition metadata form; masthead inherited from last published edition
+| `EditionMetadata.vue`, `edition-defaults.ts`
+| Done (#110, #117)
+
+| Help links (B10)
+| Inline help in the schedule, general-message and amendment screens
+| `editor-help.test.ts`, `breaker-calendar-help.test.ts`
+| Done in #130
+
+| Issue metadata: ISSN, dates, authors, contacts, reorder, languages (C1-C7, C10)
+| Schema-generated forms, up/down reorder, optimistic revision checks
+| `SchemaNode.vue`, `move-item.test.ts`, `worker/lib/edition-metadata.ts`
+| Done; languages are a JSON textarea (usable, not friendly)
+
+| Language switcher, delete issue (C8, C9)
+| Not carried
+| 3 of 396 issues use a non-en language; deleting a published issue is a reviewed revert
+| Dropped, reasons in the map
+
+| Add and delete general messages, edit existing (D1-D3)
+| Type picker, delete, import of existing YAML with source bytes preserved
+| `GeneralMessageEditor.vue`, `general-message-routes.ts`, `yaml-io.ts`
+| Done
+
+| Running annexes, approved recommendations, service restrictions, callback procedures, misc, org changes, iptn, ipns (D4, D5, D9-D13, D16, D17)
+| Generated forms and typed rows
+| `src/lib/schema.generated.ts` (`General*Wire`), `general.ts`
+| Done
+
+| Telephone service 2: country sections, communications (D6, D7)
+| `GeneralTelephoneService` > Section > Communication
+| `electron-authoring.test.ts`, `general-roundtrip.test.ts` (377 records)
+| Done; authored shape equals the corpus shape
+
+| Custom message with translatable title (D13, D14)
+| `GeneralCustom.title` multilingual, body prose
+| same tests (105 records)
+| Done
+
+| SANC (D15) and MID (D18)
+| `GeneralSancs` typed rows and prose; `GeneralMid` prose
+| same tests (124 and 6 records)
+| Done
+
+| telephone_service v1, ProseMirror editor (D8, D19)
+| Not carried
+| 0 corpus records; decision record: no ProseMirror
+| Dropped
+
+| Amendments to registers and textual datasets (E1-E3, E5, E6)
+| Register change actions ADD, REP, MOD, SUP, DEL, LIR; textarea for textual datasets; replay replaces auto-fill
+| `SubmissionWorkspace.vue`, `validation.ts`
+| Done
+
+| Amendment header, position_on prefill from latest annex (E4)
+| `AmendmentHeader.vue`: recommendation line, SP resource URL, "Amending position of DATE annexed to OB n" or never-annexed warning; `position_on` prefilled from the latest annex
+| `amendment-header.ts`, `register-source.ts`, `amendment-header.test.ts`
+| Done (in #137)
+
+| SEED
+| Bulk import plans one staff-only SEED for an empty register; server enforces staff
+| `bulk-import.ts`, `BulkImport.vue`, `test/seed-action.test.ts`
+| Done (live empty-register check not run)
+
+| Annex a publication, annexed date (F1, F2)
+| `/admin/annexes`
+| `AnnexEditor.vue`, `annexes.ts` (#121, on main)
+| Done on main
+
+| Annex dataset grid (F3, F4)
+| Not carried
+| 1 of 61 annex entries held datasets; registers replace datasets
+| Dropped
+
+| Service-publication editor (G1)
+| `/admin/catalog`, review PR against the catalog repository
+| `CatalogEntryEditor.vue`, `catalog-entries.ts` (#120)
+| Done
+
+| Dataset designer, delete publication (G2, G3)
+| Not carried
+| compiled schemas replace designer; legacy delete was "temporarily unavailable"
+| Dropped
+
+| Validation (G4)
+| Same generated validators in browser and Worker
+| `schema.validators.generated.ts`, `worker/lib/validation.ts`
+| Done
+
+| Batch commit, discard, publish (H1-H5)
+| Submissions list, withdraw, composer, staged publish
+| `SubmissionWorkspace.vue`, `Composer.vue`, `github-publisher.ts`
+| Done; sync-only items dropped
+
+| Machine translation, localizer, error toasts (I1-I3)
+| `TranslationAssist.vue` for action fields; alert lists
+| `worker/translation-routes.ts`
+| Done for actions; not mounted on the general-message editor; live service not observed
+|===
+
+== What does not block retirement
+
+* I1 on general messages and the friendlier language picker (C7).
+
+== What must happen outside this repository
+
+These are not done here, deliberately.
+
+. #130 and this branch merge into `main` (they conflict with current `main` in `docs/editor-feature-map.adoc`, `worker/lib/general-messages.ts` and `test/general-messages.node.ts`; the batch merge resolves them).
+. Live proof: remote D1 migration, Cloudflare Access, the identity provider, the real repository import and the empty-register SEED check, one browser authoring pass per message type.
+. A named owner adds the notice below to the Electron repository README and archives it. Nothing has been archived or edited.
+
+== Archive notice (README of `ituob/itu-ob-editor`)
+
+----
+> **This application is retired.**
+>
+> The ITU Operational Bulletin is now edited in the web editor at
+> https://github.com/ituob/ituob.github.io (pages under `/admin`, documented in
+> `docs/editor/electron-retirement.adoc`). Sign in with your ITU account; changes
+> go through review as pull requests instead of committing straight to the data
+> repository.
+>
+> This repository is archived and read-only. It is kept for history only and is
+> not maintained. Do not use it to edit `itu-ob-data`.
+>
+> Questions: open an issue on ituob/ituob.github.io.
+----
+
+Repository description to set when archiving: "Retired. Use the web editor in ituob/ituob.github.io."

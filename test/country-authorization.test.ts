@@ -39,16 +39,24 @@ it("uses the same resolver for multilingual names and codes, and rejects mixed c
 });
 
 it("authorizes country/service and area/network registers, refusing unscoped rows in member batches", async () => {
-  for (const [register, slug, cls, field, identity] of [
-    ["E164_CC", "e164-cc", "E164CCAmendment", "country_area_or_service", { country_code: "213" }],
-    ["Q708_SANC", "q708-sanc", "Q708SANCAmendment", "area_or_network", { code: "2-000" }],
+  for (const [register, slug, cls, field, identity, otherIdentity] of [
+    ["E164_CC", "e164-cc", "E164CCAmendment", "country_area_or_service", { country_code: "213" }, { country_code: "214" }],
+    ["Q708_SANC", "q708-sanc", "Q708SANCAmendment", "area_or_network", { code: "2-000" }, { code: "2-001" }],
   ] as const) {
     const send = (entries: unknown[]) => api("POST", "/api/me/submissions", { session: "algerian", body: {
       register_id: register, slug, action_type: "ADD", payload: { type: "ADD", data: { _class: cls, entries } },
     } });
     expect((await send([{ ...identity, [field]: { en: "Algeria" } }])).status).toBe(201);
+    // Missing country scope is rejected before validation, even for duplicate identities.
+    expect((await send([{ ...identity, [field]: { en: "Algeria" } }, otherIdentity])).status).toBe(400);
     expect((await send([{ ...identity, [field]: { en: "Algeria" } }, identity])).status).toBe(400);
     expect((await send([{ ...identity, [field]: { en: "Australia" } }])).status).toBe(403);
+    // Duplicate identities fail stage 2 only after the whole batch is authorized.
+    const before = await db().prepare("SELECT count(*) AS n FROM submission_revisions").first();
+    const row = { ...identity, [field]: { en: "Algeria" } };
+    expect((await send([row, row])).status).toBe(422);
+    expect((await send([row, { ...identity, [field]: { en: "Australia" } }])).status).toBe(403);
+    expect(await db().prepare("SELECT count(*) AS n FROM submission_revisions").first()).toEqual(before);
   }
 });
 

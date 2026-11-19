@@ -1,0 +1,171 @@
+name: Parity re-measure
+
+# Re-measures content parity (Astro vs the pinned Jekyll reference) on
+# GitHub-hosted runners. It fails below 95% and commits/pushes nothing; on
+# success it uploads the receipts as the "parity-receipts" artifact for a human
+# to commit over docs/parity/current-main/pinned/ (the committed-receipt checks
+# in tests/parity-threshold.test.ts then pass).
+#
+# Triggers (a full run is about 45-60 minutes, mostly the Jekyll reference):
+#   - pull_request, or push to main or claude-a/**, when a hashed rendering template, the corpus
+#     pins (data, data-ob), the scorer or this workflow changes
+#   - workflow_dispatch, any time
+# The ordinary build-deploy.yml run does NOT re-measure; it only checks the
+# committed receipts (threshold, metric, staleness).
+
+on:
+  push:
+    branches: [ main, "claude-a/**" ]
+    paths:
+      - 'src/lib/printed-context.ts'
+      - 'src/lib/loaders.ts'
+      - 'src/lib/ob-date.ts'
+      - 'src/components/PrintedRegisterContext.astro'
+      - 'src/components/IncompleteBanner.astro'
+      - 'src/components/ProseMirror.astro'
+      - 'src/pages/issues/**'
+      - 'src/pages/registers/**'
+      - 'package-lock.json'
+      - 'data'
+      - 'data-ob'
+      - 'test/generate_parity_evidence.rb'
+      - 'scripts/parity-audit-build.sh'
+      - 'docs/parity/current-main/reference-build.patch'
+      - '.github/workflows/parity-remeasure.yml'
+  pull_request:
+    branches: [ main, "codex/**", "claude-a/**" ]
+    paths:
+      - 'src/lib/printed-context.ts'
+      - 'src/lib/loaders.ts'
+      - 'src/lib/ob-date.ts'
+      - 'src/components/PrintedRegisterContext.astro'
+      - 'src/components/IncompleteBanner.astro'
+      - 'src/components/ProseMirror.astro'
+      - 'src/pages/issues/**'
+      - 'src/pages/registers/**'
+      - 'package-lock.json'
+      - 'data'
+      - 'data-ob'
+      - 'test/generate_parity_evidence.rb'
+      - 'scripts/parity-audit-build.sh'
+      - 'docs/parity/current-main/reference-build.patch'
+      - '.github/workflows/parity-remeasure.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: parity-remeasure-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # Jekyll source recorded in docs/parity/current-main/reference_build.json.
+  JEKYLL_SOURCE: a95ab19139e0c65271178c44362f60b48f7eed8c
+  # itu-ob-data commit the Jekyll reference is built from (D100-2). Deliberately
+  # NOT the `data` submodule gitlink (90f99728, ends at OB 1343): e17484be is the
+  # upstream master tip carrying OB 1344-1350, the same commit the committed
+  # ob1350 receipt was built from. The Astro side is untouched.
+  REFERENCE_DATA_REPO: https://github.com/ituob/itu-ob-data
+  REFERENCE_DATA_SHA: e17484be9f11d6a44d2f5c2ffc3d3e0813ffe62f
+
+jobs:
+  reference:
+    name: Jekyll reference build (pinned data)
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: recursive
+    - name: Check out the Jekyll source and apply the audit adaptations
+      run: |
+        git fetch --no-tags origin "$JEKYLL_SOURCE"
+        git worktree add "$RUNNER_TEMP/jekyll" "$JEKYLL_SOURCE"
+        cd "$RUNNER_TEMP/jekyll"
+        git apply "$GITHUB_WORKSPACE/docs/parity/current-main/reference-build.patch"
+        rm -rf data
+        git init -q "$RUNNER_TEMP/reference-data"
+        git -C "$RUNNER_TEMP/reference-data" fetch -q --no-tags --depth 1 "$REFERENCE_DATA_REPO" "$REFERENCE_DATA_SHA"
+        git -C "$RUNNER_TEMP/reference-data" checkout -q --detach FETCH_HEAD
+        test "$(git -C "$RUNNER_TEMP/reference-data" rev-parse HEAD)" = "$REFERENCE_DATA_SHA"
+        # Fail loudly if the reference does not reach OB 1350.
+        test -d "$RUNNER_TEMP/reference-data/issues/1350"
+        ln -s "$RUNNER_TEMP/reference-data" data
+    - uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: '3.1.7'
+        bundler-cache: true
+        working-directory: ${{ runner.temp }}/jekyll
+    - uses: actions/setup-node@v4
+      with:
+        node-version: '22'
+    - name: Jekyll build
+      working-directory: ${{ runner.temp }}/jekyll
+      run: bundle exec jekyll build --destination "$RUNNER_TEMP/reference-site" > "$RUNNER_TEMP/jekyll.log" 2>&1 || { tail -50 "$RUNNER_TEMP/jekyll.log"; exit 1; }
+    - name: Pack the reference site (its paths contain ':' which artifacts refuse)
+      run: tar -C "$RUNNER_TEMP" -czf "$RUNNER_TEMP/reference-site.tgz" reference-site
+    - uses: actions/upload-artifact@v4
+      with:
+        name: parity-reference-site
+        path: ${{ runner.temp }}/reference-site.tgz
+        retention-days: 1
+        if-no-files-found: error
+
+  measure:
+    name: Astro audit build and 95% gate
+    needs: reference
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: recursive
+    - uses: actions/setup-node@v4
+      with:
+        node-version: '22'
+        cache: 'npm'
+    - uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: '3.4'
+    # Same gem bundle, projection and snapshot steps as build-deploy.yml.
+    - name: Install the ituob gem bundle (data-ob/ituob/Gemfile)
+      working-directory: data-ob
+      env:
+        BUNDLE_GEMFILE: ituob/Gemfile
+      run: bundle install
+    - name: Project pinned authored data and generate register snapshots
+      run: |
+        python3 scripts/project-authored-data.py \
+          --data-root data --service-root data-ob \
+          --data-ref "$(git -C data rev-parse HEAD)" \
+          --service-ref "$(git -C data-ob rev-parse HEAD)" \
+          --snapshots-out data/snapshots \
+          --projection-root "$RUNNER_TEMP/ituob-site-projection"
+        echo "OB_DATA_ROOT=$RUNNER_TEMP/ituob-site-projection" >> "$GITHUB_ENV"
+    - name: Install dependencies
+      run: npm ci
+    - name: Astro audit build (four audited templates)
+      run: scripts/parity-audit-build.sh "$RUNNER_TEMP/astro-audit"
+    - uses: actions/download-artifact@v4
+      with:
+        name: parity-reference-site
+        path: ${{ runner.temp }}
+    - name: Unpack the reference site
+      run: tar -C "$RUNNER_TEMP" -xzf "$RUNNER_TEMP/reference-site.tgz"
+    - name: Measure parity (fails below 95%)
+      env:
+        BUNDLE_GEMFILE: ${{ github.workspace }}/data-ob/ituob/Gemfile
+        DEPLOYED_SITE: ${{ runner.temp }}/reference-site
+        LOCAL_DIST: ${{ runner.temp }}/astro-audit
+        OUTPUT_DIR: ${{ runner.temp }}/parity-receipts/pinned
+      run: |
+        bundle install
+        bundle exec ruby test/generate_parity_evidence.rb
+    - name: Retain the receipts (a human commits them; nothing is pushed here)
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: parity-receipts
+        path: ${{ runner.temp }}/parity-receipts
+        if-no-files-found: ignore

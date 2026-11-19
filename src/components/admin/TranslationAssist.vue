@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import '../../styles/admin-forms.css';
 import { ref } from 'vue';
 import { api } from '../../lib/admin-client';
 // Suggest-only: the suggestion never reaches the parent until the author presses Apply.
@@ -21,15 +22,14 @@ async function suggest() {
 function apply() { emit('apply', suggestion.value); suggestion.value = ''; }
 </script>
 <template>
-  <div :aria-busy="busy" class="translation-assist">
-    <button type="button" :disabled="busy" @click="suggest">Suggest {{ to }} translation (ITU machine translation)</button>
-    <p v-if="error" role="alert" class="error">{{ error }}</p>
-    <div v-if="suggestion" role="status">
-      <p>Machine suggestion, review before use:</p>
+  <div :aria-busy="busy" class="admin-form translation-assist">
+    <button class="admin-button" type="button" :disabled="busy" @click="suggest">Suggest {{ to }} translation (ITU machine translation)</button>
+    <p v-if="error" role="alert" class="admin-error">{{ error }}</p>
+    <div class="admin-status" v-if="suggestion" role="status">
+      <p class="admin-help">Machine suggestion, review before use:</p>
       <blockquote>{{ suggestion }}</blockquote>
-      <button type="button" @click="apply">Use this translation</button>
-      <button type="button" @click="suggestion = ''">Discard</button>
+      <button class="admin-button" type="button" @click="apply">Use this translation</button>
+      <button class="admin-button" type="button" @click="suggestion = ''">Discard</button>
     </div>
   </div>
 </template>
-<style scoped>.error { color: #a51b27; } blockquote { margin: .5rem 0; overflow-wrap: anywhere; } button { margin: .25rem; }</style>

@@ -1,11 +1,12 @@
 ---
 import Base from "~/layouts/Base.astro";
-import { loadIssue, listIssueIds } from "~/lib/loaders";
+import { loadIssue, listIssueIds, publicationHref } from "~/lib/loaders";
 import { formatSwissDate } from "~/lib/format";
 import {
   MESSAGE_TYPE_ORDER,
   GENERAL_TYPE_LABELS,
   PUBLICATION_BY_SLUG,
+  SUPPORTED_LANGUAGES,
   type GeneralMessageType,
   type Language,
 } from "~/lib/catalogs";
@@ -23,6 +24,11 @@ export function getStaticPaths() {
     const issue = loadIssue(id);
     if (!issue) continue;
     const langs = new Set<Language>();
+    // Legacy editions can declare a language while their prose falls back to English.
+    for (const language of SUPPORTED_LANGUAGES) {
+      const enabled = issue.meta.languages?.[language] as unknown;
+      if (enabled === true || enabled === "yes") langs.add(language);
+    }
     for (const m of issue.general.textual) {
       for (const l of availableLanguages(m)) langs.add(l);
     }
@@ -133,7 +139,7 @@ function sectionId(label: string): string {
             return (
               <article>
                 <h3 class="text-[var(--step-2)] mb-3" style="font-family: var(--font-display); font-weight: 600;">
-                  <a href={`/datasets/${slug}/`} class="no-underline hover:underline">{title}</a>
+                  {publicationHref(slug) ? <a href={publicationHref(slug)!} class="no-underline hover:underline">{title}</a> : title}
                 </h3>
                 {issue.amendments.structured[slug] && (
                   <StructuredAmendment amendments={issue.amendments.structured[slug]} lang={lang} />

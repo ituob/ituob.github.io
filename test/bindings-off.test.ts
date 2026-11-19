@@ -19,7 +19,7 @@ describe("unprovisioned bindings", () => {
   });
 
   it("returns a clear uncached 503 for API, auth and admin when DB is absent", async () => {
-    for (const path of ["/admin", "/admin/editor/", "/api/whoami", "/api/github/webhook", "/auth", "/auth/login", "/auth/callback", "/auth/logout"]) {
+    for (const path of ["/admin", "/admin/editor/", "/api/whoami", "/api/github/webhook", "/api/email/webhook", "/auth", "/auth/login", "/auth/callback", "/auth/logout"]) {
       const response = await worker.fetch(new Request(`https://www.ituob.org${path}`), staticEnv());
       expect(response.status, path).toBe(503);
       expect(response.headers.get("Cache-Control")).toBe("no-store");

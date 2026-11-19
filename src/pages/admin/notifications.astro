@@ -1,0 +1,8 @@
+---
+import Base from "~/layouts/Base.astro";
+import NotificationsAdmin from "~/components/account/NotificationsAdmin.vue";
+---
+<Base title="Email delivery" breadcrumbs={[{ label: "Administration", href: "/admin/" }, { label: "Email delivery" }]}>
+  <NotificationsAdmin client:load />
+  <noscript><p>Enable JavaScript to view email delivery statistics.</p></noscript>
+</Base>

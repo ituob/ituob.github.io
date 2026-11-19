@@ -134,15 +134,19 @@ describe("composer: merged -> scheduled -> published", () => {
     expect((await comp("GET", "/editions/1351")).json.edition.status).toBe("composing");
     expect((await comp("GET", "/submissions")).json.submissions[0].edition).toBe(1351);
 
-    const mergedNotes = () => n("SELECT count(*) n FROM notifications WHERE submission_id=?1 AND kind='submission.pr_merged'", r.id);
+    const kindNotes = (kind: string) => n("SELECT count(*) n FROM notifications WHERE submission_id=?1 AND user_id='member-A' AND kind=?2", r.id, kind);
+    const mergedNotes = () => kindNotes("submission.pr_merged");
     const notesBefore = await mergedNotes();
     expect(notesBefore).toBeGreaterThan(0);
+    expect(await kindNotes("submission.scheduled")).toBe(1); // placing is announced to the proposer
     const removed = await comp("POST", `/editions/1351/items/${r.id}/remove`);
     expect(removed.json.submission.state).toBe("merged");
     expect(await n("SELECT count(*) n FROM edition_items")).toBe(0);
-    expect(await mergedNotes()).toBe(notesBefore); // un-placing is not announced again
+    expect(await mergedNotes()).toBe(notesBefore); // un-placing is not reported as a second "pull request merged"
+    expect(await kindNotes("submission.unscheduled")).toBe(1); // but the proposer is told it left the edition
     expect((await comp("GET", "/editions/1351")).json.edition.status).toBe("open"); // an empty edition frees the slot
     expect((await comp("POST", "/editions/1351/items", ADMINU, { submission_id: r.id })).status).toBe(200);
+    expect(await kindNotes("submission.scheduled")).toBe(2); // a new placement is a new event
 
     expect(fake.pinRequests).toHaveLength(0);
     expect((await comp("POST", "/editions/1351/stage")).status).toBe(200);

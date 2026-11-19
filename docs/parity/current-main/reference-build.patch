@@ -1,0 +1,59 @@
+diff --git a/Gemfile.lock b/Gemfile.lock
+index 3f9d8b4..b0b42b1 100644
+--- a/Gemfile.lock
++++ b/Gemfile.lock
+@@ -411,6 +411,7 @@ GEM
+ 
+ PLATFORMS
+   arm64-darwin-21
++  arm64-darwin-25
+   x86_64-linux
+ 
+ DEPENDENCIES
+diff --git a/_plugins/issue_data_reader.rb b/_plugins/issue_data_reader.rb
+index 09672a3..67d08e3 100644
+--- a/_plugins/issue_data_reader.rb
++++ b/_plugins/issue_data_reader.rb
+@@ -255,17 +255,17 @@ module Jekyll
+ 
+     # Returns a list of OB_ROOT subdirectories (expected one for each OB issue)
+     def get_issues
+-      Pathname(OB_ROOT).children.select(&:directory?).map(&:to_s).sort_by(&:to_i)
++      Pathname(OB_ROOT).children.select(&:directory?).map(&:to_s).select { |d| File.file?(File.join(d, 'meta.yaml')) } # AUDIT PATCH 100-04.sort_by(&:to_i)
+     end
+ 
+     # Returns a list of PUB_ROOT subdirectories
+     def get_publications
+-      Pathname(PUB_ROOT).children.select(&:directory?).map(&:to_s)
++      Pathname(PUB_ROOT).children.select(&:directory?).map(&:to_s).select { |d| File.file?(File.join(d, 'meta.yaml')) } # AUDIT PATCH 100-04
+     end
+ 
+     # Returns a list of REC_ROOT subdirectories
+     def get_recommendations
+-      Pathname(REC_ROOT).children.select(&:directory?).map(&:to_s)
++      Pathname(REC_ROOT).children.select(&:directory?).map(&:to_s).select { |d| File.file?(File.join(d, 'meta.yaml')) } # AUDIT PATCH 100-04
+     end
+   end
+ 
+diff --git a/_plugins/loader_approved_recommendations.rb b/_plugins/loader_approved_recommendations.rb
+index f0b8c23..ff9246b 100644
+--- a/_plugins/loader_approved_recommendations.rb
++++ b/_plugins/loader_approved_recommendations.rb
+@@ -25,7 +25,6 @@ module Jekyll
+       }.to_h
+ 
+       # results = Queue.new
+-      @db ||= Relaton::DbCache.init_bib_caches(local_cache: 'relaton')
+       msg['items'].each do |rec, version|
+         # Check if recommendation already has metadata in YAML database
+         existing_rec = data['recommendations'][rec]
+@@ -70,8 +69,7 @@ module Jekyll
+     def fetch_recommendation_title(rec, version)
+       ref = "ITU-T #{rec.strip}"
+       ref += " #{version.strip}" if version && !version.empty?
+-      bib = @db.fetch ref
+-      return nil unless bib
++      return nil # AUDIT PATCH 100-04: no network title fetch
+ 
+       bib.title.detect { |t| t.type == 'main' }&.title&.content.to_s
+     end

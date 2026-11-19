@@ -5,6 +5,6 @@ import { defineConfig } from "vitest/config";
 export default defineConfig({
   test: {
     environment: "node",
-    include: ["test/email.test.ts", "test/publisher.test.ts", "test/access.test.ts", "test/deployment-config.test.ts"],
+    include: ["test/email.test.ts", "test/publisher.test.ts", "test/access.test.ts", "test/deployment-config.test.ts", "test/mock-idp-ignore.test.ts", "test/mock-idp-server.test.ts"],
   },
 });

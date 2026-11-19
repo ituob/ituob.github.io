@@ -5,6 +5,11 @@ export interface Env {
   DB: D1Database;
   /** "stub" enables the local stub; anything else (including unset) fails closed. */
   AUTH_MODE?: string;
+  /** "1" only in the generated local-demo config (scripts/dev-local.mjs); see localDemoEnabled(). */
+  LOCAL_DEMO?: string;
+  /** Local demo only: catalog YAML copied into the generated config by scripts/dev-local.mjs. */
+  DEMO_CATALOG_REGISTERS?: string;
+  DEMO_CATALOG_RECOMMENDATIONS?: string;
   // OIDC relying party (AUTH_MODE="oidc"). Required: ISSUER, CLIENT_ID, and
   // CLIENT_SECRET (a Worker secret) unless OIDC_CLIENT_AUTH="none". All optional
   // knobs map to assumptions A1-A11 in docs/identity-accounts.adoc. No defaults
@@ -51,6 +56,8 @@ export interface Env {
   MAIL_FROM?: string;
   /** GitHub webhook secret (Worker secret). Unset: /api/github/webhook fails closed with 503. */
   GITHUB_WEBHOOK_SECRET?: string;
+  /** Email-provider feedback webhook secret (Svix `whsec_...`, Worker secret). Unset: /api/email/webhook fails closed with 503. */
+  EMAIL_WEBHOOK_SECRET?: string;
   /** Notification carrier queue (`ituob-notify`); absent locally/unprovisioned: rows stay queued. */
   NOTIFY_Q?: Queue<{ notification_ids: string[] }>;
 }

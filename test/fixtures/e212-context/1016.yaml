@@ -1,0 +1,21 @@
+type: LIR
+date_requested:
+date_active:
+ob_issue_no: '1016'
+reference: OB-1016
+identifier:
+  code: 1016-007
+data:
+  _class: E212MNCAmendment
+  entries:
+  - mcc_mnc_codes: 228 01
+    country_or_area:
+      en: P  40  Switzerland   ADD
+    networks: Swisscom (Schweiz AG)
+    range: 20XXXXXXXX-35XXXXXXXX 38XXXXXXXX 40XXXXXXXX-44XXXXXXXX 47XXXXXXXX 52XXXXXXXX
+      59XXXXXXXX 60XXXXXXXX-62XXXXXXXX 72XXXXXXXX 77XXXXXXXX 80XXXXXXXX (Switzerland)
+      37XXXXXXXX (Liechtenstein)
+  notes:
+  - ______________
+  - "*         MCC : Mobile Country Code / Indicatif de pays du mobile / Indicativo
+    de país para el servicio móvil"

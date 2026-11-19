@@ -341,8 +341,10 @@ describe("validation stage 1", () => {
   it("rejects envelope errors at creation; stored SUP shape submits and LIR needs ITU", async () => {
     const before = await durableSnapshot();
     const r = await api("POST", "/api/me/submissions", { session: "member-A", body: body({ type: "DEL", data: { _class: "nope", entries: [entry()] } }) });
-    expect(r.status).toBe(422);
-    expect(r.json.errors.map((e: any) => e.path).sort()).toEqual(["data._class", "type"]);
+    expect(r.status).toBe(400); // An unknown class cannot establish member country scope.
+    const staff = await api("POST", "/api/me/submissions", { session: "itu-editor", body: body({ type: "DEL", data: { _class: "nope", entries: [entry()] } }) });
+    expect(staff.status).toBe(422);
+    expect(staff.json.errors.map((e: any) => e.path).sort()).toEqual(["data._class", "type"]);
     const withKey = await api("POST", "/api/me/submissions", { session: "member-A", body: { ...body(payload([entry({ superseded_by: { x: 1 } })], "SUP")), action_type: "SUP" } });
     expect(withKey.status).toBe(422);
     expect(withKey.json.errors.map((e: any) => `${e.code}:${e.path}`)).toEqual(["unknown:data.entries[0].superseded_by"]);

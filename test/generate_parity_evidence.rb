@@ -3,6 +3,7 @@
 # Run the canonical gate and retain every classified Jekyll variant.
 require 'csv'
 require 'digest'
+require 'delegate'
 require 'fileutils'
 require 'find'
 require 'json'
@@ -10,6 +11,20 @@ require 'set'
 require 'tmpdir'
 
 module ParityEvidence
+  # Keep canonical diagnostics while replacing the page-level scoring contract.
+  class ScoredReport < SimpleDelegator
+    attr_reader :coverage
+
+    def initialize(report, coverage)
+      super(report)
+      @coverage = coverage
+    end
+
+    def to_report_hash
+      super.merge(coverage: coverage.round(4))
+    end
+  end
+
   SOURCE_PATHS = %w[
     src/lib/printed-context.ts src/lib/loaders.ts src/lib/ob-date.ts
     src/components/PrintedRegisterContext.astro src/components/IncompleteBanner.astro
@@ -60,12 +75,23 @@ module ParityEvidence
 
   module Comparisons
     def compare(deployed_html, actual_html)
-      report = super
+      report = ScoredReport.new(super, multiset_coverage(deployed_html, actual_html))
       ParityEvidence.record(report, [deployed_html, actual_html])
       report
     end
 
     private
+
+    def multiset_coverage(deployed_html, actual_html)
+      old_counts, new_counts = [deployed_html, actual_html].map do |html|
+        root = main_element(parse_html(html))
+        tokens_for(spaced_text(root)).tally
+      end
+      total = old_counts.values.sum
+      return 1.0 if total.zero?
+
+      old_counts.sum { |token, count| [count, new_counts.fetch(token, 0)].min }.to_f / total
+    end
 
     # Same descendant text leaves as XPath, without libxml2's node sorting.
     def node_text(node)
@@ -166,7 +192,7 @@ end
 def evidence_payload(rows, source_hashes)
   included = rows.reject { |row| row[:exclusion] }
   {
-    schema_version: 1, threshold: 0.95, classified_variants: rows.length,
+    schema_version: 1, metric: 'multiset-token-containment', threshold: 0.95, classified_variants: rows.length,
     included_variants: included.length, excluded_variants: rows.length - included.length,
     local_pages: rows.map { |row| row[:label] }.uniq.length,
     source_sha256: source_hashes, variants: rows
@@ -195,7 +221,8 @@ if $PROGRAM_NAME == __FILE__
   build = File.expand_path(ENV.fetch('LOCAL_DIST'))
   output = File.expand_path(ENV.fetch('OUTPUT_DIR', File.join(__dir__, '../docs/parity/printed-labels-notes')))
   canonical = File.expand_path('../data-ob/scripts/parity_report.rb', __dir__)
-  repository = File.expand_path('..', __dir__)
+  # A saved build must be attributed to its source checkout, not today's tree.
+  repository = File.realpath(ENV.fetch('PARITY_SOURCE_ROOT', File.expand_path('..', __dir__)))
   source_hashes = ParityEvidence::SOURCE_PATHS.to_h do |path|
     [path, Digest::SHA256.file(File.join(repository, path)).hexdigest]
   end

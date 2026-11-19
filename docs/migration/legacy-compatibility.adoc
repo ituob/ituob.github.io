@@ -1,0 +1,68 @@
+= Legacy URL compatibility implementation
+
+The Worker resolves the exact literal paths in
+`worker/lib/legacy-redirects.json` before ASSETS and before host canonicalization.
+It emits one 301 to the canonical destination, preserving the query string.
+Directory, slashless, explicit `index.html`, and percent-encoded spaces and
+parentheses are aliases. Case remains significant; unknown paths are untouched.
+
+== Coverage
+
+Of the 648 historical HTML files, 624 redirect and 13 retain their paths
+(home, custom error page, and 11 help pages). The 299 scoped archives are included
+in the redirect count: 205 publication edition/year pages and 94 recommendation
+year pages. All have exact scoped pages; zero use overview fallbacks.
+The 11 `/_app_help/` underscore copies remain deliberately unmapped, as requested;
+they are not public help routes. `/404.html` remains the custom error document,
+whose expected HTTP status is 404 rather than 200.
+
+`src/lib/legacy-archive-scopes.json` records each archive's article source-issue
+membership from production Jekyll `8ef2eb431183bdb1257c632d340ee3476169a265`.
+Edition labels are preserved, including undated and UTC variants. A yearless
+edition archive preserves the latest-year membership the old page actually showed.
+The generated pages use the existing archive/timeline components and link the
+source issues. The map is fixed compatibility data, independent of later catalog
+or publication-date changes.
+
+The 11 public documentation pages retain their URLs and original help text in
+the site's Base layout. The source's `/docs/amend-publication/` is an uninstall
+guide and remains so. Links to unpublished tutorials and empty source hrefs are
+plain text; the scheduling tutorial retains its video and direct YouTube link.
+
+== Language editions
+
+OB 1173 declares Russian and Chinese with legacy YAML `yes` scalars; OB 1195
+declares French with a boolean. Their source general/amendment payloads do not
+contain corresponding translated prose. The old site nevertheless emitted language
+pages with localized navigation and English fallback. The Astro generator previously
+looked only for translated payloads and omitted those metadata-only editions.
+It now includes explicitly enabled supported metadata languages as well as languages
+found in content. All three legacy URLs redirect to their corresponding language
+routes; no translated prose was invented.
+
+== Verification without a build
+
+[source,sh]
+----
+node scripts/cutover-url-inventory.mjs --test \
+  --projection-root /path/to/authored-projection
+npm run test:worker
+npm run test:form
+npm run typecheck:worker
+----
+
+The inventory executes actual Astro path generators, including scoped archives and
+help routes. It exercises the Worker's shared redirect resolver for each old URL
+and its aliases, requires every mapped target to be a concrete route, and rejects
+redirect chains. The custom 404 and underscore copies have explicit dispositions.
+CI runs this check against the projection produced by that exact workflow.
+Worker tests exercise actual request handling before ASSETS, query preservation,
+host/scheme canonicalization, malformed paths and genuine unknown-path 404s.
+
+The existing country-authorization regression expected 400 for a batch missing
+required country data; generated schema validation rejects it with 422 before
+authorization. The expectation now follows that existing contract.
+
+Full local site build, new parity rendering, deployed HTTP/browser acceptance,
+deployment and DNS changes are NOT RUN. This is route and source evidence;
+artifact rendering and hosted behavior still require release acceptance.

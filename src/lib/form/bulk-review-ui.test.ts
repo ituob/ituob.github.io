@@ -7,6 +7,9 @@ import * as client from '../admin-client';
 import * as model from './model';
 import * as yamlIo from './yaml-io';
 import * as submissionDiff from '../submission-diff';
+import * as duplicate from './duplicate';
+import * as amendmentHeader from './amendment-header';
+import * as demoRefusal from '../demo-refusal';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 // Exercise the real handlers and rendered controls without a browser dependency.
@@ -15,8 +18,8 @@ async function workspace(admin = true) {
   const { descriptor } = parse(readFileSync(filename, 'utf8'));
   const modules: Record<string, unknown> = {
     vue: Vue, 'vue/server-renderer': renderer, '../../lib/admin-client': client,
-    '../../lib/form/model': model, '../../lib/form/yaml-io': yamlIo, '../../lib/submission-diff': submissionDiff,
-    './SchemaNode.vue': {},
+    '../../lib/form/model': model, '../../lib/form/yaml-io': yamlIo, '../../lib/submission-diff': submissionDiff, '../../lib/form/duplicate': duplicate,
+    './SchemaNode.vue': {}, './AmendmentHeader.vue': {}, '../../lib/form/amendment-header': amendmentHeader, '../../lib/demo-refusal': demoRefusal, '../../styles/admin-forms.css': {},
   };
   function evaluate(source: string) {
     const js = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 } }).outputText;

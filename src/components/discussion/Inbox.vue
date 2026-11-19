@@ -3,6 +3,8 @@ import { onMounted, ref } from 'vue';
 import { api, discussionLink, notificationPayload, type Notification } from '../../lib/discussion-client';
 const notifications = ref<Notification[]>([]), unread = ref(false), busy = ref(false), loaded = ref(false), error = ref(''), notice = ref('');
 const level = ref(''), handle = ref(''), savedHandle = ref<string | null>(null);
+const KIND_LABELS: Record<string, string> = { 'comment.created': 'New comment on a proposal', 'comment.reply': 'Reply to your comment', 'comment.mention': 'You were mentioned' };
+const kindLabel = (kind: string) => KIND_LABELS[kind] ?? kind.replace(/[._]/g, ' ').replace(/^./, c => c.toUpperCase());
 async function perform(work: () => Promise<void>) { busy.value = true; error.value = ''; notice.value = ''; try { await work(); } catch (e) { error.value = e instanceof Error ? e.message : 'Request failed'; } finally { busy.value = false; } }
 async function refresh() { notifications.value = (await api<{ notifications: Notification[] }>(`/api/me/notifications${unread.value ? '?unread=1' : ''}`)).notifications; loaded.value = true; }
 async function markRead(id: string) { await perform(async () => { await api(`/api/me/notifications/${id}/read`, 'POST', {}); await refresh(); notice.value = 'Notification marked as read.'; }); }
@@ -22,10 +24,10 @@ onMounted(() => perform(async () => {
   <div class="inbox" :aria-busy="busy">
     <nav><a href="/me/">My account</a> · <a href="/me/submissions/">My submissions</a> · <a href="/me/discussions/">Discussions</a></nav>
     <p v-if="error" role="alert" class="error">{{ error }}</p><p v-if="notice" role="status">{{ notice }}</p>
-    <fieldset :disabled="busy"><legend>Inbox</legend><label><input v-model="unread" type="checkbox" @change="perform(refresh)" />Unread only</label><button @click="perform(refresh)">Refresh notifications</button>
+    <fieldset :disabled="busy"><legend>Inbox</legend><label><input v-model="unread" type="checkbox" @change="perform(refresh)" />Unread only</label><button @click="perform(async () => { await refresh(); notice = unread ? 'Showing unread notifications.' : 'Notifications are up to date.'; })">Refresh notifications</button>
       <p v-if="loaded && !notifications.length && !error">No notifications found.</p>
-      <ol><li v-for="notification in notifications" :key="notification.id"><article :aria-label="`${notification.kind}, ${notification.read_at ? 'read' : 'unread'}`">
-        <p><strong>{{ notification.kind }}</strong> · {{ notification.created_at }} · {{ notification.read_at ? 'Read' : 'Unread' }}</p>
+      <ol><li v-for="notification in notifications" :key="notification.id"><article :aria-label="`${kindLabel(notification.kind)}, ${notification.read_at ? 'read' : 'unread'}`">
+        <p><strong>{{ kindLabel(notification.kind) }}</strong> · {{ notification.created_at }} · {{ notification.read_at ? 'Read' : 'Unread' }}</p>
         <p v-if="notificationPayload(notification.payload).actor_name">From {{ notificationPayload(notification.payload).actor_name }}</p>
         <p>{{ notificationPayload(notification.payload).register_id }}</p><p class="excerpt">{{ notificationPayload(notification.payload).excerpt || notificationPayload(notification.payload).reason }}</p>
         <a :href="discussionLink(notification.submission_id)">Open submission discussion</a>

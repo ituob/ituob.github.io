@@ -2,6 +2,7 @@ import { draftBinding, isSingletonPath } from "../../src/lib/form/general.ts";
 import { ConflictError } from "./membership.ts";
 import type { PatchPublisher } from "./publisher.ts";
 import { UpstreamError } from "./submissions.ts";
+import { unpackText } from "./general-message-storage.ts";
 
 /** The whole issue-targeted selection, including drafts that are not publishable.
  * Leaving a draft out would silently omit authored issue content. */
@@ -51,15 +52,18 @@ export async function generalMergesForPublication(messages: GeneralSelection[], 
  * set of issue-targeted records changed during an upstream request. */
 export function requireGeneralSelection(db: D1Database, no: number, messages: GeneralSelection[]) {
   const keys: (keyof GeneralSelection)[]=["id","type","class_name","path","revision","value_json","approved_at","approved_by","content_yaml","review_revision","repo","branch","review_path","review_content_yaml","pr_number","commit_sha","pr_url"];
-  return db.prepare(`INSERT INTO edition_items (ob_issue_no,submission_id,position)
-    SELECT ?1,'-',NULL WHERE (SELECT count(*) FROM general_messages WHERE ob_issue_no=?1) != ?3
-      OR EXISTS (SELECT 1 FROM json_each(?2) expected WHERE NOT EXISTS (
-        SELECT 1 FROM (${selectionQuery}) current WHERE ${keys.map(key=>`current.${key} IS json_extract(expected.value,'$.${key}')`).join(" AND ")}
-      ))`).bind(no,JSON.stringify(messages),messages.length);
+  // One bounded parameter per record, rather than aggregating an entire issue's
+  // stored YAML into a string that can exceed D1's 2 MB parameter limit.
+  return [db.prepare(`INSERT INTO edition_items (ob_issue_no,submission_id,position)
+    SELECT ?1,'-',NULL WHERE (SELECT count(*) FROM general_messages WHERE ob_issue_no=?1) != ?2`).bind(no,messages.length),
+    ...messages.map(message => db.prepare(`INSERT INTO edition_items (ob_issue_no,submission_id,position)
+      SELECT ?1,'-',NULL WHERE NOT EXISTS (
+        SELECT 1 FROM (${selectionQuery}) current WHERE ${keys.map(key=>`current.${key} IS json_extract(?2,'$.${key}')`).join(" AND ")}
+      )`).bind(no,JSON.stringify(message)))];
 }
-export function generalMessageSummary(message: GeneralSelection, published: boolean) {
+export async function generalMessageSummary(message: GeneralSelection, published: boolean) {
   return { id:message.id,type:message.type,path:message.path,revision:message.revision,approved_at:message.approved_at,
-    content_yaml:message.content_yaml,pr_number:message.pr_number,pr_url:message.pr_url,
+    content_yaml:message.content_yaml === null ? null : await unpackText(message.content_yaml),pr_number:message.pr_number,pr_url:message.pr_url,
     status:published ? "published" : !message.approved_at ? "awaiting_approval" : message.review_revision!==message.revision ? "awaiting_review"
       : !message.pr_number ? "review_reserved" : "review_pr_created" };
 }

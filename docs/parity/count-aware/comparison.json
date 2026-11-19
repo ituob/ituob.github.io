@@ -1,0 +1,253 @@
+{
+  "reference": "saved OB 1343 Jekyll; all 604 input hash pairs match original receipt",
+  "build": "saved 4107-page Astro audit build; all 81 source hashes verified in saved checkout",
+  "threshold": 0.95,
+  "excluded_variants": 2,
+  "old": {
+    "metric": "unique-token-containment",
+    "pages": {
+      "count": 422,
+      "minimum": 0.9556962025316456,
+      "median": 0.9894498809718513,
+      "passing": 422,
+      "below_threshold": 0
+    },
+    "included_variants": {
+      "count": 602,
+      "minimum": 0.9556962025316456,
+      "median": 0.9916200953857858,
+      "passing": 602,
+      "below_threshold": 0
+    }
+  },
+  "new": {
+    "metric": "multiset-token-containment",
+    "pages": {
+      "count": 422,
+      "minimum": 0.8581436077057794,
+      "median": 0.975544336865387,
+      "passing": 392,
+      "below_threshold": 30
+    },
+    "included_variants": {
+      "count": 602,
+      "minimum": 0.8581436077057794,
+      "median": 0.9778401472025761,
+      "passing": 565,
+      "below_threshold": 37
+    }
+  },
+  "failing_pages": [
+    {
+      "label": "issue/1079",
+      "deployed": "issues/1079-en/index.html",
+      "local": "issues/1079/index.html",
+      "old_coverage": 0.9836448598130841,
+      "new_coverage": 0.9380804953560371
+    },
+    {
+      "label": "issue/1087",
+      "deployed": "issues/1087-en/index.html",
+      "local": "issues/1087/index.html",
+      "old_coverage": 0.9885386819484241,
+      "new_coverage": 0.9411764705882353
+    },
+    {
+      "label": "issue/1129",
+      "deployed": "issues/1129-en/index.html",
+      "local": "issues/1129/index.html",
+      "old_coverage": 0.9957601453664445,
+      "new_coverage": 0.9285714285714286
+    },
+    {
+      "label": "issue/1139",
+      "deployed": "issues/1139-en/index.html",
+      "local": "issues/1139/index.html",
+      "old_coverage": 0.9795134443021767,
+      "new_coverage": 0.9418803418803419
+    },
+    {
+      "label": "issue/1161",
+      "deployed": "issues/1161-en/index.html",
+      "local": "issues/1161/index.html",
+      "old_coverage": 0.9855643044619422,
+      "new_coverage": 0.9429517850570482
+    },
+    {
+      "label": "issue/1167",
+      "deployed": "issues/1167-en/index.html",
+      "local": "issues/1167/index.html",
+      "old_coverage": 0.9871630295250321,
+      "new_coverage": 0.9367924528301886
+    },
+    {
+      "label": "issue/1168",
+      "deployed": "issues/1168-en/index.html",
+      "local": "issues/1168/index.html",
+      "old_coverage": 0.980806142034549,
+      "new_coverage": 0.9375443577004968
+    },
+    {
+      "label": "issue/1175",
+      "deployed": "issues/1175-en/index.html",
+      "local": "issues/1175/index.html",
+      "old_coverage": 0.9621380846325167,
+      "new_coverage": 0.9278350515463918
+    },
+    {
+      "label": "issue/1193",
+      "deployed": "issues/1193-en/index.html",
+      "local": "issues/1193/index.html",
+      "old_coverage": 0.9711340206185567,
+      "new_coverage": 0.9436392914653784
+    },
+    {
+      "label": "issue/1202",
+      "deployed": "issues/1202-en/index.html",
+      "local": "issues/1202/index.html",
+      "old_coverage": 0.9834710743801653,
+      "new_coverage": 0.9385783298826778
+    },
+    {
+      "label": "issue/1204",
+      "deployed": "issues/1204-en/index.html",
+      "local": "issues/1204/index.html",
+      "old_coverage": 0.9815950920245399,
+      "new_coverage": 0.9406392694063926
+    },
+    {
+      "label": "issue/1215",
+      "deployed": "issues/1215-en/index.html",
+      "local": "issues/1215/index.html",
+      "old_coverage": 0.9809523809523809,
+      "new_coverage": 0.9446415897799858
+    },
+    {
+      "label": "issue/1238",
+      "deployed": "issues/1238-en/index.html",
+      "local": "issues/1238/index.html",
+      "old_coverage": 0.9842657342657343,
+      "new_coverage": 0.9363177805800756
+    },
+    {
+      "label": "issue/1266",
+      "deployed": "issues/1266-en/index.html",
+      "local": "issues/1266/index.html",
+      "old_coverage": 0.9581589958158996,
+      "new_coverage": 0.9125984251968504
+    },
+    {
+      "label": "issue/1272",
+      "deployed": "issues/1272-en/index.html",
+      "local": "issues/1272/index.html",
+      "old_coverage": 0.9862778730703259,
+      "new_coverage": 0.9430159833217512
+    },
+    {
+      "label": "issue/1277",
+      "deployed": "issues/1277-en/index.html",
+      "local": "issues/1277/index.html",
+      "old_coverage": 0.9607072691552063,
+      "new_coverage": 0.9161469161469161
+    },
+    {
+      "label": "issue/1282",
+      "deployed": "issues/1282-en/index.html",
+      "local": "issues/1282/index.html",
+      "old_coverage": 0.9759358288770054,
+      "new_coverage": 0.9438842612889083
+    },
+    {
+      "label": "issue/1310",
+      "deployed": "issues/1310-en/index.html",
+      "local": "issues/1310/index.html",
+      "old_coverage": 0.9895697522816167,
+      "new_coverage": 0.9420523138832998
+    },
+    {
+      "label": "issue/1312",
+      "deployed": "issues/1312-en/index.html",
+      "local": "issues/1312/index.html",
+      "old_coverage": 0.9825581395348837,
+      "new_coverage": 0.9393010423053342
+    },
+    {
+      "label": "issue/1321",
+      "deployed": "issues/1321-en/index.html",
+      "local": "issues/1321/index.html",
+      "old_coverage": 0.982174688057041,
+      "new_coverage": 0.9495926680244399
+    },
+    {
+      "label": "issue/974",
+      "deployed": "issues/974-en/index.html",
+      "local": "issues/974/index.html",
+      "old_coverage": 0.9585561497326203,
+      "new_coverage": 0.9343963553530752
+    },
+    {
+      "label": "issue/976",
+      "deployed": "issues/976-en/index.html",
+      "local": "issues/976/index.html",
+      "old_coverage": 0.9852125693160814,
+      "new_coverage": 0.9496402877697842
+    },
+    {
+      "label": "issue/991",
+      "deployed": "issues/991-en/index.html",
+      "local": "issues/991/index.html",
+      "old_coverage": 0.9709897610921502,
+      "new_coverage": 0.9449818621523579
+    },
+    {
+      "label": "recommendation/E.212",
+      "deployed": "messages/complement-to-itu-t-r E.212/2010/index.html",
+      "local": "recommendations/E.212/index.html",
+      "old_coverage": 0.9753086419753086,
+      "new_coverage": 0.9370967741935484
+    },
+    {
+      "label": "recommendation/F.32",
+      "deployed": "messages/complement-to-itu-t-r F.32/2010/index.html",
+      "local": "recommendations/F.32/index.html",
+      "old_coverage": 0.9822485207100592,
+      "new_coverage": 0.8885298869143781
+    },
+    {
+      "label": "recommendation/F.400",
+      "deployed": "messages/complement-to-itu-t-r F.400/2012/index.html",
+      "local": "recommendations/F.400/index.html",
+      "old_coverage": 0.9622641509433962,
+      "new_coverage": 0.9384615384615385
+    },
+    {
+      "label": "recommendation/T.35",
+      "deployed": "messages/complement-to-itu-t-r T.35/index.html",
+      "local": "recommendations/T.35/index.html",
+      "old_coverage": 0.9583333333333334,
+      "new_coverage": 0.8754578754578755
+    },
+    {
+      "label": "register/e164-acn",
+      "deployed": "messages/amending-sp E164_ACN (2011-11-30 23:00:00 UTC)/index.html",
+      "local": "registers/e164-acn/index.html",
+      "old_coverage": 0.9556962025316456,
+      "new_coverage": 0.8581436077057794
+    },
+    {
+      "label": "register/e212-mnc",
+      "deployed": "messages/amending-sp E212_MNC (2010-06-14 22:00:00 UTC)/index.html",
+      "local": "registers/e212-mnc/index.html",
+      "old_coverage": 0.9691629955947136,
+      "new_coverage": 0.9364937388193202
+    },
+    {
+      "label": "register/f32-tdi",
+      "deployed": "messages/amending-sp F32_TDI (-)/index.html",
+      "local": "registers/f32-tdi/index.html",
+      "old_coverage": 0.9829545454545454,
+      "new_coverage": 0.9211822660098522
+    }
+  ],
+  "scorer_sha256": "ff388dd544f74619863e93c16ae4bb677f266cec15a14a0367d447339849bfad"
+}

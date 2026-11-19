@@ -1,0 +1,136 @@
+= Identity against a mock provider (#102)
+:toc:
+
+Member sign-in is built and tested against a local mock OpenID provider. No real
+identity service, Cloudflare resource, secret or deploy is involved. This page says
+what exists, how to use the mock, and why a real provider is a configuration swap.
+
+== What already existed
+
+The Worker is a generic OIDC relying party, not tied to any provider:
+`worker/lib/oidc.ts` (authorization code + PKCE, discovery, JWKS, ID-token
+validation), `worker/lib/auth-routes.ts` (`/auth/login`, `/auth/callback`,
+`/auth/logout`), `worker/lib/session.ts` (rotating, expiring server-side sessions;
+`getSession` is the single authorization seam) and `worker/lib/authority.ts`
+(roles and member state resolved from D1 on every request). `test/oidc.test.ts`
+covers the protocol against an in-test provider (`test/mock-idp.ts`).
+
+== What the mock adds
+
+`scripts/mock-idp.mjs` is a runnable provider for `wrangler dev` plus a handler
+the tests drive through the real Worker:
+
+* discovery, JWKS (ES256), `/authorize` with PKCE and a persona picker, `/token`;
+* redirect URIs are loopback only; codes are single use and verifier-bound;
+* six personas (`itu-admin`, `itu-editor`, `member-aland`, `member-suspendia`,
+  `pending-claimant`, `unaffiliated`). The provider only asserts _who_ a persona is.
+  What they may do lives in D1, exactly as with a real provider.
+
+== Start the complete local site
+
+With Node 22+, OpenSSL, installed dependencies and the pinned `data` and `data-ob`
+submodules initialized, run:
+
+[source,sh]
+----
+npm run dev:local
+----
+
+Open https://127.0.0.1:8443 and accept the self-signed local certificate once.
+Use this HTTPS address throughout the demo. The header's *Sign in* link opens the
+identity provider's email form. Enter a test email (for example,
+`delegate@aland.mock.test`) and press *Continue*, or expand *Test accounts* to
+choose a persona. After sign-in the header shows the user's name; its menu offers
+*My account* and *Sign out*. Sign out submits a same-origin POST, as production
+requires; navigating to `/auth/logout` with GET is intentionally unsupported.
+
+The command applies D1 migrations, mock personas and `seeds/roster.sql` locally
+before starting Astro, Wrangler and the provider. Seeds are idempotent, so restarting
+preserves existing roster rows and does not duplicate memberships. All generated
+configuration, certificates and persistent D1 data are under git-ignored
+`.local-dev/`; no remote database or production configuration is used. To reset
+only this demo, stop it and delete `.local-dev/`. Stop all services with Ctrl-C.
+
+The loopback HTTPS gateway sends `/api` and `/auth` to the Worker, `/authorize` to
+the provider, and other paths (including Vite hot reload) to Astro. Internal ports
+are 14321 (Astro), 18787 (Worker HTTPS), and 18788 (provider); the public local
+origin uses 8443. These ports must be free. Wait for all services' ready messages;
+a transient 503 while they start can be retried by refreshing.
+
+`__Host-ituob_flow` and `__Host-ituob_session` retain production `Secure`,
+`HttpOnly`, `Path=/` and `SameSite=Lax` attributes. Plain HTTP is unsuitable for
+this flow: browsers can discard the flow cookie, causing callback 400. Sending
+the cookie manually with curl does not demonstrate browser sign-in. The self-signed
+certificate is a local browser trust exception, not a change to cookie policy.
+The mock remains bound to loopback, accepts loopback callback URIs only, and is
+excluded from deployment configuration. Its local password-free test chooser is
+explicitly labelled; a production provider supplies the real authentication policy.
+
+For provider-only protocol development, `npm run dev:idp` and `.dev.vars.example`
+remain available. They do not replace the HTTPS stack for browser acceptance.
+
+While the stack is running, the repeatable live sign-in proof is:
+
+[source,sh]
+----
+node scripts/verify-local-signin.mjs
+----
+
+It follows the rendered email form and OIDC redirects at the HTTPS origin for
+`member-aland`, `itu-admin` and `member-suspendia`. Its cookie jar rejects Secure
+cookies over HTTP and invalid `__Host-` cookies; it checks the resulting identities,
+roles, suspended submission 403, GET logout 405, cross-origin logout 403, successful
+same-origin POST logout and the cleared session. It trusts only the generated local
+certificate and refuses redirects outside the local HTTPS origin.
+
+== Who may do what
+
+[cols="2,3"]
+|===
+| Persona | Result after sign-in
+| `itu-admin`, `itu-editor` | `itu-admin` / `itu-editor` role; may submit for any key. Admin API still needs Access.
+| `member-aland` | `member-submitter` bound to `MOCK-A`; may submit only for Aland.
+| `member-suspendia` | signed in, no roles (state suspended); submissions refused with 403.
+| `pending-claimant` | no roles until an administrator verifies the claim.
+| `unaffiliated`, any new sub | an inert account is created on first sign-in; no roles.
+|===
+
+== Moving to a real provider
+
+Only configuration changes; no code does:
+
+[cols="2,3"]
+|===
+| Setting | Mock -> real
+| `OIDC_ISSUER` | `https://...` issuer of the real provider (HTTPS required off loopback)
+| `OIDC_CLIENT_ID` | the client registered for ituob.org
+| `OIDC_CLIENT_SECRET` | Worker secret (never a var); `OIDC_CLIENT_AUTH=none` for a public client
+| `OIDC_AUTHORIZATION_ENDPOINT`, `OIDC_TOKEN_ENDPOINT`, `OIDC_JWKS_URI` | only if the provider has no discovery document
+| `OIDC_END_SESSION_ENDPOINT` | enables provider-side logout
+| `OIDC_SUB_KEY` | `issuer` to namespace subjects per provider
+|===
+
+Real subjects replace `mock-*` ids; roster rows and role grants are then made by the
+claim/verify flow (docs/membership-roles.adoc). The mock personas and `.dev.vars` are
+never deployed: `wrangler*.jsonc` name no issuer and no secret.
+
+== Tests
+
+`test/mock-idp-dev.test.ts`: sign-in, sign-out, replayed and forged cookies, expired
+session, first-time unknown user, suspended and pending members denied, role mapping,
+suspension taking effect on the next request, and the mock's own redirect/PKCE/code
+rules. Run with `npm run test:worker`.
+
+The browser-equivalent Worker regression jar rejects Secure cookies over HTTP and
+asserts the HTTP callback fails, while HTTPS email sign-in, identity/role mapping,
+suspended-member denial and POST logout succeed. `test/mock-idp-server.test.ts`
+also exercises the runnable provider's email form. The header component UI test
+`src/lib/form/header-account-ui.test.ts` renders the actual Vue component with
+signed-out, signed-in and error states and checks the POST form.
+
+[source,sh]
+----
+npm run test:worker
+OB_DATA_ROOT="$PWD/data-ob" npm run test:form
+npm run typecheck:worker
+----

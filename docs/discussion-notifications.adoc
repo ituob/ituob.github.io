@@ -263,12 +263,22 @@ badge).
 
 | `submission.ci_failed`
 | `ci_failed`
-| R, A
+| P, R, A
 | [a]
 
 | `submission.pr_merged`
 | `merged`
 | P, W, A
+| [a]
+
+| `submission.scheduled`
+| `merged -> scheduled` (composer places it in an edition)
+| P, W
+| [a]
+
+| `submission.unscheduled`
+| `scheduled -> merged` (composer takes it out again)
+| P
 | [a]
 
 | `submission.published` / `edition.published`
@@ -296,6 +306,16 @@ badge).
 | P, R, C, W
 | [a]
 |===
+
+Every state the proposer can observe has an event, so the proposer is
+told at every transition they did not cause (the actor is never notified
+of their own action). There is one deliberate exception: `pr_pending`.
+It is committed in the same batch as `approved` (which notifies P) and is
+left by the system for `pr_open` within moments, so it has no event of its
+own and the proposer sees `approved` then `pr_opened`. Taking an item out of
+an edition is not announced as a second `submission.pr_merged`; it has its
+own `submission.unscheduled` event, because it reverses what
+`submission.scheduled` told the proposer.
 
 Rules:
 

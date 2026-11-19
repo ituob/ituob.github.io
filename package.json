@@ -12,12 +12,17 @@
     "check": "astro check",
     "test": "node --experimental-strip-types --test tests/*.test.ts",
     "astro": "astro",
+    "dev:idp": "node scripts/mock-idp.mjs serve",
     "test:worker": "vitest run",
+    "test:spot-check": "vitest run --config vitest.spot-check.config.ts",
+    "spot-check:downloads": "node --experimental-strip-types scripts/spot-check-downloads.ts",
     "test:form": "vitest run --config vitest.form.config.ts",
     "typecheck:worker": "tsc -p worker/tsconfig.json",
     "check:bindings": "node scripts/check-bindings.mjs",
     "test:bindings": "node --experimental-strip-types --test tests/check-bindings.test.ts",
-    "seed:roster": "node scripts/seed-roster.mjs"
+    "seed:roster": "node scripts/seed-roster.mjs",
+    "dev:local": "node scripts/dev-local.mjs",
+    "test:visual": "playwright test"
   },
   "dependencies": {
     "@astrojs/mdx": "^7.0.0",
@@ -33,8 +38,10 @@
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.0",
+    "@axe-core/playwright": "^4.14.0",
     "@cloudflare/vitest-plugin": "^1.7.0",
     "@cloudflare/workers-types": "^5.20261022.1",
+    "@playwright/test": "^1.65.1",
     "@types/node": "^24.0.0",
     "typescript": "^5.9.0",
     "vite": "^8.0.0",

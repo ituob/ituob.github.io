@@ -19,7 +19,7 @@ function editor(existing: annexes.AnnexesWire, drafts: unknown[] = [], fail = fa
     return { drafts };
   });
   const modules: Record<string, unknown> = { vue: { ...Vue, onMounted: (fn: typeof mounted) => { mounted = fn; } },
-    '../../lib/form/annexes': annexes, '../../lib/admin-client': { api, ApiError } };
+    '../../lib/form/annexes': annexes, '../../lib/admin-client': { api, ApiError }, '../../styles/admin-forms.css': {} };
   const exports: any = {};
   new Function('require', 'exports', js)((name: string) => {
     if (!(name in modules)) throw new Error(`Unexpected import: ${name}`);

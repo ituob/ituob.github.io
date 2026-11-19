@@ -17,12 +17,16 @@ import type { ActionType } from "~/lib/catalogs";
 import { ACTION_TYPE_LABELS } from "~/lib/catalogs";
 import { formatObDate } from "~/lib/ob-date";
 import { formatCellValue } from "~/lib/values";
+import { registerColumnLabel, formatRegisterCell } from "~/lib/register-labels";
+import { loadPrintedContext, loadBlankContinuationLabels } from "~/lib/printed-context";
+import ProseMirror from "~/components/ProseMirror.astro";
 
 export interface Props {
   amendments: SequencedAmendment[];
   lang?: string;
 }
 const { amendments, lang: _lang = "en" } = Astro.props;
+const CONTACT_LABELS: Record<string, string> = { tel: "Tel:", fax: "Fax:", email: "E-mail:" };
 
 /** Column labels per known data class. Falls back to header-less table. */
 function columnsFor(entries: Record<string, unknown>[]): string[] {
@@ -32,10 +36,12 @@ function columnsFor(entries: Record<string, unknown>[]): string[] {
     for (const [k, v] of Object.entries(e)) {
       if (k === "_class" || k === "source_contents") continue;
       if (Array.isArray(v) && v.length > 0 && typeof v[0] === "object" && v[0] !== null && !Array.isArray(v[0])) {
-        const first = v[0] as Record<string, unknown>;
-        for (const nk of Object.keys(first)) {
-          if (nk === "_class") continue;
-          keys.add(nk);
+        for (const nested of v as Record<string, unknown>[]) {
+          if (!nested || typeof nested !== "object" || Array.isArray(nested)) continue;
+          for (const nk of Object.keys(nested)) {
+            if (nk === "_class") continue;
+            keys.add(nk);
+          }
         }
       } else {
         keys.add(k);
@@ -46,7 +52,7 @@ function columnsFor(entries: Record<string, unknown>[]): string[] {
 }
 
 function resolveCell(entry: Record<string, unknown>, col: string): string {
-  if (col in entry) return formatCellValue(entry[col]);
+  if (col in entry) return formatRegisterCell(col, entry[col]);
   // Nested collections (e.g. a station's measurement services): the
   // column exists on the element objects — join EVERY element's
   // value, not just the first (an entry can carry seven services).
@@ -75,6 +81,9 @@ function entriesOf(amd: SequencedAmendment): Record<string, unknown>[] {
     const hasEntries = entries.length > 0 && cols.length > 0;
     const notes = (amd.data?.notes as string[] | undefined) ?? [];
     const showNotes = amdIdx === amendments.length - 1;
+    const continuationLabels = showNotes ? loadBlankContinuationLabels(Number(amd.ob_issue_no), amd.slug) : [];
+    const technicalHeadings = showNotes && amd.slug === "list-viii"
+      ? loadPrintedContext(Number(amd.ob_issue_no), amd.slug) : [];
     return (
       <article>
         <header style="display: flex; flex-wrap: wrap; align-items: center; gap: 0.6rem; margin-bottom: 0.85rem; padding-bottom: 0.6rem; border-bottom: 1px solid var(--border-subtle);">
@@ -108,7 +117,7 @@ function entriesOf(amd: SequencedAmendment): Record<string, unknown>[] {
               <thead>
                 <tr>
                   {cols.map((c) => (
-                    <th>{c.replace(/_/g, " ")}</th>
+                    <th>{registerColumnLabel(c, entries)}</th>
                   ))}
                 </tr>
               </thead>
@@ -116,9 +125,16 @@ function entriesOf(amd: SequencedAmendment): Record<string, unknown>[] {
                 {entries.map((e) => (
                   <tr>
                     {cols.map((c) => (
-                      <td>{resolveCell(e, c)}</td>
+                      <td>{resolveCell(e, c) && (
+                        <>{CONTACT_LABELS[c] && (
+                          <span>{CONTACT_LABELS[c]}{" "}</span>
+                        )}{c === "name" && amd.data?._class === "ListVIIIAmendment" && <span>Station: </span>}{resolveCell(e, c)}</>
+                      )}</td>
                     ))}
                   </tr>
+                ))}
+                {continuationLabels.map((label) => (
+                  <tr>{cols.map((c) => <td>{c === "country_or_area" ? label : ""}</td>)}</tr>
                 ))}
               </tbody>
             </table>
@@ -127,6 +143,9 @@ function entriesOf(amd: SequencedAmendment): Record<string, unknown>[] {
           <p style="font-size: var(--step--2); font-style: italic; color: var(--fg-muted); margin: 0;">
             No structured entries — parser did not extract data for this amendment.
           </p>
+        )}
+        {technicalHeadings.length > 0 && (
+          <aside class="prose-bulletin">{technicalHeadings.map((node) => <ProseMirror node={node} />)}</aside>
         )}
         {showNotes && notes.length > 0 && (
           <footer style="margin-top: 0.85rem; padding-top: 0.6rem; border-top: 1px solid var(--border-subtle); font-size: var(--step--2); color: var(--fg-muted); font-family: var(--font-sans);">

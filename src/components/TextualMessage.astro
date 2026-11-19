@@ -10,35 +10,21 @@
 import ProseMirror from "~/components/ProseMirror.astro";
 import type { TextualGeneralMessage } from "~/lib/types";
 import { resolveGeneralContent } from "~/lib/i18n";
-import { MESSAGE_TYPE_METADATA } from "~/lib/catalogs";
+import GeneralMessageMetadata from "./GeneralMessageMetadata.astro";
 import type { Language } from "~/lib/catalogs";
 
 export interface Props {
   message: TextualGeneralMessage;
   lang?: Language;
+  showMetadata?: boolean;
 }
-const { message, lang = "en" } = Astro.props;
+const { message, lang = "en", showMetadata = true } = Astro.props;
 const doc = resolveGeneralContent(message.contents, lang);
 const nodes = typeof doc === "object" ? doc?.content ?? [] : [];
 const textField = (message as unknown as { text?: unknown }).text;
 const plainText = typeof doc === "string" ? doc : typeof textField === "string" ? textField : null;
-const meta = MESSAGE_TYPE_METADATA[message.type] ?? {};
-const rec = (message as any).recommendation ?? meta.recommendation;
-const url = (message as any).url ?? meta.url;
 ---
-{(rec || url) && (
-  <p class="text-[var(--step--1)] mb-3" style="color: var(--fg-subtle); font-family: var(--font-sans);">
-    {rec && (
-      <span>
-        In accordance with {rec.body ?? "ITU-T"} Recommendation {rec.code}{rec.version ? ` (${rec.version})` : ""}
-      </span>
-    )}
-    {rec && url && <span class="mx-2">·</span>}
-    {url && (
-      <a href={url} rel="external" class="hover:underline">Authoritative resource</a>
-    )}
-  </p>
-)}
+{showMetadata && <GeneralMessageMetadata message={message} />}
 {nodes.length > 0 ? (
   <div class="prose-bulletin">
     {nodes.map((node) => <ProseMirror node={node} />)}

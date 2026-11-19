@@ -21,6 +21,7 @@ import {
 } from "./fs";
 import { resolve, sep } from "node:path";
 import { dedupeAssetTwins } from "./dedupe";
+import { computeJekyllSeqNos } from "./jekyll-seqno";
 import type {
   LoadedIssue,
   IssueMeta,
@@ -42,8 +43,27 @@ import {
   generalTypesForRec,
   registerForDataset,
   DATASET_GENERAL_TYPES,
+  PUBLICATION_BY_ID,
   type GeneralMessageType,
 } from "./catalogs";
+
+interface SourceAmendmentMessage {
+  type?: string;
+  target?: { publication?: string };
+  contents?: unknown;
+  datasetChanges?: Record<string, { contents?: unknown }>;
+}
+
+/** Source messages can declare an amendment without carrying any content.
+ * Keep its publication header visible when the normalized projection omitted it. */
+function isEmptySourceAmendment(message: SourceAmendmentMessage): boolean {
+  if (message.type !== "amendment" || !message.target?.publication) return false;
+  if (!message.contents || typeof message.contents !== "object" || Array.isArray(message.contents) ||
+      Object.keys(message.contents).length !== 0) return false;
+  const changes = message.datasetChanges;
+  return !!changes && Object.keys(changes).length > 0 &&
+    Object.values(changes).every((change) => Array.isArray(change?.contents) && change.contents.length === 0);
+}
 
 /** Read an AsciiDoc asset referenced by a general message
  *  (e.g. contents: "general/misc_comms.adoc"). Returns null when the
@@ -81,6 +101,7 @@ export const listIssueIds = memoize((): number[] => {
 const ACTION_RE = /^(\d+)-([A-Z0-9]+)$/;
 
 import { existsSync } from "node:fs";
+import { loadManifest } from "./snapshots";
 function exists(path: string): boolean {
   return existsSync(path);
 }
@@ -174,6 +195,19 @@ export const loadIssue = memoize((id: number): LoadedIssue | null => {
     }
   }
 
+  // A few source issues declare a publication amendment with no message text
+  // and no dataset rows. Preserve only that header; never synthesize rows or
+  // replace content already present in the normalized projection.
+  const sourceMessages = readYamlOrNull<{ messages?: SourceAmendmentMessage[] }>(
+    join(listsRoot(), "..", "issues", String(id), "amendments.yaml"),
+  )?.messages ?? [];
+  for (const message of sourceMessages) {
+    if (!isEmptySourceAmendment(message)) continue;
+    const slug = PUBLICATION_BY_ID.get(message.target!.publication!)?.slug;
+    if (!slug || structured[slug] || textualAmd[slug] || placeholder[slug]) continue;
+    placeholder[slug] = { _class: "PlaceholderAmendment", ob_issue_no: String(id) };
+  }
+
   return {
     id,
     meta,
@@ -182,6 +216,7 @@ export const loadIssue = memoize((id: number): LoadedIssue | null => {
       runningAnnexes,
       approvedRecommendations,
       textual,
+      textualWithTwins: allTextual,
     },
     amendments: { structured, textual: textualAmd, placeholder },
     // Preserve an explicit corpus disclaimer even when some content is present.
@@ -212,6 +247,38 @@ function generalIsEmpty(
   if (textual.length > 0) return false;
   return true;
 }
+
+/** Message order of an issue as authored in the Jekyll-era source
+ *  (data/issues/N/general.yaml and amendments.yaml). The normalized ob-issues
+ *  projection groups messages by directory and loses the authored sequence,
+ *  which the original issue page (Jekyll `general.messages` / `amendments.messages`
+ *  loops) followed. Null when the source has no file for the issue (issues
+ *  authored after the Jekyll corpus freeze, OB 1344 onward). */
+export interface SourceMessageOrder {
+  /** General message types in authored order (one entry per message). */
+  general: string[];
+  /** Amendment dataset slugs in authored order. */
+  amendments: string[];
+  /** True when amendments.yaml exists, even with `messages: []`. Jekyll's
+   *  `{% if amendments %}` renders the section (and TOC entry) on presence. */
+  hasAmendmentsFile: boolean;
+}
+export const loadSourceMessageOrder = memoize((id: number): SourceMessageOrder | null => {
+  const dir = join(listsRoot(), "..", "issues", String(id));
+  const general = readYamlOrNull<{ messages?: { type?: string }[] }>(join(dir, "general.yaml"));
+  const amendments = readYamlOrNull<{ messages?: SourceAmendmentMessage[] }>(join(dir, "amendments.yaml"));
+  if (!general && !amendments) return null;
+  const slugs: string[] = [];
+  for (const m of amendments?.messages ?? []) {
+    const slug = m.target?.publication ? PUBLICATION_BY_ID.get(m.target.publication)?.slug : undefined;
+    if (slug && !slugs.includes(slug)) slugs.push(slug);
+  }
+  return {
+    general: (general?.messages ?? []).map((m) => String(m.type ?? "")),
+    amendments: slugs,
+    hasAmendmentsFile: amendments !== null,
+  };
+});
 
 /** Load many issues — convenience. */
 export function loadIssues(ids: number[]): (LoadedIssue | null)[] {
@@ -324,6 +391,12 @@ export function loadListMetadata(pubId: string): ListMeta | null {
 
   _listMetaCache.set(pubId, null as any);
   return null;
+}
+
+/** Page for a publication slug: its dataset page, else its register page, else null (nothing to link). */
+export function publicationHref(slug: string): string | null {
+  if (listDatasetSlugs().includes(slug)) return `/datasets/${slug}/`;
+  return loadManifest(slug) ? `/registers/${slug}/` : null;
 }
 
 export const listDatasetSlugs = memoize((): string[] => {
@@ -796,6 +869,29 @@ export function cumulativeAmendmentNumber(issueId: number, slug: string): number
   }
   _lastAnnexByIssueCache.set(cacheKey, count);
   return count;
+}
+
+/** Jekyll `seq_no` numbering: see ./jekyll-seqno. */
+const jekyllSeqNos = memoize((): Map<number, Map<string, number>> => {
+  const issuesDir = join(listsRoot(), "..", "issues");
+  const issues = listIssueIds().map((id) => {
+    const dir = join(issuesDir, String(id));
+    const meta = readYamlOrNull<{ publication_date?: unknown }>(join(dir, "meta.yaml"));
+    const amendments = readYamlOrNull<{ messages?: SourceAmendmentMessage[] }>(join(dir, "amendments.yaml"));
+    const annexes = readYamlOrNull<Record<string, { position_on?: unknown } | null>>(join(dir, "annexes.yaml")) ?? {};
+    const messages = (amendments?.messages ?? []).map((m) => ({
+      type: m.type,
+      publication: m.target?.publication,
+      positionOn: (m.target as { position_on?: unknown } | undefined)?.position_on,
+    }));
+    return { id, publicationDate: meta?.publication_date, messages, annexes };
+  });
+  return computeJekyllSeqNos(issues, (pubId) => PUBLICATION_BY_ID.get(pubId)?.slug);
+});
+
+/** Jekyll `seq_no` of the amendment to `slug` in issue `issueId`; 0 when Jekyll showed none. */
+export function jekyllAmendmentNumber(issueId: number, slug: string): number {
+  return jekyllSeqNos().get(issueId)?.get(slug) ?? 0;
 }
 
 /* -- ProseMirror helpers --------------------------------------------------- */

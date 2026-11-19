@@ -67,6 +67,11 @@ export function listSnapshotSlugs(): string[] {
   });
 }
 
+/** True when /registers/<slug>/at/<n>/ exists: only OB issues that touched the register have a snapshot. */
+export function hasSnapshotAt(slug: string, obIssue: number): boolean {
+  return !!loadManifest(slug)?.touched_issues.includes(obIssue);
+}
+
 export function loadManifest(slug: string): RegisterManifest | null {
   return readJson<RegisterManifest>(join(SNAPSHOT_ROOT, slug, "manifest.json"));
 }

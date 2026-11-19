@@ -1,3 +1,5 @@
+import { explainRefusal } from "../../lib/demo-refusal";
+
 export interface Identity {
   authenticated: boolean;
   userId?: string;
@@ -19,8 +21,10 @@ export async function api<T>(path: string, body?: unknown): Promise<T> {
     headers: body === undefined ? { Accept: "application/json" } : { Accept: "application/json", "Content-Type": "application/json" },
     ...(body === undefined ? {} : { body: JSON.stringify(body) }),
   });
+  // An unread body keeps the request open in the browser (it never finishes), so refusals drop it first.
+  if (response.status === 401 || response.status === 403 || !response.headers.get("Content-Type")?.includes("application/json")) await response.body?.cancel().catch(() => undefined);
   if (response.status === 401) throw new Error("Your session has ended. Sign in again to continue.");
-  if (response.status === 403) throw new Error("You do not have permission for this action. Administration requires Cloudflare Access sign-in.");
+  if (response.status === 403) throw new Error((await explainRefusal(path)) ?? "You do not have permission for this action. Administration requires Cloudflare Access sign-in.");
   if (!response.headers.get("Content-Type")?.includes("application/json")) throw new Error("The service could not complete this request. Please try again.");
   const data = await response.json();
   if (!response.ok) throw new Error(typeof data.error === "string" ? data.error : "The request failed. Please try again.");

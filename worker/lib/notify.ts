@@ -15,8 +15,13 @@ export const STATE_EVENT: Record<string, string> = {
   pr_open: "submission.pr_opened",
   ci_failed: "submission.ci_failed",
   merged: "submission.pr_merged",
+  scheduled: "submission.scheduled",
   published: "submission.published",
+  // `pr_pending` is deliberately absent: it is committed in the same batch as `approved`
+  // (which notifies the proposer) and the system leaves it for `pr_open` within moments.
 };
+/** Composer removal (`scheduled -> merged`): its own event, never `submission.pr_merged` again. */
+const UNSCHEDULED = "submission.unscheduled";
 /** Emailed even at level `mentions` (action required, design rule 1 / D3). */
 const ACTIONABLE = new Set(["submission.changes_requested", "submission.rejected"]);
 /** "To me" events honoured at level `mentions`. */
@@ -76,7 +81,9 @@ export async function transitionRecipients(db: D1Database, kind: string, submiss
     case "submission.published": return [...P, ...CW, ...A];
     case "submission.pr_opened":
     case "submission.pr_merged": return [...P, ...(await participantIds(db, submissionId, ["watcher"])), ...A];
-    case "submission.ci_failed": return [...R, ...A];
+    case "submission.ci_failed": return [...P, ...R, ...A];
+    case "submission.scheduled": return [...P, ...(await participantIds(db, submissionId, ["watcher"]))];
+    case "submission.unscheduled": return P;
     case "submission.withdrawn": return [...P, ...R, ...CW];
     case "discussion.closed":
     case "discussion.reopened": return [...P, ...R, ...CW];
@@ -135,11 +142,11 @@ export interface TransitionInfo {
 export async function transitionNotifications(db: D1Database, t: TransitionInfo): Promise<D1PreparedStatement[]> {
   const out: D1PreparedStatement[] = [];
   for (let i = 1; i < t.chain.length; i++) {
-    const kind = STATE_EVENT[t.chain[i]!];
+    // Taking an item back out of an edition (scheduled -> merged) changes what the proposer was told
+    // ("scheduled"), so it gets its own event rather than a second "pull request merged".
+    const unscheduled = t.chain[i - 1] === "scheduled" && t.chain[i] === "merged";
+    const kind = unscheduled ? UNSCHEDULED : STATE_EVENT[t.chain[i]!];
     if (!kind) continue;
-    // Taking an item back out of an edition (scheduled -> merged) is composer bookkeeping:
-    // the member was already told the PR merged, so it is not announced again.
-    if (t.chain[i - 1] === "scheduled" && t.chain[i] === "merged") continue;
     const last = i === t.chain.length - 1;
     out.push(
       ...(await notifyStatements(db, {
@@ -166,7 +173,7 @@ const EMAIL_COPY = {
       "submission.changes_requested": "Changes requested", "submission.approved": "Submission approved",
       "submission.rejected": "Submission rejected", "submission.withdrawn": "Submission withdrawn",
       "submission.pr_opened": "Pull request opened", "submission.ci_failed": "Checks failed",
-      "submission.pr_merged": "Pull request merged", "submission.published": "Submission published",
+      "submission.pr_merged": "Pull request merged", "submission.published": "Submission published", "submission.scheduled": "Scheduled in an edition", "submission.unscheduled": "Removed from an edition",
       "comment.mention": "You were mentioned", "comment.reply": "Reply to your comment",
       "comment.created": "New comment", "discussion.closed": "Discussion closed", "discussion.reopened": "Discussion reopened",
     },
@@ -179,7 +186,7 @@ const EMAIL_COPY = {
       "submission.changes_requested": "Modifications demandées", "submission.approved": "Proposition approuvée",
       "submission.rejected": "Proposition rejetée", "submission.withdrawn": "Proposition retirée",
       "submission.pr_opened": "Demande de fusion ouverte", "submission.ci_failed": "Échec des vérifications",
-      "submission.pr_merged": "Demande de fusion intégrée", "submission.published": "Proposition publiée",
+      "submission.pr_merged": "Demande de fusion intégrée", "submission.published": "Proposition publiée", "submission.scheduled": "Planifiée dans une édition", "submission.unscheduled": "Retirée d’une édition",
       "comment.mention": "Vous avez été mentionné", "comment.reply": "Réponse à votre commentaire",
       "comment.created": "Nouveau commentaire", "discussion.closed": "Discussion fermée", "discussion.reopened": "Discussion rouverte",
     },
@@ -192,7 +199,7 @@ const EMAIL_COPY = {
       "submission.changes_requested": "Cambios solicitados", "submission.approved": "Presentación aprobada",
       "submission.rejected": "Presentación rechazada", "submission.withdrawn": "Presentación retirada",
       "submission.pr_opened": "Solicitud de incorporación abierta", "submission.ci_failed": "Verificaciones fallidas",
-      "submission.pr_merged": "Solicitud de incorporación integrada", "submission.published": "Presentación publicada",
+      "submission.pr_merged": "Solicitud de incorporación integrada", "submission.published": "Presentación publicada", "submission.scheduled": "Programada en una edición", "submission.unscheduled": "Retirada de una edición",
       "comment.mention": "Te han mencionado", "comment.reply": "Respuesta a tu comentario",
       "comment.created": "Nuevo comentario", "discussion.closed": "Discusión cerrada", "discussion.reopened": "Discusión reabierta",
     },
@@ -205,7 +212,7 @@ const EMAIL_COPY = {
       "submission.changes_requested": "Запрошены изменения", "submission.approved": "Заявка одобрена",
       "submission.rejected": "Заявка отклонена", "submission.withdrawn": "Заявка отозвана",
       "submission.pr_opened": "Запрос на слияние открыт", "submission.ci_failed": "Проверки не пройдены",
-      "submission.pr_merged": "Запрос на слияние принят", "submission.published": "Заявка опубликована",
+      "submission.pr_merged": "Запрос на слияние принят", "submission.published": "Заявка опубликована", "submission.scheduled": "Запланировано в выпуск", "submission.unscheduled": "Исключено из выпуска",
       "comment.mention": "Вас упомянули", "comment.reply": "Ответ на ваш комментарий",
       "comment.created": "Новый комментарий", "discussion.closed": "Обсуждение закрыто", "discussion.reopened": "Обсуждение возобновлено",
     },
@@ -218,7 +225,7 @@ const EMAIL_COPY = {
       "submission.changes_requested": "需要修改", "submission.approved": "提交内容已批准",
       "submission.rejected": "提交内容已拒绝", "submission.withdrawn": "提交内容已撤回",
       "submission.pr_opened": "拉取请求已创建", "submission.ci_failed": "检查失败",
-      "submission.pr_merged": "拉取请求已合并", "submission.published": "提交内容已发布",
+      "submission.pr_merged": "拉取请求已合并", "submission.published": "提交内容已发布", "submission.scheduled": "已排入某期", "submission.unscheduled": "已从某期移除",
       "comment.mention": "有人提到了您", "comment.reply": "您的评论收到回复",
       "comment.created": "新评论", "discussion.closed": "讨论已关闭", "discussion.reopened": "讨论已重新开启",
     },
@@ -231,7 +238,7 @@ const EMAIL_COPY = {
       "submission.changes_requested": "طُلبت تعديلات", "submission.approved": "تمت الموافقة على الطلب",
       "submission.rejected": "تم رفض الطلب", "submission.withdrawn": "تم سحب الطلب",
       "submission.pr_opened": "تم فتح طلب دمج", "submission.ci_failed": "فشلت الفحوصات",
-      "submission.pr_merged": "تم دمج طلب الدمج", "submission.published": "تم نشر الطلب",
+      "submission.pr_merged": "تم دمج طلب الدمج", "submission.published": "تم نشر الطلب", "submission.scheduled": "تمت جدولته في عدد", "submission.unscheduled": "أُزيل من عدد",
       "comment.mention": "تمت الإشارة إليك", "comment.reply": "رد على تعليقك",
       "comment.created": "تعليق جديد", "discussion.closed": "تم إغلاق المناقشة", "discussion.reopened": "أُعيد فتح المناقشة",
     },

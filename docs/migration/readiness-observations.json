@@ -1,0 +1,125 @@
+{
+  "observed_at_utc": "2026-11-17T16:40:31.237264+00:00",
+  "main": "49f704491a730b358c2a8405be0f6876a3408da9",
+  "production_jekyll": "8ef2eb431183bdb1257c632d340ee3476169a265",
+  "parity_branch": "44ef89245cc7b30b7044b2bfc3f00371fc6e5a3f",
+  "pages": {
+    "url": "https://api.github.com/repos/ituob/ituob.github.io/pages",
+    "status": "built",
+    "cname": "www.ituob.org",
+    "custom_404": true,
+    "html_url": "https://www.ituob.org/",
+    "build_type": "legacy",
+    "source": {
+      "branch": "production-jekyll",
+      "path": "/"
+    },
+    "public": true,
+    "protected_domain_state": "verified",
+    "pending_domain_unverified_at": null,
+    "https_certificate": {
+      "state": "approved",
+      "description": "The certificate has been approved.",
+      "domains": [
+        "www.ituob.org",
+        "ituob.org"
+      ],
+      "expires_at": "2027-01-26"
+    },
+    "https_enforced": true
+  },
+  "pages_latest_build": {
+    "status": "built",
+    "commit": "8ef2eb431183bdb1257c632d340ee3476169a265",
+    "created_at": "2026-10-22T07:57:01Z",
+    "updated_at": "2026-10-22T07:57:46Z",
+    "error": {
+      "message": null
+    }
+  },
+  "main_build_run": {
+    "conclusion": "failure",
+    "databaseId": 44108119390,
+    "headSha": "49f704491a730b358c2a8405be0f6876a3408da9",
+    "jobs": [
+      {
+        "name": "build",
+        "conclusion": "failure",
+        "failed_steps": [
+          "Worker tests"
+        ]
+      },
+      {
+        "name": "deploy-cloudflare-staging",
+        "conclusion": "skipped",
+        "failed_steps": []
+      },
+      {
+        "name": "content-parity-audit",
+        "conclusion": "skipped",
+        "failed_steps": []
+      },
+      {
+        "name": "deploy-cloudflare-production",
+        "conclusion": "skipped",
+        "failed_steps": []
+      }
+    ],
+    "url": "https://github.com/ituob/ituob.github.io/actions/runs/44108119390"
+  },
+  "parity_receipt": {
+    "path": "docs/parity/printed-labels-notes/build_inputs.json",
+    "source_head": "df1c47d0ece971a3ebe4288c24920706ef62010a",
+    "status": "success",
+    "audited_routes": 429,
+    "source_input_count": 66,
+    "differing_source_inputs": [
+      "astro.config.mjs",
+      "package-lock.json",
+      "register-snapshots.integration.mjs",
+      "src/components/AdocText.astro",
+      "src/components/RegisterTable.astro",
+      "src/components/TelephoneService.astro",
+      "src/components/TextualMessage.astro",
+      "src/components/vue/CommandPalette.vue",
+      "src/layouts/Base.astro",
+      "src/lib/i18n.ts",
+      "src/lib/loaders.ts",
+      "src/lib/schema.generated.ts",
+      "src/lib/snapshots.ts",
+      "src/pages/cmdk-index.json.ts",
+      "src/pages/issues/[id]/[lang].astro",
+      "src/pages/issues/[id]/index.astro",
+      "src/pages/registers/[slug]/index.astro",
+      "src/pages/search.astro"
+    ]
+  },
+  "repository_config_names": {
+    "CLOUDFLARE_ACCOUNT_ID": "present; value not recorded",
+    "CLOUDFLARE_DEPLOY": "false (obsolete gate)",
+    "CLOUDFLARE_DEPLOY_PRODUCTION": "absent (404)",
+    "CLOUDFLARE_API_TOKEN": "secret name present; value/validity not inspected"
+  },
+  "dns_observations": {
+    "www_cname": "ituob.github.io.",
+    "apex_nameservers": [
+      "arturo.ns.cloudflare.com.",
+      "melody.ns.cloudflare.com."
+    ],
+    "proxy_and_apex_record_state": "not established"
+  },
+  "sample_live_http_head": {
+    "https://www.ituob.org/_app_help/": 404,
+    "https://www.ituob.org/docs/": 200,
+    "scope": "Only listed help roots and root indexing/feed endpoints probed; not an exhaustive HTTP audit.",
+    "https://www.ituob.org/feed.xml": 404,
+    "https://www.ituob.org/sitemap.xml": 404,
+    "https://www.ituob.org/robots.txt": 404
+  },
+  "production_config_preflight": {
+    "command": "node scripts/configure-cloudflare.mjs --check --environment production",
+    "exit_code": 1,
+    "stderr": "Cloudflare configuration: An explicit Cloudflare account_id is required (32 hex characters).",
+    "ci_account_variable_supplied_rerun": "same failure; checked-in config has no explicit account_id"
+  }
+}

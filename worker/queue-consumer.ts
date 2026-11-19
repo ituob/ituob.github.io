@@ -70,9 +70,9 @@ async function deliver(env: Env, first: Notification): Promise<boolean> {
     const statements: D1PreparedStatement[] = [];
     for (const n of ready) {
       statements.push(
-        env.DB.prepare(`UPDATE notifications SET email_status='sent',email_provider_id=?2,email_sent_at=?3,
+        env.DB.prepare(`UPDATE notifications SET email_status='sent',email_provider_id=?2,email_sent_at=?3,email_to=?4,
           email_attempts=email_attempts+1,email_reason=NULL WHERE id=?1 AND email_status IN ('queued','failed')`)
-          .bind(n.id, result.id, new Date().toISOString()),
+          .bind(n.id, result.id, new Date().toISOString(), ready[0]!.email),
         env.DB.prepare(`INSERT INTO notification_counters(day,metric,n) SELECT ?1,'sent',changes()
           WHERE changes()>0 ON CONFLICT(day,metric) DO UPDATE SET n=n+excluded.n`)
           .bind(new Date().toISOString().slice(0, 10)),

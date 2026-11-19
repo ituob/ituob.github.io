@@ -1,0 +1,54 @@
+= Form UI precedent for the web editor
+
+:site-sha: aa4461ad5cd7e9aa778bab49ec5ab41ca83039ca
+:site-base: https://github.com/ituob/ituob.github.io/blob/{site-sha}
+:legacy-sha: 74b1564e3edba391921120d4b51501f6365fc9b6
+:legacy-base: https://github.com/ituob/itu-ob-editor/blob/{legacy-sha}
+
+This report records verified visual and interaction precedent for <<issue101,issue #101>>. The issue describes “Form UIs over the same classes on the site's Vue 3 stack under `/admin`” and specifies “Forms generated from the ontology; structured fields only.” In context, these are replacements for legacy Blueprint/React editor screens; the issue explicitly drops ProseMirror and says the editor authors actions, not full files.
+
+The admin forms are new Vue implementations of the schema/action editor, not reused Electron components. They do have precedent: the public site already supplies the visual tokens and control/table styling, while the Electron editor supplies field and workflow conventions. The missing piece is consistent application of that existing site presentation to all admin forms.
+
+== Current site visual system
+
+At inspected source commit `{site-sha}`, `src/styles/global.css` sets the live palette to white surfaces (`--bg: #ffffff`, `--bg-2: #fafafa`, `--bg-3: #f5f5f5`), dark text, gray borders, and blue accent (`--accent: #1aa1da`, hover `#178ec4`). It sets Helvetica/Arial sans-serif, a 15px body default (`--step-0`), monospace for code/data, a visible 2px accent `:focus-visible` outline, and 4–20px radius tokens. The theme's comments mention “MERCURY,” but live glass backgrounds are white, blur and gradients are disabled, and shadows are restrained; use computed values rather than the theme comments as the visual evidence.
+
+`src/layouts/Base.astro` imports the global stylesheet and provides the site header, optional breadcrumbs, content container, and page padding, with `wide` and `full` layout options. `src/components/RegisterTable.astro` wraps `.table-bulletin` in horizontal overflow. The class uses compact tabular data, collapsed borders, padded cells, muted uppercase headings and row hover. These are site presentation precedents, rather than a recommendation to render schema forms as tables.
+
+The same global stylesheet already defines `.btn-primary` and `.btn-ghost`: compact padded inline actions, sans-serif text, small-radius borders, accent or white backgrounds, and hover states. These provide button styling precedent without adding another palette.
+
+== Current Vue form precedents
+
+At inspected source commit `{site-sha}`:
+
+* `src/components/admin/SchemaNode.vue` is the direct schema-form precedent: nested object/list fieldsets with legends; field labels and required markers; enum selects, boolean checkboxes, numeric/date/text inputs, and textareas; add/remove/reorder controls; field path and client validation; preservation messaging for extra stored fields. It is used by the admin editor and is aligned with issue #101's ontology-form direction.
+* `src/components/admin/EditionMetadata.vue` demonstrates admin workflow states: help and scheduling context, busy-disabled fieldset, schema and server errors announced with `role="alert"`, success with `role="status"`, save/reload/schedule actions, and visible draft revision/status.
+* `src/components/admin/CatalogEntryEditor.vue` demonstrates label-wrapped input/select controls, helper text with `aria-describedby`, field-level validation, submit/cancel actions, the review-PR result message, and an existing-record table.
+* `src/components/discussion/Discussion.vue` demonstrates user-facing forms: fieldsets/legends, labels, alert/status announcements, busy-disabled controls, and post/cancel actions. Its component-scoped CSS uses literal gray borders, so its semantics are more useful precedent than its styling.
+* `src/components/vue/CommandPalette.vue` uses the globally styled `.cmdk-input`: full-width input, inherited site foreground, sans-serif type, padded text and a token-based bottom border. This is an existing token-based input pattern, though its search-dialog sizing should not dictate ordinary form controls.
+* `src/components/account/MembersAdmin.vue` uses bold block labels, full-width padded text/select/textarea controls, separate checkbox spacing, fieldset padding and visibly disabled buttons. Its literal border colors should be replaced by site tokens when applying these conventions to admin editors.
+* `src/components/account/SessionAccount.vue` is not a general account-form precedent: it shows account status, a responsive definition list, retry button and logout form. This report uses it only for those specific patterns.
+
+== Legacy editor field and workflow conventions
+
+The legacy repository was inspected read-only at https://github.com/ituob/itu-ob-editor/tree/{legacy-sha}[{legacy-sha}]. It uses React and Blueprint; this supports workflow/field conventions, not carrying its component skin into the current site.
+
+* `src/renderer/issue-editor/message-forms/custom.tsx` groups title input in a Blueprint `FormGroup` inside a `Callout`, then places the content editor below it. The title input has a placeholder and changes update the message model. This demonstrates a clear separation between message metadata and message content.
+* `src/renderer/issue-editor/message-forms/service_restrictions.tsx` uses explicit `Label` wrappers and large `InputGroup` controls for “Country name,” “OB edition number” (number input), and “Page number” (number input). In its add-item dialog, the footer action is “Add item” and is disabled until all three values are present. This shows typed fields, visible labels, and a validity-gated action.
+* `src/renderer/issue-editor/message-forms/amendment.tsx` separates the amendment editor into “Review changes” and “Add message (optional)” tabs and places datasets in a selectable navigation list beside the main editor pane. This is concrete review/selection layout evidence, not a general form layout requirement.
+* `src/renderer/form-validation/index.tsx` models named per-field validators with human-readable error messages; `GenericValidationErrorsNotice` renders each failed check as a list item (“Must …”). Its async `validate` function returns errors keyed by field and validator.
+* `src/renderer/batch-commit/index.tsx` groups modified items by content type, presents them for selection, warns when uncommitted changes pause sync, and offers separate “Commit selected” and “Discard selected” flows. Commit requires a message in a prompt; discard has a confirmation action. Its `styles.scss` uses a vertical viewport layout, scrollable item pane, padded wrapped item cards, and a bottom action footer. This is a legacy batch workflow precedent; the web issue's action/PR flow governs what the new composer actually saves.
+* `README.md` says to access application help at `https://www.ituob.org/docs/` and notes the app Help menu. This verifies help/docs as a legacy user capability, without establishing its detailed contents.
+
+== Decision
+
+The web editor should follow current site visual tokens and `Base.astro` layout conventions. Where useful, carry over the legacy conventions evidenced above: grouped typed fields with visible labels, separation of metadata from content, selecting and reviewing changes, per-field validation, and explicit save/review actions. Apply them to the issue's schema-driven action forms and review flow. The visual recommendation comes from current site source; the field/workflow recommendation comes from the verified legacy sources and issue #101.
+
+== Sources
+
+* [[issue101]]Issue #101: https://github.com/ituob/ituob.github.io/issues/101[Port itu-ob-editor features to the web app]
+* Current site source at {site-sha}: https://github.com/ituob/ituob.github.io/tree/{site-sha}[source tree]
+* Current files at that revision: link:{site-base}/src/styles/global.css[global.css], link:{site-base}/src/layouts/Base.astro[Base.astro], link:{site-base}/src/components/admin/SchemaNode.vue[SchemaNode.vue], link:{site-base}/src/components/admin/EditionMetadata.vue[EditionMetadata.vue], link:{site-base}/src/components/admin/CatalogEntryEditor.vue[CatalogEntryEditor.vue], link:{site-base}/src/components/discussion/Discussion.vue[Discussion.vue], link:{site-base}/src/components/account/SessionAccount.vue[SessionAccount.vue], link:{site-base}/src/components/vue/CommandPalette.vue[CommandPalette.vue], link:{site-base}/src/components/account/MembersAdmin.vue[MembersAdmin.vue], and link:{site-base}/src/components/RegisterTable.astro[RegisterTable.astro].
+* Legacy editor source at {legacy-sha}: https://github.com/ituob/itu-ob-editor/tree/{legacy-sha}[source tree]
+* Legacy files at that revision: link:{legacy-base}/src/renderer/issue-editor/message-forms/custom.tsx[custom.tsx], link:{legacy-base}/src/renderer/issue-editor/message-forms/service_restrictions.tsx[service_restrictions.tsx], link:{legacy-base}/src/renderer/issue-editor/message-forms/amendment.tsx[amendment.tsx], link:{legacy-base}/src/renderer/form-validation/index.tsx[form-validation], link:{legacy-base}/src/renderer/batch-commit/index.tsx[batch-commit], link:{legacy-base}/src/renderer/batch-commit/styles.scss[batch-commit styles], and link:{legacy-base}/README.md[README].
+
