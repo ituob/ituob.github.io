@@ -43,6 +43,13 @@ describe("localized notification messages", () => {
     expect(notify.renderEmail(notification).text).not.toContain("Operational Bulletin");
   });
 
+  it("names the OB issue on unscheduled and published emails too", () => {
+    for (const kind of ["submission.unscheduled", "submission.published"]) {
+      const event = { ...notification, kind, payload: JSON.stringify({ register_id: "E.164", slug: "x", edition: 1352 }) };
+      expect(notify.renderEmail(event).text).toContain("Operational Bulletin No. 1352");
+    }
+  });
+
   it("renders a localized digest containing every event, with safe fallback event titles", () => {
     const second = { ...notification, id: "n2", kind: "<custom>", payload: "{}" };
     const digest = notify.renderDigestEmail([notification, second], { locale: "es" });
