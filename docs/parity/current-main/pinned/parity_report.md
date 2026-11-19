@@ -11,17 +11,17 @@ variant of it passes ≥95%.
 
 | verdict | count | percent |
 |---------|-------|---------|
-| pass (≥95%) | 422 | 100.0% |
+| pass (≥95%) | 429 | 100.0% |
 | warn (80-95%) | 0 | 0.0% |
 | fail (<80%) | 0 | 0.0% |
 | missing (no local) | 0 | 0.0% |
-| **total** | **422** | |
+| **total** | **429** | |
 
 ## index — 1 pages, avg 98.5%, 1/1 pass
 
 _All pages pass ≥95% parity._
 
-## issue — 389 pages, avg 98.7%, 389/389 pass
+## issue — 396 pages, avg 98.7%, 396/396 pass
 
 _All pages pass ≥95% parity._
 
@@ -29,7 +29,7 @@ _All pages pass ≥95% parity._
 
 _All pages pass ≥95% parity._
 
-## register — 20 pages, avg 98.9%, 20/20 pass
+## register — 20 pages, avg 98.8%, 20/20 pass
 
 _All pages pass ≥95% parity._
 
