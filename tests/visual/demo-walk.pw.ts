@@ -23,8 +23,21 @@ async function signIn(page: Page, email: string) {
   await page.waitForURL("**/me/");
 }
 
+// A page is ready once it has loaded and its requests settle. A request that never settles is
+// named in the failure, so a hang points at the request rather than burning the test timeout.
 async function open(page: Page, path: string) {
-  await page.goto(path, { waitUntil: "networkidle" });
+  const pending = new Set<string>();
+  const track = (r: { url(): string }) => pending.add(r.url());
+  const done = (r: { url(): string }) => pending.delete(r.url());
+  page.on("request", track); page.on("requestfinished", done); page.on("requestfailed", done);
+  try {
+    await page.goto(path, { waitUntil: "load" });
+    await page.waitForLoadState("networkidle", { timeout: 30_000 }).catch(() => {
+      throw new Error(`${path}: requests still open after 30s: ${[...pending].join(", ")}`);
+    });
+  } finally {
+    page.off("request", track); page.off("requestfinished", done); page.off("requestfailed", done);
+  }
   await page.waitForTimeout(400);
 }
 const mainText = (page: Page) => page.locator("main").innerText();
