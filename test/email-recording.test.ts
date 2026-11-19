@@ -35,6 +35,21 @@ describe("localized notification messages", () => {
     expect(notify.renderEmail(notification, { locale: null }).locale).toBe("en");
   });
 
+  it("names the OB issue an item was scheduled into, in the recipient's language", () => {
+    const scheduled = { ...notification, kind: "submission.scheduled", payload: JSON.stringify({ register_id: "E.164", slug: "x", edition: 1351 }) };
+    expect(notify.renderEmail(scheduled).text).toContain("Operational Bulletin No. 1351");
+    expect(notify.renderEmail(scheduled, { locale: "fr" }).text).toContain("Bulletin d'exploitation n° 1351");
+    expect(notify.renderEmail(scheduled, { locale: "zh" }).text).toContain("操作公报第1351期");
+    expect(notify.renderEmail(notification).text).not.toContain("Operational Bulletin");
+  });
+
+  it("names the OB issue on unscheduled and published emails too", () => {
+    for (const kind of ["submission.unscheduled", "submission.published"]) {
+      const event = { ...notification, kind, payload: JSON.stringify({ register_id: "E.164", slug: "x", edition: 1352 }) };
+      expect(notify.renderEmail(event).text).toContain("Operational Bulletin No. 1352");
+    }
+  });
+
   it("renders a localized digest containing every event, with safe fallback event titles", () => {
     const second = { ...notification, id: "n2", kind: "<custom>", payload: "{}" };
     const digest = notify.renderDigestEmail([notification, second], { locale: "es" });

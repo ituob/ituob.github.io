@@ -139,6 +139,8 @@ describe("composer: merged -> scheduled -> published", () => {
     const notesBefore = await mergedNotes();
     expect(notesBefore).toBeGreaterThan(0);
     expect(await kindNotes("submission.scheduled")).toBe(1); // placing is announced to the proposer
+    const [placed] = await rows("SELECT payload FROM notifications WHERE submission_id=?1 AND user_id='member-A' AND kind='submission.scheduled'", r.id);
+    expect(JSON.parse(placed!.payload as string).edition).toBe(1351); // the proposer is told which OB issue
     const removed = await comp("POST", `/editions/1351/items/${r.id}/remove`);
     expect(removed.json.submission.state).toBe("merged");
     expect(await n("SELECT count(*) n FROM edition_items")).toBe(0);

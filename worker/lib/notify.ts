@@ -136,6 +136,8 @@ export interface TransitionInfo {
   rev: number;
   at: string;
   version: number;
+  /** OB issue number the last state refers to (placement in an edition), if any. */
+  edition?: number | null;
 }
 
 /** The single call `mutate` makes: one event per committed state in the chain. */
@@ -152,7 +154,7 @@ export async function transitionNotifications(db: D1Database, t: TransitionInfo)
       ...(await notifyStatements(db, {
         submissionId: t.sub.id, proposerId: t.sub.proposer_id, kind, actorId: t.actorId,
         refType: "review_state", refId: `${t.sub.id}:${t.version}:${t.chain[i]}`, at: t.at, version: t.version,
-        payload: { register_id: t.sub.register_id, slug: t.sub.slug, from: t.chain[i - 1], to: t.chain[i], rev: t.rev, reason: last ? t.reason : null },
+        payload: { register_id: t.sub.register_id, slug: t.sub.slug, from: t.chain[i - 1], to: t.chain[i], rev: t.rev, reason: last ? t.reason : null, edition: last ? (t.edition ?? null) : null },
       })),
     );
   }
@@ -166,7 +168,7 @@ interface EmailNotification { kind: string; payload: string; id: string; submiss
 
 const EMAIL_COPY = {
   en: {
-    event: "Event", actor: "By", reason: "Reason", comment: "Comment", open: "Open submission",
+    edition: "Operational Bulletin No.", event: "Event", actor: "By", reason: "Reason", comment: "Comment", open: "Open submission",
     preferences: "Notification preferences", digest: "Notification digest", fallback: "Submission update",
     events: {
       "submission.submitted": "Submission received", "submission.in_review": "Submission under review",
@@ -179,7 +181,7 @@ const EMAIL_COPY = {
     },
   },
   fr: {
-    event: "Événement", actor: "Par", reason: "Motif", comment: "Commentaire", open: "Ouvrir la proposition",
+    edition: "Bulletin d'exploitation n°", event: "Événement", actor: "Par", reason: "Motif", comment: "Commentaire", open: "Ouvrir la proposition",
     preferences: "Préférences de notification", digest: "Résumé des notifications", fallback: "Mise à jour de la proposition",
     events: {
       "submission.submitted": "Proposition reçue", "submission.in_review": "Proposition en cours d’examen",
@@ -192,7 +194,7 @@ const EMAIL_COPY = {
     },
   },
   es: {
-    event: "Evento", actor: "Por", reason: "Motivo", comment: "Comentario", open: "Abrir la presentación",
+    edition: "Boletín de Explotación N.°", event: "Evento", actor: "Por", reason: "Motivo", comment: "Comentario", open: "Abrir la presentación",
     preferences: "Preferencias de notificación", digest: "Resumen de notificaciones", fallback: "Actualización de la presentación",
     events: {
       "submission.submitted": "Presentación recibida", "submission.in_review": "Presentación en revisión",
@@ -205,7 +207,7 @@ const EMAIL_COPY = {
     },
   },
   ru: {
-    event: "Событие", actor: "Автор", reason: "Причина", comment: "Комментарий", open: "Открыть заявку",
+    edition: "Эксплуатационный бюллетень №", event: "Событие", actor: "Автор", reason: "Причина", comment: "Комментарий", open: "Открыть заявку",
     preferences: "Настройки уведомлений", digest: "Сводка уведомлений", fallback: "Обновление заявки",
     events: {
       "submission.submitted": "Заявка получена", "submission.in_review": "Заявка на рассмотрении",
@@ -218,7 +220,7 @@ const EMAIL_COPY = {
     },
   },
   zh: {
-    event: "事件", actor: "作者", reason: "原因", comment: "评论", open: "查看提交内容",
+    edition: "操作公报第", event: "事件", actor: "作者", reason: "原因", comment: "评论", open: "查看提交内容",
     preferences: "通知偏好设置", digest: "通知摘要", fallback: "提交内容更新",
     events: {
       "submission.submitted": "已收到提交内容", "submission.in_review": "提交内容正在审核",
@@ -231,7 +233,7 @@ const EMAIL_COPY = {
     },
   },
   ar: {
-    event: "الحدث", actor: "بواسطة", reason: "السبب", comment: "التعليق", open: "فتح الطلب",
+    edition: "النشرة التشغيلية رقم", event: "الحدث", actor: "بواسطة", reason: "السبب", comment: "التعليق", open: "فتح الطلب",
     preferences: "تفضيلات الإشعارات", digest: "ملخص الإشعارات", fallback: "تحديث الطلب",
     events: {
       "submission.submitted": "تم استلام الطلب", "submission.in_review": "الطلب قيد المراجعة",
@@ -270,6 +272,7 @@ function renderEmailEvent(n: EmailNotification, locale: EmailLocale, origin: str
   const heading = title ? `${title}: ${event}` : event;
   const separator = locale === "fr" ? " : " : ": ";
   const lines = [`${copy.event}${separator}${event}`];
+  if (typeof p.edition === "number") lines.push(`${copy.edition}${locale === "zh" ? "" : " "}${p.edition}${locale === "zh" ? "期" : ""}`);
   for (const [key, label] of [["actor_name", copy.actor], ["reason", copy.reason], ["excerpt", copy.comment]]) {
     if (p[key!]) lines.push(`${label}${separator}${String(p[key!])}`);
   }
