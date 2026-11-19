@@ -79,6 +79,8 @@ jobs:
       run: |
         npm run check:bindings
         npm run test:bindings
+    - name: Node unit tests (tests/*.test.ts)
+      run: npm test
 
     - name: Worker tests
       run: npx vitest run
