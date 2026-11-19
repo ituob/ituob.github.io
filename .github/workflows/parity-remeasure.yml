@@ -62,6 +62,12 @@ concurrency:
 env:
   # Jekyll source recorded in docs/parity/current-main/reference_build.json.
   JEKYLL_SOURCE: a95ab19139e0c65271178c44362f60b48f7eed8c
+  # itu-ob-data commit the Jekyll reference is built from (D100-2). Deliberately
+  # NOT the `data` submodule gitlink (90f99728, ends at OB 1343): e17484be is the
+  # upstream master tip carrying OB 1344-1350, the same commit the committed
+  # ob1350 receipt was built from. The Astro side is untouched.
+  REFERENCE_DATA_REPO: https://github.com/ituob/itu-ob-data
+  REFERENCE_DATA_SHA: e17484be9f11d6a44d2f5c2ffc3d3e0813ffe62f
 
 jobs:
   reference:
@@ -79,7 +85,13 @@ jobs:
         cd "$RUNNER_TEMP/jekyll"
         git apply "$GITHUB_WORKSPACE/docs/parity/current-main/reference-build.patch"
         rm -rf data
-        ln -s "$GITHUB_WORKSPACE/data" data
+        git init -q "$RUNNER_TEMP/reference-data"
+        git -C "$RUNNER_TEMP/reference-data" fetch -q --no-tags --depth 1 "$REFERENCE_DATA_REPO" "$REFERENCE_DATA_SHA"
+        git -C "$RUNNER_TEMP/reference-data" checkout -q --detach FETCH_HEAD
+        test "$(git -C "$RUNNER_TEMP/reference-data" rev-parse HEAD)" = "$REFERENCE_DATA_SHA"
+        # Fail loudly if the reference does not reach OB 1350.
+        test -d "$RUNNER_TEMP/reference-data/issues/1350"
+        ln -s "$RUNNER_TEMP/reference-data" data
     - uses: ruby/setup-ruby@v1
       with:
         ruby-version: '3.1.7'
