@@ -11,7 +11,10 @@ export const demoMode = (): boolean => import.meta.env.PUBLIC_LOCAL_DEMO === '1'
 async function getJson<T>(path: string): Promise<T | null> {
   try {
     const response = await fetch(path, { credentials: 'same-origin', cache: 'no-store', headers: { Accept: 'application/json' } });
-    return response.ok ? await response.json() as T : null;
+    if (response.ok) return await response.json() as T;
+    // An unread body keeps the request open in the browser, so a refusal drops it.
+    await response.body?.cancel().catch(() => undefined);
+    return null;
   } catch { return null; }
 }
 

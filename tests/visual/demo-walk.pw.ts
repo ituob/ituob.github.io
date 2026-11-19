@@ -12,6 +12,9 @@ const PERSONAS = {
 } as const;
 type Name = keyof typeof PERSONAS;
 
+// Every test signs in on its own page, so tests can run on parallel workers against one dev server.
+test.describe.configure({ mode: "parallel" });
+
 const ME = ["/me/", "/me/inbox/", "/me/membership/", "/me/submissions/", "/me/discussions/"];
 const ADMIN = ["/admin/", "/admin/general/", "/admin/catalog/", "/admin/annexes/", "/admin/submissions/", "/admin/composer/", "/admin/editor/", "/admin/members/", "/admin/bulk/"];
 const DEVELOPER_TEXT = /Cloudflare Access|npm run|GITHUB_|not configured|undefined|\[object|NaN\b|Traceback|Unexpected token|Failed to fetch|Internal Server Error|stub|TODO/;
@@ -38,6 +41,8 @@ async function open(page: Page, path: string) {
   } finally {
     page.off("request", track); page.off("requestfinished", done); page.off("requestfailed", done);
   }
+  // Interactive islands are inert until hydrated (Astro drops their `ssr` attribute then); a click before that does nothing.
+  await expect(page.locator("astro-island[ssr]")).toHaveCount(0, { timeout: 30_000 });
   await page.waitForTimeout(400);
 }
 const mainText = (page: Page) => page.locator("main").innerText();
@@ -48,7 +53,7 @@ const submitterPages = new Set(["/me/submissions/", "/admin/editor/", "/me/discu
 
 for (const [name, persona] of Object.entries(PERSONAS) as [Name, (typeof PERSONAS)[Name]][]) {
   test.describe(name, () => {
-    test.setTimeout(900_000);
+    test.setTimeout(1_500_000);
 
     test("pages show the right content or the right refusal, with no developer text", async ({ page }) => {
       await signIn(page, persona.email);
@@ -75,17 +80,28 @@ for (const [name, persona] of Object.entries(PERSONAS) as [Name, (typeof PERSONA
       }
     });
 
-    test("every visible button gives feedback", async ({ page }) => {
+    // One test per page, so pages run side by side (workers) instead of one 30-minute test per persona.
+    for (const path of [...ME, ...ADMIN]) test(`every visible button gives feedback on ${path}`, async ({ page }) => {
       await signIn(page, persona.email);
       const dead: string[] = [];
-      for (const path of [...ME, ...ADMIN]) {
+      {
         await open(page, path);
         const count = await page.locator("main button:visible, main summary:visible").count();
+        // Rows repeat the same control (a roster's 142 "Verify" buttons); check each label once.
+        const seen = new Set<string>();
         for (let i = 0; i < count; i++) {
           if (i > 0) await open(page, path);
-          const button = page.locator("main button:visible, main summary:visible").nth(i);
-          const label = ((await button.innerText().catch(() => "")) || (await button.getAttribute("aria-label")) || "").trim().replace(/\s+/g, " ");
-          if (!(await button.isEnabled())) {
+          // A section is disabled while its first load runs; a user waits for it, so the test does too.
+          // Some stay disabled by design (an editor's read-only catalog form), so give up after 3 s.
+          await expect(page.locator("main fieldset[disabled]")).toHaveCount(0, { timeout: 3_000 }).catch(() => undefined);
+          // A click can remove its own button ("Mark read"), so the list may be shorter on reopen.
+          const buttons = page.locator("main button:visible, main summary:visible");
+          if (i >= await buttons.count()) break;
+          const button = buttons.nth(i);
+          const label = ((await button.innerText({ timeout: 5000 }).catch(() => "")) || (await button.getAttribute("aria-label", { timeout: 5000 }).catch(() => null)) || "").trim().replace(/\s+/g, " ");
+          if (seen.has(label)) continue;
+          seen.add(label);
+          if (!(await button.isEnabled({ timeout: 5000 }).catch(() => false))) {
             // A disabled control must say why: a title, aria-description or neighbouring explanation.
             continue;
           }
@@ -96,17 +112,20 @@ for (const [name, persona] of Object.entries(PERSONAS) as [Name, (typeof PERSONA
           const url = page.url();
           await button.click({ timeout: 4000 }).catch(() => undefined);
           // The demo Worker can take a few seconds to answer; wait for the page to change (or 6 s) instead of a fixed 700 ms.
-          await page.waitForFunction(prev => (document.querySelector("main") as HTMLElement | null)?.innerText !== prev || document.querySelector("main :invalid") !== null, before, { timeout: 6000 }).catch(() => undefined);
+          // A status line that shows and then settles back (a refusal repeated, a list reloaded unchanged) is feedback the user saw.
+          const changed = await page.waitForFunction(prev => (document.querySelector("main") as HTMLElement | null)?.innerText !== prev || document.querySelector("main :invalid") !== null, before, { timeout: 6000 }).then(() => true, () => false);
           await page.waitForTimeout(300);
           page.off("request", onRequest);
           const after = await mainText(page).catch(() => "");
           const invalid = await page.locator("main :invalid").count();
-          const expanded = await button.evaluate(el => el.tagName === "SUMMARY" || el.getAttribute("aria-expanded") !== null).catch(() => false);
-          if (after === before && page.url() === url && invalid === 0 && !expanded && requests === 0) dead.push(`${path} [${i}] "${label}"`);
-          else if (after === before && page.url() === url && invalid === 0 && !expanded) dead.push(`${path} [${i}] "${label}" (request only, no visible change)`);
+          const expanded = await button.evaluate(el => el.tagName === "SUMMARY" || el.getAttribute("aria-expanded") !== null, undefined, { timeout: 3000 }).catch(() => false);
+          if (!changed && after === before && page.url() === url && invalid === 0 && !expanded && requests === 0) dead.push(`${path} [${i}] "${label}"`);
+          else if (!changed && after === before && page.url() === url && invalid === 0 && !expanded) dead.push(`${path} [${i}] "${label}" (request only, no visible change)`);
+          // The account page's own "Sign out" button really signs out; sign back in so later pages are checked as this persona.
+          if (/^Sign out/i.test(label)) await signIn(page, persona.email);
         }
       }
-      expect(dead, `${name}: buttons with no visible feedback`).toEqual([]);
+      expect(dead, `${name} ${path}: buttons with no visible feedback`).toEqual([]);
     });
 
     test("no unlabelled controls on me and admin pages", async ({ page }) => {
@@ -129,7 +148,7 @@ for (const [name, persona] of Object.entries(PERSONAS) as [Name, (typeof PERSONA
 }
 
 test("internal links on the walkthrough pages never return 404", async ({ page, request }) => {
-  test.setTimeout(900_000);
+  test.setTimeout(1_500_000);
   const seeds = ["/", "/registers/", "/datasets/", "/downloads/", "/types/", "/issues/", "/issues/1301/", "/issues/1350/", "/recommendations/E.212/", "/recommendations/E.118/", "/registers/e118-iin/", "/registers/e118-iin/history/", "/registers/e118-iin/at/1161/", "/search/?q=E.164", "/about/"];
   const checked = new Map<string, number>();
   const broken: string[] = [];

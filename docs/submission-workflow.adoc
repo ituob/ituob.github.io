@@ -69,9 +69,21 @@ Authored files are immutable inputs. The submission and metadata publishers crea
 The historical patch log still resides in the service repository at the baseline revision. Cumulative data-repository authored patches are overlaid without replacing historical bytes. This transitional overlay does not establish that the complete historical log has migrated to the canonical repository. Whole-program completion requires that migration and proof that the site consumes its authored inputs.
 
 [[projection]]
-== The projection gap (blocks the demo)
+== The projection gap (closed by option A)
 
-Replay consumes `datasets/*/changes/`, which is a committed projection
+Closed by option A: the site build (`build-deploy.yml`, step "Project pinned
+authored data and generate register snapshots") runs
+`scripts/project-authored-data.py`. When the pinned itu-ob-data commit carries
+authored `ob-issues/` files, it stages them into a temporary copy of the pinned
+service, runs `migrate_actions_to_changes.rb` there, then
+`generate_register_snapshots.rb`. Neither input tree is written. Measured
+2026-11-19 at data-ob `7d94b1c1`: the migration takes 20 s (21 registers,
+5006 change files). Without authored files the build uses the committed
+`datasets/*/changes/` as they are, and those differ from a fresh regeneration
+in 745 files (UNVERIFIED whether any differ in content that replay reads).
+Regenerating on every build and untracking `changes/` is the follow-up.
+
+The original analysis follows. Replay consumes `datasets/*/changes/`, which is a committed projection
 of `ob-issues/`. A PR that adds only an `ob-issues` file passes the gates
 and changes no snapshot. The demo step "replay regenerates the
 projections -> staging shows the change" therefore needs one of:

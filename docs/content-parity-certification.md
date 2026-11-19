@@ -13,6 +13,10 @@ itu-ob-data `e17484be` (OB 1350) and the Astro audit build on CI
 | Included variants ≥95% | 609 / 609 |
 | Variant min / median | 95.6% / 99.1% |
 
+Re-run on 2026-11-19 at this branch (run 44505801474, commit `cbcd8d60`, data-ob
+`7d94b1c1`): 429 / 429 pages and 609 / 609 included variants again. Receipts:
+`docs/parity/current-main/pinned/`.
+
 Receipts: `docs/parity/ob1350/pinned/`. This closes the "OB 1344–1350 is
 outside the pinned reference" gap noted below; the sections after this one are
 the earlier OB 1343 receipts, kept as history. Print-to-patch coverage
