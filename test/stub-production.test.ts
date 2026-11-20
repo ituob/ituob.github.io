@@ -6,7 +6,7 @@ import { addUser, api, db, seedFixtures } from "./helpers.ts";
 const hdr = { "X-Stub-Session": "itu-admin", "X-Stub-Access": "a@b.c" };
 
 describe("the stub cannot run in production", () => {
-  it("live deployment configs stay static-safe and keep credentials in secrets", () => {
+  it("live deployment configs stay static-safe, public-only and keep credentials out of vars", () => {
     const configs = (env as any).WRANGLER_CONFIGS as Record<string, string>;
     const files = Object.keys(configs);
     const liveFiles = ["wrangler.jsonc", "wrangler.staging.jsonc"];
@@ -19,10 +19,10 @@ describe("the stub cannot run in production", () => {
       expect(config.queues?.producers ?? [], f).toHaveLength(0);
       expect(config.queues?.consumers ?? [], f).toHaveLength(0);
       expect(config.triggers?.crons ?? [], f).toHaveLength(0);
-      for (const secret of ["OIDC_CLIENT_SECRET", "RESEND_API_KEY", "GITHUB_APP_PRIVATE_KEY", "GITHUB_WEBHOOK_SECRET"]) {
+      // Public-only profile: no provider secrets are required to deploy; the full profile generates them.
+      expect(config.secrets?.required ?? [], f).toHaveLength(0);
+      for (const secret of ["OIDC_CLIENT_SECRET", "RESEND_API_KEY", "GITHUB_APP_PRIVATE_KEY", "GITHUB_WEBHOOK_SECRET"])
         expect(config.vars ?? {}, f).not.toHaveProperty(secret);
-        expect(config.secrets?.required, f).toContain(secret);
-      }
       expect(text, f).not.toMatch(/stub/i);
     }
     for (const f of ["wrangler.bindings.example.jsonc", "wrangler.staging.bindings.example.jsonc"]) {

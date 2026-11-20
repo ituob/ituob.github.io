@@ -88,6 +88,29 @@ export function validateConfig(config, environment, expectedAccount) {
   assert(Array.isArray(config.secrets?.required) && requiredSecrets(config.vars).every((name) => config.secrets.required.includes(name)), 'Declare all required provider secret names with secrets.required.');
   return config;
 }
+/**
+ * Public-only profile: the checked-in live configs. Static site, canonical redirects and the Worker
+ * "not available yet" answers; no D1, queues, cron, vars or provider secrets (no OIDC/identity work).
+ * Structural problems throw first; a missing account_id is reported alone as the operator input.
+ */
+export const ACCOUNT_INPUT_MESSAGE = 'Public-only profile is otherwise ready; one operator input remains: an explicit Cloudflare account_id (32 hex characters) in the Wrangler config.';
+export function validatePublicConfig(config, environment, expectedAccount) {
+  const selected = target(environment);
+  assert(config.name === selected.name && config.main === 'worker/index.ts', 'Worker name/main does not match the selected environment.');
+  assert(config.workers_dev === false, 'workers_dev must remain disabled for the configured custom domains.');
+  const hosts = environment === 'production' ? ['www.ituob.org', 'ituob.org'] : ['staging-www.ituob.org'];
+  assert(Array.isArray(config.routes) && config.routes.length === hosts.length && hosts.every((host) => config.routes.some((route) => route.pattern === host && route.custom_domain === true)), 'Custom domains must match the selected environment.');
+  assert(config.assets?.binding === 'ASSETS' && config.assets?.directory === './dist' && config.assets?.run_worker_first === true && config.run_worker_first === undefined, 'ASSETS must run the Worker first; run_worker_first belongs inside assets.');
+  assert(config.assets.html_handling === 'auto-trailing-slash' && config.assets.not_found_handling === '404-page', 'Preserve static asset routing and 404 handling.');
+  assert(!(config.d1_databases ?? []).length && !(config.queues?.producers ?? []).length && !(config.queues?.consumers ?? []).length && !(config.triggers?.crons ?? []).length, 'The public-only profile must not declare D1, queues or cron triggers; use --profile full.');
+  assert(!config.vars || !Object.keys(config.vars).length, 'The public-only profile must not declare vars (no identity or provider configuration).');
+  assert(!(config.secrets?.required ?? []).length, 'The public-only profile must not require provider secrets; a missing secret would block the read-only deploy.');
+  const hasAccount = text(config.account_id) && /^[0-9a-f]{32}$/i.test(config.account_id) && !/^0{32}$/.test(config.account_id);
+  if (config.account_id !== undefined) assert(hasAccount, 'account_id must be 32 hex characters.');
+  if (expectedAccount && hasAccount) assert(config.account_id === expectedAccount, 'Config account_id differs from CLOUDFLARE_ACCOUNT_ID.');
+  assert(hasAccount, ACCOUNT_INPUT_MESSAGE);
+  return config;
+}
 export function validateIsolation(left, right) {
   // An unconfigured peer template has no resource identity to compare yet.
   if (!left || !right) return;
@@ -118,20 +141,27 @@ function readJson(file) {
   catch { throw new Error(`Cannot read valid JSONC from ${file}.`); }
 }
 export function main(args, root = ROOT) {
-  let environment, input, write = false, check = false;
+  let environment, input, write = false, check = false, profile = 'full';
   for (let i = 0; i < args.length; i++) {
     const arg = args[i];
     if (arg === '--environment') environment = args[++i];
     else if (arg === '--input') input = args[++i];
     else if (arg === '--write') write = true;
     else if (arg === '--check') check = true;
-    else throw new Error('Usage: --environment staging|production [--input resources.json [--write] | --check]');
+    else if (arg === '--profile') profile = args[++i];
+    else throw new Error('Usage: --environment staging|production [--input resources.json [--write] | --check] [--profile public|full]');
   }
   const selected = target(environment);
+  assert(['public', 'full'].includes(profile), '--profile must be public or full.');
+  assert(profile === 'full' || check, '--profile public applies to --check only; the checked-in configs are the public profile.');
   assert(!(check && (input || write)), '--check cannot be combined with --input or --write.');
   const peerEnv = environment === 'staging' ? 'production' : 'staging';
   const base = readJson(resolve(root, selected.file));
   const peer = readJson(resolve(root, TARGETS[peerEnv].file));
+  if (check && profile === 'public') {
+    validatePublicConfig(base, environment, process.env.CLOUDFLARE_ACCOUNT_ID);
+    return `Local ${environment} public-only declarations passed (no D1, queues, OIDC or provider secrets). Remote account, domain attachment and certificates are not checked.\n`;
+  }
   if (check) {
     validateConfig(base, environment, process.env.CLOUDFLARE_ACCOUNT_ID);
     validateIsolation(base, peer);
