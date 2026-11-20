@@ -1,98 +1,13 @@
 {
   "inputs": {
-    "source_sha": "fb664dbb25fa1c210ae9de17fcfa88bbc8ea1146",
+    "source_sha": "761be3ce23b374bd14c9fd288baa9877a35f7f2b",
     "legacy_sha": "8ef2eb431183bdb1257c632d340ee3476169a265",
     "legacy_ref": "origin/production-jekyll",
     "data_sha": "90f99728acd1e96d025ce0034fe43a38b572aa62",
     "data_ob_sha": "7d94b1c1a6425396525dc6e153ee09eece74cd54",
-    "snapshot_manifests": [
-      {
-        "path": "data/snapshots/bureaufax/manifest.json",
-        "sha256": "14e3c36a5ba7797cf097f95290d9b64b6bc4e94506ce77fd1e29eb40c894b04c"
-      },
-      {
-        "path": "data/snapshots/dp/manifest.json",
-        "sha256": "c82ccac817f86f843d49c05141fb5b1d108bbec02ce1ccdf0271b109fc18f5ea"
-      },
-      {
-        "path": "data/snapshots/e118-iin/manifest.json",
-        "sha256": "cb1509507c730da73474d4bdd6b24a3f194e196e261a48a4a730c87937e90b01"
-      },
-      {
-        "path": "data/snapshots/e164-acn/manifest.json",
-        "sha256": "fb8a2248f8bc062519b14c139583f00e3037612ed851d89d8ea5d216c75bdeeb"
-      },
-      {
-        "path": "data/snapshots/e164-cc/manifest.json",
-        "sha256": "9b2ba34fb6c611e060400a1b7ee96d60fbad787aba1d7ae473ce7a27673407a0"
-      },
-      {
-        "path": "data/snapshots/e164-note-n/manifest.json",
-        "sha256": "6643b7d5e39b113bd7ad029a26fe6a1da0680eda6773576950235445cbb4e586"
-      },
-      {
-        "path": "data/snapshots/e164-note-o/manifest.json",
-        "sha256": "82ecd4469af1766248cab7b6c6ac4cc9024576b72a8c08acdcf397bd9af34672"
-      },
-      {
-        "path": "data/snapshots/e164-note-pq/manifest.json",
-        "sha256": "70c1958f55039a5259ab9f16159b5b924f70b81bef8ebcdda93eb503ed0ed4e9"
-      },
-      {
-        "path": "data/snapshots/e212-mnc/manifest.json",
-        "sha256": "753cf48ef3fe1f49cf6d822575d9fc10a231d55c5c9349a3b6427c386f8a37b5"
-      },
-      {
-        "path": "data/snapshots/e212-shared-mcc/manifest.json",
-        "sha256": "7e2227e6f0a4af5b16d6039b0b26bca61222f95d42919db807b62816db810da3"
-      },
-      {
-        "path": "data/snapshots/e218-trcc/manifest.json",
-        "sha256": "781b4878faaeea60e09559f297a786a0f874063461694121d1aba51b4f746977"
-      },
-      {
-        "path": "data/snapshots/f1/manifest.json",
-        "sha256": "f2ea40f874f1967b86138aef62f4ba0b9eda5b54e78ac5140fdbfe8c7bdabffc"
-      },
-      {
-        "path": "data/snapshots/f32-tdi/manifest.json",
-        "sha256": "9a64f7abe2f332e4c693196202170c18c35182b733a6490076ff52d69426b3a1"
-      },
-      {
-        "path": "data/snapshots/f400-admd/manifest.json",
-        "sha256": "535976fa63205f7bae9c0bc073651ccfc6713b10fbdbc507a9eb9789af5bc50c"
-      },
-      {
-        "path": "data/snapshots/m1400-icc/manifest.json",
-        "sha256": "abb9cc0fd373c30808946db341468c3e8a322dbe74156ae3d9694c70aaf41b6d"
-      },
-      {
-        "path": "data/snapshots/q708-ispc/manifest.json",
-        "sha256": "652f79ec3ffb4569eff57de4adafa19bdc29b52662e1d5f3301d5054b708f082"
-      },
-      {
-        "path": "data/snapshots/q708-sanc/manifest.json",
-        "sha256": "c2fea02092fcf038b83f5ed75d6f814e3e9770ab42ea9ef468b0b7ad9092df8f"
-      },
-      {
-        "path": "data/snapshots/rr251/manifest.json",
-        "sha256": "a7136523f1e26b2e6d0c5438c1fed1208f9d1bc587933637cef8913772753a25"
-      },
-      {
-        "path": "data/snapshots/t35-cc/manifest.json",
-        "sha256": "f59207d0ee39e7306f421252126fbee8a369638857d669d87a273a5fe3ffd472"
-      },
-      {
-        "path": "data/snapshots/t35-na/manifest.json",
-        "sha256": "fda8e7852b2fc1f178961680dd322f7700c013779d339cb8272cf9017f80501a"
-      },
-      {
-        "path": "data/snapshots/x121-dnic/manifest.json",
-        "sha256": "5437fb1b45b5d14053ab538136c6168b929790a20c65eec639543afb675478eb"
-      }
-    ],
+    "snapshot_manifests": [],
     "projection": {
-      "provenance": "CI run 44108114203 authored-projection",
+      "provenance": "CI run 44108114203 authored-projection, head 0dddeec671; catalogs from pinned gitlink",
       "file_count": 14041,
       "tree_sha256": "351846dfdfa963ec99765f932c8d033df75d06b59793448113ca9d236e48f3ea"
     },
@@ -127,19 +42,23 @@
       },
       {
         "path": "src/pages/admin/editor.astro",
-        "sha256": "7337ac6cc2f096ab2af6430f79e8e06705b825532095a561a295700a4fbc7ced"
+        "sha256": "2704ed2d882e5905183a82bea0afeae28c944acbe84a72195d3d3999616abacc"
       },
       {
         "path": "src/pages/admin/general.astro",
-        "sha256": "ae51ebaf074bdd26a01998e9bc4ea0fd62b72c1a8e6d0f26c21cd04ba19fffdf"
+        "sha256": "e626d830615c2d858fa52afe69cef2d2cface3b76d14d68e7c3cea402ca066dd"
       },
       {
         "path": "src/pages/admin/index.astro",
-        "sha256": "411df72e6450e0909d5d584bf29bd78f12208f88c291f39f554c8d4326b6c32a"
+        "sha256": "c36b724ed82971046e3b35c5fcbd608a04a2313e4e5bf571aec949677decb58c"
       },
       {
         "path": "src/pages/admin/members.astro",
         "sha256": "a1b8db9865f0cd28de4b264150c33e0b26b260f9a1128f03adad4ddc3bb46913"
+      },
+      {
+        "path": "src/pages/admin/notifications.astro",
+        "sha256": "817c339bb224ac12f2f3cbbd8e1417cc5bbe069924b3051cdff769419d77d664"
       },
       {
         "path": "src/pages/admin/submissions.astro",
@@ -187,11 +106,11 @@
       },
       {
         "path": "src/pages/issues/[id]/[lang].astro",
-        "sha256": "842a178977ce06a1fcfabc874252dc3e1224dad5b0f71b2e190cc56cdcf16c3e"
+        "sha256": "75ceb2b70efefc44ab7c2e68067009f8562895a02c33981ed12a1e98b2b3f7f4"
       },
       {
         "path": "src/pages/issues/[id]/index.astro",
-        "sha256": "3e656a444d570003ea7ce7aa2fdabee9fefc52e29c841aa7f0c6f6d304704669"
+        "sha256": "9671514a5099caf8f3317c9c6754b6df0ae207c0cc649d2792edec1c5e5485a8"
       },
       {
         "path": "src/pages/issues/index.astro",
@@ -215,7 +134,7 @@
       },
       {
         "path": "src/pages/me/submissions.astro",
-        "sha256": "473bc400dd552e919d95f373c1d91717f79e4b05f4891eeb43be54b034c34445"
+        "sha256": "218c04c62322e61da2bd977259736fc64752e4b93f125d6ca06a64a61245232f"
       },
       {
         "path": "src/pages/recommendations/[code]/index.astro",
@@ -243,15 +162,15 @@
       },
       {
         "path": "src/pages/registers/[slug]/history/index.astro",
-        "sha256": "a2d2434e09211ee4fdc05568874eb79a16044d2f9e767cf28df26b14d669f45e"
+        "sha256": "c01d95cb30aeed6020e222e2c8232208f20218630d93e4c6c84fcbee5a9ad2af"
       },
       {
         "path": "src/pages/registers/[slug]/index.astro",
-        "sha256": "e1bc97d5667f846df570c86aa68570b07407503767768fb908b9d50afdf4456a"
+        "sha256": "fc601a04f8cce199831e66a4ac008e29bac2fb7c80626c9f0065d5e73e6bf742"
       },
       {
         "path": "src/pages/registers/[slug]/items/[key]/index.astro",
-        "sha256": "8e3317b3e2a5eacc05a69ae22b10eac1616a803e4f9dbc9ae67d83886fe802e0"
+        "sha256": "37f73ecf08488fc17e9f19bc5207b1066768281f1745fbd109d85dcc73badb27"
       },
       {
         "path": "src/pages/registers/[slug]/items/index.astro",
@@ -263,7 +182,7 @@
       },
       {
         "path": "src/pages/search.astro",
-        "sha256": "6afeb45f694e124f308adb4cef7599b5daca277859779dfe3e628344fbff60ac"
+        "sha256": "03a545b5fb6579f81fa39ac7b8780d2dc07aaaf9a7dcf2e732e47a3527890671"
       },
       {
         "path": "src/pages/types/[type]/index.astro",
@@ -289,6 +208,7 @@
       "scoped_page": 299,
       "overview": 0,
       "unmapped": 11,
+      "retirement_proposed": 11,
       "same_path": 13,
       "failures": []
     },
@@ -298,7 +218,7 @@
       "no_new_page": 11,
       "redirect_required": 624
     },
-    "relevant_new_routes": 4446,
+    "relevant_new_routes": 4426,
     "old_resources": 5140,
     "resources": {
       "not_in_public": 5133,
@@ -314,12 +234,12 @@
     },
     {
       "source": "src/pages/issues/[id]/[lang].astro",
-      "sha256": "842a178977ce06a1fcfabc874252dc3e1224dad5b0f71b2e190cc56cdcf16c3e",
+      "sha256": "75ceb2b70efefc44ab7c2e68067009f8562895a02c33981ed12a1e98b2b3f7f4",
       "count": 3
     },
     {
       "source": "src/pages/issues/[id]/index.astro",
-      "sha256": "3e656a444d570003ea7ce7aa2fdabee9fefc52e29c841aa7f0c6f6d304704669",
+      "sha256": "9671514a5099caf8f3317c9c6754b6df0ae207c0cc649d2792edec1c5e5485a8",
       "count": 396
     },
     {
@@ -344,8 +264,8 @@
     },
     {
       "source": "src/pages/registers/[slug]/index.astro",
-      "sha256": "e1bc97d5667f846df570c86aa68570b07407503767768fb908b9d50afdf4456a",
-      "count": 26
+      "sha256": "fc601a04f8cce199831e66a4ac008e29bac2fb7c80626c9f0065d5e73e6bf742",
+      "count": 5
     }
   ],
   "pages": [
@@ -373,7 +293,10 @@
       "archive_disposition": null,
       "publication_scope": "underscore_copy_not_established_public",
       "route_evidence": "no_verified_target",
-      "rationale": "No equivalent page identified"
+      "rationale": "No equivalent page identified",
+      "disposition": "retirement_proposed",
+      "equivalent_route": "/docs/amend-publication/",
+      "retirement_reason": "Underscore copy of the /docs/ help page; production answered 404 for it, so no inbound URLs exist to preserve"
     },
     {
       "old_url": "/_app_help/find-edition/",
@@ -386,7 +309,10 @@
       "archive_disposition": null,
       "publication_scope": "underscore_copy_not_established_public",
       "route_evidence": "no_verified_target",
-      "rationale": "No equivalent page identified"
+      "rationale": "No equivalent page identified",
+      "disposition": "retirement_proposed",
+      "equivalent_route": "/docs/find-edition/",
+      "retirement_reason": "Underscore copy of the /docs/ help page; production answered 404 for it, so no inbound URLs exist to preserve"
     },
     {
       "old_url": "/_app_help/",
@@ -399,7 +325,10 @@
       "archive_disposition": null,
       "publication_scope": "underscore_copy_not_established_public",
       "route_evidence": "no_verified_target",
-      "rationale": "No equivalent page identified"
+      "rationale": "No equivalent page identified",
+      "disposition": "retirement_proposed",
+      "equivalent_route": "/docs/",
+      "retirement_reason": "Underscore copy of the /docs/ help page; production answered 404 for it, so no inbound URLs exist to preserve"
     },
     {
       "old_url": "/_app_help/messages/",
@@ -412,7 +341,10 @@
       "archive_disposition": null,
       "publication_scope": "underscore_copy_not_established_public",
       "route_evidence": "no_verified_target",
-      "rationale": "No equivalent page identified"
+      "rationale": "No equivalent page identified",
+      "disposition": "retirement_proposed",
+      "equivalent_route": "/docs/messages/",
+      "retirement_reason": "Underscore copy of the /docs/ help page; production answered 404 for it, so no inbound URLs exist to preserve"
     },
     {
       "old_url": "/_app_help/messages/running_annexes/",
@@ -425,7 +357,10 @@
       "archive_disposition": null,
       "publication_scope": "underscore_copy_not_established_public",
       "route_evidence": "no_verified_target",
-      "rationale": "No equivalent page identified"
+      "rationale": "No equivalent page identified",
+      "disposition": "retirement_proposed",
+      "equivalent_route": "/docs/messages/running_annexes/",
+      "retirement_reason": "Underscore copy of the /docs/ help page; production answered 404 for it, so no inbound URLs exist to preserve"
     },
     {
       "old_url": "/_app_help/messages/service_restrictions/",
@@ -438,7 +373,10 @@
       "archive_disposition": null,
       "publication_scope": "underscore_copy_not_established_public",
       "route_evidence": "no_verified_target",
-      "rationale": "No equivalent page identified"
+      "rationale": "No equivalent page identified",
+      "disposition": "retirement_proposed",
+      "equivalent_route": "/docs/messages/service_restrictions/",
+      "retirement_reason": "Underscore copy of the /docs/ help page; production answered 404 for it, so no inbound URLs exist to preserve"
     },
     {
       "old_url": "/_app_help/migration/find-legacy-edition/",
@@ -451,7 +389,10 @@
       "archive_disposition": null,
       "publication_scope": "underscore_copy_not_established_public",
       "route_evidence": "no_verified_target",
-      "rationale": "No equivalent page identified"
+      "rationale": "No equivalent page identified",
+      "disposition": "retirement_proposed",
+      "equivalent_route": "/docs/migration/find-legacy-edition/",
+      "retirement_reason": "Underscore copy of the /docs/ help page; production answered 404 for it, so no inbound URLs exist to preserve"
     },
     {
       "old_url": "/_app_help/migration/",
@@ -464,7 +405,10 @@
       "archive_disposition": null,
       "publication_scope": "underscore_copy_not_established_public",
       "route_evidence": "no_verified_target",
-      "rationale": "No equivalent page identified"
+      "rationale": "No equivalent page identified",
+      "disposition": "retirement_proposed",
+      "equivalent_route": "/docs/migration/",
+      "retirement_reason": "Underscore copy of the /docs/ help page; production answered 404 for it, so no inbound URLs exist to preserve"
     },
     {
       "old_url": "/_app_help/migration/migrate-edition/",
@@ -477,7 +421,10 @@
       "archive_disposition": null,
       "publication_scope": "underscore_copy_not_established_public",
       "route_evidence": "no_verified_target",
-      "rationale": "No equivalent page identified"
+      "rationale": "No equivalent page identified",
+      "disposition": "retirement_proposed",
+      "equivalent_route": "/docs/migration/migrate-edition/",
+      "retirement_reason": "Underscore copy of the /docs/ help page; production answered 404 for it, so no inbound URLs exist to preserve"
     },
     {
       "old_url": "/_app_help/migration/prepare-repo/",
@@ -490,7 +437,10 @@
       "archive_disposition": null,
       "publication_scope": "underscore_copy_not_established_public",
       "route_evidence": "no_verified_target",
-      "rationale": "No equivalent page identified"
+      "rationale": "No equivalent page identified",
+      "disposition": "retirement_proposed",
+      "equivalent_route": "/docs/migration/prepare-repo/",
+      "retirement_reason": "Underscore copy of the /docs/ help page; production answered 404 for it, so no inbound URLs exist to preserve"
     },
     {
       "old_url": "/_app_help/schedule/",
@@ -503,7 +453,10 @@
       "archive_disposition": null,
       "publication_scope": "underscore_copy_not_established_public",
       "route_evidence": "no_verified_target",
-      "rationale": "No equivalent page identified"
+      "rationale": "No equivalent page identified",
+      "disposition": "retirement_proposed",
+      "equivalent_route": "/docs/schedule/",
+      "retirement_reason": "Underscore copy of the /docs/ help page; production answered 404 for it, so no inbound URLs exist to preserve"
     },
     {
       "old_url": "/docs/amend-publication/",

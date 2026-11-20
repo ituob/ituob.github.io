@@ -59,29 +59,22 @@ conditional until the release produces the same manifests. Replay contents are n
 |Issue editions |313 |310 redirect candidates; 3 unverified translations
 |Recommendation archives |106 |12 redirect candidates; 94 year archives need a decision
 |Publication edition/year archives |205 |Overview candidates require a content decision
-|Help and documentation |22 |No equivalent page identified
+|Help and documentation |22 |11 `/docs/` same path; 11 `/_app_help/` copies proposed for retirement
 |===
 
 The conservative inventory contains 648 HTML candidates: 637 public-shaped files
 and 11 underscore-prefixed help copies not established as published. Sample HEAD probes covered only the roots: `/_app_help/` returned 404 while `/docs/` returned 200.
-Child URLs were not individually probed. The 25 gaps include 11 underscore copies
-whose publication is not established, leaving 14 potentially public gaps.
+All 11 `/_app_help/` child URLs were later probed (2026-11-20) and returned 404, while
+their `/docs/` twins exist. They are marked `disposition: retirement_proposed` with
+`equivalent_route`; no redirect is added for URLs that never resolved. Approval is the owner's.
 
-Overall: 648 old page candidates; 2 same paths, 322 redirects required, 25 without verified
-new pages, and 299 semantic replacements requiring a decision.
-No legacy-path redirects were found in the checked source: the Worker's apex-to-www
-redirect preserves the path and does not solve these aliases.
+Overall: 648 old page candidates; 13 same paths, 624 redirects required, 11 without
+new pages (the proposed retirements) and 299 of the redirects land on scoped archives.
 
-The three untranslated targets are `/issues/1173-ru/`, `/issues/1173-zh/`, and
-`/issues/1195-fr/`. Both normalized gitlink data and the retained authored CI projection return zero
-translated paths. The final JSON uses the latter, CI run 44108114203 at head
-`0dddeec671782253e58f22fbce1bbe151764e6d7`. Its route generators, data gitlinks,
-and projection script match main; among `src/lib` files only
-`register-rules.generated.ts` differs. These remain source-inferred gaps against
-a prior successful CI input, not HTTP-proven omissions from the eventual main release.
-Validate them against the exact release projection before deciding whether to restore
-content or retire/redirect a language edition. The other 22 gaps comprise every old
-`/docs/` and `/_app_help/` page, including their indexes and nested migration/message pages.
+The three translated issues `/issues/1173-ru/`, `/issues/1173-zh/` and `/issues/1195-fr/`
+resolve to concrete generated routes in the recorded projection (CI run 44108114203,
+head `0dddeec671782253e58f22fbce1bbe151764e6d7`); this is source-inferred against a prior
+CI input, not HTTP-proven for the eventual release.
 
 `redirect_required` means the candidate was present in concrete generated paths;
 it does not mean a redirect exists. `replacement_requires_decision` means an overview

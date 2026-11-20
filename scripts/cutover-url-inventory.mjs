@@ -138,6 +138,13 @@ try {
       archive_disposition: archiveRoutes[oldPath] ? (redirect === archiveRoutes[oldPath] && targetExists ? 'exact_scope' : 'overview') : null, publication_scope: file.startsWith('_app_help/') ? 'underscore_copy_not_established_public' : 'public_shaped_artifact_not_individually_http_probed',
       route_evidence: targetExists && candidate.startsWith('/registers/') && !catalog.find(r => `/registers/${r.slug}/` === candidate)?.external ? 'conditional_on_hashed_untracked_snapshot_manifest' : targetExists ? 'committed_source_and_gitlink_data' : 'no_verified_target',
       rationale };
+  }).map(row => {
+    // The underscore help copies are byte-for-byte siblings of /docs/ (title aside) and answered 404 in
+    // production, so they get no redirect: propose retiring them in favour of the live /docs/ page.
+    if (!row.old_url.startsWith('/_app_help/')) return row;
+    const equivalent = row.old_url.replace('/_app_help/', '/docs/');
+    return { ...row, disposition: 'retirement_proposed', equivalent_route: routes.has(equivalent) ? equivalent : null,
+      retirement_reason: 'Underscore copy of the /docs/ help page; production answered 404 for it, so no inbound URLs exist to preserve' };
   });
   // Exercise the same resolver used before ASSETS, against concrete path generators.
   // The published custom 404 has a route but intentionally returns HTTP 404.
@@ -174,7 +181,7 @@ try {
       route_source_sha256: pageFiles.map(f => ({ path: relative(root, f), sha256: digest(readFileSync(f)) })) },
     methodology: 'All tracked production HTML files, including help/docs and collection/year archives. Execute imported getStaticPaths functions from current Astro source using Vite SSR with the recorded issue/dataset input and committed catalog/recommendation data, without rendering/building. Static pages/endpoints from src/pages; candidate dynamic routes checked against actual generated paths, never a wildcard match.',
     limitations: ['Routes are source-inferred from current source plus the recorded projection when supplied, otherwise normalized gitlink data. A prior CI projection is not the exact main release; rendering and deployment still need artifact verification.', 'Generated snapshot manifests are separately hashed untracked inputs; snapshot-dependent rows are conditional. No replay data or full build was run.', 'Only dynamic route families that can serve these old URLs are evaluated, including scoped legacy archives; other dynamic families are not counted.', 'Same path proves route existence, not content parity or HTTP deployment behavior. Worker redirect destinations are checked against the concrete route table.', 'Resource presence is path-only (not byte parity); tracked source data/cache resources are included conservatively. Sitemap output from the Astro integration requires a build; its sitemap index does not imply a legacy sitemap.xml alias.'],
-    summary: { compatibility: { redirected: pages.filter(p => p.redirect_present).length, scoped_page: pages.filter(p => p.archive_disposition === 'exact_scope').length, overview: pages.filter(p => p.archive_disposition === 'overview').length, unmapped: pages.filter(p => !p.new_route).length, same_path: pages.filter(p => p.status === 'same_path').length, failures }, old_pages: pages.length, pages: counts(pages), relevant_new_routes: routes.size, old_resources: resources.length, resources: counts(resources), legacy_feed_sitemap_pagination_files: files.filter(f => /(^|\/)(feed|sitemap|atom|rss|page\d*)([/.]|$)/i.test(f)) },
+    summary: { compatibility: { redirected: pages.filter(p => p.redirect_present).length, scoped_page: pages.filter(p => p.archive_disposition === 'exact_scope').length, overview: pages.filter(p => p.archive_disposition === 'overview').length, unmapped: pages.filter(p => !p.new_route).length, retirement_proposed: pages.filter(p => p.disposition === 'retirement_proposed').length, same_path: pages.filter(p => p.status === 'same_path').length, failures }, old_pages: pages.length, pages: counts(pages), relevant_new_routes: routes.size, old_resources: resources.length, resources: counts(resources), legacy_feed_sitemap_pagination_files: files.filter(f => /(^|\/)(feed|sitemap|atom|rss|page\d*)([/.]|$)/i.test(f)) },
     evaluated_generators: evaluatedSources, pages, resources,
   };
   mkdirSync(dirname(out), { recursive: true });
