@@ -169,7 +169,8 @@ jobs:
 
   # Cloudflare staging (ituob-org-staging.<account>.workers.dev, later
   # staging-www.ituob.org). Gated on the repo variable — flip it on
-  # once CLOUDFLARE_API_TOKEN / CLOUDFLARE_ACCOUNT_ID are set.
+  # once CLOUDFLARE_API_TOKEN / CLOUDFLARE_ACCOUNT_ID are set. Preflight profile:
+  # repo variable CLOUDFLARE_PROFILE (public by default; full needs generated bindings).
   deploy-cloudflare-staging:
     needs: build
     if: github.ref == 'refs/heads/staging' && github.event_name == 'push'
@@ -186,7 +187,8 @@ jobs:
     - name: Verify staging bindings and authentication configuration
       env:
         CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
-      run: node scripts/configure-cloudflare.mjs --check --environment staging
+        CLOUDFLARE_PROFILE: ${{ vars.CLOUDFLARE_PROFILE || 'public' }}
+      run: node scripts/configure-cloudflare.mjs --check --environment staging --profile "$CLOUDFLARE_PROFILE"
     - name: Deploy to Cloudflare Workers (staging)
       uses: cloudflare/wrangler-action@v3
       with:
@@ -215,7 +217,8 @@ jobs:
     - name: Verify production bindings and authentication configuration
       env:
         CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
-      run: node scripts/configure-cloudflare.mjs --check --environment production
+        CLOUDFLARE_PROFILE: ${{ vars.CLOUDFLARE_PROFILE || 'public' }}
+      run: node scripts/configure-cloudflare.mjs --check --environment production --profile "$CLOUDFLARE_PROFILE"
     - name: Deploy to Cloudflare Workers (production)
       uses: cloudflare/wrangler-action@v3
       with:

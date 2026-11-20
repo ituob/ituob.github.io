@@ -28,6 +28,21 @@ test('all public routes have concrete targets and only underscore copies remain 
   assert.equal(page('/issues/1195-fr/').new_route, '/issues/1195/fr/');
 });
 
+test('every unmapped page is an underscore help copy proposed for retirement in favour of its live /docs/ twin', () => {
+  const unmapped = report.pages.filter(p => p.status === 'no_new_page');
+  assert.equal(unmapped.length, 11);
+  assert.equal(report.summary.compatibility.retirement_proposed, 11);
+  for (const row of unmapped) {
+    assert.equal(row.disposition, 'retirement_proposed', row.old_url);
+    assert.match(row.old_url, /^\/_app_help\//);
+    assert.equal(row.redirect_present, false);
+    assert.equal(row.equivalent_route, row.old_url.replace('/_app_help/', '/docs/'));
+    assert.equal(page(row.equivalent_route)?.status, 'same_path', row.equivalent_route);
+    assert.ok(row.retirement_reason);
+  }
+  assert.equal(report.pages.filter(p => p.disposition === 'retirement_proposed').length, 11);
+});
+
 test('all 299 scoped archives preserve their scope, with no overview fallbacks', () => {
   assert.equal(report.pages.filter(p => p.archive_disposition === 'exact_scope').length, 299);
   assert.equal(report.summary.compatibility.overview, 0);

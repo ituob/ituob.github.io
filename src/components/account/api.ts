@@ -13,6 +13,7 @@ export interface Membership {
   id: number; kind: string; member_id: string | null; status: string;
   claim_note?: string | null; decision_note?: string | null; claimed_at?: string;
 }
+export class NotAvailableYet extends Error {}
 export async function api<T>(path: string, body?: unknown): Promise<T> {
   const response = await fetch(path, {
     method: body === undefined ? "GET" : "POST",
@@ -27,6 +28,7 @@ export async function api<T>(path: string, body?: unknown): Promise<T> {
   if (response.status === 403) throw new Error((await explainRefusal(path)) ?? "You do not have permission for this action. Administration requires Cloudflare Access sign-in.");
   if (!response.headers.get("Content-Type")?.includes("application/json")) throw new Error("The service could not complete this request. Please try again.");
   const data = await response.json();
+  if (data?.code === "not_available_yet") throw new NotAvailableYet(data.error);
   if (!response.ok) throw new Error(typeof data.error === "string" ? data.error : "The request failed. Please try again.");
   return data as T;
 }

@@ -3,7 +3,7 @@ import { env } from "cloudflare:workers";
 import { addUser, db } from "./helpers.ts";
 import { flushOutbox } from "../worker/lib/outbox.ts";
 import type { Env } from "../worker/lib/types.ts";
-import worker from "../worker/index.ts";
+import worker, { NOT_AVAILABLE_MESSAGE } from "../worker/index.ts";
 import type { RuntimeEnv } from "../worker/lib/types.ts";
 import type { NotifyMessage } from "../worker/lib/outbox.ts";
 
@@ -18,12 +18,23 @@ describe("unprovisioned bindings", () => {
     expect(redirect.headers.get("Location")).toBe("https://www.ituob.org/docs?a=1");
   });
 
-  it("returns a clear uncached 503 for API, auth and admin when DB is absent", async () => {
+  it("answers a clear uncached not-available-yet (not a 503) for API, auth and admin when DB is absent", async () => {
     for (const path of ["/admin", "/admin/editor/", "/api/whoami", "/api/github/webhook", "/api/email/webhook", "/auth", "/auth/login", "/auth/callback", "/auth/logout"]) {
       const response = await worker.fetch(new Request(`https://www.ituob.org${path}`), staticEnv());
-      expect(response.status, path).toBe(503);
+      expect(response.status, path).toBe(404);
       expect(response.headers.get("Cache-Control")).toBe("no-store");
-      expect(await response.json()).toEqual({ error: "Webapp unavailable: DB binding is not configured." });
+      expect(await response.json()).toEqual({ error: NOT_AVAILABLE_MESSAGE, code: "not_available_yet" });
+    }
+  });
+
+  it("answers browsers a small HTML page and leaves static pages and PDFs untouched", async () => {
+    const page = await worker.fetch(new Request("https://www.ituob.org/auth/login", { headers: { Accept: "text/html" } }), staticEnv());
+    expect(page.status).toBe(404);
+    expect(page.headers.get("Content-Type")).toContain("text/html");
+    expect(await page.text()).toContain("not available yet");
+    for (const path of ["/about/", "/downloads/x.pdf", "/me/", "/authors/", "/administration/"]) {
+      const response = await worker.fetch(new Request(`https://www.ituob.org${path}`), staticEnv());
+      expect(await response.text(), path).toBe("static asset");
     }
   });
 

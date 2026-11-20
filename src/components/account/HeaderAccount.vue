@@ -1,18 +1,19 @@
 <script setup lang="ts">
 import "../../styles/admin-forms.css";
 import { onMounted, ref } from "vue";
-import { api, type Identity } from "./api";
+import { api, NotAvailableYet, type Identity } from "./api";
 
 const identity = ref<Identity | null>(null);
+const available = ref(true);
 async function load() {
   try { identity.value = await api<Identity>("/api/whoami"); }
-  catch { identity.value = null; }
+  catch (error) { identity.value = null; if (error instanceof NotAvailableYet) available.value = false; }
 }
 onMounted(load);
 </script>
 
 <template>
-  <div class="header-account">
+  <div v-if="available" class="header-account">
     <details v-if="identity?.authenticated">
       <summary>{{ identity.user?.displayName || identity.user?.email || identity.userId || 'My account' }}</summary>
       <nav class="account-links" aria-label="Account">

@@ -4,8 +4,8 @@
 The live `wrangler.jsonc` (production) and `wrangler.staging.jsonc` retain the
 static deployment configuration from main. They contain no D1, queue, or cron
 bindings. Deploying them does not opt into resource provisioning. Without `DB`,
-static assets and canonical redirects work; API and sign-in return an uncached
-503 explaining the missing binding. Scheduled work skips with a diagnostic, and
+static assets and canonical redirects work; API, sign-in and admin return an
+uncached 404 "not available yet". Scheduled work skips with a diagnostic, and
 queue deliveries retry rather than acknowledge messages. Without `NOTIFY_Q`,
 outbox rows remain queued for later delivery.
 

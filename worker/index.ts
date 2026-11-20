@@ -25,6 +25,19 @@ function hasDatabase(env: RuntimeEnv): env is Env {
 
 const APEX_HOST = "ituob.org";
 
+export const NOT_AVAILABLE_MESSAGE = "Sign-in, member and administration features are not available yet.";
+
+// Public-only profile (no DB binding): the read-only site is complete, the account surface is not
+// deployed. Answer plainly (404, never cached) instead of a raw 503; browsers get a small page.
+function notAvailableYet(request: Request): Response {
+  const headers = { "Cache-Control": "no-store" };
+  if (request.headers.get("Accept")?.includes("text/html")) {
+    const body = `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Not available yet</title></head><body><h1>Not available yet</h1><p>${NOT_AVAILABLE_MESSAGE}</p><p><a href="/">Return to the home page</a></p></body></html>`;
+    return new Response(body, { status: 404, headers: { ...headers, "Content-Type": "text/html; charset=utf-8" } });
+  }
+  return Response.json({ error: NOT_AVAILABLE_MESSAGE, code: "not_available_yet" }, { status: 404, headers });
+}
+
 export default {
   async fetch(request: Request, env: RuntimeEnv): Promise<Response> {
     const url = new URL(request.url);
@@ -38,9 +51,7 @@ export default {
     }
 
     if ((url.pathname.startsWith("/api/") || url.pathname === "/auth" || url.pathname.startsWith("/auth/")) && !hasDatabase(env)) {
-      return Response.json({ error: "Webapp unavailable: DB binding is not configured." }, {
-        status: 503, headers: { "Cache-Control": "no-store" },
-      });
+      return notAvailableYet(request);
     }
 
     if (url.pathname.startsWith("/api/") && hasDatabase(env)) {
@@ -59,11 +70,7 @@ export default {
     // Worker-first routing must preserve the admin gate even if an Access
     // application is accidentally omitted from the edge configuration.
     if (url.pathname === "/admin" || url.pathname.startsWith("/admin/")) {
-      if (!hasDatabase(env)) {
-        return Response.json({ error: "Webapp unavailable: DB binding is not configured." }, {
-          status: 503, headers: { "Cache-Control": "no-store" },
-        });
-      }
+      if (!hasDatabase(env)) return notAvailableYet(request);
       try {
         const access = await getAccessIdentity(request, env);
         if (!access) return new Response("Forbidden", { status: 403 });
