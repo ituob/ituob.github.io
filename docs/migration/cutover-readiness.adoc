@@ -97,15 +97,12 @@ The checked-in production and staging configs have no DB or queue bindings.
 See link:../webapp-deployment.adoc[deployment configuration and preflight] for
 resource discovery and generated full-webapp configuration.
 
-*Preserve phase order:* the existing deployment preflight expects the full
-webapp's D1, queues, OIDC and provider configuration. This creates a dependency
-on later phases if used unchanged. Choose and implement a public-site-only
-production profile/preflight, with later-phase UI/routes disabled or clearly
-unavailable, or explicitly accept a separately provisioned full-webapp deployment.
-Do not make completion of the editor or identity service an accidental prerequisite
-for moving the read-only website. `worker/index.ts` can serve static assets without
-DB, but returns 503 for `/api/*`, `/auth*` and `/admin*` without it; that alone does
-not make the current CI preflight or member UI suitable for a public-only launch.
+*Preserve phase order:* the read-only website must not wait for the editor or
+the identity service. The `public` preflight profile (`configure-cloudflare.mjs
+--check --profile public`, the CI default) accepts a config without D1, queues,
+cron or secrets. Without `DB`, `worker/index.ts` serves static assets and answers
+`/api/*`, `/auth*` and `/admin*` with an uncached 404 "not available yet", and the
+header hides "Sign in". The `full` profile keeps the full-webapp requirements.
 
 === URL compatibility
 

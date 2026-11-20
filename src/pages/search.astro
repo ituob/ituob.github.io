@@ -40,6 +40,9 @@ import Base from "~/layouts/Base.astro";
           status.textContent = "Search index could not be loaded.";
           return;
         }
+        // A newer keystroke ran while the index loaded; it owns the list now.
+        if (input.value.trim() !== q) return;
+        list.replaceChildren();
       }
       const hits = filterEntries(index, q);
       status.textContent = hits.length ? `${hits.length} result${hits.length === 1 ? "" : "s"}` : `No results for "${q}".`;

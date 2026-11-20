@@ -26,8 +26,8 @@ test("matches meta and requires every term", () => {
 });
 
 test("prefix match outranks mid-label match; boost breaks ties", () => {
-  assert.equal(filterEntries(entries, "ob no")[0].href, "/issues/1350/");
-  assert.equal(filterEntries(entries, "E.164")[0].label, "E.164 (2010) PDF");
+  assert.equal(filterEntries(entries, "ob no")[0]?.href, "/issues/1350/");
+  assert.equal(filterEntries(entries, "E.164")[0]?.label, "E.164 (2010) PDF");
 });
 
 test("no match yields an empty list", () => {

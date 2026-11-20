@@ -14,13 +14,14 @@ export interface SearchEntry {
 
 export function filterEntries(entries: SearchEntry[], query: string): SearchEntry[] {
   const terms = query.toLowerCase().split(/\s+/).filter(Boolean);
-  if (terms.length === 0) return [];
+  const [firstTerm] = terms;
+  if (firstTerm === undefined) return [];
   const scored: { entry: SearchEntry; score: number }[] = [];
   for (const entry of entries) {
     const label = entry.label.toLowerCase();
     const hay = `${label} ${(entry.meta ?? "").toLowerCase()}`;
     if (!terms.every((t) => hay.includes(t))) continue;
-    const first = label.indexOf(terms[0]);
+    const first = label.indexOf(firstTerm);
     const position = first === 0 ? 500 : first > 0 ? 200 - first : 0;
     scored.push({ entry, score: position + (entry.boost ?? 0) });
   }
