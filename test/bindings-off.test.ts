@@ -3,7 +3,8 @@ import { env } from "cloudflare:workers";
 import { addUser, db } from "./helpers.ts";
 import { flushOutbox } from "../worker/lib/outbox.ts";
 import type { Env } from "../worker/lib/types.ts";
-import worker, { NOT_AVAILABLE_MESSAGE } from "../worker/index.ts";
+import worker from "../worker/index.ts";
+import { NOT_AVAILABLE_MESSAGE } from "../worker/lib/not-available.ts";
 import type { RuntimeEnv } from "../worker/lib/types.ts";
 import type { NotifyMessage } from "../worker/lib/outbox.ts";
 

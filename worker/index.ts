@@ -18,6 +18,7 @@ import { getAccessIdentity, StubMisconfigured } from "./lib/session.ts";
 import { ituSession } from "./submission-routes.ts";
 import { Forbidden, requireRole } from "./lib/authz.ts";
 import type { Env, RuntimeEnv } from "./lib/types.ts";
+import { NOT_AVAILABLE_MESSAGE } from "./lib/not-available.ts";
 
 function hasDatabase(env: RuntimeEnv): env is Env {
   return !!env.DB;
@@ -25,7 +26,6 @@ function hasDatabase(env: RuntimeEnv): env is Env {
 
 const APEX_HOST = "ituob.org";
 
-export const NOT_AVAILABLE_MESSAGE = "Sign-in, member and administration features are not available yet.";
 
 // Public-only profile (no DB binding): the read-only site is complete, the account surface is not
 // deployed. Answer plainly (404, never cached) instead of a raw 503; browsers get a small page.
