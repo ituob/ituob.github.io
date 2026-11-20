@@ -216,6 +216,7 @@
     font-weight: 700;
     color: var(--fg);
     text-wrap: balance;
+    overflow-wrap: break-word;
     letter-spacing: -0.022em;
   }
 
@@ -272,7 +273,7 @@
 @layer components {
   /* -- Layout containers — TRUE FULL BLEED (liquid) --------------------- */
   .container-full { width: 100%; max-width: 100%; margin-inline: auto; }
-  .container-wide { width: 100%; max-width: 100%; margin-inline: auto; }
+  .container-wide { width: 100%; max-width: 1920px; margin-inline: auto; }
   .container-content { width: 100%; max-width: 1440px; margin-inline: 0; }
   .measure { max-width: var(--measure); }
   .measure-read { max-width: var(--measure-read); }
@@ -476,6 +477,7 @@
 
   /* -- Prose ------------------------------------------------------------- */
   .prose-bulletin {
+    overflow-wrap: anywhere;
     font-size: var(--step-0);
     line-height: var(--line-height-body);
     color: var(--fg-1);
@@ -502,6 +504,7 @@
     margin-bottom: 0.5rem;
   }
   .table-bulletin th, .table-bulletin td {
+    overflow-wrap: anywhere;
     text-align: left;
     vertical-align: top;
     padding: 0.5rem 0.7rem;
@@ -524,6 +527,12 @@
   }
   .table-bulletin tbody tr:hover {
     background: var(--bg-hover);
+  }
+  /* Small screens: a table wider than the column scrolls inside itself. */
+  @media (max-width: 899px) {
+    .table-bulletin { display: block; max-width: 100%; overflow-x: auto; }
+    .table-bulletin thead th { position: static; }
+    .table-bulletin th, .table-bulletin td { overflow-wrap: break-word; }
   }
 
   /* -- Inline pill / chip (metallic, depth) ----------------------------- */

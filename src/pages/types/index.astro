@@ -26,15 +26,15 @@ const types = ALL_GENERAL_TYPES.map((t) => ({
     </p>
   </header>
 
-  <ul class="grid sm:grid-cols-2 gap-3" style="font-family: var(--font-sans);">
+  <ul class="grid grid-cols-1 sm:grid-cols-2 gap-3" style="font-family: var(--font-sans);">
     {types.map(({ type, label, structured, count }) => (
       <li>
         <a href={`/types/${type}/`} class="block panel p-4 no-underline hover:border-[var(--accent)]">
           <span class="block font-semibold text-[var(--step-1)]" style="font-family: var(--font-display);">
             {label}
           </span>
-          <span class="mt-1 flex items-center gap-2 text-[var(--step--1)]" style="color: var(--fg-muted);">
-            <code class="num">{type}</code>
+          <span class="mt-1 flex flex-wrap items-center gap-2 text-[var(--step--1)]" style="color: var(--fg-muted);">
+            <code class="num min-w-0 break-all">{type}</code>
             {structured && <span class="chip">structured</span>}
             <span class="ml-auto num">{count} issues</span>
           </span>

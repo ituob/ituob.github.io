@@ -220,6 +220,7 @@
 
   function selectMessageAndSection(currentMessageEl, sectionMenu, messageMenu) {
     const messageTitle = getMenuItemTitleForMessage(currentMessageEl);
+    if (!messageTitle) return;
     sectionMenu.selectItemContainingSubitemWithTitle(messageTitle);
     messageMenu.setItems(sectionMenu.getSelectedItem().items);
     messageMenu.selectItemByTitle(messageTitle);
@@ -278,8 +279,11 @@
   }
 
   function getMenuItemTitleForMessage(element) {
-    return Array.from(element.children).
-      filter(e => e.matches('header'))[0].querySelector('.title > .text').textContent;
+    // Some messages have no header, or a header without .title > .text.
+    const header = Array.from(element.children).filter(e => e.matches('header'))[0];
+    if (!header) return null;
+    const text = header.querySelector('.title > .text') || header.querySelector('.title') || header;
+    return text.textContent.trim() || null;
   }
 
   function buildSectionMenu() {
@@ -303,9 +307,10 @@
         filter(e => e.matches('article')).
         forEach(messageEl => {
       const anchor = messageEl.querySelector('a.anchor');
-      if (anchor && anchor.hasAttribute('id')) {  // Exclude items without anchor
+      const title = getMenuItemTitleForMessage(messageEl);
+      if (title && anchor && anchor.hasAttribute('id')) {  // Exclude items without anchor or title
         items.push({
-          title: getMenuItemTitleForMessage(messageEl),
+          title: title,
           id: anchor.getAttribute('id'),
           anchor: anchor,
           el: messageEl,
