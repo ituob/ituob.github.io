@@ -224,13 +224,17 @@ results and cache implications. Genuine unknown paths must remain 404.
   the chosen tracking and consent behavior, verify production events, and avoid
   sending staging traffic to the production property.
 | Search
-| `/search/` imports `/pagefind/pagefind-ui.js`; no Pagefind generation step
-  exists in `package.json` or the build workflow. Command palette separately
-  uses `src/pages/cmdk-index.json.ts`.
-| Add reproducible indexing/UI assets (including styling) or replace the search
-  implementation. Verify representative issue, register and recommendation
-  queries plus result links. Check command-palette/download targets too;
-  `/downloads/` is referenced but has no page on this baseline.
+| The published Jekyll site (`production-jekyll` 8ef2eb4) has no search: no
+  search page, script, index file or search form (zero `search` matches in
+  `index.html`, `404.html`, `assets/js/*`; no tree path matching `search` or
+  `index.json`; the only content hits are an external registry URL in message
+  text). Search is a new feature, not a parity gap. The new `/search/` page now
+  filters the build-time command-palette index (`/cmdk-index.json`, from
+  `src/pages/cmdk-index.json.ts`) on the client by `?q=` and a text input; no
+  Pagefind and no new dependency.
+| Basic search over the command-palette index; parity not required. Index
+  entries carry only label, href, meta and kind (no full text), so results are
+  titles and identifiers, not body text. Verify `/search/?q=E.164` in staging.
 |===
 
 `public/_headers` declares security headers and immutable Astro-asset caching.
@@ -270,8 +274,8 @@ for both production names before public traffic moves.
   final release artifact; see below. Revalidate the chosen candidate.
 | Code / release operator
 | Blocking
-| Search index generation missing; final sitemap, redirects, TLS and 404 runtime
-  evidence absent. Pass staged acceptance before the switch.
+| Final sitemap, redirects, TLS and 404 runtime evidence absent (search index
+  is not a parity gate: the old site had no search; see search row). Pass staged acceptance before the switch.
 | Code / release operator
 | Decision
 | Analytics continuity, undocumented feed consumers, intentional help-page
@@ -315,9 +319,10 @@ scheduling and account authority; none was performed for this assessment.
   display completion as predecessor gates; editor and identity are later work.
   Assign a release operator, DNS/account operator and rollback decision maker.
 . *Complete code gaps*: finalize every inventory disposition, implement/test
-  redirects and anchors, repair release CI, complete search, indexing and the
-  analytics decision. Use the public-only production profile (or an agreed full
-  configuration) and supply the account_id. The old deployment runbook is reconciled. Do not enable production
+  redirects and anchors, repair release CI, verify basic search (new feature, not
+  parity), indexing and the analytics decision. Use the public-only production
+  profile (or an agreed full configuration) and supply the account_id. The old
+  deployment runbook is reconciled. Do not enable production
   deployment while those changes land.
 . *Prepare account and rollback evidence*: verify the correct Cloudflare account,
   token permissions, zone authority, existing Workers/custom domains and TLS.

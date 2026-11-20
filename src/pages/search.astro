@@ -1,10 +1,8 @@
 ---
 /**
- * Search results page — powered by Pagefind.
- * Pagefind generates the /pagefind/ directory at build time.
+ * Search page: client-side filter over the build-time /cmdk-index.json.
  */
 import Base from "~/layouts/Base.astro";
-const demo = import.meta.env.PUBLIC_LOCAL_DEMO === "1";
 ---
 <Base title="Search" description="Search the ITU Operational Bulletin.">
   <main id="main" class="mx-auto max-w-[var(--measure)] px-4 py-8">
@@ -12,34 +10,65 @@ const demo = import.meta.env.PUBLIC_LOCAL_DEMO === "1";
       Search
     </h1>
     <p class="text-[var(--step--1)] mb-6" style="color: var(--fg-muted); font-family: var(--font-sans);">
-      Search across all ITU Operational Bulletin issues, datasets, and recommendations.
+      Basic search over issues, datasets, registers, recommendations and downloads.
       Looking for a PDF? See <a href="/downloads/" class="underline">Downloads</a>.
     </p>
-    <div id="search-root" data-demo={demo ? "1" : undefined}>
-      <p style="color: var(--fg-muted); font-style: italic;">
-        Search index loads after the page renders. If this persists, the index may not be built yet.
-      </p>
-    </div>
+    <form id="search-form" role="search" class="mb-4">
+      <input id="search-input" type="search" name="q" autocomplete="off" aria-label="Search"
+        class="w-full px-3 py-2 border" style="font-family: var(--font-sans);" />
+    </form>
+    <p id="search-status" role="status" style="color: var(--fg-muted);"></p>
+    <ul id="search-results" class="space-y-2"></ul>
   </main>
 
-  <script is:inline>
-    (async () => {
-      var el = document.getElementById("search-root");
-      try {
-        var path = "/page" + "find/page" + "find-ui.js";
-        var mod = await import(path);
-        new mod.PagefindUI({
-          element: "#search-root",
-          showImages: false,
-          pageSize: 10,
-        });
-      } catch (e) {
-        if (el) {
-          el.innerHTML = el.dataset.demo === "1"
-            ? "<p style='color: var(--fg-muted);'>Full-text search is not available in this preview. You can still browse the <a href='/issues/'>issues</a>, <a href='/registers/'>registers</a> and <a href='/recommendations/'>recommendations</a>.</p>"
-            : "<p style='color: var(--fg-muted); font-style: italic;'>Search index not yet generated. Run <code>npm run build</code> with Pagefind enabled.</p>";
+  <script>
+    import { filterEntries, type SearchEntry } from "~/lib/search-filter";
+
+    const input = document.getElementById("search-input") as HTMLInputElement;
+    const status = document.getElementById("search-status")!;
+    const list = document.getElementById("search-results")!;
+    let index: SearchEntry[] | null = null;
+
+    async function run() {
+      const q = input.value.trim();
+      list.replaceChildren();
+      if (!q) { status.textContent = ""; return; }
+      if (!index) {
+        try {
+          index = (await (await fetch("/cmdk-index.json")).json()) as SearchEntry[];
+        } catch {
+          status.textContent = "Search index could not be loaded.";
+          return;
         }
       }
-    })();
+      const hits = filterEntries(index, q);
+      status.textContent = hits.length ? `${hits.length} result${hits.length === 1 ? "" : "s"}` : `No results for "${q}".`;
+      for (const h of hits.slice(0, 100)) {
+        const li = document.createElement("li");
+        const a = document.createElement("a");
+        a.href = h.href;
+        a.className = "underline";
+        a.textContent = h.label;
+        li.append(a);
+        if (h.meta) {
+          const m = document.createElement("span");
+          m.style.color = "var(--fg-muted)";
+          m.textContent = ` ${h.meta}`;
+          li.append(m);
+        }
+        list.append(li);
+      }
+    }
+
+    document.getElementById("search-form")!.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const url = new URL(location.href);
+      url.searchParams.set("q", input.value.trim());
+      history.replaceState(null, "", url);
+      run();
+    });
+    input.addEventListener("input", run);
+    input.value = new URLSearchParams(location.search).get("q") ?? "";
+    run();
   </script>
 </Base>
