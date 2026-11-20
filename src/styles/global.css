@@ -273,7 +273,7 @@
   /* -- Layout containers — TRUE FULL BLEED (liquid) --------------------- */
   .container-full { width: 100%; max-width: 100%; margin-inline: auto; }
   .container-wide { width: 100%; max-width: 100%; margin-inline: auto; }
-  .container-content { width: 100%; max-width: 100%; margin-inline: auto; }
+  .container-content { width: 100%; max-width: 1440px; margin-inline: 0; }
   .measure { max-width: var(--measure); }
   .measure-read { max-width: var(--measure-read); }
 
@@ -1095,7 +1095,6 @@ body {
 
 @media screen and (min-width: 800px) {
   body {
-    min-width: 900px;
     padding: 0 5vw;
   }
   body > header,
@@ -1170,6 +1169,31 @@ body > header nav.sections {
   display: flex;
   align-items: center;
   gap: 0.15rem;
+}
+
+@media screen and (min-width: 900px) {
+  body > header nav.sections {
+    flex-wrap: wrap;
+  }
+}
+
+/* Below 900px: brand + account on row 1, sections scroll on row 2. */
+@media screen and (max-width: 899px) {
+  body > header .header-account {
+    order: 2;
+  }
+  body > header nav.sections {
+    order: 3;
+    width: 100%;
+    margin-left: 0;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  body > header nav.sections a {
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
 }
 
 body > header nav.sections a {
@@ -1269,6 +1293,12 @@ body > footer .footer-link:hover {
   color: #1aa1da;
 }
 
+body > footer .footer-pills {
+  display: flex;
+  flex-flow: row wrap;
+  align-items: center;
+}
+
 body > footer .footer-pill {
   white-space: nowrap;
   height: 24px;
@@ -1283,6 +1313,9 @@ body > footer .footer-pill {
 }
 
 body > footer .footer-pill .icon {
+  box-sizing: content-box;
+  display: flex;
+  align-items: center;
   margin: -1rem 0.5rem -1rem -2rem;
   padding-left: 2rem;
   width: 1rem;
@@ -1313,6 +1346,7 @@ body > footer .powered-by .icon img.logo {
   transition: opacity 0.2s linear;
   width: 2.5rem;
   height: 2.5rem;
+  max-width: none;
   display: block;
 }
 

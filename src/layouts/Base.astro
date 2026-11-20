@@ -71,8 +71,7 @@ const dir = isRtl ? "rtl" : "ltr";
 
 const containerClass = full ? "container-full" : wide ? "container-wide" : "container-content";
 
-// Site sections (footer navigation). The original footer carried an
-// "Editors" pill to /docs/, which does not exist in this build.
+// Site sections (footer navigation).
 const navItems = [
   { href: "/issues/", label: "Issues" },
   { href: "/datasets/", label: "Datasets" },
@@ -177,12 +176,20 @@ const navItems = [
         <a href="https://www.itu.int/" rel="external" class="footer-link">ITU.int ↗</a>
         <a href="https://www.itu.int/itu-t/bulletin/" rel="external" class="footer-link">Official OB ↗</a>
       </nav>
-      <a href="https://open.ribose.com/" class="footer-pill interactive powered-by">
-        <span class="icon">
-          <img class="logo" src="/assets/ribose-logo.png" alt="Ribose logo" />
-        </span>
-        Powered by Ribose
-      </a>
+      <div class="footer-pills">
+        <a href="/docs/" class="footer-pill interactive">
+          <span class="icon" aria-hidden="true">
+            <svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor"><path d="M12.1 1.3a1.5 1.5 0 0 1 2.1 0l.5.5a1.5 1.5 0 0 1 0 2.1L5.6 13 1.5 14.5 3 10.4z"/></svg>
+          </span>
+          Editors
+        </a>
+        <a href="https://open.ribose.com/" class="footer-pill interactive powered-by">
+          <span class="icon">
+            <img class="logo" src="/assets/ribose-logo.png" alt="Ribose logo" />
+          </span>
+          Powered by Ribose
+        </a>
+      </div>
     </footer>
 
     <CommandPalette client:idle />
@@ -191,5 +198,4 @@ const navItems = [
 
 <style>
   header .bar { flex-wrap: wrap; }
-  header nav.sections { flex-wrap: wrap; }
 </style>
