@@ -231,7 +231,6 @@ results and cache implications. Genuine unknown paths must remain 404.
 | Basic search over the command-palette index; parity not required. Index
   entries carry only label, href, meta and kind (no full text), so results are
   titles and identifiers, not body text. Verify `/search/?q=E.164` in staging.
-  `/downloads/` is referenced but has no page on this baseline.
 |===
 
 `public/_headers` declares security headers and immutable Astro-asset caching.
