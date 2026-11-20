@@ -224,15 +224,14 @@ results and cache implications. Genuine unknown paths must remain 404.
   search page, script, index file or search form (zero `search` matches in
   `index.html`, `404.html`, `assets/js/*`; no tree path matching `search` or
   `index.json`; the only content hits are an external registry URL in message
-  text). Search is therefore a new feature, not a parity gap. The new site adds
-  `/search/`, which imports `/pagefind/pagefind-ui.js`; no Pagefind generation
-  step exists in `package.json` or the build workflow, and no page links to it.
-  Command palette separately uses `src/pages/cmdk-index.json.ts`.
-| Owner decides: ship search as a post-cutover feature (then add a build-time
-  index and UI, and verify issue, register and recommendation queries) or
-  remove the non-functional `/search/` page before cutover. Not a cutover
-  blocker for parity. Check command-palette/download targets too; `/downloads/`
-  is referenced but has no page on this baseline.
+  text). Search is a new feature, not a parity gap. The new `/search/` page now
+  filters the build-time command-palette index (`/cmdk-index.json`, from
+  `src/pages/cmdk-index.json.ts`) on the client by `?q=` and a text input; no
+  Pagefind and no new dependency.
+| Basic search over the command-palette index; parity not required. Index
+  entries carry only label, href, meta and kind (no full text), so results are
+  titles and identifiers, not body text. Verify `/search/?q=E.164` in staging.
+  `/downloads/` is referenced but has no page on this baseline.
 |===
 
 `public/_headers` declares security headers and immutable Astro-asset caching.
