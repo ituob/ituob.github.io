@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { buildConfig, main, TARGETS, validateConfig, validateIsolation } from "../scripts/configure-cloudflare.mjs";
+import { ACCOUNT_INPUT_MESSAGE, buildConfig, main, TARGETS, validateConfig, validateIsolation, validatePublicConfig } from "../scripts/configure-cloudflare.mjs";
 import { parseJsonc } from "../scripts/check-bindings.mjs";
 
 const templates = Object.fromEntries(Object.entries(TARGETS).map(([environment, target]) => [environment, parseJsonc(target.file, readFileSync(target.file, "utf8"))]));
@@ -27,6 +27,36 @@ beforeEach(() => {
   for (const [environment, target] of Object.entries(TARGETS)) writeFileSync(join(temp, target.file), JSON.stringify(templates[environment]));
 });
 afterEach(() => { rmSync(temp, { recursive: true, force: true }); vi.unstubAllEnvs(); });
+
+describe("public-only deployment profile", () => {
+  const ACCOUNT = "1234567890abcdef1234567890abcdef";
+  it.each(["staging", "production"])("reports the account_id as the single remaining operator input for %s", (environment) => {
+    expect(() => validatePublicConfig(templates[environment], environment)).toThrow(ACCOUNT_INPUT_MESSAGE);
+    expect(() => main(["--check", "--profile", "public", "--environment", environment], temp)).toThrow(/one operator input remains/);
+  });
+  it.each(["staging", "production"])("passes %s without D1, queues, OIDC or secrets once account_id is supplied", (environment) => {
+    const config = { ...structuredClone(templates[environment]), account_id: ACCOUNT };
+    expect(validatePublicConfig(config, environment, ACCOUNT)).toBe(config);
+    writeFileSync(join(temp, TARGETS[environment].file), JSON.stringify(config));
+    expect(main(["--check", "--profile", "public", "--environment", environment], temp)).toContain("public-only declarations passed");
+    // The full profile still demands every later-phase binding.
+    expect(() => main(["--check", "--environment", environment], temp)).toThrow(/D1/);
+  });
+  it("rejects later-phase declarations, wrong account and structural drift before asking for the account", () => {
+    const base = { ...structuredClone(templates.production), account_id: ACCOUNT };
+    expect(() => validatePublicConfig({ ...base, d1_databases: [{ binding: "DB" }] }, "production")).toThrow(/D1, queues or cron/);
+    expect(() => validatePublicConfig({ ...base, vars: { OIDC_ISSUER: "https://x.example" } }, "production")).toThrow(/vars/);
+    expect(() => validatePublicConfig({ ...base, secrets: { required: ["RESEND_API_KEY"] } }, "production")).toThrow(/secrets/);
+    expect(() => validatePublicConfig({ ...base, account_id: "0".repeat(32) }, "production")).toThrow(/32 hex/);
+    expect(() => validatePublicConfig(base, "production", "f".repeat(32))).toThrow(/differs/);
+    const drift = structuredClone(templates.production); drift.workers_dev = true;
+    expect(() => validatePublicConfig(drift, "production")).toThrow(/workers_dev/);
+  });
+  it("applies only to --check", () => {
+    expect(() => main(["--profile", "public", "--environment", "staging", "--input", "x.json"], temp)).toThrow(/--check only/);
+    expect(() => main(["--check", "--profile", "other", "--environment", "staging"], temp)).toThrow(/public or full/);
+  });
+});
 
 describe("Cloudflare deployment configuration", () => {
   it("generates real binding shapes while preserving domains and assets", () => {

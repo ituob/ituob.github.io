@@ -6,9 +6,26 @@ The site uses two independent Wrangler configurations:
 The Worker handles authentication, APIs and administration before serving
 assets. `run_worker_first` belongs inside `assets`.
 
-The checked-in templates have no resource IDs and are deliberately
-*not deployment-ready*. They declare OIDC authentication, provider secret
-names and the reconciliation schedule. Generate bindings from authenticated
+== Profiles
+
+*Public-only* (checked-in configs; the CI default via `CLOUDFLARE_PROFILE`):
+static site and redirects only. No D1, queues, cron, vars or required secrets.
+`/api/*`, `/auth*` and `/admin*` answer "not available yet" (404, uncached) and the
+header sign-in link is hidden; static pages and PDFs are unchanged.
+
+[source,sh]
+----
+node scripts/configure-cloudflare.mjs --check --profile public --environment production
+----
+
+It fails until the config carries an explicit `account_id`; that is the single remaining
+operator input (do not invent one). Everything else is validated first, so that is the only
+message when the rest is correct. `--profile full` (the default for the command line) is the
+original preflight described below.
+
+*Full webapp*: the rest of this document. The checked-in templates have no
+resource IDs and are *not deployment-ready for that profile*. Generation adds OIDC
+authentication, provider secret names and the reconciliation schedule. Generate bindings from authenticated
 resource information before deployment; do not invent IDs or deploy templates.
 `--check` fails on missing runtime declarations. Neither this command nor
 configuration generation deploys, creates resources, applies migrations or

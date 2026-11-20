@@ -252,10 +252,14 @@ for both production names before public traffic moves.
   exact release head; do not label the prior green `0dddeec` run a main-head pass.
 | Code
 | Blocking
-| Account/preflight not ready; actual Worker, domain attachment, certificates,
-  remote bindings and secret validity have not been verified. Select the
-  public-only deployment boundary before provisioning later-phase dependencies.
-| Code profile; owner/account operator
+| Public-only boundary implemented in code (branch `claude-a/mig-profile`, not yet on
+  main): `scripts/configure-cloudflare.mjs --check --profile public` needs no
+  D1/queues/OIDC/provider secrets; CI selects the profile from `CLOUDFLARE_PROFILE`
+  (default `public`); `/api/*`, `/auth*`, `/admin*` answer "not available yet" (404) and the
+  sign-in link is hidden. Remaining: one operator input, the explicit Cloudflare
+  `account_id` in the Wrangler configs (the check now reports exactly that and nothing
+  else). Actual Worker, domain attachment, certificates and token scope remain unverified.
+| Owner/account operator (account_id); code merged
 | Blocking
 | Parity evidence is successful but belongs to a recorded fixture build, not the
   final release artifact; see below. Revalidate the chosen candidate.
@@ -268,11 +272,11 @@ for both production names before public traffic moves.
 | Analytics continuity, undocumented feed consumers, intentional help-page
   retirement and monitoring/rollback thresholds need explicit agreement.
 | Owner with code support
-| Documentation
-| `docs/cloudflare-webapp.adoc` still names `CLOUDFLARE_DEPLOY`, shows obsolete
-  workers.dev testing, suggests moving an already-Cloudflare zone and describes
-  obsolete Pages deployment architecture. Follow actual workflow/config and this
-  evidence; reconcile that runbook before execution.
+| Documentation (code-side done)
+| `docs/cloudflare-webapp.adoc` reconciled on the branch: `CLOUDFLARE_DEPLOY`,
+  workers.dev, the zone move (now "export first, move only if needed") and the Pages
+  architecture are replaced by the actual workflow/config. Re-read it against the
+  final workflow before execution.
 | Code
 |===
 
@@ -307,8 +311,8 @@ scheduling and account authority; none was performed for this assessment.
   Assign a release operator, DNS/account operator and rollback decision maker.
 . *Complete code gaps*: finalize every inventory disposition, implement/test
   redirects and anchors, repair release CI, complete search, indexing and the
-  analytics decision. Select the public-only production profile or agreed full
-  configuration. Reconcile the old deployment runbook. Do not enable production
+  analytics decision. Use the public-only production profile (or an agreed full
+  configuration) and supply the account_id. The old deployment runbook is reconciled. Do not enable production
   deployment while those changes land.
 . *Prepare account and rollback evidence*: verify the correct Cloudflare account,
   token permissions, zone authority, existing Workers/custom domains and TLS.
@@ -377,7 +381,7 @@ scheduling and account authority; none was performed for this assessment.
 == Ownership and immediate next work
 
 *Code work can begin now*: compatibility map and missing-page dispositions,
-public-only deployment/preflight boundary, failed CI contract, Pagefind pipeline,
+public-only deployment/preflight boundary (done on branch; only account_id remains), failed CI contract, Pagefind pipeline,
 robots/sitemap filtering, analytics wiring once decided, staged HTTP acceptance
 harness, durable release evidence, and runbook corrections.
 

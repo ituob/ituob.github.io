@@ -41,8 +41,11 @@ migration and stays on the roadmap.
 *Workers static assets, not Pages.* Cloudflare's convergence guidance
 steers new deployments to Workers; the webapp future (API routes in
 the same Worker via `main`, D1 for drafts/members, Access for admin,
-`run_worker_first` for `/api/*`) is the native Workers shape. Assets-only
-now (no `main`, no SSR) — adding the API later is additive.
+`run_worker_first` for `/api/*`) is the native Workers shape. The Worker
+(`worker/index.ts`) runs first today: it canonicalizes apex to www, applies the
+legacy redirects, and serves `dist/` through `ASSETS`. Without a `DB` binding
+(the public-only profile) `/api/*`, `/auth*` and `/admin*` answer a clear
+"not available yet" (404, uncached) and the header sign-in link is hidden.
 
 *Direct upload from GitHub Actions, not Cloudflare's Git integration.*
 The build is the hard, certified part (Ruby bundle, submodules, snapshot
@@ -54,47 +57,59 @@ artifact keeps one pipeline and one source of truth.
 (production, `ituob-org`) and `wrangler.staging.jsonc`
 (`ituob-org-staging`) — explicit, no inheritance traps.
 
-*Staging deploys now; production flip is a later, explicit step.*
+*Staging deploys on a push to `staging`; production flip is a later, explicit step.*
 GitHub Pages keeps serving www (zero downtime) until the Cloudflare
-production host is validated and DNS moves. Both CF jobs are gated on
-the repo variable `CLOUDFLARE_DEPLOY == 'true'` plus secrets
-`CLOUDFLARE_API_TOKEN` / var `CLOUDFLARE_ACCOUNT_ID`.
+production host is validated and DNS moves. Staging runs on every push to
+`staging`. Production runs only on a push to `main` with repository variable
+`CLOUDFLARE_DEPLOY_PRODUCTION=true`. Both use secret `CLOUDFLARE_API_TOKEN` and
+var `CLOUDFLARE_ACCOUNT_ID`; the obsolete `CLOUDFLARE_DEPLOY` variable is not read.
+Each job first runs `scripts/configure-cloudflare.mjs --check` with the profile in
+repository variable `CLOUDFLARE_PROFILE` (default `public`).
+
+*Two deployment profiles.* `public` (the checked-in configs): static site only, no D1,
+queues, cron, OIDC vars or provider secrets, so moving the read-only site does not
+depend on identity or editor work. `full`: generated bindings and provider
+configuration (see `webapp-deployment.adoc`). Only the explicit Cloudflare
+`account_id` is left for the account operator in the public profile.
 
 == Current architecture
 
 [source]
 ----------------------------------------------------------------
 GitHub Actions (build: submodules → ruby snapshots → TS → astro
-build → astro check)
-  ├─ GitHub Pages (www.ituob.org)          ← production today
-  ├─ artifact site-dist ──▶ Cloudflare Workers staging
-  │                          ituob-org-staging.<account>.workers.dev
-  │                          (later staging-www.ituob.org)      [gated]
-  └─ (gated, for the flip) ─▶ Cloudflare Workers production
-                               ituob-org.<account>.workers.dev
-                               → www.ituob.org                  [gated]
+build → astro check) → artifact site-dist
+  ├─ push to staging ─▶ Worker ituob-org-staging
+  │                     → staging-www.ituob.org (custom domain)
+  └─ push to main with CLOUDFLARE_DEPLOY_PRODUCTION=true
+        ─▶ Worker ituob-org → www.ituob.org + ituob.org (custom domains)
+
+www.ituob.org is served today by GitHub Pages (branch production-jekyll)
+until the DNS cutover in docs/migration/cutover-readiness.adoc.
+workers_dev is false: there is no workers.dev URL to test against.
 ----------------------------------------------------------------
 
 == DNS / cutover runbook
 
+The authoritative sequence, gates and rollback are in
+`docs/migration/cutover-readiness.adoc`; this section only records the
+configuration facts.
+
 . Lower DNS TTLs on www.ituob.org a day ahead.
-. Set repo variable `CLOUDFLARE_DEPLOY=true` + secret
-  `CLOUDFLARE_API_TOKEN` (scope: Workers Scripts Edit; + Zone/ DNS if
-  automating domains) + var `CLOUDFLARE_ACCOUNT_ID`.
-. Verify staging on the workers.dev URL (content spot-checks + parity
-  numbers match the CI audit).
-. Move the ituob.org zone to Cloudflare (registrar nameserver change).
-. Switch configs to custom domains:
-  production `www.ituob.org`, staging `staging-www.ituob.org`
-  (`workers_dev: false` + `routes: custom_domain`) — DONE 2026-10-22;
-  deploy auto-provisions the DNS records. Security headers
-  (HSTS/nosniff/frame-deny/referrer) + immutable /_astro caching ship
-  via public/_headers.
-. Old GitHub Pages records: CNAME www → pages unlink; traffic flips
-  on TTL; GitHub keeps serving anyone still resolving old records
-  until then (no downtime window).
-. Remove the GitHub Pages deploy job + `upload-pages-artifact` step;
-  delete the Pages site. Done.
+. Set secret `CLOUDFLARE_API_TOKEN` and var `CLOUDFLARE_ACCOUNT_ID`
+  (token scope: Workers Scripts Edit; Zone/DNS only if automating domains), and
+  put the verified `account_id` in the Wrangler config. Production additionally needs
+  `CLOUDFLARE_DEPLOY_PRODUCTION=true`.
+. Verify the staging Worker at https://staging-www.ituob.org (content spot-checks and
+  parity numbers). There is no workers.dev testing path.
+. Export the actual zone and account configuration first. Check whether ituob.org is
+  already a Cloudflare zone before planning any nameserver change; only move it if the
+  export shows it is elsewhere.
+. The configs use custom domains (`workers_dev: false`, `routes` with
+  `custom_domain: true`; done 2026-10-22). The deploy provisions the DNS records.
+  Security headers and immutable `/_astro` caching ship via `public/_headers`.
+. Old GitHub Pages records are replaced at the cutover; traffic flips on TTL.
+. Pages is retired only after the rollback window; the repository has no Pages
+  deploy job to remove for the Worker deploy path.
 
 == The webapp: use cases and phases
 
