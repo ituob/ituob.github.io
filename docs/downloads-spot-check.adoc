@@ -28,6 +28,10 @@ CI requires a populated catalog from the producer on every event.
 artifact (`report.md`, `report.json`). CI uses `--sample all`: every publication
 and every available language is checked on every run, including the last sorted entry.
 
+== Live status (measured 2026-11-25)
+
+`https://www.ituob.org/downloads/` and `https://staging-www.ituob.org/downloads/` both return 404 (`curl -L`). The page source is on `main` (`src/pages/downloads/index.astro`), but no deployed build contains it: the `staging` branch (last deployed 2026-11-11) has no `src/pages/downloads`, and the 2026-11-20 `main` run (44736184862) skipped both deploy jobs, with `CLOUDFLARE_DEPLOY_PRODUCTION` unset. Fixing the 404 needs a deploy, which is an owner decision still open; no code change is needed.
+
 == Repeat it by hand
 
 [source,sh]

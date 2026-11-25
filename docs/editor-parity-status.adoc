@@ -53,7 +53,7 @@ Done, depending on `service-publications-docs` PR #114 (typed `GeneralCustom.tit
 [cols="1,3,3",options="header"]
 |===
 | Row | Why it is not done here | What unblocks it
-| F1, F2 | There is no annex class in `class-description.generated.json`. | Owner decision: add an annexes class, or retire `annexes.yaml` authoring and record that in #101.
+| F1, F2 | The annex flow works on `main` (#121): `AnnexEditor.vue` and draft type `annexes` at `annexes.yaml`. It is not bound to a compiled class: there is no annex entry in `class-description.generated.json`. | Owner decision, open: add an annexes class, or retire `annexes.yaml` authoring and record that in #101.
 | G1 | Catalogs are code (`src/lib/catalogs.ts`). | Owner decision: a catalog form, or "publications are added in code" recorded in #101.
 | D3, W2 SEED (live proof) | Built against the fake reader only. Reading real data-repo files, the `datasets.yaml` / `changes/` directory-listing contract against the real `ituob/service-publications-docs`, and a GitHub replacement PR for an existing path were not exercised. | A provisioned read token and a run against the real repositories.
 | E4 | The amendment header and annex-position prefill still need annex data in the Worker. This is non-blocking. | n/a
