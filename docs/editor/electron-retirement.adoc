@@ -9,7 +9,7 @@ retirement decision: what each legacy feature became, what is left, and the text
 of the notice for the Electron repository.
 
 Legacy editor: `ituob/itu-ob-editor` at `74b1564`. Web editor: this branch
-(`claude-a/101-electron-final`, on top of #130) plus `main` for the pieces that
+(`claude-a/101-electron-final`, on top of #130, which closed unmerged on 2026-11-17 and was replaced by #137, merged 2026-11-19) plus `main` for the pieces that
 merged there (#110, #117, #120, #121, #124).
 
 == Where each piece lives
@@ -18,7 +18,7 @@ merged there (#110, #117, #120, #121, #124).
 |===
 | Location | Meaning
 | main | merged: #110 screens, #117 parity, #120 catalog form (G1), #121 annexes (F1, F2), #124 telephone, custom title, SANC and mid (D6, D7, D14, D15, D18)
-| #130 | open: byte preservation for 612 stored records, scheduling calendar (B6), inline help (B10)
+| #137 | merged 2026-11-19, replacing #130 (closed unmerged 2026-11-17): byte preservation for 612 stored records, scheduling calendar (B6), inline help (B10)
 |===
 
 The earlier belief that telephone, custom title, mid and SANC authoring, SEED
@@ -55,7 +55,7 @@ editor wrote (`src/lib/form/electron-authoring.test.ts`).
 | Calendar with cutoff and publication dates (B6)
 | UTC month grid with navigation
 | `ScheduleCalendar.vue`, `schedule-calendar.test.ts`
-| Done in #130
+| Done in #137
 
 | Schedule a new issue, inherit masthead (B7, B8)
 | Edition metadata form; masthead inherited from last published edition
@@ -65,7 +65,7 @@ editor wrote (`src/lib/form/electron-authoring.test.ts`).
 | Help links (B10)
 | Inline help in the schedule, general-message and amendment screens
 | `editor-help.test.ts`, `breaker-calendar-help.test.ts`
-| Done in #130
+| Done in #137
 
 | Issue metadata: ISSN, dates, authors, contacts, reorder, languages (C1-C7, C10)
 | Schema-generated forms, up/down reorder, optimistic revision checks
@@ -166,7 +166,7 @@ editor wrote (`src/lib/form/electron-authoring.test.ts`).
 
 These are not done here, deliberately.
 
-. #130 and this branch merge into `main` (they conflict with current `main` in `docs/editor-feature-map.adoc`, `worker/lib/general-messages.ts` and `test/general-messages.node.ts`; the batch merge resolves them).
+. This branch merges into `main`. #130 closed unmerged; #137 (its replacement) is already on `main`. The conflict notes below predate #137 and were not re-measured: they named `docs/editor-feature-map.adoc`, `worker/lib/general-messages.ts` and `test/general-messages.node.ts`, which the batch merge was to resolve.
 . Live proof: remote D1 migration, Cloudflare Access, the identity provider, the real repository import and the empty-register SEED check, one browser authoring pass per message type.
 . A named owner adds the notice below to the Electron repository README and archives it. Nothing has been archived or edited.
 
