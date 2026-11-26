@@ -1,6 +1,6 @@
 // Admin composer routes (#103). Every route is Access-guarded (/api/admin/*), and composer.ts
 // additionally requires the itu-admin role, resolved server-side from the Access email.
-import { editionNo, listEditions, listMergedUnpublished, openEdition, placeItem, publishEdition, readEdition, removeItem, stageEdition } from "./lib/composer.ts";
+import { editionNo, listEditions, listMergedUnpublished, openEdition, placeItem, publishEdition, readEdition, reorderItems, removeItem, stageEdition } from "./lib/composer.ts";
 import { type Route, body, json } from "./lib/http.ts";
 import { InvalidError } from "./lib/membership.ts";
 import { getPublisher } from "./lib/publisher.ts";
@@ -33,6 +33,11 @@ export const composerRoutes: Route[] = [
   { method: "POST", pattern: re(`/api/admin/composer/editions/(\\d+)/items/${ID}/remove`), guard: "access",
     handler: async ({ env, access, params }) =>
       json({ ok: true, submission: await removeItem(env.DB, await ituSession(env, access!), editionNo(params[0]), params[1]!) }) },
+  { method: "POST", pattern: re("/api/admin/composer/editions/(\\d+)/order"), guard: "access",
+    handler: async ({ request, env, access, params }) => {
+      const b = await body(request);
+      return json({ ok: true, ...(await reorderItems(env.DB, await ituSession(env, access!), editionNo(params[0]), b.order)) });
+    } },
   { method: "POST", pattern: re("/api/admin/composer/editions/(\\d+)/stage"), guard: "access",
     handler: async ({ env, access, params }) => {
       const result = await stageEdition(env.DB, await ituSession(env, access!), editionNo(params[0]), getPublisher(env));

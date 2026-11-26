@@ -789,7 +789,7 @@ Every state change still goes through `mutate`. Nothing calls GitHub: the publis
 not built, so without the stub identity every route answers 403; each entry point also requires the
 `itu-admin` role, resolved server-side from the Access email, so an editor gets 403):
 list merged-unpublished submissions; create or open an edition (idempotent; at most one `open`); read an
-edition; place (`merged -> scheduled`); remove (`scheduled -> merged`, sends no notification: the member already heard the PR merged); publish. `POST /api/admin/reconcile`
+edition; place (`merged -> scheduled`); remove (`scheduled -> merged`, sends no notification: the member already heard the PR merged); reorder (`POST .../editions/{N}/order`, body `{order: [submission_id, ...]}` naming every placed submission in its new order: a composing edition only, malformed order 400, a list that is not the edition's current set 409, positions become 1..n, no state moves); publish. `POST /api/admin/reconcile`
 runs the reconciler on demand.
 
 *Decisions*

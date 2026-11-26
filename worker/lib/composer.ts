@@ -178,6 +178,37 @@ export async function removeItem(db: D1Database, session: Session | null, no: nu
   });
 }
 
+/**
+ * Reorder the items of a composing edition. `order` must name exactly the submissions now in the
+ * edition: a malformed value is 400, a list that is not the edition's current set is 409 (the
+ * client is stale). Positions become 1..n in the given order. No submission state moves and nothing
+ * is sent upstream; the change is audited as `edition.reordered`.
+ */
+export async function reorderItems(db: D1Database, session: Session | null, no: number, order: unknown) {
+  const s = admin(session);
+  if (!Array.isArray(order) || order.some((id) => typeof id !== "string" || id.length === 0))
+    throw new InvalidError("order must be an array of submission ids");
+  if (new Set(order).size !== order.length) throw new InvalidError("order names a submission more than once");
+  const ed = await getEdition(db, no);
+  if (ed.status !== "composing") throw new ConflictError(`edition ${no} is ${ed.status}`);
+  const current = new Set((await db.prepare(`SELECT submission_id FROM edition_items WHERE ob_issue_no=?1`).bind(no)
+    .all<{ submission_id: string }>()).results.map((r) => r.submission_id));
+  if (current.size !== order.length || order.some((id) => !current.has(id)))
+    throw new ConflictError("order does not match the items in this edition; reload and retry");
+  const ids = order as string[];
+  const items = ids.map((submission_id, i) => ({ submission_id, position: i + 1 }));
+  await run(db, [
+    requireEditionStatus(db, no, ["composing"]),
+    // A placement or removal that raced the read changes the count: fail the batch (409), write nothing.
+    db.prepare(`INSERT INTO edition_items (ob_issue_no, submission_id, position)
+      SELECT ?1, '-', NULL WHERE (SELECT count(*) FROM edition_items WHERE ob_issue_no=?1) != ?2`).bind(no, ids.length),
+    ...items.map((i) =>
+      db.prepare(`UPDATE edition_items SET position=?3 WHERE ob_issue_no=?1 AND submission_id=?2`).bind(no, i.submission_id, i.position)),
+    ...(await auditStatements(db, [auditEdition(now(), s.userId, no, "edition.reordered", { order: ids })])),
+  ]);
+  return { edition: no, items };
+}
+
 // ---------------------------------------------------------------- publication
 
 const itemQuery = `SELECT i.submission_id, i.position, s.state, p.merge_sha FROM edition_items i JOIN submissions s ON s.id=i.submission_id
