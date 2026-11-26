@@ -92,7 +92,7 @@ describe("admin-only guard (Access JWT verification is not built: fail closed)",
     const r = await toMerged();
     const calls: [string, string, unknown?][] = [
       ["GET", "/submissions"], ["GET", "/editions"], ["POST", "/editions", { ob_issue_no: 1351 }], ["GET", "/editions/1351"],
-      ["POST", "/editions/1351/items", { submission_id: r.id }], ["POST", `/editions/1351/items/${r.id}/remove`], ["POST", "/editions/1351/stage"], ["POST", "/editions/1351/publish"],
+      ["POST", "/editions/1351/items", { submission_id: r.id }], ["POST", `/editions/1351/items/${r.id}/remove`], ["POST", "/editions/1351/order", { order: [r.id] }], ["POST", "/editions/1351/stage"], ["POST", "/editions/1351/publish"],
     ];
     const before = await counts();
     for (const [m, p, b] of calls) {
@@ -654,5 +654,72 @@ describe("stage and publish are separate, staff-only, audited clicks (#103)", ()
     expect(await counts()).toEqual(before);
     expect([fake.pinRequests.length, fake.promotionRequests.length]).toEqual([0, 0]);
     expect((await one("SELECT status FROM editions")).status).toBe("composing");
+  });
+});
+
+describe("composer: reorder the placed items of a composing edition (#103)", () => {
+  const order = (ids: unknown, who: string | undefined = ADMINU) => comp("POST", "/editions/1351/order", who, { order: ids });
+  const positions = () => rows("SELECT submission_id, position FROM edition_items WHERE ob_issue_no=1351 ORDER BY position");
+  async function composing() {
+    const a = await toMerged("e118-iin");
+    const b = await toMerged("e212-mnc");
+    await comp("POST", "/editions", ADMINU, { ob_issue_no: 1351 });
+    expect((await comp("POST", "/editions/1351/items", ADMINU, { submission_id: a.id })).status).toBe(200);
+    expect((await comp("POST", "/editions/1351/items", ADMINU, { submission_id: b.id })).status).toBe(200);
+    return { a, b };
+  }
+
+  it("sets positions 1..n to the given order, moves no submission state, and audits the change", async () => {
+    const { a, b } = await composing();
+    const before = await counts();
+    const res = await order([b.id, a.id]);
+    expect(res.status, JSON.stringify(res.json)).toBe(200);
+    expect(res.json.items).toEqual([{ submission_id: b.id, position: 1 }, { submission_id: a.id, position: 2 }]);
+    expect(await positions()).toEqual([{ submission_id: b.id, position: 1 }, { submission_id: a.id, position: 2 }]);
+    expect((await comp("GET", "/editions/1351")).json.items.map((i: any) => i.submission_id)).toEqual([b.id, a.id]);
+    expect([await stateOf(a.id), await stateOf(b.id)]).toEqual(["scheduled", "scheduled"]);
+    const after = await counts();
+    expect(after[0]).toBe(before[0]); // review_state: no transition
+    expect(after[3]).toBe(before[3]); // submission_reverts
+    expect(after[1]).toBe(before[1] + 1); // exactly one audit row
+    expect(await n("SELECT count(*) n FROM audit_log WHERE action='edition.reordered'")).toBe(1);
+    expect(await verifyChain(db())).toBeNull();
+    expect((await order([a.id, b.id])).status).toBe(200); // and back again
+    expect(await positions()).toEqual([{ submission_id: a.id, position: 1 }, { submission_id: b.id, position: 2 }]);
+  });
+
+  it("is itu-admin only: no identity, a session without Access, a member, an editor and an unknown email get 403, nothing changes", async () => {
+    const { a, b } = await composing();
+    // Positive control: the itu-admin identity is allowed, so the refusals below are about the role.
+    expect((await order([b.id, a.id])).status).toBe(200);
+    const before = await counts();
+    const pos = await positions();
+    const audits = await n("SELECT count(*) n FROM audit_log WHERE action='edition.reordered'");
+    const body = { order: [a.id, b.id] };
+    expect((await api("POST", "/api/admin/composer/editions/1351/order", { body })).status).toBe(403);
+    expect((await api("POST", "/api/admin/composer/editions/1351/order", { session: "itu-admin", body })).status).toBe(403);
+    expect((await api("POST", "/api/admin/composer/editions/1351/order", { session: "member-A", body })).status).toBe(403);
+    for (const who of [MEMBER_A, EDITOR, "nobody@example.test"])
+      expect((await order([a.id, b.id], who)).status, who).toBe(403);
+    expect(await positions()).toEqual(pos);
+    expect(await counts()).toEqual(before);
+    expect(await n("SELECT count(*) n FROM audit_log WHERE action='edition.reordered'")).toBe(audits); // only the control's row
+  });
+
+  it("refuses an invalid order with nothing written: malformed is 400, a set that is not the edition's items is 409", async () => {
+    const { a, b } = await composing();
+    const pos = await positions();
+    const before = await counts();
+    for (const bad of [undefined, "x", [a.id, 7], [a.id, a.id], [""]])
+      expect((await order(bad)).status, JSON.stringify(bad)).toBe(400);
+    for (const stale of [[], [a.id], [a.id, b.id, "01J9XK2P0000000000000000ZZ"]])
+      expect((await order(stale)).status, JSON.stringify(stale)).toBe(409);
+    expect(await positions()).toEqual(pos);
+    expect(await counts()).toEqual(before);
+  });
+
+  it("refuses reordering once the edition is no longer composing", async () => {
+    await comp("POST", "/editions", ADMINU, { ob_issue_no: 1351 });
+    expect((await order([])).status).toBe(409); // open, no items yet
   });
 });
